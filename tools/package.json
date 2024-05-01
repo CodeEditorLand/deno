@@ -27,7 +27,7 @@
 	"devDependencies": {
 		"@playform/build": "0.0.7",
 		"@playform/document": "0.0.6",
-		"magic-string": "0.25.2"
+		"magic-string": "0.30.10"
 	},
 	"publishConfig": {
 		"access": "public"
