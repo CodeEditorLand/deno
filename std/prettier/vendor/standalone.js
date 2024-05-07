@@ -6301,7 +6301,7 @@
    * @property {OptionValueInfo} [redirect] - redirect deprecated value
    */
 
-  /** @type {{ [name: string]: OptionInfo }} */
+  
 
   var options = {
     cursorOffset: {
@@ -12855,7 +12855,7 @@
 
 
   function isPreviousLineEmpty(text, node, locStart) {
-    /** @type {number | false} */
+    
     var idx = locStart(node) - 1;
     idx = skipSpaces(text, idx, {
       backwards: true
@@ -12879,9 +12879,9 @@
 
 
   function isNextLineEmptyAfterIndex(text, index) {
-    /** @type {number | false} */
+    
     var oldIdx = null;
-    /** @type {number | false} */
+    
 
     var idx = index;
 
@@ -12917,9 +12917,9 @@
 
 
   function getNextNonSpaceNonCommentCharacterIndexWithStartIndex(text, idx) {
-    /** @type {number | false} */
+    
     var oldIdx = null;
-    /** @type {number | false} */
+    
 
     var nextIdx = idx;
 
@@ -13187,13 +13187,13 @@
     // `rawContent` is the string exactly like it appeared in the input source
     // code, without its enclosing quotes.
     var rawContent = raw.slice(1, -1);
-    /** @type {{ quote: '"', regex: RegExp }} */
+    
 
     var double = {
       quote: '"',
       regex: /"/g
     };
-    /** @type {{ quote: "'", regex: RegExp }} */
+    
 
     var single = {
       quote: "'",
@@ -13221,7 +13221,7 @@
     // the quotes on a DirectiveLiteral.
 
     var canChangeDirectiveQuotes = !rawContent.includes('"') && !rawContent.includes("'");
-    /** @type {Quote} */
+    
 
     var enclosingQuote = options.parser === "json" ? '"' : options.__isInHtmlAttribute ? "'" : getPreferredQuote(raw, options.singleQuote ? "'" : '"'); // Directives are exact code unit sequences, which means that you can't
     // change the escape sequences they use.
@@ -13563,7 +13563,7 @@
   var concat$1 = docBuilders.concat,
       fill$1 = docBuilders.fill,
       cursor$1 = docBuilders.cursor;
-  /** @type {Record<symbol, typeof MODE_BREAK | typeof MODE_FLAT>} */
+  
 
   var groupModeMap;
   var MODE_BREAK = 1;
@@ -23356,7 +23356,7 @@
   function isNgForOf(node, index, parentNode) {
     return node.type === "NGMicrosyntaxKeyedExpression" && node.key.name === "of" && index === 1 && parentNode.body[0].type === "NGMicrosyntaxLet" && parentNode.body[0].value === null;
   }
-  /** @param node {import("estree").TemplateLiteral} */
+  
 
 
   function isSimpleTemplateLiteral(node) {
@@ -23914,9 +23914,9 @@
 
   function hasClosureCompilerTypeCastComment(text, path) {
     // https://github.com/google/closure-compiler/wiki/Annotating-Types#type-casts
-    // Syntax example: var x = /** @type {string} */ (fruit);
+    // Syntax example: var x =  (fruit);
     var n = path.getValue();
-    return isParenthesized(n) && (hasTypeCastComment(n) || hasAncestorTypeCastComment(0)); // for sub-item: /** @type {array} */ (numberOrString).map(x => x);
+    return isParenthesized(n) && (hasTypeCastComment(n) || hasAncestorTypeCastComment(0)); // for sub-item:  (numberOrString).map(x => x);
 
     function hasAncestorTypeCastComment(index) {
       var ancestor = path.getParentNode(index);
@@ -24076,9 +24076,9 @@
 
           case "CallExpression":
             if (
-            /** @(x().y) */
+            
             hasMemberExpression ||
-            /** @(x().y()) */
+            
             hasCallExpression) {
               return true;
             }
@@ -30563,11 +30563,11 @@
   }
 
   function printRoot(path, options, print) {
-    /** @typedef {{ index: number, offset: number }} IgnorePosition */
+    
 
-    /** @type {Array<{start: IgnorePosition, end: IgnorePosition}>} */
+    
     var ignoreRanges = [];
-    /** @type {IgnorePosition | null} */
+    
 
     var ignoreStart = null;
     var children = path.getValue().children;
@@ -30679,7 +30679,7 @@
 
     return current;
   }
-  /** @return {false | 'next' | 'start' | 'end'} */
+  
 
 
   function isPrettierIgnore$1(node) {

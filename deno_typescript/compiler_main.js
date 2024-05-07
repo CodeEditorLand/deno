@@ -271,12 +271,12 @@ class Host {
     containingFile = moduleMap.has(containingFile)
       ? moduleMap.get(containingFile)
       : containingFile;
-    /** @type {string[]} */
+    
     const resolvedNames = dispatch("resolveModuleNames", {
       moduleNames,
       containingFile
     });
-    /** @type {ts.ResolvedModule[]} */
+    
     const r = resolvedNames.map(resolvedFileName => {
       const extension = getExtension(resolvedFileName);
       return { resolvedFileName, extension };
