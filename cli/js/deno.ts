@@ -116,17 +116,17 @@ export const args: string[] = [];
 
 // These are internal Deno APIs.  We are marking them as internal so they do not
 // appear in the runtime type library.
-/** @internal */
+
 export { core } from "./core.ts";
 
-/** @internal */
+
 export { setPrepareStackTrace } from "./error_stack.ts";
 
 // TODO Don't expose Console nor stringifyArgs.
-/** @internal */
+
 export { Console, stringifyArgs } from "./console.ts";
 // TODO Don't expose DomIterableMixin.
-/** @internal */
+
 export { DomIterableMixin } from "./mixins/dom_iterable.ts";
 
 /** The current process id of the runtime. */

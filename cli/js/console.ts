@@ -493,7 +493,7 @@ export class Console {
   indentLevel: number;
   [isConsoleInstance] = false;
 
-  /** @internal */
+  
   constructor(private printFunc: PrintFunc) {
     this.indentLevel = 0;
     this[isConsoleInstance] = true;

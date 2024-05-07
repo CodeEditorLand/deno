@@ -2201,7 +2201,7 @@ declare namespace __domTypes {
      * Reloads the current page.
      */
     reload(): void;
-    /** @deprecated */
+    
     reload(forcedReload: boolean): void;
     /**
      * Removes the current page from the session history and navigates to the
