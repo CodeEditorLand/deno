@@ -1,3 +1,4 @@
+import { assertEquals } from "../testing/asserts.ts";
 /**
  * Tar test
  *
@@ -8,8 +9,7 @@
  * **to run this test**
  * deno run --allow-read archive/tar_test.ts
  */
-import { test, runIfMain } from "../testing/mod.ts";
-import { assertEquals } from "../testing/asserts.ts";
+import { runIfMain, test } from "../testing/mod.ts";
 
 import { resolve } from "../path/mod.ts";
 import { Tar, Untar } from "./tar.ts";
@@ -17,75 +17,75 @@ import { Tar, Untar } from "./tar.ts";
 const filePath = resolve("archive", "testdata", "example.txt");
 
 test(async function createTarArchive(): Promise<void> {
-  // initialize
-  const tar = new Tar();
+	// initialize
+	const tar = new Tar();
 
-  // put data on memory
-  const content = new TextEncoder().encode("hello tar world!");
-  await tar.append("output.txt", {
-    reader: new Deno.Buffer(content),
-    contentSize: content.byteLength
-  });
+	// put data on memory
+	const content = new TextEncoder().encode("hello tar world!");
+	await tar.append("output.txt", {
+		reader: new Deno.Buffer(content),
+		contentSize: content.byteLength,
+	});
 
-  // put a file
-  await tar.append("dir/tar.ts", { filePath });
+	// put a file
+	await tar.append("dir/tar.ts", { filePath });
 
-  // write tar data to a buffer
-  const writer = new Deno.Buffer(),
-    wrote = await Deno.copy(writer, tar.getReader());
+	// write tar data to a buffer
+	const writer = new Deno.Buffer(),
+		wrote = await Deno.copy(writer, tar.getReader());
 
-  /**
-   * 3072 = 512 (header) + 512 (content) + 512 (header) + 512 (content)
-   *       + 1024 (footer)
-   */
-  assertEquals(wrote, 3072);
+	/**
+	 * 3072 = 512 (header) + 512 (content) + 512 (header) + 512 (content)
+	 *       + 1024 (footer)
+	 */
+	assertEquals(wrote, 3072);
 });
 
 test(async function deflateTarArchive(): Promise<void> {
-  const fileName = "output.txt";
-  const text = "hello tar world!";
+	const fileName = "output.txt";
+	const text = "hello tar world!";
 
-  // create a tar archive
-  const tar = new Tar();
-  const content = new TextEncoder().encode(text);
-  await tar.append(fileName, {
-    reader: new Deno.Buffer(content),
-    contentSize: content.byteLength
-  });
+	// create a tar archive
+	const tar = new Tar();
+	const content = new TextEncoder().encode(text);
+	await tar.append(fileName, {
+		reader: new Deno.Buffer(content),
+		contentSize: content.byteLength,
+	});
 
-  // read data from a tar archive
-  const untar = new Untar(tar.getReader());
-  const buf = new Deno.Buffer();
-  const result = await untar.extract(buf);
-  const untarText = new TextDecoder("utf-8").decode(buf.bytes());
+	// read data from a tar archive
+	const untar = new Untar(tar.getReader());
+	const buf = new Deno.Buffer();
+	const result = await untar.extract(buf);
+	const untarText = new TextDecoder("utf-8").decode(buf.bytes());
 
-  // tests
-  assertEquals(result.fileName, fileName);
-  assertEquals(untarText, text);
+	// tests
+	assertEquals(result.fileName, fileName);
+	assertEquals(untarText, text);
 });
 
 test(async function appendFileWithLongNameToTarArchive(): Promise<void> {
-  // 9 * 15 + 13 = 148 bytes
-  const fileName = new Array(10).join("long-file-name/") + "file-name.txt";
-  const text = "hello tar world!";
+	// 9 * 15 + 13 = 148 bytes
+	const fileName = new Array(10).join("long-file-name/") + "file-name.txt";
+	const text = "hello tar world!";
 
-  // create a tar archive
-  const tar = new Tar();
-  const content = new TextEncoder().encode(text);
-  await tar.append(fileName, {
-    reader: new Deno.Buffer(content),
-    contentSize: content.byteLength
-  });
+	// create a tar archive
+	const tar = new Tar();
+	const content = new TextEncoder().encode(text);
+	await tar.append(fileName, {
+		reader: new Deno.Buffer(content),
+		contentSize: content.byteLength,
+	});
 
-  // read data from a tar archive
-  const untar = new Untar(tar.getReader());
-  const buf = new Deno.Buffer();
-  const result = await untar.extract(buf);
-  const untarText = new TextDecoder("utf-8").decode(buf.bytes());
+	// read data from a tar archive
+	const untar = new Untar(tar.getReader());
+	const buf = new Deno.Buffer();
+	const result = await untar.extract(buf);
+	const untarText = new TextDecoder("utf-8").decode(buf.bytes());
 
-  // tests
-  assertEquals(result.fileName, fileName);
-  assertEquals(untarText, text);
+	// tests
+	assertEquals(result.fileName, fileName);
+	assertEquals(untarText, text);
 });
 
 runIfMain(import.meta);

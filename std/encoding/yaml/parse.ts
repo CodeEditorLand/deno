@@ -3,8 +3,8 @@
 // Copyright 2011-2015 by Vitaly Puzrin. All rights reserved. MIT license.
 // Copyright 2018-2019 the Deno authors. All rights reserved. MIT license.
 
-import { CbFunction, load, loadAll } from "./loader/loader.ts";
-import { LoaderStateOptions } from "./loader/loader_state.ts";
+import { type CbFunction, load, loadAll } from "./loader/loader.ts";
+import type { LoaderStateOptions } from "./loader/loader_state.ts";
 
 export type ParseOptions = LoaderStateOptions;
 
@@ -16,7 +16,7 @@ export type ParseOptions = LoaderStateOptions;
  *
  */
 export function parse(content: string, options?: ParseOptions): unknown {
-  return load(content, options);
+	return load(content, options);
 }
 
 /**
@@ -24,9 +24,9 @@ export function parse(content: string, options?: ParseOptions): unknown {
  * Applies iterator to each document if specified, or returns array of documents.
  */
 export function parseAll(
-  content: string,
-  iterator?: CbFunction,
-  options?: ParseOptions
+	content: string,
+	iterator?: CbFunction,
+	options?: ParseOptions,
 ): unknown {
-  return loadAll(content, iterator, options);
+	return loadAll(content, iterator, options);
 }

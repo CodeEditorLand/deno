@@ -1,6 +1,6 @@
-// Copyright 2018-2019 the Deno authors. All rights reserved. MIT license.
-import { sendSync, sendAsync } from "./dispatch_json.ts";
 import * as dispatch from "./dispatch.ts";
+// Copyright 2018-2019 the Deno authors. All rights reserved. MIT license.
+import { sendAsync, sendSync } from "./dispatch_json.ts";
 
 /** Synchronously renames (moves) `oldpath` to `newpath`. If `newpath` already
  * exists and is not a directory, `renameSync()` replaces it. OS-specific
@@ -10,7 +10,7 @@ import * as dispatch from "./dispatch.ts";
  *       Deno.renameSync("old/path", "new/path");
  */
 export function renameSync(oldpath: string, newpath: string): void {
-  sendSync(dispatch.OP_RENAME, { oldpath, newpath });
+	sendSync(dispatch.OP_RENAME, { oldpath, newpath });
 }
 
 /** Renames (moves) `oldpath` to `newpath`. If `newpath` already exists and is
@@ -20,5 +20,5 @@ export function renameSync(oldpath: string, newpath: string): void {
  *       await Deno.rename("old/path", "new/path");
  */
 export async function rename(oldpath: string, newpath: string): Promise<void> {
-  await sendAsync(dispatch.OP_RENAME, { oldpath, newpath });
+	await sendAsync(dispatch.OP_RENAME, { oldpath, newpath });
 }

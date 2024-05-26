@@ -12,23 +12,23 @@ import { getFileInfoType } from "./utils.ts";
  * @param dest the destination link path
  */
 export async function ensureSymlink(src: string, dest: string): Promise<void> {
-  const srcStatInfo = await Deno.lstat(src);
-  const srcFilePathType = getFileInfoType(srcStatInfo);
+	const srcStatInfo = await Deno.lstat(src);
+	const srcFilePathType = getFileInfoType(srcStatInfo);
 
-  if (await exists(dest)) {
-    const destStatInfo = await Deno.lstat(dest);
-    const destFilePathType = getFileInfoType(destStatInfo);
-    if (destFilePathType !== "symlink") {
-      throw new Error(
-        `Ensure path exists, expected 'symlink', got '${destFilePathType}'`
-      );
-    }
-    return;
-  }
+	if (await exists(dest)) {
+		const destStatInfo = await Deno.lstat(dest);
+		const destFilePathType = getFileInfoType(destStatInfo);
+		if (destFilePathType !== "symlink") {
+			throw new Error(
+				`Ensure path exists, expected 'symlink', got '${destFilePathType}'`,
+			);
+		}
+		return;
+	}
 
-  await ensureDir(path.dirname(dest));
+	await ensureDir(path.dirname(dest));
 
-  await Deno.symlink(src, dest, srcFilePathType);
+	await Deno.symlink(src, dest, srcFilePathType);
 }
 
 /**
@@ -39,21 +39,21 @@ export async function ensureSymlink(src: string, dest: string): Promise<void> {
  * @param dest the destination link path
  */
 export function ensureSymlinkSync(src: string, dest: string): void {
-  const srcStatInfo = Deno.lstatSync(src);
-  const srcFilePathType = getFileInfoType(srcStatInfo);
+	const srcStatInfo = Deno.lstatSync(src);
+	const srcFilePathType = getFileInfoType(srcStatInfo);
 
-  if (existsSync(dest)) {
-    const destStatInfo = Deno.lstatSync(dest);
-    const destFilePathType = getFileInfoType(destStatInfo);
-    if (destFilePathType !== "symlink") {
-      throw new Error(
-        `Ensure path exists, expected 'symlink', got '${destFilePathType}'`
-      );
-    }
-    return;
-  }
+	if (existsSync(dest)) {
+		const destStatInfo = Deno.lstatSync(dest);
+		const destFilePathType = getFileInfoType(destStatInfo);
+		if (destFilePathType !== "symlink") {
+			throw new Error(
+				`Ensure path exists, expected 'symlink', got '${destFilePathType}'`,
+			);
+		}
+		return;
+	}
 
-  ensureDirSync(path.dirname(dest));
+	ensureDirSync(path.dirname(dest));
 
-  Deno.symlinkSync(src, dest, srcFilePathType);
+	Deno.symlinkSync(src, dest, srcFilePathType);
 }

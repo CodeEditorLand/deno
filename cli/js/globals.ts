@@ -4,29 +4,29 @@
 // is evaluated in.  We use this file to automatically build the runtime type
 // library.
 
-// Modules which will make up part of the global public API surface should be
-// imported as namespaces, so when the runtime type library is generated they
-// can be expressed as a namespace in the type library.
-import { window } from "./window.ts";
 import * as blob from "./blob.ts";
 import * as consoleTypes from "./console.ts";
-import * as csprng from "./get_random_values.ts";
 import * as customEvent from "./custom_event.ts";
 import * as Deno from "./deno.ts";
-import * as domTypes from "./dom_types.ts";
 import * as domFile from "./dom_file.ts";
+import * as domTypes from "./dom_types.ts";
 import * as event from "./event.ts";
 import * as eventTarget from "./event_target.ts";
-import * as formData from "./form_data.ts";
 import * as fetchTypes from "./fetch.ts";
+import * as formData from "./form_data.ts";
+import * as csprng from "./get_random_values.ts";
 import * as headers from "./headers.ts";
+import * as performanceUtil from "./performance.ts";
+import * as request from "./request.ts";
 import * as textEncoding from "./text_encoding.ts";
 import * as timers from "./timers.ts";
 import * as url from "./url.ts";
 import * as urlSearchParams from "./url_search_params.ts";
+// Modules which will make up part of the global public API surface should be
+// imported as namespaces, so when the runtime type library is generated they
+// can be expressed as a namespace in the type library.
+import { window } from "./window.ts";
 import * as workers from "./workers.ts";
-import * as performanceUtil from "./performance.ts";
-import * as request from "./request.ts";
 
 // These imports are not exposed and therefore are fine to just import the
 // symbols required.
@@ -36,32 +36,35 @@ import { core } from "./core.ts";
 // file are tracked and created as part of default library that is built into
 // Deno, we only need to declare the enough to compile Deno.
 declare global {
-  interface CallSite {
-    getThis(): unknown;
-    getTypeName(): string;
-    getFunction(): Function;
-    getFunctionName(): string;
-    getMethodName(): string;
-    getFileName(): string;
-    getLineNumber(): number | null;
-    getColumnNumber(): number | null;
-    getEvalOrigin(): string | null;
-    isToplevel(): boolean;
-    isEval(): boolean;
-    isNative(): boolean;
-    isConstructor(): boolean;
-    isAsync(): boolean;
-    isPromiseAll(): boolean;
-    getPromiseIndex(): number | null;
-  }
+	interface CallSite {
+		getThis(): unknown;
+		getTypeName(): string;
+		getFunction(): Function;
+		getFunctionName(): string;
+		getMethodName(): string;
+		getFileName(): string;
+		getLineNumber(): number | null;
+		getColumnNumber(): number | null;
+		getEvalOrigin(): string | null;
+		isToplevel(): boolean;
+		isEval(): boolean;
+		isNative(): boolean;
+		isConstructor(): boolean;
+		isAsync(): boolean;
+		isPromiseAll(): boolean;
+		getPromiseIndex(): number | null;
+	}
 
-  interface ErrorConstructor {
-    prepareStackTrace(error: Error, structuredStackTrace: CallSite[]): string;
-  }
+	interface ErrorConstructor {
+		prepareStackTrace(
+			error: Error,
+			structuredStackTrace: CallSite[],
+		): string;
+	}
 
-  interface Object {
-    [consoleTypes.customInspect]?(): string;
-  }
+	interface Object {
+		[consoleTypes.customInspect]?(): string;
+	}
 }
 
 // A self reference to the global object.
@@ -81,13 +84,13 @@ window.clearInterval = timers.clearInterval;
 window.console = new consoleTypes.Console(core.print);
 window.setTimeout = timers.setTimeout;
 window.setInterval = timers.setInterval;
-window.location = (undefined as unknown) as domTypes.Location;
+window.location = undefined as unknown as domTypes.Location;
 window.onload = undefined as undefined | Function;
 window.onunload = undefined as undefined | Function;
 // The following Crypto interface implementation is not up to par with the
 // standard https://www.w3.org/TR/WebCryptoAPI/#crypto-interface as it does not
 // yet incorporate the SubtleCrypto interface as its "subtle" property.
-window.crypto = (csprng as unknown) as Crypto;
+window.crypto = csprng as unknown as Crypto;
 // window.queueMicrotask added by hand to self-maintained lib.deno_runtime.d.ts
 
 // When creating the runtime type library, we use modifications to `window` to
@@ -159,42 +162,42 @@ window[eventTarget.eventTargetHasActivationBehavior] = false;
 window.addEventListener = eventTarget.EventTarget.prototype.addEventListener;
 window.dispatchEvent = eventTarget.EventTarget.prototype.dispatchEvent;
 window.removeEventListener =
-  eventTarget.EventTarget.prototype.removeEventListener;
+	eventTarget.EventTarget.prototype.removeEventListener;
 
 // Registers the handler for window.onload function.
 window.addEventListener("load", (e: domTypes.Event): void => {
-  const onload = window.onload;
-  if (typeof onload === "function") {
-    onload(e);
-  }
+	const onload = window.onload;
+	if (typeof onload === "function") {
+		onload(e);
+	}
 });
 // Registers the handler for window.onunload function.
 window.addEventListener("unload", (e: domTypes.Event): void => {
-  const onunload = window.onunload;
-  if (typeof onunload === "function") {
-    onunload(e);
-  }
+	const onunload = window.onunload;
+	if (typeof onunload === "function") {
+		onunload(e);
+	}
 });
 
 // below are interfaces that are available in TypeScript but
 // have different signatures
 export interface ImportMeta {
-  url: string;
-  main: boolean;
+	url: string;
+	main: boolean;
 }
 
 export interface Crypto {
-  readonly subtle: null;
-  getRandomValues: <
-    T extends
-      | Int8Array
-      | Uint8Array
-      | Uint8ClampedArray
-      | Int16Array
-      | Uint16Array
-      | Int32Array
-      | Uint32Array
-  >(
-    typedArray: T
-  ) => T;
+	readonly subtle: null;
+	getRandomValues: <
+		T extends
+			| Int8Array
+			| Uint8Array
+			| Uint8ClampedArray
+			| Int16Array
+			| Uint16Array
+			| Int32Array
+			| Uint32Array,
+	>(
+		typedArray: T,
+	) => T;
 }

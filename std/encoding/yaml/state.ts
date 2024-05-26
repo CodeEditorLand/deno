@@ -3,9 +3,9 @@
 // Copyright 2011-2015 by Vitaly Puzrin. All rights reserved. MIT license.
 // Copyright 2018-2019 the Deno authors. All rights reserved. MIT license.
 
-import { SchemaDefinition } from "./schema.ts";
+import type { SchemaDefinition } from "./schema.ts";
 import { DEFAULT_SCHEMA } from "./schema/mod.ts";
 
 export abstract class State {
-  constructor(public schema: SchemaDefinition = DEFAULT_SCHEMA) {}
+	constructor(public schema: SchemaDefinition = DEFAULT_SCHEMA) {}
 }

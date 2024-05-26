@@ -1,6 +1,2 @@
 console.log(0);
-console.log([
-    function foo() {},
-    function baz() {},
-    a => {}
-]);
+console.log([function foo() {}, function baz() {}, (a) => {}]);

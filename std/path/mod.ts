@@ -1,8 +1,8 @@
 // Copyright the Browserify authors. MIT License.
 // Ported from https://github.com/browserify/path-browserify/
 
-import * as _win32 from "./win32.ts";
 import * as _posix from "./posix.ts";
+import * as _win32 from "./win32.ts";
 
 import { isWindows } from "./constants.ts";
 

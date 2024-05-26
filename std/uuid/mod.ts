@@ -4,11 +4,11 @@
 export const NIL_UUID = "00000000-0000-0000-0000-000000000000";
 
 export function isNil(val: string): boolean {
-  return val === NIL_UUID;
+	return val === NIL_UUID;
 }
 
 const NOT_IMPLEMENTED = (): void => {
-  throw new Error("Not implemented");
+	throw new Error("Not implemented");
 };
 
 // TODO Implement

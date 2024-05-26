@@ -1,19 +1,17 @@
-// Copyright 2018-2019 the Deno authors. All rights reserved. MIT license.
-import { sendSync, sendAsync } from "./dispatch_json.ts";
 import * as dispatch from "./dispatch.ts";
-import { FileInfo, FileInfoImpl } from "./file_info.ts";
-import { StatResponse } from "./stat.ts";
+// Copyright 2018-2019 the Deno authors. All rights reserved. MIT license.
+import { sendAsync, sendSync } from "./dispatch_json.ts";
+import { type FileInfo, FileInfoImpl } from "./file_info.ts";
+import type { StatResponse } from "./stat.ts";
 
 interface ReadDirResponse {
-  entries: StatResponse[];
+	entries: StatResponse[];
 }
 
 function res(response: ReadDirResponse): FileInfo[] {
-  return response.entries.map(
-    (statRes: StatResponse): FileInfo => {
-      return new FileInfoImpl(statRes);
-    }
-  );
+	return response.entries.map((statRes: StatResponse): FileInfo => {
+		return new FileInfoImpl(statRes);
+	});
 }
 
 /** Reads the directory given by path and returns a list of file info
@@ -22,7 +20,7 @@ function res(response: ReadDirResponse): FileInfo[] {
  *       const files = Deno.readDirSync("/");
  */
 export function readDirSync(path: string): FileInfo[] {
-  return res(sendSync(dispatch.OP_READ_DIR, { path }));
+	return res(sendSync(dispatch.OP_READ_DIR, { path }));
 }
 
 /** Reads the directory given by path and returns a list of file info.
@@ -30,5 +28,5 @@ export function readDirSync(path: string): FileInfo[] {
  *       const files = await Deno.readDir("/");
  */
 export async function readDir(path: string): Promise<FileInfo[]> {
-  return res(await sendAsync(dispatch.OP_READ_DIR, { path }));
+	return res(await sendAsync(dispatch.OP_READ_DIR, { path }));
 }

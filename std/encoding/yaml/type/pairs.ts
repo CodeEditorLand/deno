@@ -4,46 +4,46 @@
 // Copyright 2018-2019 the Deno authors. All rights reserved. MIT license.
 
 import { Type } from "../type.ts";
-import { Any } from "../utils.ts";
+import type { Any } from "../utils.ts";
 
 const _toString = Object.prototype.toString;
 
 function resolveYamlPairs(data: Any[][]): boolean {
-  const result = new Array(data.length);
+	const result = new Array(data.length);
 
-  for (let index = 0; index < data.length; index++) {
-    const pair = data[index];
+	for (let index = 0; index < data.length; index++) {
+		const pair = data[index];
 
-    if (_toString.call(pair) !== "[object Object]") return false;
+		if (_toString.call(pair) !== "[object Object]") return false;
 
-    const keys = Object.keys(pair);
+		const keys = Object.keys(pair);
 
-    if (keys.length !== 1) return false;
+		if (keys.length !== 1) return false;
 
-    result[index] = [keys[0], pair[keys[0] as Any]];
-  }
+		result[index] = [keys[0], pair[keys[0] as Any]];
+	}
 
-  return true;
+	return true;
 }
 
 function constructYamlPairs(data: string): Any[] {
-  if (data === null) return [];
+	if (data === null) return [];
 
-  const result = new Array(data.length);
+	const result = new Array(data.length);
 
-  for (let index = 0; index < data.length; index += 1) {
-    const pair = data[index];
+	for (let index = 0; index < data.length; index += 1) {
+		const pair = data[index];
 
-    const keys = Object.keys(pair);
+		const keys = Object.keys(pair);
 
-    result[index] = [keys[0], pair[keys[0] as Any]];
-  }
+		result[index] = [keys[0], pair[keys[0] as Any]];
+	}
 
-  return result;
+	return result;
 }
 
 export const pairs = new Type("tag:yaml.org,2002:pairs", {
-  construct: constructYamlPairs,
-  kind: "sequence",
-  resolve: resolveYamlPairs
+	construct: constructYamlPairs,
+	kind: "sequence",
+	resolve: resolveYamlPairs,
 });

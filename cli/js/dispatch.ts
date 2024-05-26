@@ -1,7 +1,7 @@
+import * as json from "./dispatch_json.ts";
 // Copyright 2018-2019 the Deno authors. All rights reserved. MIT license.
 import * as minimal from "./dispatch_minimal.ts";
-import * as json from "./dispatch_json.ts";
-import { AsyncHandler } from "./plugins.ts";
+import type { AsyncHandler } from "./plugins.ts";
 
 // These consts are shared with Rust. Update with care.
 export let OP_READ: number;
@@ -73,61 +73,61 @@ export let OP_OPEN_PLUGIN: number;
 const PLUGIN_ASYNC_HANDLER_MAP: Map<number, AsyncHandler> = new Map();
 
 export function setPluginAsyncHandler(
-  opId: number,
-  handler: AsyncHandler
+	opId: number,
+	handler: AsyncHandler,
 ): void {
-  PLUGIN_ASYNC_HANDLER_MAP.set(opId, handler);
+	PLUGIN_ASYNC_HANDLER_MAP.set(opId, handler);
 }
 
 export function asyncMsgFromRust(opId: number, ui8: Uint8Array): void {
-  switch (opId) {
-    case OP_WRITE:
-    case OP_READ:
-      minimal.asyncMsgFromRust(opId, ui8);
-      break;
-    case OP_GET_DIR:
-    case OP_EXIT:
-    case OP_IS_TTY:
-    case OP_ENV:
-    case OP_EXEC_PATH:
-    case OP_UTIME:
-    case OP_OPEN:
-    case OP_SEEK:
-    case OP_FETCH:
-    case OP_REPL_START:
-    case OP_REPL_READLINE:
-    case OP_ACCEPT:
-    case OP_ACCEPT_TLS:
-    case OP_DIAL:
-    case OP_GLOBAL_TIMER:
-    case OP_HOST_GET_WORKER_CLOSED:
-    case OP_HOST_GET_MESSAGE:
-    case OP_WORKER_GET_MESSAGE:
-    case OP_RUN_STATUS:
-    case OP_MKDIR:
-    case OP_CHMOD:
-    case OP_CHOWN:
-    case OP_REMOVE:
-    case OP_COPY_FILE:
-    case OP_STAT:
-    case OP_REALPATH:
-    case OP_READ_DIR:
-    case OP_RENAME:
-    case OP_LINK:
-    case OP_SYMLINK:
-    case OP_READ_LINK:
-    case OP_TRUNCATE:
-    case OP_MAKE_TEMP_DIR:
-    case OP_DIAL_TLS:
-    case OP_FETCH_SOURCE_FILES:
-      json.asyncMsgFromRust(opId, ui8);
-      break;
-    default:
-      const handler = PLUGIN_ASYNC_HANDLER_MAP.get(opId);
-      if (handler) {
-        handler(ui8);
-      } else {
-        throw Error("bad async opId");
-      }
-  }
+	switch (opId) {
+		case OP_WRITE:
+		case OP_READ:
+			minimal.asyncMsgFromRust(opId, ui8);
+			break;
+		case OP_GET_DIR:
+		case OP_EXIT:
+		case OP_IS_TTY:
+		case OP_ENV:
+		case OP_EXEC_PATH:
+		case OP_UTIME:
+		case OP_OPEN:
+		case OP_SEEK:
+		case OP_FETCH:
+		case OP_REPL_START:
+		case OP_REPL_READLINE:
+		case OP_ACCEPT:
+		case OP_ACCEPT_TLS:
+		case OP_DIAL:
+		case OP_GLOBAL_TIMER:
+		case OP_HOST_GET_WORKER_CLOSED:
+		case OP_HOST_GET_MESSAGE:
+		case OP_WORKER_GET_MESSAGE:
+		case OP_RUN_STATUS:
+		case OP_MKDIR:
+		case OP_CHMOD:
+		case OP_CHOWN:
+		case OP_REMOVE:
+		case OP_COPY_FILE:
+		case OP_STAT:
+		case OP_REALPATH:
+		case OP_READ_DIR:
+		case OP_RENAME:
+		case OP_LINK:
+		case OP_SYMLINK:
+		case OP_READ_LINK:
+		case OP_TRUNCATE:
+		case OP_MAKE_TEMP_DIR:
+		case OP_DIAL_TLS:
+		case OP_FETCH_SOURCE_FILES:
+			json.asyncMsgFromRust(opId, ui8);
+			break;
+		default:
+			const handler = PLUGIN_ASYNC_HANDLER_MAP.get(opId);
+			if (handler) {
+				handler(ui8);
+			} else {
+				throw Error("bad async opId");
+			}
+	}
 }

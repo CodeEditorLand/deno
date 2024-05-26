@@ -1,5 +1,5 @@
 // Copyright 2018 the Deno authors. All rights reserved. MIT license.
-import * as domTypes from "./dom_types.ts";
+import type * as domTypes from "./dom_types.ts";
 import * as event from "./event.ts";
 import { getPrivateValue, requiredArguments } from "./util.ts";
 
@@ -8,38 +8,38 @@ import { getPrivateValue, requiredArguments } from "./util.ts";
 export const customEventAttributes = new WeakMap();
 
 export class CustomEvent extends event.Event implements domTypes.CustomEvent {
-  constructor(
-    type: string,
-    customEventInitDict: domTypes.CustomEventInit = {}
-  ) {
-    requiredArguments("CustomEvent", arguments.length, 1);
-    super(type, customEventInitDict);
-    const { detail = null } = customEventInitDict;
-    customEventAttributes.set(this, { detail });
-  }
+	constructor(
+		type: string,
+		customEventInitDict: domTypes.CustomEventInit = {},
+	) {
+		requiredArguments("CustomEvent", arguments.length, 1);
+		super(type, customEventInitDict);
+		const { detail = null } = customEventInitDict;
+		customEventAttributes.set(this, { detail });
+	}
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get detail(): any {
-    return getPrivateValue(this, customEventAttributes, "detail");
-  }
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	get detail(): any {
+		return getPrivateValue(this, customEventAttributes, "detail");
+	}
 
-  initCustomEvent(
-    type: string,
-    bubbles?: boolean,
-    cancelable?: boolean,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    detail?: any
-  ): void {
-    if (this.dispatched) {
-      return;
-    }
+	initCustomEvent(
+		type: string,
+		bubbles?: boolean,
+		cancelable?: boolean,
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		detail?: any,
+	): void {
+		if (this.dispatched) {
+			return;
+		}
 
-    customEventAttributes.set(this, { detail });
-  }
+		customEventAttributes.set(this, { detail });
+	}
 
-  get [Symbol.toStringTag](): string {
-    return "CustomEvent";
-  }
+	get [Symbol.toStringTag](): string {
+		return "CustomEvent";
+	}
 }
 
 /** Built-in objects providing `get` methods for our

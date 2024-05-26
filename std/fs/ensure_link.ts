@@ -12,20 +12,20 @@ import { getFileInfoType } from "./utils.ts";
  * @param dest the destination link path
  */
 export async function ensureLink(src: string, dest: string): Promise<void> {
-  if (await exists(dest)) {
-    const destStatInfo = await Deno.lstat(dest);
-    const destFilePathType = getFileInfoType(destStatInfo);
-    if (destFilePathType !== "file") {
-      throw new Error(
-        `Ensure path exists, expected 'file', got '${destFilePathType}'`
-      );
-    }
-    return;
-  }
+	if (await exists(dest)) {
+		const destStatInfo = await Deno.lstat(dest);
+		const destFilePathType = getFileInfoType(destStatInfo);
+		if (destFilePathType !== "file") {
+			throw new Error(
+				`Ensure path exists, expected 'file', got '${destFilePathType}'`,
+			);
+		}
+		return;
+	}
 
-  await ensureDir(path.dirname(dest));
+	await ensureDir(path.dirname(dest));
 
-  await Deno.link(src, dest);
+	await Deno.link(src, dest);
 }
 
 /**
@@ -36,18 +36,18 @@ export async function ensureLink(src: string, dest: string): Promise<void> {
  * @param dest the destination link path
  */
 export function ensureLinkSync(src: string, dest: string): void {
-  if (existsSync(dest)) {
-    const destStatInfo = Deno.lstatSync(dest);
-    const destFilePathType = getFileInfoType(destStatInfo);
-    if (destFilePathType !== "file") {
-      throw new Error(
-        `Ensure path exists, expected 'file', got '${destFilePathType}'`
-      );
-    }
-    return;
-  }
+	if (existsSync(dest)) {
+		const destStatInfo = Deno.lstatSync(dest);
+		const destFilePathType = getFileInfoType(destStatInfo);
+		if (destFilePathType !== "file") {
+			throw new Error(
+				`Ensure path exists, expected 'file', got '${destFilePathType}'`,
+			);
+		}
+		return;
+	}
 
-  ensureDirSync(path.dirname(dest));
+	ensureDirSync(path.dirname(dest));
 
-  Deno.linkSync(src, dest);
+	Deno.linkSync(src, dest);
 }
