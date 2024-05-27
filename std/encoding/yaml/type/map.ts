@@ -4,11 +4,11 @@
 // Copyright 2018-2019 the Deno authors. All rights reserved. MIT license.
 
 import { Type } from "../type.ts";
-import type { Any } from "../utils.ts";
+import { Any } from "../utils.ts";
 
 export const map = new Type("tag:yaml.org,2002:map", {
-	construct(data): Any {
-		return data !== null ? data : {};
-	},
-	kind: "mapping",
+  construct(data): Any {
+    return data !== null ? data : {};
+  },
+  kind: "mapping"
 });

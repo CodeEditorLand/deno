@@ -4,136 +4,136 @@
 // Copyright 2018-2019 the Deno authors. All rights reserved. MIT license.
 
 import { Type } from "../type.ts";
-import type { Any } from "../utils.ts";
+import { Any } from "../utils.ts";
 
 const { Buffer } = Deno;
 
 // [ 64, 65, 66 ] -> [ padding, CR, LF ]
 const BASE64_MAP =
-	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=\n\r";
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=\n\r";
 
 function resolveYamlBinary(data: Any): boolean {
-	if (data === null) return false;
+  if (data === null) return false;
 
-	let code: number;
-	let bitlen = 0;
-	const max = data.length;
-	const map = BASE64_MAP;
+  let code: number;
+  let bitlen = 0;
+  const max = data.length;
+  const map = BASE64_MAP;
 
-	// Convert one by one.
-	for (let idx = 0; idx < max; idx++) {
-		code = map.indexOf(data.charAt(idx));
+  // Convert one by one.
+  for (let idx = 0; idx < max; idx++) {
+    code = map.indexOf(data.charAt(idx));
 
-		// Skip CR/LF
-		if (code > 64) continue;
+    // Skip CR/LF
+    if (code > 64) continue;
 
-		// Fail on illegal characters
-		if (code < 0) return false;
+    // Fail on illegal characters
+    if (code < 0) return false;
 
-		bitlen += 6;
-	}
+    bitlen += 6;
+  }
 
-	// If there are any bits left, source was corrupted
-	return bitlen % 8 === 0;
+  // If there are any bits left, source was corrupted
+  return bitlen % 8 === 0;
 }
 
 function constructYamlBinary(data: string): Deno.Buffer {
-	// remove CR/LF & padding to simplify scan
-	const input = data.replace(/[\r\n=]/g, "");
-	const max = input.length;
-	const map = BASE64_MAP;
+  // remove CR/LF & padding to simplify scan
+  const input = data.replace(/[\r\n=]/g, "");
+  const max = input.length;
+  const map = BASE64_MAP;
 
-	// Collect by 6*4 bits (3 bytes)
+  // Collect by 6*4 bits (3 bytes)
 
-	const result = [];
-	let bits = 0;
-	for (let idx = 0; idx < max; idx++) {
-		if (idx % 4 === 0 && idx) {
-			result.push((bits >> 16) & 0xff);
-			result.push((bits >> 8) & 0xff);
-			result.push(bits & 0xff);
-		}
+  const result = [];
+  let bits = 0;
+  for (let idx = 0; idx < max; idx++) {
+    if (idx % 4 === 0 && idx) {
+      result.push((bits >> 16) & 0xff);
+      result.push((bits >> 8) & 0xff);
+      result.push(bits & 0xff);
+    }
 
-		bits = (bits << 6) | map.indexOf(input.charAt(idx));
-	}
+    bits = (bits << 6) | map.indexOf(input.charAt(idx));
+  }
 
-	// Dump tail
+  // Dump tail
 
-	const tailbits = (max % 4) * 6;
+  const tailbits = (max % 4) * 6;
 
-	if (tailbits === 0) {
-		result.push((bits >> 16) & 0xff);
-		result.push((bits >> 8) & 0xff);
-		result.push(bits & 0xff);
-	} else if (tailbits === 18) {
-		result.push((bits >> 10) & 0xff);
-		result.push((bits >> 2) & 0xff);
-	} else if (tailbits === 12) {
-		result.push((bits >> 4) & 0xff);
-	}
+  if (tailbits === 0) {
+    result.push((bits >> 16) & 0xff);
+    result.push((bits >> 8) & 0xff);
+    result.push(bits & 0xff);
+  } else if (tailbits === 18) {
+    result.push((bits >> 10) & 0xff);
+    result.push((bits >> 2) & 0xff);
+  } else if (tailbits === 12) {
+    result.push((bits >> 4) & 0xff);
+  }
 
-	return new Buffer(new Uint8Array(result));
+  return new Buffer(new Uint8Array(result));
 }
 
 function representYamlBinary(object: Uint8Array): string {
-	const max = object.length;
-	const map = BASE64_MAP;
+  const max = object.length;
+  const map = BASE64_MAP;
 
-	// Convert every three bytes to 4 ASCII characters.
+  // Convert every three bytes to 4 ASCII characters.
 
-	let result = "";
-	let bits = 0;
-	for (let idx = 0; idx < max; idx++) {
-		if (idx % 3 === 0 && idx) {
-			result += map[(bits >> 18) & 0x3f];
-			result += map[(bits >> 12) & 0x3f];
-			result += map[(bits >> 6) & 0x3f];
-			result += map[bits & 0x3f];
-		}
+  let result = "";
+  let bits = 0;
+  for (let idx = 0; idx < max; idx++) {
+    if (idx % 3 === 0 && idx) {
+      result += map[(bits >> 18) & 0x3f];
+      result += map[(bits >> 12) & 0x3f];
+      result += map[(bits >> 6) & 0x3f];
+      result += map[bits & 0x3f];
+    }
 
-		bits = (bits << 8) + object[idx];
-	}
+    bits = (bits << 8) + object[idx];
+  }
 
-	// Dump tail
+  // Dump tail
 
-	const tail = max % 3;
+  const tail = max % 3;
 
-	if (tail === 0) {
-		result += map[(bits >> 18) & 0x3f];
-		result += map[(bits >> 12) & 0x3f];
-		result += map[(bits >> 6) & 0x3f];
-		result += map[bits & 0x3f];
-	} else if (tail === 2) {
-		result += map[(bits >> 10) & 0x3f];
-		result += map[(bits >> 4) & 0x3f];
-		result += map[(bits << 2) & 0x3f];
-		result += map[64];
-	} else if (tail === 1) {
-		result += map[(bits >> 2) & 0x3f];
-		result += map[(bits << 4) & 0x3f];
-		result += map[64];
-		result += map[64];
-	}
+  if (tail === 0) {
+    result += map[(bits >> 18) & 0x3f];
+    result += map[(bits >> 12) & 0x3f];
+    result += map[(bits >> 6) & 0x3f];
+    result += map[bits & 0x3f];
+  } else if (tail === 2) {
+    result += map[(bits >> 10) & 0x3f];
+    result += map[(bits >> 4) & 0x3f];
+    result += map[(bits << 2) & 0x3f];
+    result += map[64];
+  } else if (tail === 1) {
+    result += map[(bits >> 2) & 0x3f];
+    result += map[(bits << 4) & 0x3f];
+    result += map[64];
+    result += map[64];
+  }
 
-	return result;
+  return result;
 }
 
 function isBinary(obj: Any): obj is Deno.Buffer {
-	const buf = new Buffer();
-	try {
-		if (0 > buf.readFromSync(obj as Deno.Buffer)) return true;
-		return false;
-	} catch {
-		return false;
-	} finally {
-		buf.reset();
-	}
+  const buf = new Buffer();
+  try {
+    if (0 > buf.readFromSync(obj as Deno.Buffer)) return true;
+    return false;
+  } catch {
+    return false;
+  } finally {
+    buf.reset();
+  }
 }
 
 export const binary = new Type("tag:yaml.org,2002:binary", {
-	construct: constructYamlBinary,
-	kind: "scalar",
-	predicate: isBinary,
-	represent: representYamlBinary,
-	resolve: resolveYamlBinary,
+  construct: constructYamlBinary,
+  kind: "scalar",
+  predicate: isBinary,
+  represent: representYamlBinary,
+  resolve: resolveYamlBinary
 });

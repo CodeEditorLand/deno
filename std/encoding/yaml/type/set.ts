@@ -4,28 +4,28 @@
 // Copyright 2018-2019 the Deno authors. All rights reserved. MIT license.
 
 import { Type } from "../type.ts";
-import type { Any } from "../utils.ts";
+import { Any } from "../utils.ts";
 
 const _hasOwnProperty = Object.prototype.hasOwnProperty;
 
 function resolveYamlSet(data: Any): boolean {
-	if (data === null) return true;
+  if (data === null) return true;
 
-	for (const key in data) {
-		if (_hasOwnProperty.call(data, key)) {
-			if (data[key] !== null) return false;
-		}
-	}
+  for (const key in data) {
+    if (_hasOwnProperty.call(data, key)) {
+      if (data[key] !== null) return false;
+    }
+  }
 
-	return true;
+  return true;
 }
 
 function constructYamlSet(data: string): Any {
-	return data !== null ? data : {};
+  return data !== null ? data : {};
 }
 
 export const set = new Type("tag:yaml.org,2002:set", {
-	construct: constructYamlSet,
-	kind: "mapping",
-	resolve: resolveYamlSet,
+  construct: constructYamlSet,
+  kind: "mapping",
+  resolve: resolveYamlSet
 });

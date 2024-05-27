@@ -1,6 +1,6 @@
-import * as dispatch from "./dispatch.ts";
 // Copyright 2018-2019 the Deno authors. All rights reserved. MIT license.
 import { sendSync } from "./dispatch_json.ts";
+import * as dispatch from "./dispatch.ts";
 
 /**
  * `cwd()` Return a string representing the current working directory.
@@ -10,7 +10,7 @@ import { sendSync } from "./dispatch_json.ts";
  * throws `NotFound` exception if directory not available
  */
 export function cwd(): string {
-	return sendSync(dispatch.OP_CWD);
+  return sendSync(dispatch.OP_CWD);
 }
 
 /**
@@ -18,5 +18,5 @@ export function cwd(): string {
  * throws `NotFound` exception if directory not available
  */
 export function chdir(directory: string): void {
-	sendSync(dispatch.OP_CHDIR, { directory });
+  sendSync(dispatch.OP_CHDIR, { directory });
 }

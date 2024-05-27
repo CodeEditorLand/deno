@@ -1,14 +1,14 @@
 // Copyright 2018-2019 the Deno authors. All rights reserved. MIT license.
 interface Version {
-	deno: string;
-	v8: string;
-	typescript: string;
+  deno: string;
+  v8: string;
+  typescript: string;
 }
 
 export const version: Version = {
-	deno: "",
-	v8: "",
-	typescript: "",
+  deno: "",
+  v8: "",
+  typescript: ""
 };
 
 /**
@@ -16,13 +16,13 @@ export const version: Version = {
  * @internal
  */
 export function setVersions(
-	denoVersion: string,
-	v8Version: string,
-	tsVersion: string,
+  denoVersion: string,
+  v8Version: string,
+  tsVersion: string
 ): void {
-	version.deno = denoVersion;
-	version.v8 = v8Version;
-	version.typescript = tsVersion;
+  version.deno = denoVersion;
+  version.v8 = v8Version;
+  version.typescript = tsVersion;
 
-	Object.freeze(version);
+  Object.freeze(version);
 }

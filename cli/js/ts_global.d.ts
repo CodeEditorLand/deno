@@ -13,7 +13,7 @@
 import * as ts_ from "$asset$/typescript.d.ts";
 
 declare global {
-	namespace ts {
-		export = ts_;
-	}
+  namespace ts {
+    export = ts_;
+  }
 }
