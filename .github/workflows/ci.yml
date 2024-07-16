@@ -155,7 +155,7 @@ jobs:
           git config user.email "propelml@gmail.com"
           git config user.name "denobot"
           git add .
-          git commit --message "Update benchmarks"
+          git ecommit --message "Update benchmarks"
           git push origin gh-pages
 
       - name: Worker info
