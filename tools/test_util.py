@@ -8,8 +8,16 @@ import os
 import sys
 import unittest
 
-from util import (enable_ansi_colors, build_path, RESET, FG_RED, FG_GREEN,
-                  executable_suffix, rmtree, tests_path)
+from util import (
+    enable_ansi_colors,
+    build_path,
+    RESET,
+    FG_RED,
+    FG_GREEN,
+    executable_suffix,
+    rmtree,
+    tests_path,
+)
 
 
 class DenoTestCase(unittest.TestCase):
@@ -57,18 +65,15 @@ class ColorTextTestRunner(unittest.TextTestRunner):
 def create_test_arg_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--failfast', '-f', action='store_true', help='Stop on first failure')
-    parser.add_argument(
-        '--verbose', '-v', action='store_true', help='Verbose output')
+        "--failfast", "-f", action="store_true", help="Stop on first failure"
+    )
+    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     parser.add_argument("--executable", help="Use external executable of Deno")
     parser.add_argument(
-        '--release',
-        action='store_true',
-        help='Test against release executable')
-    parser.add_argument(
-        '--pattern', '-p', help='Run tests that match provided pattern')
-    parser.add_argument(
-        '--build-dir', dest="build_dir", help='Deno build directory')
+        "--release", action="store_true", help="Test against release executable"
+    )
+    parser.add_argument("--pattern", "-p", help="Run tests that match provided pattern")
+    parser.add_argument("--build-dir", dest="build_dir", help="Deno build directory")
     return parser
 
 
@@ -83,19 +88,20 @@ def parse_test_args(argv=None):
 
     if args.executable and args.release:
         raise argparse.ArgumentError(
-            None, "Path to executable is inferred from "
-            "--release, cannot provide both.")
+            None,
+            "Path to executable is inferred from " "--release, cannot provide both.",
+        )
 
     if not args.build_dir:
         args.build_dir = build_path()
 
     if not args.executable:
-        args.executable = os.path.join(args.build_dir,
-                                       "deno" + executable_suffix)
+        args.executable = os.path.join(args.build_dir, "deno" + executable_suffix)
 
     if not os.path.isfile(args.executable):
         raise argparse.ArgumentError(
-            None, "deno executable not found at {}".format(args.executable))
+            None, "deno executable not found at {}".format(args.executable)
+        )
 
     return args
 
@@ -122,6 +128,7 @@ def run_tests(test_cases=None):
     # cases from calling module
     if test_cases is None:
         import __main__
+
         suite = loader.loadTestsFromModule(__main__)
     else:
         suite = unittest.TestSuite()
@@ -132,8 +139,7 @@ def run_tests(test_cases=None):
         filtered_tests = filter_test_suite(suite, args.pattern)
         suite = unittest.TestSuite(filtered_tests)
 
-    runner = ColorTextTestRunner(
-        verbosity=args.verbose + 2, failfast=args.failfast)
+    runner = ColorTextTestRunner(verbosity=args.verbose + 2, failfast=args.failfast)
 
     result = runner.run(suite)
     if not result.wasSuccessful():

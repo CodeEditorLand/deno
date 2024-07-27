@@ -9,9 +9,7 @@ from test_util import DenoTestCase, run_tests
 
 class TestBenchmark(DenoTestCase):
     def test_strace_parse(self):
-        with open(
-                os.path.join(sys.path[0], "testdata/strace_summary.out"),
-                "r") as f:
+        with open(os.path.join(sys.path[0], "testdata/strace_summary.out"), "r") as f:
             summary = benchmark.strace_parse(f.read())
             # first syscall line
             assert summary["munmap"]["calls"] == 60
@@ -36,8 +34,7 @@ class TestBenchmark(DenoTestCase):
         assert binary_size_dict["CLI_SNAPSHOT.js.map"] > 0
         assert binary_size_dict["CLI_SNAPSHOT.bin"] > 0
 
-    @unittest.skipIf("linux" not in sys.platform,
-                     "strace only supported on linux")
+    @unittest.skipIf("linux" not in sys.platform, "strace only supported on linux")
     def test_strace(self):
         new_data = {}
         benchmark.run_strace_benchmarks(self.deno_exe, new_data)
@@ -53,7 +50,7 @@ class TestBenchmark(DenoTestCase):
         assert s["hello"] > 1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # FIME this doesn't appear to be the case.
     # This test assumes tools/http_server.py is running in the background.
     run_tests()

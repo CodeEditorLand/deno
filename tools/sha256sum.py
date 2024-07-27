@@ -20,14 +20,16 @@ def main():
         dest="input",
         type=str,
         metavar="TEXT",
-        help="Hash literal text specified on the command line.")
+        help="Hash literal text specified on the command line.",
+    )
     parser.add_argument(
         "--infile",
         action="append",
         dest="input",
         type=read_file,
         metavar="FILE",
-        help="Hash the contents of a file.")
+        help="Hash the contents of a file.",
+    )
 
     # Arguments dealing with output.
     parser.add_argument(
@@ -36,18 +38,20 @@ def main():
         dest="format",
         default="%s",
         metavar="TEMPLATE",
-        help="Format output using Python template (default = '%%s').")
+        help="Format output using Python template (default = '%%s').",
+    )
     parser.add_argument(
         "--outfile",
         dest="outfile",
         type=argparse.FileType("wb"),
         default=sys.stdout,
         metavar="FILE",
-        help="Write the formatted hash to a file (default = stdout).")
+        help="Write the formatted hash to a file (default = stdout).",
+    )
 
     # Parse arguments. Print usage and exit if given no input.
     args = parser.parse_args()
-    if (not args.input):
+    if not args.input:
         parser.print_usage()
         return 1
 
@@ -66,5 +70,5 @@ def read_file(filename):
         return f.read()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

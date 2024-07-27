@@ -50,9 +50,9 @@ When designing function interfaces, stick to the following rules.
 
 2. Optional parameters should generally go into the options object.
 
-   An optional parameter that's not in an options object might be acceptable if
-   there is only one, and it seems inconceivable that we would add more optional
-   parameters in the future.
+    An optional parameter that's not in an options object might be acceptable if
+    there is only one, and it seems inconceivable that we would add more
+    optional parameters in the future.
 
 <!-- prettier-ignore-start -->
 <!-- see https://github.com/prettier/prettier/issues/3679 -->
@@ -73,25 +73,25 @@ When designing function interfaces, stick to the following rules.
 ```ts
 // BAD: optional parameters not part of options object. (#2)
 export function resolve(
-  hostname: string,
-  family?: "ipv4" | "ipv6",
-  timeout?: number
+	hostname: string,
+	family?: "ipv4" | "ipv6",
+	timeout?: number,
 ): IPAddress[] {}
 
 // GOOD.
 export interface ResolveOptions {
-  family?: "ipv4" | "ipv6";
-  timeout?: number;
+	family?: "ipv4" | "ipv6";
+	timeout?: number;
 }
 export function resolve(
-  hostname: string,
-  options: ResolveOptions = {}
+	hostname: string,
+	options: ResolveOptions = {},
 ): IPAddress[] {}
 ```
 
 ```ts
 export interface Environment {
-  [key: string]: string;
+	[key: string]: string;
 }
 
 // BAD: `env` could be a regular Object and is therefore indistinguishable
@@ -100,52 +100,52 @@ export function runShellWithEnv(cmdline: string, env: Environment): string {}
 
 // GOOD.
 export interface RunShellOptions {
-  env: Environment;
+	env: Environment;
 }
 export function runShellWithEnv(
-  cmdline: string,
-  options: RunShellOptions
+	cmdline: string,
+	options: RunShellOptions,
 ): string {}
 ```
 
 ```ts
 // BAD: more than 3 arguments (#1), multiple optional parameters (#2).
 export function renameSync(
-  oldname: string,
-  newname: string,
-  replaceExisting?: boolean,
-  followLinks?: boolean
+	oldname: string,
+	newname: string,
+	replaceExisting?: boolean,
+	followLinks?: boolean,
 ) {}
 
 // GOOD.
 interface RenameOptions {
-  replaceExisting?: boolean;
-  followLinks?: boolean;
+	replaceExisting?: boolean;
+	followLinks?: boolean;
 }
 export function renameSync(
-  oldname: string,
-  newname: string,
-  options: RenameOptions = {}
+	oldname: string,
+	newname: string,
+	options: RenameOptions = {},
 ) {}
 ```
 
 ```ts
 // BAD: too many arguments. (#1)
 export function pwrite(
-  fd: number,
-  buffer: TypedArray,
-  offset: number,
-  length: number,
-  position: number
+	fd: number,
+	buffer: TypedArray,
+	offset: number,
+	length: number,
+	position: number,
 ) {}
 
 // BETTER.
 export interface PWrite {
-  fd: number;
-  buffer: TypedArray;
-  offset: number;
-  length: number;
-  position: number;
+	fd: number;
+	buffer: TypedArray;
+	offset: number;
+	length: number;
+	position: number;
 }
 export function pwrite(options: PWrite) {}
 ```
@@ -180,7 +180,7 @@ Bad
 
 ```ts
 export const foo = (): string => {
-  return "bar";
+	return "bar";
 };
 ```
 
@@ -188,7 +188,7 @@ Good
 
 ```ts
 export function foo(): string {
-  return "bar";
+	return "bar";
 }
 ```
 
@@ -215,7 +215,7 @@ If possible, use a single line for the JS Doc. Example:
 ```ts
 /** foo does bar. */
 export function foo() {
-  // ...
+	// ...
 }
 ```
 
@@ -299,6 +299,6 @@ import { test } from "https://deno.land/std@v0.11/testing/mod.ts";
 import { foo } from "./mod.ts";
 
 test(function myTestFunction() {
-  assertEquals(foo(), { bar: "bar" });
+	assertEquals(foo(), { bar: "bar" });
 });
 ```

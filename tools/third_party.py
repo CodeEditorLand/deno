@@ -31,8 +31,9 @@ def python_env(env=None, merge_env=None):
         python_site_env = {}
         temp = os.environ["PATH"], sys.path
         os.environ["PATH"], sys.path = "", []
-        site.addsitedir(os.path.join(libdeno_path,
-                                     "build"))  # Modifies PATH and sys.path.
+        site.addsitedir(
+            os.path.join(libdeno_path, "build")
+        )  # Modifies PATH and sys.path.
         site.addsitedir(python_packages_path)  # Modifies PATH and sys.path.
         python_site_env = {"PATH": os.environ["PATH"], "PYTHONPATH": sys.path}
         os.environ["PATH"], sys.path = temp
@@ -80,11 +81,10 @@ def google_env(env=None, merge_env=None, depot_tools_path_=depot_tools_path):
 def run_yarn():
     node_modules_path = os.path.join(third_party_path, "node_modules")
     # Note to keep the root directory clean, we keep package.json is in tools/.
-    run([
-        "yarn", "install", "--no-lockfile",
-        "--modules-folder=" + node_modules_path
-    ],
-        cwd=os.path.join(root_path, "tools"))
+    run(
+        ["yarn", "install", "--no-lockfile", "--modules-folder=" + node_modules_path],
+        cwd=os.path.join(root_path, "tools"),
+    )
 
 
 # Install python packages with pip.
@@ -93,33 +93,60 @@ def run_pip():
     # that is bundled with python is too old to support the next step.
     temp_python_home = mkdtemp()
     pip_env = {"PYTHONUSERBASE": temp_python_home}
-    run([sys.executable, "-m", "pip", "install", "--upgrade", "--user", "pip"],
+    run(
+        [sys.executable, "-m", "pip", "install", "--upgrade", "--user", "pip"],
         cwd=third_party_path,
-        merge_env=pip_env)
+        merge_env=pip_env,
+    )
 
     # Install pywin32.
-    run([
-        sys.executable, "-m", "pip", "install", "--upgrade", "--target",
-        python_packages_path, "--platform=win_amd64", "--only-binary=:all:",
-        "pypiwin32"
-    ],
+    run(
+        [
+            sys.executable,
+            "-m",
+            "pip",
+            "install",
+            "--upgrade",
+            "--target",
+            python_packages_path,
+            "--platform=win_amd64",
+            "--only-binary=:all:",
+            "pypiwin32",
+        ],
         cwd=third_party_path,
-        merge_env=pip_env)
+        merge_env=pip_env,
+    )
 
     # Get yapf.
-    run([
-        sys.executable, "-m", "pip", "install", "--upgrade", "--target",
-        python_packages_path, "yapf"
-    ],
+    run(
+        [
+            sys.executable,
+            "-m",
+            "pip",
+            "install",
+            "--upgrade",
+            "--target",
+            python_packages_path,
+            "yapf",
+        ],
         cwd=third_party_path,
-        merge_env=pip_env)
+        merge_env=pip_env,
+    )
 
-    run([
-        sys.executable, "-m", "pip", "install", "--upgrade", "--target",
-        python_packages_path, "pylint==1.5.6"
-    ],
+    run(
+        [
+            sys.executable,
+            "-m",
+            "pip",
+            "install",
+            "--upgrade",
+            "--target",
+            python_packages_path,
+            "pylint==1.5.6",
+        ],
         cwd=third_party_path,
-        merge_env=pip_env)
+        merge_env=pip_env,
+    )
 
     # Remove the temporary pip installation.
     rmtree(temp_python_home)
@@ -152,12 +179,10 @@ def run_gclient_sync():
         else:
             raise
 
-    args = [
-        "gclient", "sync", "--reset", "--shallow", "--no-history", "--nohooks"
-    ]
+    args = ["gclient", "sync", "--reset", "--shallow", "--no-history", "--nohooks"]
     envs = {
         "DEPOT_TOOLS_UPDATE": "0",
-        "GCLIENT_FILE": os.path.join(root_path, "tools", "gclient_config.py")
+        "GCLIENT_FILE": os.path.join(root_path, "tools", "gclient_config.py"),
     }
     env = google_env(depot_tools_path_=depot_tools_temp_path, merge_env=envs)
     run(args, cwd=third_party_path, env=env)
@@ -166,10 +191,11 @@ def run_gclient_sync():
     # gclient did indeed install a fresh copy.
     # Also check that `{depot_tools_temp_path}/gclient.py` exists, so a typo in
     # this script won't accidentally blow out someone's home dir.
-    if (os.path.isdir(os.path.join(depot_tools_path, ".git"))
-            and os.path.isfile(os.path.join(depot_tools_path, "gclient.py"))
-            and os.path.isfile(
-                os.path.join(depot_tools_temp_path, "gclient.py"))):
+    if (
+        os.path.isdir(os.path.join(depot_tools_path, ".git"))
+        and os.path.isfile(os.path.join(depot_tools_path, "gclient.py"))
+        and os.path.isfile(os.path.join(depot_tools_temp_path, "gclient.py"))
+    ):
         rmtree(depot_tools_temp_path)
 
 
@@ -183,41 +209,44 @@ def get_platform_dir_name():
 
 
 def get_prebuilt_tool_path(tool):
-    return os.path.join(prebuilt_path, get_platform_dir_name(),
-                        tool + executable_suffix)
+    return os.path.join(
+        prebuilt_path, get_platform_dir_name(), tool + executable_suffix
+    )
 
 
 def get_buildtools_tool_path(tool):
-    return os.path.join(libdeno_path, "buildtools", get_platform_dir_name(),
-                        tool + executable_suffix)
+    return os.path.join(
+        libdeno_path, "buildtools", get_platform_dir_name(), tool + executable_suffix
+    )
 
 
 def download_from_google_storage2(sha1_file, bucket):
-    download_script = os.path.join(depot_tools_path,
-                                   "download_from_google_storage.py")
-    run([
-        sys.executable,
-        download_script,
-        "--no_auth",
-        "--bucket=%s" % bucket,
-        "--sha1_file",
-        sha1_file,
-    ],
-        env=google_env())
+    download_script = os.path.join(depot_tools_path, "download_from_google_storage.py")
+    run(
+        [
+            sys.executable,
+            download_script,
+            "--no_auth",
+            "--bucket=%s" % bucket,
+            "--sha1_file",
+            sha1_file,
+        ],
+        env=google_env(),
+    )
 
 
 # Download the given item from Google storage.
 def download_from_google_storage(item, bucket, base_dir):
-    sha1_file = os.path.join(base_dir, get_platform_dir_name(),
-                             item + executable_suffix + ".sha1")
+    sha1_file = os.path.join(
+        base_dir, get_platform_dir_name(), item + executable_suffix + ".sha1"
+    )
     download_from_google_storage2(sha1_file, bucket)
 
 
 # Download the given item from Chrome Infrastructure Package Deployment.
 def download_from_cipd(item, version):
     cipd_exe = os.path.join(depot_tools_path, "cipd")
-    download_dir = os.path.join(libdeno_path, "buildtools",
-                                get_platform_dir_name())
+    download_dir = os.path.join(libdeno_path, "buildtools", get_platform_dir_name())
 
     if sys.platform == "win32":
         item += "windows-amd64"
@@ -228,22 +257,27 @@ def download_from_cipd(item, version):
 
     # Init cipd if necessary.
     if not os.path.exists(os.path.join(download_dir, ".cipd")):
-        run([
-            cipd_exe,
-            "init",
-            download_dir,
-            "-force",
-        ], env=google_env())
+        run(
+            [
+                cipd_exe,
+                "init",
+                download_dir,
+                "-force",
+            ],
+            env=google_env(),
+        )
 
-    run([
-        cipd_exe,
-        "install",
-        item,
-        "git_revision:" + version,
-        "-root",
-        download_dir,
-    ],
-        env=google_env())
+    run(
+        [
+            cipd_exe,
+            "install",
+            item,
+            "git_revision:" + version,
+            "-root",
+            download_dir,
+        ],
+        env=google_env(),
+    )
 
 
 # Download gn from Google storage.
@@ -253,19 +287,24 @@ def download_gn():
 
 # Download clang-format from Google storage.
 def download_clang_format():
-    download_from_google_storage("clang-format", "chromium-clang-format",
-                                 os.path.join(libdeno_path, "buildtools"))
+    download_from_google_storage(
+        "clang-format",
+        "chromium-clang-format",
+        os.path.join(libdeno_path, "buildtools"),
+    )
 
 
 # Download clang by calling the clang update script.
 def download_clang():
-    update_script = os.path.join(libdeno_path, "v8", "tools", "clang",
-                                 "scripts", "update.py")
+    update_script = os.path.join(
+        libdeno_path, "v8", "tools", "clang", "scripts", "update.py"
+    )
     run([sys.executable, update_script], env=google_env())
 
 
 def maybe_download_sysroot():
     if sys.platform.startswith("linux"):
-        install_script = os.path.join(libdeno_path, "build", "linux",
-                                      "sysroot_scripts", "install-sysroot.py")
+        install_script = os.path.join(
+            libdeno_path, "build", "linux", "sysroot_scripts", "install-sysroot.py"
+        )
         run([sys.executable, install_script, "--arch=amd64"], env=google_env())
