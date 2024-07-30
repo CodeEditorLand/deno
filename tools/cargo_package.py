@@ -128,7 +128,7 @@ authors = ["The deno authors <bertbelder@nodejs.org>"]
 version = "$VERSION"
 build = "build.rs"
 include = ["src/*", "lib/*", "Cargo.toml", "build.rs"]
-license = "MIT"
+license = "SEE LICENSE IN LICENSE"
 repository = "https://github.com/denoland/deno"
 """)
 
