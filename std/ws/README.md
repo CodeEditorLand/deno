@@ -2,7 +2,7 @@
 
 ws module is made to provide helpers to create WebSocket client/server.
 
-## Usage
+## 🛠️ Usage
 
 ### Server
 

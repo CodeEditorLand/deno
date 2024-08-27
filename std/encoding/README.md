@@ -29,7 +29,7 @@ Parse the CSV string with the options provided.
   is executed on each entry of the header. This can be combined with the Parse
   function of the rows.
 
-#### Usage
+#### 🛠️ Usage
 
 ```ts
 // input:
@@ -192,7 +192,7 @@ will output:
 }
 ```
 
-### Usage
+### 🛠️ Usage
 
 #### Parse
 

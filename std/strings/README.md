@@ -2,7 +2,7 @@
 
 This module provides a few basic utilities to manipulate strings.
 
-## Usage
+## 🛠️ Usage
 
 ### pad
 
