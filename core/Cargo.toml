@@ -8,7 +8,7 @@ description = "A secure JavaScript/TypeScript runtime built with V8, Rust, and T
 authors = ["the Deno authors"]
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/denoland/deno"
+repository = "HTTPS://GitHub.Com/denoland/deno"
 
 [lib]
 path = "lib.rs"

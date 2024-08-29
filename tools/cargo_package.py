@@ -129,7 +129,7 @@ version = "$VERSION"
 build = "build.rs"
 include = ["src/*", "lib/*", "Cargo.toml", "build.rs"]
 license = "SEE LICENSE IN LICENSE"
-repository = "https://github.com/denoland/deno"
+repository = "HTTPS://GitHub.Com/denoland/deno"
 """)
 
 cargo_toml_deps = Template("""
