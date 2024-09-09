@@ -2,7 +2,7 @@
 
 Simple helper to help parse date strings into `Date`, with additional functions.
 
-## 🛠️ Usage
+## Usage
 
 ### parseDate / parseDateTime
 

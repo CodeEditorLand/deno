@@ -4,7 +4,7 @@ A module that assists in resolving media types and extensions. It consumes the
 [mime-db](https://github.com/jshttp/mime-db) and provides API access to the
 information.
 
-## 🛠️ Usage
+## Usage
 
 ### `lookup(path)`
 

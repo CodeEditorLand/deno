@@ -3,7 +3,7 @@
 This module provides a few basic utilities to make testing easier and consistent
 in Deno.
 
-## 🛠️ Usage
+## Usage
 
 The module exports a `test` function which is the test harness in Deno. It
 accepts either a function (including async functions) or an object which

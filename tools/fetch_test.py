@@ -14,19 +14,16 @@ class TestFetch(DenoTestCase):
         deno_dir = mkdtemp()
         try:
             t = os.path.join(tests_path, "006_url_imports.ts")
-            result = run_output(
-                [self.deno_exe, "fetch", t],
-                quiet=True,
-                merge_env={"DENO_DIR": deno_dir},
-            )
+            result = run_output([self.deno_exe, "fetch", t],
+                                quiet=True,
+                                merge_env={"DENO_DIR": deno_dir})
             self.assertEqual(result.out, "")
             self.assertEqual(result.code, 0)
             # Check that we actually did the prefetch.
             os.path.exists(
                 os.path.join(
-                    deno_dir, "deps/http/localhost_PORT4545/tests/subdir/mod2.ts"
-                )
-            )
+                    deno_dir,
+                    "deps/http/localhost_PORT4545/tests/subdir/mod2.ts"))
         finally:
             shutil.rmtree(deno_dir)
 

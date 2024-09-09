@@ -5,7 +5,6 @@ gn can only run python scripts. This launches a subprocess Node process.
 The working dir of this program is out/Debug/ (AKA root_build_dir)
 Before running node, we symlink js/node_modules to out/Debug/node_modules.
 """
-
 import sys
 from os import path
 from util import symlink, root_path, run

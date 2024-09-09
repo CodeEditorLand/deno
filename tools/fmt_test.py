@@ -11,7 +11,8 @@ class TestFmt(DenoTestCase):
     def test_fmt(self):
         d = mkdtemp()
         try:
-            fixed_filename = os.path.join(tests_path, "badly_formatted_fixed.js")
+            fixed_filename = os.path.join(tests_path,
+                                          "badly_formatted_fixed.js")
             src = os.path.join(tests_path, "badly_formatted.js")
             dst = os.path.join(d, "badly_formatted.js")
             shutil.copyfile(src, dst)
@@ -27,8 +28,7 @@ class TestFmt(DenoTestCase):
                 cwd=d,
                 merge_env={"DENO_DIR": deno_dir},
                 exit_on_fail=True,
-                quiet=True,
-            )
+                quiet=True)
             self.assertEqual(result.code, 0)
             with open(fixed_filename) as f:
                 expected = f.read()

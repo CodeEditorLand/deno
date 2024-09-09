@@ -128,8 +128,8 @@ authors = ["The deno authors <bertbelder@nodejs.org>"]
 version = "$VERSION"
 build = "build.rs"
 include = ["src/*", "lib/*", "Cargo.toml", "build.rs"]
-license = "SEE LICENSE IN LICENSE"
-repository = "HTTPS://GitHub.Com/denoland/deno"
+license = "MIT"
+repository = "https://github.com/denoland/deno"
 """)
 
 cargo_toml_deps = Template("""

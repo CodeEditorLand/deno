@@ -23,16 +23,16 @@ It's built on V8, Rust, and Tokio.
 
 ### Feature Highlights
 
--   Secure by default. No file, network, or environment access (unless
-    explicitly enabled).
--   Supports TypeScript out of the box.
--   Ships a single executable (`deno`).
--   Has built in utilities like a dependency inspector (`deno info`) and a code
-    formatter (`deno fmt`).
--   Has
-    [a set of reviewed (audited) standard modules](https://github.com/denoland/deno/tree/master/std)
-    that are guaranteed to work with Deno.
--   Scripts can be bundled into a single javascript file.
+- Secure by default. No file, network, or environment access (unless explicitly
+  enabled).
+- Supports TypeScript out of the box.
+- Ships a single executable (`deno`).
+- Has built in utilities like a dependency inspector (`deno info`) and a code
+  formatter (`deno fmt`).
+- Has
+  [a set of reviewed (audited) standard modules](https://github.com/denoland/deno/tree/master/std)
+  that are guaranteed to work with Deno.
+- Scripts can be bundled into a single javascript file.
 
 ### Philosophy
 
@@ -50,31 +50,29 @@ have been historically written with bash or python.
 
 ### Goals
 
--   Only ship a single executable (`deno`).
--   Provide Secure Defaults
-    -   Unless specifically allowed, scripts can't access files, the
-        environment, or the network.
--   Browser compatible: The subset of Deno programs which are written completely
-    in JavaScript and do not use the global `Deno` namespace (or feature test
-    for it), ought to also be able to be run in a modern web browser without
-    change.
--   Provide built-in tooling like unit testing, code formatting, and linting to
-    improve developer experience.
--   Does not leak V8 concepts into user land.
--   Be able to serve HTTP efficiently
+- Only ship a single executable (`deno`).
+- Provide Secure Defaults
+  - Unless specifically allowed, scripts can't access files, the environment, or
+    the network.
+- Browser compatible: The subset of Deno programs which are written completely
+  in JavaScript and do not use the global `Deno` namespace (or feature test for
+  it), ought to also be able to be run in a modern web browser without change.
+- Provide built-in tooling like unit testing, code formatting, and linting to
+  improve developer experience.
+- Does not leak V8 concepts into user land.
+- Be able to serve HTTP efficiently
 
 ### Comparison to Node.js
 
--   Deno does not use `npm`
-    -   It uses modules referenced as URLs or file paths
--   Deno does not use `package.json` in its module resolution algorithm.
--   All async actions in Deno return a promise. Thus Deno provides different
-    APIs than Node.
--   Deno requires explicit permissions for file, network, and environment
-    access.
--   Deno always dies on uncaught errors.
--   Uses "ES Modules" and does not support `require()`. Third party modules are
-    imported via URLs:
+- Deno does not use `npm`
+  - It uses modules referenced as URLs or file paths
+- Deno does not use `package.json` in its module resolution algorithm.
+- All async actions in Deno return a promise. Thus Deno provides different APIs
+  than Node.
+- Deno requires explicit permissions for file, network, and environment access.
+- Deno always dies on uncaught errors.
+- Uses "ES Modules" and does not support `require()`. Third party modules are
+  imported via URLs:
 
 ```javascript
 import * as log from "https://deno.land/std/log/mod.ts";
@@ -82,11 +80,11 @@ import * as log from "https://deno.land/std/log/mod.ts";
 
 ### Other key behaviors
 
--   Remote code is fetched and cached on first execution, and never updated
-    until the code is run with the `--reload` flag. (So, this will still work on
-    an airplane.)
--   Modules/files loaded from remote URLs are intended to be immutable and
-    cacheable.
+- Remote code is fetched and cached on first execution, and never updated until
+  the code is run with the `--reload` flag. (So, this will still work on an
+  airplane.)
+- Modules/files loaded from remote URLs are intended to be immutable and
+  cacheable.
 
 ## Built-in Deno Utilities / Commands
 
@@ -294,10 +292,10 @@ is opened, and printed to stdout.
 
 ```ts
 for (let i = 1; i < Deno.args.length; i++) {
-	let filename = Deno.args[i];
-	let file = await Deno.open(filename);
-	await Deno.copy(Deno.stdout, file);
-	file.close();
+  let filename = Deno.args[i];
+  let file = await Deno.open(filename);
+  await Deno.copy(Deno.stdout, file);
+  file.close();
 }
 ```
 
@@ -321,7 +319,7 @@ and returns to the client anything it sends.
 const listener = Deno.listen({ port: 8080 });
 console.log("listening on 0.0.0.0:8080");
 for await (const conn of listener) {
-	Deno.copy(conn, conn);
+  Deno.copy(conn, conn);
 }
 ```
 
@@ -363,7 +361,7 @@ program, at a later stage, needs those permissions, it will fail.
 // lookup a permission
 const status = await Deno.permissions.query({ name: "write" });
 if (status.state !== "granted") {
-	throw new Error("need write permission");
+  throw new Error("need write permission");
 }
 
 const log = await Deno.open("request.log", "a+");
@@ -462,7 +460,7 @@ Example:
 ```ts
 // create subprocess
 const p = Deno.run({
-	args: ["echo", "hello"],
+  args: ["echo", "hello"]
 });
 
 // await its completion
@@ -489,26 +487,26 @@ you can use `"piped"` option.
 const fileNames = Deno.args.slice(1);
 
 const p = Deno.run({
-	args: [
-		"deno",
-		"run",
-		"--allow-read",
-		"https://deno.land/std/examples/cat.ts",
-		...fileNames,
-	],
-	stdout: "piped",
-	stderr: "piped",
+  args: [
+    "deno",
+    "run",
+    "--allow-read",
+    "https://deno.land/std/examples/cat.ts",
+    ...fileNames
+  ],
+  stdout: "piped",
+  stderr: "piped"
 });
 
 const { code } = await p.status();
 
 if (code === 0) {
-	const rawOutput = await p.output();
-	await Deno.stdout.write(rawOutput);
+  const rawOutput = await p.output();
+  await Deno.stdout.write(rawOutput);
 } else {
-	const rawError = await p.stderrOutput();
-	const errorString = new TextDecoder().decode(rawError);
-	console.log(errorString);
+  const rawError = await p.stderrOutput();
+  const errorString = new TextDecoder().decode(rawError);
+  console.log(errorString);
 }
 
 Deno.exit(code);
@@ -539,11 +537,11 @@ import { test, runIfMain } from "https://deno.land/std/testing/mod.ts";
 import { assertEquals } from "https://deno.land/std/testing/asserts.ts";
 
 test(function t1() {
-	assertEquals("hello", "hello");
+  assertEquals("hello", "hello");
 });
 
 test(function t2() {
-	assertEquals("world", "world");
+  assertEquals("world", "world");
 });
 
 runIfMain(import.meta);
@@ -557,11 +555,8 @@ running 2 tests
 test t1 ... ok
 test t2 ... ok
 
-test result: ok. 2 passed
-0 failed
-0 ignored
-0 measured
-0 filtered out
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+
 ```
 
 Note that we did not have to provide the `--allow-net` flag for this program,
@@ -574,11 +569,10 @@ environmental variable. It defaults to the system's cache directory if
 will be made. If the program hasn't changed, it won't be recompiled either. The
 default directory is:
 
--   On Linux/Redox: `$XDG_CACHE_HOME/deno` or `$HOME/.cache/deno`
--   On Windows: `%LOCALAPPDATA%/deno` (`%LOCALAPPDATA%` =
-    `FOLDERID_LocalAppData`)
--   On macOS: `$HOME/Library/Caches/deno`
--   If something fails, it falls back to `$HOME/.deno`
+- On Linux/Redox: `$XDG_CACHE_HOME/deno` or `$HOME/.cache/deno`
+- On Windows: `%LOCALAPPDATA%/deno` (`%LOCALAPPDATA%` = `FOLDERID_LocalAppData`)
+- On macOS: `$HOME/Library/Caches/deno`
+- If something fails, it falls back to `$HOME/.deno`
 
 **But what if `https://deno.land/` goes down?** Relying on external servers is
 convenient for development but brittle in production. Production software should
@@ -671,7 +665,7 @@ check `import.meta.main`.
 
 ```ts
 if (import.meta.main) {
-	console.log("main");
+  console.log("main");
 }
 ```
 
@@ -755,11 +749,11 @@ redirect it to an appropriate file.
 
 The supported shells are:
 
--   zsh
--   bash
--   fish
--   powershell
--   elvish
+- zsh
+- bash
+- fish
+- powershell
+- elvish
 
 Example:
 
@@ -826,14 +820,14 @@ Bundles can also be loaded in the web browser. The bundle is a self-contained ES
 module, and so the attribute of `type` must be set to `"module"`. For example:
 
 ```html
-<script src="website.bundle.js" type="module"></script>
+<script type="module" src="website.bundle.js"></script>
 ```
 
 Or you could import it into another ES module to consume:
 
 ```html
 <script type="module">
-	import * as website from "website.bundle.js";
+  import * as website from "website.bundle.js";
 </script>
 ```
 
@@ -937,10 +931,10 @@ One can use import map with `--importmap=<FILE>` CLI flag.
 
 Current limitations:
 
--   single import map
--   no fallback URLs
--   Deno does not support `std:` namespace
--   Does supports only `file:`, `http:` and `https:` schemes
+- single import map
+- no fallback URLs
+- Deno does not support `std:` namespace
+- Does supports only `file:`, `http:` and `https:` schemes
 
 Example:
 
@@ -961,7 +955,7 @@ import { serve } from "http/server.ts";
 
 const body = new TextEncoder().encode("Hello World\n");
 for await (const req of serve(":8000")) {
-	req.respond({ body });
+  req.respond({ body });
 }
 ```
 
@@ -1012,7 +1006,7 @@ Example:
 import "./imported.ts";
 
 const handler = (e: Event): void => {
-	console.log(`got ${e.type} event in event handler (main)`);
+  console.log(`got ${e.type} event in event handler (main)`);
 };
 
 window.addEventListener("load", handler);
@@ -1020,27 +1014,27 @@ window.addEventListener("load", handler);
 window.addEventListener("unload", handler);
 
 window.onload = (e: Event): void => {
-	console.log(`got ${e.type} event in onload function (main)`);
+  console.log(`got ${e.type} event in onload function (main)`);
 };
 
 window.onunload = (e: Event): void => {
-	console.log(`got ${e.type} event in onunload function (main)`);
+  console.log(`got ${e.type} event in onunload function (main)`);
 };
 
 // imported.ts
 const handler = (e: Event): void => {
-	console.log(`got ${e.type} event in event handler (imported)`);
+  console.log(`got ${e.type} event in event handler (imported)`);
 };
 
 window.addEventListener("load", handler);
 window.addEventListener("unload", handler);
 
 window.onload = (e: Event): void => {
-	console.log(`got ${e.type} event in onload function (imported)`);
+  console.log(`got ${e.type} event in onload function (imported)`);
 };
 
 window.onunload = (e: Event): void => {
-	console.log(`got ${e.type} event in onunload function (imported)`);
+  console.log(`got ${e.type} event in onunload function (imported)`);
 };
 
 console.log("log from imported script");
@@ -1131,7 +1125,7 @@ ninja -C target/release d8
 
 # Exercise it.
 third_party/wrk/linux/wrk http://localhost:4500/
-kill $(pgrep deno)
+kill `pgrep deno`
 ```
 
 V8 will write a file in the current directory that looks like this:
@@ -1157,20 +1151,20 @@ Open `third_party/v8/tools/profview/index.html` in your browser, and select
 
 Useful V8 flags during profiling:
 
--   --prof
--   --log-internal-timer-events
--   --log-timer-events
--   --track-gc
--   --log-source-code
--   --track-gc-object-stats
+- --prof
+- --log-internal-timer-events
+- --log-timer-events
+- --track-gc
+- --log-source-code
+- --track-gc-object-stats
 
 Note that you might need to run Deno with `--current-thread` flag to capture
 full V8 profiling output.
 
 To learn more about `d8` and profiling, check out the following links:
 
--   [https://v8.dev/docs/d8](https://v8.dev/docs/d8)
--   [https://v8.dev/docs/profile](https://v8.dev/docs/profile)
+- [https://v8.dev/docs/d8](https://v8.dev/docs/d8)
+- [https://v8.dev/docs/profile](https://v8.dev/docs/profile)
 
 ### Debugging with LLDB
 
@@ -1220,29 +1214,29 @@ The benchmark chart supposes `//website/data.json` has the type
 
 ```ts
 interface ExecTimeData {
-	mean: number;
-	stddev: number;
-	user: number;
-	system: number;
-	min: number;
-	max: number;
+  mean: number;
+  stddev: number;
+  user: number;
+  system: number;
+  min: number;
+  max: number;
 }
 
 interface BenchmarkData {
-	created_at: string;
-	sha1: string;
-	benchmark: {
-		[key: string]: ExecTimeData;
-	};
-	binarySizeData: {
-		[key: string]: number;
-	};
-	threadCountData: {
-		[key: string]: number;
-	};
-	syscallCountData: {
-		[key: string]: number;
-	};
+  created_at: string;
+  sha1: string;
+  benchmark: {
+    [key: string]: ExecTimeData;
+  };
+  binarySizeData: {
+    [key: string]: number;
+  };
+  threadCountData: {
+    [key: string]: number;
+  };
+  syscallCountData: {
+    [key: string]: number;
+  };
 }
 ```
 
@@ -1251,13 +1245,13 @@ interface BenchmarkData {
 These Deno logos, like the Deno software, are distributed under the MIT license
 (public domain and free for use)
 
--   [A hand drawn one by @ry](https://deno.land/images/deno_logo.png)
+- [A hand drawn one by @ry](https://deno.land/images/deno_logo.png)
 
--   [An animated one by @hashrock](https://github.com/denolib/animated-deno-logo/)
+- [An animated one by @hashrock](https://github.com/denolib/animated-deno-logo/)
 
--   [A high resolution SVG one by @kevinkassimo](https://github.com/denolib/high-res-deno-logo)
+- [A high resolution SVG one by @kevinkassimo](https://github.com/denolib/high-res-deno-logo)
 
--   [A pixelated animation one by @tanakaworld](https://deno.land/images/deno_logo_4.gif)
+- [A pixelated animation one by @tanakaworld](https://deno.land/images/deno_logo_4.gif)
 
 ## Contributing
 

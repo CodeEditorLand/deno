@@ -12,26 +12,10 @@ os.chdir(os.path.join(root_path, "cli/js"))
 
 # You must have typedoc installed seprately.
 # TODO Replace typedoc with something else ASAP. It's very awful.
-run(
-    [
-        "typedoc",
-        "lib.deno_runtime.d.ts",
-        "--out",
-        os.path.join(target_path, "typedoc"),
-        "--entryPoint",
-        "Deno",
-        "--ignoreCompilerErrors",
-        "--includeDeclarations",
-        "--excludeExternals",
-        "--excludePrivate",
-        "--excludeProtected",
-        "--mode",
-        "file",
-        "--name",
-        "deno",
-        "--theme",
-        "minimal",
-        "--readme",
-        "none",
-    ]
-)
+run([
+    "typedoc", "lib.deno_runtime.d.ts", "--out",
+    os.path.join(target_path, "typedoc"), "--entryPoint", "Deno",
+    "--ignoreCompilerErrors", "--includeDeclarations", "--excludeExternals",
+    "--excludePrivate", "--excludeProtected", "--mode", "file", "--name",
+    "deno", "--theme", "minimal", "--readme", "none"
+])

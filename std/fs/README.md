@@ -2,7 +2,7 @@
 
 fs module is made to provide helpers to manipulate the filesystem.
 
-## 🛠️ Usage
+## Usage
 
 All the following modules are exposed in `mod.ts`
 

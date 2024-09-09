@@ -8,14 +8,14 @@ description = "A secure JavaScript/TypeScript runtime built with V8, Rust, and T
 authors = ["the Deno authors"]
 license = "MIT"
 readme = "README.md"
-repository = "HTTPS://GitHub.Com/denoland/deno"
+repository = "https://github.com/denoland/deno"
 
 [lib]
 path = "lib.rs"
 
 [dependencies]
 downcast-rs = "1.1.1"
-futures = { version = "0.3", features = ["thread-pool", "compat"] }
+futures = { version = "0.3", features = [ "thread-pool", "compat" ] }
 lazy_static = "1.4.0"
 libc = "0.2.65"
 log = "0.4.8"
