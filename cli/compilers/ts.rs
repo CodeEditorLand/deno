@@ -390,7 +390,7 @@ impl TsCompiler {
       debug!(">>>>> compile_sync END");
       Ok(compiled_module)
     }
-      .boxed()
+    .boxed()
   }
 
   /// Get associated `CompiledFileMetadata` for given module if it exists.
@@ -717,25 +717,16 @@ mod tests {
 
     let test_cases = vec![
       // valid JSON
-      (
-        r#"{ "compilerOptions": { "checkJs": true } } "#,
-        true,
-      ),
+      (r#"{ "compilerOptions": { "checkJs": true } } "#, true),
       // JSON with comment
       (
         r#"{ "compilerOptions": { // force .js file compilation by Deno "checkJs": true } } "#,
         true,
       ),
       // invalid JSON
-      (
-        r#"{ "compilerOptions": { "checkJs": true },{ } "#,
-        true,
-      ),
+      (r#"{ "compilerOptions": { "checkJs": true },{ } "#, true),
       // without content
-      (
-        "",
-        false,
-      ),
+      ("", false),
     ];
 
     let path = temp_dir_path.join("tsconfig.json");

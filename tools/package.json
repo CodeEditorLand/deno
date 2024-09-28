@@ -1,6 +1,12 @@
 {
 	"name": "deno",
 	"devDependencies": {
+<<<<<<< HEAD
 		"magic-string": "0.25.2"
 	}
+=======
+		"magic-string": "0.30.11"
+	},
+	"name": "deno"
+>>>>>>> 95f98979beeb3221889d2a5448ee469cc291fdd4
 }
