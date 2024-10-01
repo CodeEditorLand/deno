@@ -1,13 +1,11 @@
 [submodule "chromium_build"]
 path = core/libdeno/build
-url = ssh://git@github.com/CodeEditorLand/chromium_build.git
+url = ssh://git@github.com/CodeEditorLand/ChromiumBuild.git
 
 [submodule "deno_third_party"]
 path = third_party
-url = ssh://git@github.com/CodeEditorLand/deno_third_party.git
+url = ssh://git@github.com/CodeEditorLand/DenoThirdParty.git
 
 [submodule "typescript"]
 path = deno_typescript/typescript
 url = ssh://git@github.com/CodeEditorLand/TypeScript.git
-fetchRecurseSubmodules = false
-shallow = true
