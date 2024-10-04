@@ -7,9 +7,9 @@
  * @returns patterns
  */
 export function parse(ignoreString: string): Set<string> {
-  const partterns = ignoreString
-    .split(/\r?\n/)
-    .filter(line => line.trim() !== "" && line.charAt(0) !== "#");
+	const partterns = ignoreString
+		.split(/\r?\n/)
+		.filter((line) => line.trim() !== "" && line.charAt(0) !== "#");
 
-  return new Set(partterns);
+	return new Set(partterns);
 }

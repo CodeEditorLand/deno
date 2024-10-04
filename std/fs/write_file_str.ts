@@ -8,8 +8,8 @@
  * @returns void
  */
 export function writeFileStrSync(filename: string, content: string): void {
-  const encoder = new TextEncoder();
-  Deno.writeFileSync(filename, encoder.encode(content));
+	const encoder = new TextEncoder();
+	Deno.writeFileSync(filename, encoder.encode(content));
 }
 
 /**
@@ -20,9 +20,9 @@ export function writeFileStrSync(filename: string, content: string): void {
  * @returns Promise<void>
  */
 export async function writeFileStr(
-  filename: string,
-  content: string
+	filename: string,
+	content: string,
 ): Promise<void> {
-  const encoder = new TextEncoder();
-  await Deno.writeFile(filename, encoder.encode(content));
+	const encoder = new TextEncoder();
+	await Deno.writeFile(filename, encoder.encode(content));
 }

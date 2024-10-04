@@ -8,23 +8,23 @@ const [originHostname, originPort] = originAddr.split(":");
 const listener = Deno.listen({ hostname, port: Number(port) });
 
 async function handle(conn: Deno.Conn): Promise<void> {
-  const origin = await Deno.dial({
-    hostname: originHostname,
-    port: Number(originPort)
-  });
-  try {
-    await Promise.all([Deno.copy(conn, origin), Deno.copy(origin, conn)]);
-  } catch (err) {
-    if (err.message !== "read error" && err.message !== "write error") {
-      throw err;
-    }
-  } finally {
-    conn.close();
-    origin.close();
-  }
+	const origin = await Deno.dial({
+		hostname: originHostname,
+		port: Number(originPort),
+	});
+	try {
+		await Promise.all([Deno.copy(conn, origin), Deno.copy(origin, conn)]);
+	} catch (err) {
+		if (err.message !== "read error" && err.message !== "write error") {
+			throw err;
+		}
+	} finally {
+		conn.close();
+		origin.close();
+	}
 }
 
 console.log(`Proxy listening on http://${addr}/`);
 for await (const conn of listener) {
-  handle(conn);
+	handle(conn);
 }

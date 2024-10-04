@@ -1,24 +1,24 @@
-const { dial, run } = Deno;
-
-import { test, runIfMain } from "../testing/mod.ts";
-import { assert, assertEquals } from "../testing/asserts.ts";
 import { BufReader } from "../io/bufio.ts";
+import { assert, assertEquals } from "../testing/asserts.ts";
+import { runIfMain, test } from "../testing/mod.ts";
 import { TextProtoReader } from "../textproto/mod.ts";
+
+const { dial, run } = Deno;
 
 let server: Deno.Process;
 async function startServer(): Promise<void> {
-  server = run({
-    args: [Deno.execPath(), "run", "-A", "http/racing_server.ts"],
-    stdout: "piped"
-  });
-  // Once racing server is ready it will write to its stdout.
-  const r = new TextProtoReader(new BufReader(server.stdout!));
-  const s = await r.readLine();
-  assert(s !== Deno.EOF && s.includes("Racing server listening..."));
+	server = run({
+		args: [Deno.execPath(), "run", "-A", "http/racing_server.ts"],
+		stdout: "piped",
+	});
+	// Once racing server is ready it will write to its stdout.
+	const r = new TextProtoReader(new BufReader(server.stdout!));
+	const s = await r.readLine();
+	assert(s !== Deno.EOF && s.includes("Racing server listening..."));
 }
 function killServer(): void {
-  server.close();
-  server.stdout!.close();
+	server.close();
+	server.stdout!.close();
 }
 
 const input = `GET / HTTP/1.1
@@ -48,18 +48,18 @@ World 4
 `;
 
 test(async function serverPipelineRace(): Promise<void> {
-  await startServer();
+	await startServer();
 
-  const conn = await dial({ port: 4501 });
-  const r = new TextProtoReader(new BufReader(conn));
-  await conn.write(new TextEncoder().encode(input));
-  const outLines = output.split("\n");
-  // length - 1 to disregard last empty line
-  for (let i = 0; i < outLines.length - 1; i++) {
-    const s = await r.readLine();
-    assertEquals(s, outLines[i]);
-  }
-  killServer();
+	const conn = await dial({ port: 4501 });
+	const r = new TextProtoReader(new BufReader(conn));
+	await conn.write(new TextEncoder().encode(input));
+	const outLines = output.split("\n");
+	// length - 1 to disregard last empty line
+	for (let i = 0; i < outLines.length - 1; i++) {
+		const s = await r.readLine();
+		assertEquals(s, outLines[i]);
+	}
+	killServer();
 });
 
 runIfMain(import.meta);
