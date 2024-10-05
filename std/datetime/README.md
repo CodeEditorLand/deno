@@ -6,10 +6,10 @@ Simple helper to help parse date strings into `Date`, with additional functions.
 
 ### parseDate / parseDateTime
 
-- `parseDate()` - Take an input string and a format to parse the date. Supported
-  formats are exported in `DateFormat`.
-- `parseDateTime()` - Take an input string and a format to parse the dateTime.
-  Supported formats are exported in `DateTimeFormat`.
+-   `parseDate()` - Take an input string and a format to parse the date.
+    Supported formats are exported in `DateFormat`.
+-   `parseDateTime()` - Take an input string and a format to parse the dateTime.
+    Supported formats are exported in `DateTimeFormat`.
 
 ```ts
 import { parseDate, parseDateTime } from 'https://deno.land/std/datetime/mod.ts'
@@ -25,8 +25,8 @@ parseDateTime("16:34 01-03-2019", "hh:mm mm-dd-yyyy") // output : new Date(2019,
 
 ### dayOfYear / currentDayOfYear
 
-- `dayOfYear()` - Returns the number of the day in the year.
-- `currentDayOfYear()` - Returns the number of the current day in the year.
+-   `dayOfYear()` - Returns the number of the day in the year.
+-   `currentDayOfYear()` - Returns the number of the current day in the year.
 
 ```ts
 import {

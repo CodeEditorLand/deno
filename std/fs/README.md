@@ -178,10 +178,10 @@ Writes an object to a JSON file.
 
 **WriteJsonOptions**
 
-- replacer : An array of strings and numbers that acts as a approved list for
-  selecting the object properties that will be stringified.
-- space : Adds indentation, white space, and line break characters to the
-  return-value JSON text to make it easier to read.
+-   replacer : An array of strings and numbers that acts as a approved list for
+    selecting the object properties that will be stringified.
+-   space : Adds indentation, white space, and line break characters to the
+    return-value JSON text to make it easier to read.
 
 ```ts
 import { writeJson, writeJsonSync } from "https://deno.land/std/fs/mod.ts";
@@ -196,7 +196,7 @@ Read file and output it as a string.
 
 **ReadOptions**
 
-- encoding : The encoding to read file. lowercased.
+-   encoding : The encoding to read file. lowercased.
 
 ```ts
 import { readFileStr, readFileStrSync } from "https://deno.land/std/fs/mod.ts";

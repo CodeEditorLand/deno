@@ -2,10 +2,10 @@
 
 ## CSV
 
-- **`readAll(reader: BufReader, opt: ParseOptions = { comma: ",", trimLeadingSpace: false, lazyQuotes: false } ): Promise<[string[][], BufState]>`**:
-  Read the whole buffer and output the structured CSV datas
-- **`parse(csvString: string, opt: ParseOption): Promise<unknown[]>`**: See
-  [parse](###Parse)
+-   **`readAll(reader: BufReader, opt: ParseOptions = { comma: ",", trimLeadingSpace: false, lazyQuotes: false } ): Promise<[string[][], BufState]>`**:
+    Read the whole buffer and output the structured CSV datas
+-   **`parse(csvString: string, opt: ParseOption): Promise<unknown[]>`**: See
+    [parse](###Parse)
 
 ### Parse
 
@@ -15,19 +15,19 @@ Parse the CSV string with the options provided.
 
 ##### ParseOption
 
-- **`header: boolean | string[] | HeaderOption[];`**: If a boolean is provided,
-  the first line will be used as Header definitions. If `string[]` or
-  `HeaderOption[]` those names will be used for header definition.
-- **`parse?: (input: unknown) => unknown;`**: Parse function for the row, which
-  will be executed after parsing of all columns. Therefore if you don't provide
-  header and parse function with headers, input will be `string[]`.
+-   **`header: boolean | string[] | HeaderOption[];`**: If a boolean is
+    provided, the first line will be used as Header definitions. If `string[]`
+    or `HeaderOption[]` those names will be used for header definition.
+-   **`parse?: (input: unknown) => unknown;`**: Parse function for the row,
+    which will be executed after parsing of all columns. Therefore if you don't
+    provide header and parse function with headers, input will be `string[]`.
 
 ##### HeaderOption
 
-- **`name: string;`**: Name of the header to be used as property.
-- **`parse?: (input: string) => unknown;`**: Parse function for the column. This
-  is executed on each entry of the header. This can be combined with the Parse
-  function of the rows.
+-   **`name: string;`**: Name of the header to be used as property.
+-   **`parse?: (input: string) => unknown;`**: Parse function for the column.
+    This is executed on each entry of the header. This can be combined with the
+    Parse function of the rows.
 
 #### Usage
 
@@ -107,25 +107,27 @@ TypeScript side is a bit different.
 
 ### Supported types and handling
 
-- :heavy_check_mark: [Keys](https://github.com/toml-lang/toml#string)
-- :exclamation: [String](https://github.com/toml-lang/toml#string)
-- :heavy_check_mark:
-  [Multiline String](https://github.com/toml-lang/toml#string)
-- :heavy_check_mark: [Literal String](https://github.com/toml-lang/toml#string)
-- :exclamation: [Integer](https://github.com/toml-lang/toml#integer)
-- :heavy_check_mark: [Float](https://github.com/toml-lang/toml#float)
-- :heavy_check_mark: [Boolean](https://github.com/toml-lang/toml#boolean)
-- :heavy_check_mark:
-  [Offset Date-time](https://github.com/toml-lang/toml#offset-date-time)
-- :heavy_check_mark:
-  [Local Date-time](https://github.com/toml-lang/toml#local-date-time)
-- :heavy_check_mark: [Local Date](https://github.com/toml-lang/toml#local-date)
-- :exclamation: [Local Time](https://github.com/toml-lang/toml#local-time)
-- :heavy_check_mark: [Table](https://github.com/toml-lang/toml#table)
-- :heavy_check_mark:
-  [Inline Table](https://github.com/toml-lang/toml#inline-table)
-- :exclamation:
-  [Array of Tables](https://github.com/toml-lang/toml#array-of-tables)
+-   :heavy_check_mark: [Keys](https://github.com/toml-lang/toml#string)
+-   :exclamation: [String](https://github.com/toml-lang/toml#string)
+-   :heavy_check_mark:
+    [Multiline String](https://github.com/toml-lang/toml#string)
+-   :heavy_check_mark:
+    [Literal String](https://github.com/toml-lang/toml#string)
+-   :exclamation: [Integer](https://github.com/toml-lang/toml#integer)
+-   :heavy_check_mark: [Float](https://github.com/toml-lang/toml#float)
+-   :heavy_check_mark: [Boolean](https://github.com/toml-lang/toml#boolean)
+-   :heavy_check_mark:
+    [Offset Date-time](https://github.com/toml-lang/toml#offset-date-time)
+-   :heavy_check_mark:
+    [Local Date-time](https://github.com/toml-lang/toml#local-date-time)
+-   :heavy_check_mark:
+    [Local Date](https://github.com/toml-lang/toml#local-date)
+-   :exclamation: [Local Time](https://github.com/toml-lang/toml#local-time)
+-   :heavy_check_mark: [Table](https://github.com/toml-lang/toml#table)
+-   :heavy_check_mark:
+    [Inline Table](https://github.com/toml-lang/toml#inline-table)
+-   :exclamation:
+    [Array of Tables](https://github.com/toml-lang/toml#array-of-tables)
 
 :exclamation: _Supported with warnings see [Warning](#Warning)._
 
@@ -133,8 +135,8 @@ TypeScript side is a bit different.
 
 ##### String
 
-- Regex : Due to the spec, there is no flag to detect regex properly in a TOML
-  declaration. So the regex is stored as string.
+-   Regex : Due to the spec, there is no flag to detect regex properly in a TOML
+    declaration. So the regex is stored as string.
 
 ##### Integer
 
@@ -158,8 +160,7 @@ animal = { type.name = "pug" }
 animal.as.leaders = "tosin"
 ## Output { animal: { as: { leaders: "tosin" } } }
 "tosin.abasi" = "guitarist"
-## Output
-"tosin.abasi" : "guitarist"
+"tosin.abasi" : "guitarist"## Output
 ```
 
 ##### Array of Tables
@@ -184,11 +185,11 @@ will output:
 
 ```json
 {
-  "bin": [
-    { "name": "deno", "path": "cli/main.rs" },
-    { "name": "deno_core", "path": "src/foo.rs" }
-  ],
-  "nib": [{ "name": "node", "path": "not_found" }]
+	"bin": [
+		{ "name": "deno", "path": "cli/main.rs" },
+		{ "name": "deno_core", "path": "src/foo.rs" }
+	],
+	"nib": [{ "name": "node", "path": "not_found" }]
 }
 ```
 
@@ -232,8 +233,8 @@ See [`./yaml/example`](./yaml/example) folder and [js-yaml] repository.
 
 ### :warning: Limitations
 
-- `binary` type is currently not stable
-- `function`, `regexp`, and `undefined` type are currently not supported
+-   `binary` type is currently not stable
+-   `function`, `regexp`, and `undefined` type are currently not supported
 
 # Basic usage
 

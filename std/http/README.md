@@ -16,7 +16,7 @@ A small program for serving local files over HTTP
 
 ```sh
 deno --allow-net --allow-read https://deno.land/std/http/file_server.ts
-> HTTP server listening on http://0.0.0.0:4500/
+server > HTTP listening on http://0.0.0.0:4500/
 ```
 
 ## Cookie

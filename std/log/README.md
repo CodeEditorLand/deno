@@ -90,8 +90,8 @@ string and outputs it to target.
 
 `log` module comes with two built-in handlers:
 
-- `ConsoleHandler` - (default)
-- `FileHandler`
+-   `ConsoleHandler` - (default)
+-   `FileHandler`
 
 #### Custom message format
 

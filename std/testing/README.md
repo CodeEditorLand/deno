@@ -14,36 +14,37 @@ false an `AssertionError` will be thrown.
 
 Asserts are exposed in `testing/asserts.ts` module.
 
-- `equal()` - Deep comparison function, where `actual` and `expected` are
-  compared deeply, and if they vary, `equal` returns `false`.
-- `assert()` - Expects a boolean value, throws if the value is `false`.
-- `assertEquals()` - Uses the `equal` comparison and throws if the `actual` and
-  `expected` are not equal.
-- `assertNotEquals()` - Uses the `equal` comparison and throws if the `actual`
-  and `expected` are equal.
-- `assertStrictEq()` - Compares `actual` and `expected` strictly, therefore for
-  non-primitives the values must reference the same instance.
-- `assertStrContains()` - Make an assertion that `actual` contains `expected`.
-- `assertMatch()` - Make an assertion that `actual` match RegExp `expected`.
-- `assertArrayContains()` - Make an assertion that `actual` array contains the
-  `expected` values.
-- `assertThrows()` - Expects the passed `fn` to throw. If `fn` does not throw,
-  this function does. Also compares any errors thrown to an optional expected
-  `Error` class and checks that the error `.message` includes an optional
-  string.
-- `assertThrowsAsync()` - Expects the passed `fn` to be async and throw (or
-  return a `Promise` that rejects). If the `fn` does not throw or reject, this
-  function will throw asynchronously. Also compares any errors thrown to an
-  optional expected `Error` class and checks that the error `.message` includes
-  an optional string.
-- `unimplemented()` - Use this to stub out methods that will throw when invoked
-- `unreachable()` - Used to assert unreachable code
+-   `equal()` - Deep comparison function, where `actual` and `expected` are
+    compared deeply, and if they vary, `equal` returns `false`.
+-   `assert()` - Expects a boolean value, throws if the value is `false`.
+-   `assertEquals()` - Uses the `equal` comparison and throws if the `actual`
+    and `expected` are not equal.
+-   `assertNotEquals()` - Uses the `equal` comparison and throws if the `actual`
+    and `expected` are equal.
+-   `assertStrictEq()` - Compares `actual` and `expected` strictly, therefore
+    for non-primitives the values must reference the same instance.
+-   `assertStrContains()` - Make an assertion that `actual` contains `expected`.
+-   `assertMatch()` - Make an assertion that `actual` match RegExp `expected`.
+-   `assertArrayContains()` - Make an assertion that `actual` array contains the
+    `expected` values.
+-   `assertThrows()` - Expects the passed `fn` to throw. If `fn` does not throw,
+    this function does. Also compares any errors thrown to an optional expected
+    `Error` class and checks that the error `.message` includes an optional
+    string.
+-   `assertThrowsAsync()` - Expects the passed `fn` to be async and throw (or
+    return a `Promise` that rejects). If the `fn` does not throw or reject, this
+    function will throw asynchronously. Also compares any errors thrown to an
+    optional expected `Error` class and checks that the error `.message`
+    includes an optional string.
+-   `unimplemented()` - Use this to stub out methods that will throw when
+    invoked
+-   `unreachable()` - Used to assert unreachable code
 
 `runTests()` executes the declared tests. It accepts a `RunOptions` parameter:
 
-- parallel : Execute tests in a parallel way.
-- exitOnFail : if one test fails, test will throw an error and stop the tests.
-  If not all tests will be processed.
+-   parallel : Execute tests in a parallel way.
+-   exitOnFail : if one test fails, test will throw an error and stop the tests.
+    If not all tests will be processed.
 
 Basic usage:
 

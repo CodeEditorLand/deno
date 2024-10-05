@@ -1,5 +1,5 @@
-test  format
+test format
 
 ```javascript
-console.log('')
+console.log("");
 ```

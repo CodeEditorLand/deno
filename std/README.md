@@ -20,20 +20,20 @@ the future.
 
 Here are the dedicated documentations of modules:
 
-- [colors](fmt/colors.ts)
-- [datetime](datetime/README.md)
-- [encoding](encoding/README.md)
-- [examples](examples/README.md)
-- [flags](flags/README.md)
-- [fs](fs/README.md)
-- [http](http/README.md)
-- [log](log/README.md)
-- [media_types](media_types/README.md)
-- [prettier](prettier/README.md)
-- [strings](strings/README.md)
-- [testing](testing/README.md)
-- [uuid](uuid/README.md)
-- [ws](ws/README.md)
+-   [colors](fmt/colors.ts)
+-   [datetime](datetime/README.md)
+-   [encoding](encoding/README.md)
+-   [examples](examples/README.md)
+-   [flags](flags/README.md)
+-   [fs](fs/README.md)
+-   [http](http/README.md)
+-   [log](log/README.md)
+-   [media_types](media_types/README.md)
+-   [prettier](prettier/README.md)
+-   [strings](strings/README.md)
+-   [testing](testing/README.md)
+-   [uuid](uuid/README.md)
+-   [ws](ws/README.md)
 
 ## Contributing
 

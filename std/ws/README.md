@@ -142,7 +142,7 @@ Returns true if input value is a WebSocketPongEvent, false otherwise.
 
 This module is used to merge two Uint8Arrays.
 
-- note: This module might move to common/util.
+-   note: This module might move to common/util.
 
 ```ts
 import { append } from "https://deno.land/std/ws/mod.ts";
@@ -193,4 +193,4 @@ Returns base64 encoded 16 bytes string for Sec-WebSocket-Key header.
 
 Connect to WebSocket endpoint url with inputted endpoint string and headers.
 
-- note: Endpoint must be acceptable for URL.
+-   note: Endpoint must be acceptable for URL.
