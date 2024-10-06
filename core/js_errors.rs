@@ -142,11 +142,9 @@ impl V8Exception {
 		}
 		let message = String::from(message_v.as_str().unwrap());
 
-		let source_line =
-			obj.get("sourceLine").and_then(|v| v.as_str().map(String::from));
-		let script_resource_name = obj
-			.get("scriptResourceName")
-			.and_then(|v| v.as_str().map(String::from));
+		let source_line = obj.get("sourceLine").and_then(|v| v.as_str().map(String::from));
+		let script_resource_name =
+			obj.get("scriptResourceName").and_then(|v| v.as_str().map(String::from));
 		let line_number = obj.get("lineNumber").and_then(Value::as_i64);
 		let start_position = obj.get("startPosition").and_then(Value::as_i64);
 		let end_position = obj.get("endPosition").and_then(Value::as_i64);
@@ -199,8 +197,7 @@ fn format_source_loc(script_name:&str, line:i64, column:i64) -> String {
 
 fn format_stack_frame(frame:&StackFrame) -> String {
 	// Note when we print to string, we change from 0-indexed to 1-indexed.
-	let source_loc =
-		format_source_loc(&frame.script_name, frame.line, frame.column);
+	let source_loc = format_source_loc(&frame.script_name, frame.line, frame.column);
 
 	if !frame.function_name.is_empty() {
 		format!("    at {} ({})", frame.function_name, source_loc)
@@ -214,8 +211,7 @@ fn format_stack_frame(frame:&StackFrame) -> String {
 impl fmt::Display for CoreJSError {
 	fn fmt(&self, f:&mut fmt::Formatter) -> fmt::Result {
 		if self.0.script_resource_name.is_some() {
-			let script_resource_name =
-				self.0.script_resource_name.as_ref().unwrap();
+			let script_resource_name = self.0.script_resource_name.as_ref().unwrap();
 			if self.0.line_number.is_some() && self.0.start_column.is_some() {
 				assert!(self.0.line_number.is_some());
 				assert!(self.0.start_column.is_some());
@@ -318,8 +314,7 @@ mod tests {
 			Some(StackFrame {
 				line:1,
 				column:10,
-				script_name:"/Users/rld/src/deno/tests/error_001.ts"
-					.to_string(),
+				script_name:"/Users/rld/src/deno/tests/error_001.ts".to_string(),
 				function_name:"foo".to_string(),
 				is_eval:true,
 				is_constructor:false,
@@ -380,8 +375,7 @@ mod tests {
 			StackFrame {
 				line:1,
 				column:10,
-				script_name:"/Users/rld/src/deno/tests/error_001.ts"
-					.to_string(),
+				script_name:"/Users/rld/src/deno/tests/error_001.ts".to_string(),
 				function_name:"foo".to_string(),
 				is_eval:true,
 				is_constructor:false,
@@ -394,12 +388,11 @@ mod tests {
 	fn v8_exception_from_json_2() {
 		let r = V8Exception::from_json(
 			"{\"message\":\"Error: boo\",\"sourceLine\":\"throw \
-			 Error('boo');\",\"scriptResourceName\":\"a.js\",\"lineNumber\":3,\
-			 \"startPosition\":8,\"endPosition\":9,\"errorLevel\":8,\"\
-			 startColumn\":6,\"endColumn\":7,\"isSharedCrossOrigin\":false,\"\
-			 isOpaque\":false,\"frames\":[{\"line\":3,\"column\":7,\"\
-			 functionName\":\"\",\"scriptName\":\"a.js\",\"isEval\":false,\"\
-			 isConstructor\":false,\"isWasm\":false}]}",
+			 Error('boo');\",\"scriptResourceName\":\"a.js\",\"lineNumber\":3,\"startPosition\":8,\
+			 \"endPosition\":9,\"errorLevel\":8,\"startColumn\":6,\"endColumn\":7,\"\
+			 isSharedCrossOrigin\":false,\"isOpaque\":false,\"frames\":[{\"line\":3,\"column\":7,\\
+			 "functionName\":\"\",\"scriptName\":\"a.js\",\"isEval\":false,\"isConstructor\":\
+			 false,\"isWasm\":false}]}",
 		);
 		assert!(r.is_some());
 		let e = r.unwrap();
@@ -418,8 +411,8 @@ mod tests {
 	#[test]
 	fn js_error_to_string() {
 		let e = CoreJSError(error1());
-		let expected = "Error: foo bar\n    at foo (foo_bar.ts:5:17)\n    at \
-		                qat (bar_baz.ts:6:21)\n    at deno_main.js:2:2";
+		let expected = "Error: foo bar\n    at foo (foo_bar.ts:5:17)\n    at qat \
+		                (bar_baz.ts:6:21)\n    at deno_main.js:2:2";
 		assert_eq!(expected, &e.to_string());
 	}
 }

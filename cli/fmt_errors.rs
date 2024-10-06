@@ -68,16 +68,14 @@ pub fn format_maybe_source_line(
 	let line_color = colors::black_on_white(line.to_string());
 	let line_len = line.clone().len();
 	let line_padding =
-		colors::black_on_white(format!("{:indent$}", "", indent = line_len))
-			.to_string();
+		colors::black_on_white(format!("{:indent$}", "", indent = line_len)).to_string();
 	let mut s = String::new();
 	let start_column = start_column.unwrap();
 	let end_column = end_column.unwrap();
 	// TypeScript uses `~` always, but V8 would utilise `^` always, even when
 	// doing ranges, so here, if we only have one marker (very common with V8
 	// errors) we will use `^` instead.
-	let underline_char =
-		if (end_column - start_column) <= 1 { '^' } else { '~' };
+	let underline_char = if (end_column - start_column) <= 1 { '^' } else { '~' };
 	for i in 0..end_column {
 		if i >= start_column {
 			s.push(underline_char);
@@ -85,11 +83,8 @@ pub fn format_maybe_source_line(
 			s.push(' ');
 		}
 	}
-	let color_underline = if is_error {
-		colors::red(s).to_string()
-	} else {
-		colors::cyan(s).to_string()
-	};
+	let color_underline =
+		if is_error { colors::red(s).to_string() } else { colors::cyan(s).to_string() };
 
 	let indent = format!("{:indent$}", "", indent = level);
 
@@ -108,8 +103,7 @@ pub fn format_error_message(msg:String) -> String {
 fn format_stack_frame(frame:&StackFrame) -> String {
 	// Note when we print to string, we change from 0-indexed to 1-indexed.
 	let function_name = colors::italic_bold(frame.function_name.clone());
-	let source_loc =
-		format_source_name(frame.script_name.clone(), frame.line, frame.column);
+	let source_loc = format_source_name(frame.script_name.clone(), frame.line, frame.column);
 
 	if !frame.function_name.is_empty() {
 		format!("    at {} ({})", function_name, source_loc)
@@ -127,10 +121,7 @@ pub struct JSError(V8Exception);
 impl JSError {
 	pub fn new(v8_exception:V8Exception) -> Self { Self(v8_exception) }
 
-	pub fn from_json(
-		json_str:&str,
-		source_map_getter:&impl SourceMapGetter,
-	) -> ErrBox {
+	pub fn from_json(json_str:&str, source_map_getter:&impl SourceMapGetter) -> ErrBox {
 		let unmapped_exception = V8Exception::from_json(json_str).unwrap();
 		Self::from_v8_exception(unmapped_exception, source_map_getter)
 	}
@@ -139,8 +130,7 @@ impl JSError {
 		unmapped_exception:V8Exception,
 		source_map_getter:&impl SourceMapGetter,
 	) -> ErrBox {
-		let mapped_exception =
-			apply_source_map(&unmapped_exception, source_map_getter);
+		let mapped_exception = apply_source_map(&unmapped_exception, source_map_getter);
 		let js_error = Self(mapped_exception);
 		ErrBox::from(js_error)
 	}
@@ -150,11 +140,7 @@ impl DisplayFormatter for JSError {
 	fn format_category_and_code(&self) -> String { "".to_string() }
 
 	fn format_message(&self, _level:usize) -> String {
-		format!(
-			"{}{}",
-			colors::red_bold("error: ".to_string()),
-			self.0.message.clone()
-		)
+		format!("{}{}", colors::red_bold("error: ".to_string()), self.0.message.clone())
 	}
 
 	fn format_related_info(&self) -> String { "".to_string() }
@@ -178,11 +164,7 @@ impl DisplayFormatter for JSError {
 
 		format!(
 			"\n► {}",
-			format_maybe_source_name(
-				e.script_resource_name.clone(),
-				e.line_number,
-				e.start_column,
-			)
+			format_maybe_source_name(e.script_resource_name.clone(), e.line_number, e.start_column,)
 		)
 	}
 }
@@ -272,11 +254,8 @@ mod tests {
 
 	#[test]
 	fn test_format_some_source_name() {
-		let actual = format_maybe_source_name(
-			Some("file://foo/bar.ts".to_string()),
-			Some(1),
-			Some(2),
-		);
+		let actual =
+			format_maybe_source_name(Some("file://foo/bar.ts".to_string()), Some(1), Some(2));
 		assert_eq!(strip_ansi_codes(&actual), "file://foo/bar.ts:2:3");
 	}
 
@@ -296,10 +275,7 @@ mod tests {
 			true,
 			0,
 		);
-		assert_eq!(
-			strip_ansi_codes(&actual),
-			"\n\n9 console.log(\'foo\');\n          ~~~\n"
-		);
+		assert_eq!(strip_ansi_codes(&actual), "\n\n9 console.log(\'foo\');\n          ~~~\n");
 	}
 
 	#[test]

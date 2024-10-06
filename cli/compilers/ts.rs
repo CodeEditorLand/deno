@@ -29,8 +29,7 @@ use crate::{
 };
 
 lazy_static! {
-	static ref CHECK_JS_RE: Regex =
-		Regex::new(r#""checkJs"\s*?:\s*?true"#).unwrap();
+	static ref CHECK_JS_RE: Regex = Regex::new(r#""checkJs"\s*?:\s*?true"#).unwrap();
 }
 
 /// Struct which represents the state of the compiler
@@ -82,10 +81,7 @@ impl CompilerConfig {
 		// Load the contents of the configuration file
 		let config = match &config_file {
 			Some(config_file) => {
-				debug!(
-					"Attempt to load config: {}",
-					config_file.to_str().unwrap()
-				);
+				debug!("Attempt to load config: {}", config_file.to_str().unwrap());
 				let config = fs::read(&config_file)?;
 				Some(config)
 			},
@@ -106,12 +102,7 @@ impl CompilerConfig {
 			false
 		};
 
-		let ts_config = Self {
-			path:config_path,
-			content:config,
-			hash:config_hash,
-			compile_js,
-		};
+		let ts_config = Self { path:config_path, content:config, hash:config_hash, compile_js };
 
 		Ok(ts_config)
 	}
@@ -136,10 +127,8 @@ impl CompiledFileMetadata {
 			serde_json::from_str(&metadata_string);
 
 		if let Ok(metadata_json) = maybe_metadata_json {
-			let source_path =
-				metadata_json[SOURCE_PATH].as_str().map(PathBuf::from);
-			let version_hash =
-				metadata_json[VERSION_HASH].as_str().map(String::from);
+			let source_path = metadata_json[SOURCE_PATH].as_str().map(PathBuf::from);
+			let version_hash = metadata_json[VERSION_HASH].as_str().map(String::from);
 
 			if source_path.is_none() || version_hash.is_none() {
 				return None;
@@ -193,11 +182,7 @@ fn req(
 
 /// Emit a SHA256 hash based on source code, deno version and TS config.
 /// Used to check if a recompilation for source code is needed.
-pub fn source_code_version_hash(
-	source_code:&[u8],
-	version:&str,
-	config_hash:&[u8],
-) -> String {
+pub fn source_code_version_hash(source_code:&[u8], version:&str, config_hash:&[u8]) -> String {
 	crate::checksum::gen(vec![source_code, version.as_bytes(), config_hash])
 }
 
@@ -240,19 +225,14 @@ impl TsCompiler {
 	/// runtime.
 	fn setup_worker(global_state:ThreadSafeGlobalState) -> Worker {
 		let (int, ext) = ThreadSafeState::create_channels();
-		let worker_state =
-			ThreadSafeState::new(global_state.clone(), None, None, true, int)
-				.expect("Unable to create worker state");
+		let worker_state = ThreadSafeState::new(global_state.clone(), None, None, true, int)
+			.expect("Unable to create worker state");
 
 		// Count how many times we start the compiler worker.
 		global_state.metrics.compiler_starts.fetch_add(1, Ordering::SeqCst);
 
-		let mut worker = Worker::new(
-			"TS".to_string(),
-			startup_data::compiler_isolate_init(),
-			worker_state,
-			ext,
-		);
+		let mut worker =
+			Worker::new("TS".to_string(), startup_data::compiler_isolate_init(), worker_state, ext);
 		worker.execute("denoMain()").unwrap();
 		worker.execute("workerMain()").unwrap();
 		worker.execute("compilerMain()").unwrap();
@@ -268,12 +248,8 @@ impl TsCompiler {
 		debug!("Invoking the compiler to bundle. module_name: {}", module_name);
 
 		let root_names = vec![module_name.clone()];
-		let req_msg = req(
-			msg::CompilerRequestType::Bundle,
-			root_names,
-			self.config.clone(),
-			out_file,
-		);
+		let req_msg =
+			req(msg::CompilerRequestType::Bundle, root_names, self.config.clone(), out_file);
 
 		let worker = TsCompiler::setup_worker(global_state.clone());
 		let worker_ = worker.clone();
@@ -287,9 +263,7 @@ impl TsCompiler {
 			if let Some(msg) = maybe_msg {
 				let json_str = std::str::from_utf8(&msg).unwrap();
 				debug!("Message: {}", json_str);
-				if let Some(diagnostics) =
-					Diagnostic::from_emit_result(json_str)
-				{
+				if let Some(diagnostics) = Diagnostic::from_emit_result(json_str) {
 					return Err(ErrBox::from(diagnostics));
 				}
 			}
@@ -347,9 +321,7 @@ impl TsCompiler {
 
 				if metadata.version_hash == version_hash_to_validate {
 					debug!("load_cache metadata version hash match");
-					if let Ok(compiled_module) =
-						self.get_compiled_module(&source_file.url)
-					{
+					if let Ok(compiled_module) = self.get_compiled_module(&source_file.url) {
 						self.mark_compiled(&source_file.url);
 						return futures::future::ok(compiled_module).boxed();
 					}
@@ -362,23 +334,14 @@ impl TsCompiler {
 		debug!(">>>>> compile_sync START");
 		let module_url = source_file.url.clone();
 
-		debug!(
-			"Running rust part of compile_sync, module specifier: {}",
-			&source_file.url
-		);
+		debug!("Running rust part of compile_sync, module specifier: {}", &source_file.url);
 
 		let root_names = vec![module_url.to_string()];
-		let req_msg = req(
-			msg::CompilerRequestType::Compile,
-			root_names,
-			self.config.clone(),
-			None,
-		);
+		let req_msg = req(msg::CompilerRequestType::Compile, root_names, self.config.clone(), None);
 
 		let worker = TsCompiler::setup_worker(global_state.clone());
 		let worker_ = worker.clone();
-		let compiling_job =
-			global_state.progress.add("Compile", &module_url.to_string());
+		let compiling_job = global_state.progress.add("Compile", &module_url.to_string());
 		let global_state_ = global_state.clone();
 
 		async move {
@@ -389,9 +352,7 @@ impl TsCompiler {
 			if let Some(msg) = maybe_msg {
 				let json_str = std::str::from_utf8(&msg).unwrap();
 				debug!("Message: {}", json_str);
-				if let Some(diagnostics) =
-					Diagnostic::from_emit_result(json_str)
-				{
+				if let Some(diagnostics) = Diagnostic::from_emit_result(json_str) {
 					return Err(ErrBox::from(diagnostics));
 				}
 			}
@@ -410,8 +371,7 @@ impl TsCompiler {
 	pub fn get_metadata(self: &Self, url:&Url) -> Option<CompiledFileMetadata> {
 		// Try to load cached version:
 		// 1. check if there's 'meta' file
-		let cache_key =
-			self.disk_cache.get_cache_filename_with_extension(url, "meta");
+		let cache_key = self.disk_cache.get_cache_filename_with_extension(url, "meta");
 		if let Ok(metadata_bytes) = self.disk_cache.get(&cache_key) {
 			if let Ok(metadata) = std::str::from_utf8(&metadata_bytes) {
 				if let Some(read_metadata) =
@@ -425,16 +385,11 @@ impl TsCompiler {
 		None
 	}
 
-	pub fn get_compiled_module(
-		self: &Self,
-		module_url:&Url,
-	) -> Result<CompiledModule, ErrBox> {
+	pub fn get_compiled_module(self: &Self, module_url:&Url) -> Result<CompiledModule, ErrBox> {
 		let compiled_source_file = self.get_compiled_source_file(module_url)?;
 
 		let compiled_module = CompiledModule {
-			code:str::from_utf8(&compiled_source_file.source_code)
-				.unwrap()
-				.to_string(),
+			code:str::from_utf8(&compiled_source_file.source_code).unwrap().to_string(),
 			name:module_url.to_string(),
 		};
 
@@ -444,13 +399,8 @@ impl TsCompiler {
 	/// Return compiled JS file for given TS module.
 	// TODO: ideally we shouldn't construct SourceFile by hand, but it should be
 	// delegated to SourceFileFetcher
-	pub fn get_compiled_source_file(
-		self: &Self,
-		module_url:&Url,
-	) -> Result<SourceFile, ErrBox> {
-		let cache_key = self
-			.disk_cache
-			.get_cache_filename_with_extension(&module_url, "js");
+	pub fn get_compiled_source_file(self: &Self, module_url:&Url) -> Result<SourceFile, ErrBox> {
+		let cache_key = self.disk_cache.get_cache_filename_with_extension(&module_url, "js");
 		let compiled_code = self.disk_cache.get(&cache_key)?;
 		let compiled_code_filename = self.disk_cache.location.join(cache_key);
 		debug!("compiled filename: {:?}", compiled_code_filename);
@@ -491,18 +441,13 @@ impl TsCompiler {
 				&self.config.hash,
 			);
 
-			let compiled_file_metadata = CompiledFileMetadata {
-				source_path:source_file.filename.to_owned(),
-				version_hash,
-			};
-			let meta_key = self.disk_cache.get_cache_filename_with_extension(
-				module_specifier.as_url(),
-				"meta",
-			);
-			self.disk_cache.set(
-				&meta_key,
-				compiled_file_metadata.to_json_string()?.as_bytes(),
-			)
+			let compiled_file_metadata =
+				CompiledFileMetadata { source_path:source_file.filename.to_owned(), version_hash };
+			let meta_key = self
+				.disk_cache
+				.get_cache_filename_with_extension(module_specifier.as_url(), "meta");
+			self.disk_cache
+				.set(&meta_key, compiled_file_metadata.to_json_string()?.as_bytes())
 		})
 	}
 
@@ -513,10 +458,9 @@ impl TsCompiler {
 		self: &Self,
 		module_specifier:&ModuleSpecifier,
 	) -> Result<SourceFile, ErrBox> {
-		let cache_key = self.disk_cache.get_cache_filename_with_extension(
-			module_specifier.as_url(),
-			"js.map",
-		);
+		let cache_key = self
+			.disk_cache
+			.get_cache_filename_with_extension(module_specifier.as_url(), "js.map");
 		let source_code = self.disk_cache.get(&cache_key)?;
 		let source_map_filename = self.disk_cache.location.join(cache_key);
 		debug!("source map filename: {:?}", source_map_filename);
@@ -537,10 +481,9 @@ impl TsCompiler {
 		module_specifier:&ModuleSpecifier,
 		contents:&str,
 	) -> std::io::Result<()> {
-		let source_map_key = self.disk_cache.get_cache_filename_with_extension(
-			module_specifier.as_url(),
-			"js.map",
-		);
+		let source_map_key = self
+			.disk_cache
+			.get_cache_filename_with_extension(module_specifier.as_url(), "js.map");
 		self.disk_cache.set(&source_map_key, contents.as_bytes())
 	}
 
@@ -561,8 +504,7 @@ impl TsCompiler {
 
 impl SourceMapGetter for TsCompiler {
 	fn get_source_map(&self, script_name:&str) -> Option<Vec<u8>> {
-		self.try_to_resolve_and_get_source_map(script_name)
-			.map(|out| out.source_code)
+		self.try_to_resolve_and_get_source_map(script_name).map(|out| out.source_code)
 	}
 
 	fn get_source_line(&self, script_name:&str, line:usize) -> Option<String> {
@@ -578,33 +520,22 @@ impl SourceMapGetter for TsCompiler {
 
 // `SourceMapGetter` related methods
 impl TsCompiler {
-	fn try_to_resolve(
-		self: &Self,
-		script_name:&str,
-	) -> Option<ModuleSpecifier> {
+	fn try_to_resolve(self: &Self, script_name:&str) -> Option<ModuleSpecifier> {
 		// if `script_name` can't be resolved to ModuleSpecifier it's probably
 		// internal script (like `gen/cli/bundle/compiler.js`) so we won't be
 		// able to get source for it anyway
 		ModuleSpecifier::resolve_url(script_name).ok()
 	}
 
-	fn try_resolve_and_get_source_file(
-		&self,
-		script_name:&str,
-	) -> Option<SourceFile> {
+	fn try_resolve_and_get_source_file(&self, script_name:&str) -> Option<SourceFile> {
 		if let Some(module_specifier) = self.try_to_resolve(script_name) {
-			return self
-				.file_fetcher
-				.fetch_cached_source_file(&module_specifier);
+			return self.file_fetcher.fetch_cached_source_file(&module_specifier);
 		}
 
 		None
 	}
 
-	fn try_to_resolve_and_get_source_map(
-		&self,
-		script_name:&str,
-	) -> Option<SourceFile> {
+	fn try_to_resolve_and_get_source_map(&self, script_name:&str) -> Option<SourceFile> {
 		if let Some(module_specifier) = self.try_to_resolve(script_name) {
 			return match self.get_source_map_file(&module_specifier) {
 				Ok(out) => Some(out),
@@ -633,8 +564,7 @@ mod tests {
 			.unwrap()
 			.join("tests/002_hello.ts")
 			.to_owned();
-		let specifier =
-			ModuleSpecifier::resolve_url_or_path(p.to_str().unwrap()).unwrap();
+		let specifier = ModuleSpecifier::resolve_url_or_path(p.to_str().unwrap()).unwrap();
 
 		let out = SourceFile {
 			url:specifier.as_url().clone(),
@@ -643,26 +573,22 @@ mod tests {
 			source_code:include_bytes!("../tests/002_hello.ts").to_vec(),
 		};
 
-		let mock_state = ThreadSafeGlobalState::mock(vec![
-			String::from("deno"),
-			String::from("hello.js"),
-		]);
+		let mock_state =
+			ThreadSafeGlobalState::mock(vec![String::from("deno"), String::from("hello.js")]);
 
-		let fut =
-			async move {
-				let result = mock_state
-					.ts_compiler
-					.compile_async(mock_state.clone(), &out)
-					.await;
+		let fut = async move {
+			let result = mock_state.ts_compiler.compile_async(mock_state.clone(), &out).await;
 
-				assert!(result.is_ok());
-				assert!(
-					result.unwrap().code.as_bytes().starts_with(
-						"console.log(\"Hello World\");".as_bytes()
-					)
-				);
-				Ok(())
-			};
+			assert!(result.is_ok());
+			assert!(
+				result
+					.unwrap()
+					.code
+					.as_bytes()
+					.starts_with("console.log(\"Hello World\");".as_bytes())
+			);
+			Ok(())
+		};
 
 		tokio_util::run(fut.boxed())
 	}
@@ -676,9 +602,7 @@ mod tests {
 			.to_owned();
 		use deno::ModuleSpecifier;
 		let module_name =
-			ModuleSpecifier::resolve_url_or_path(p.to_str().unwrap())
-				.unwrap()
-				.to_string();
+			ModuleSpecifier::resolve_url_or_path(p.to_str().unwrap()).unwrap().to_string();
 
 		let state = ThreadSafeGlobalState::mock(vec![
 			String::from("deno"),
@@ -689,11 +613,7 @@ mod tests {
 		let fut = async move {
 			let result = state
 				.ts_compiler
-				.bundle_async(
-					state.clone(),
-					module_name,
-					Some(String::from("$deno$/bundle.js")),
-				)
+				.bundle_async(state.clone(), module_name, Some(String::from("$deno$/bundle.js")))
 				.await;
 
 			assert!(result.is_ok());
@@ -721,11 +641,7 @@ mod tests {
 		// Different config should result in different hash.
 		assert_eq!(
 			"195eaf104a591d1d7f69fc169c60a41959c2b7a21373cd23a8f675f877ec385f",
-			source_code_version_hash(
-				b"1",
-				"0.4.0",
-				b"{\"compilerOptions\": {}}"
-			)
+			source_code_version_hash(b"1", "0.4.0", b"{\"compilerOptions\": {}}")
 		);
 	}
 

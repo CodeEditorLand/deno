@@ -11,13 +11,7 @@ use std::{
 use deno::{ErrBox, ModuleSpecifier};
 
 use crate::{
-	compilers::{
-		CompiledModule,
-		JsCompiler,
-		JsonCompiler,
-		TsCompiler,
-		WasmCompiler,
-	},
+	compilers::{CompiledModule, JsCompiler, JsonCompiler, TsCompiler, WasmCompiler},
 	deno_dir,
 	deno_error::permission_denied,
 	file_fetcher::SourceFileFetcher,
@@ -65,10 +59,7 @@ impl Deref for ThreadSafeGlobalState {
 }
 
 impl ThreadSafeGlobalState {
-	pub fn new(
-		flags:flags::DenoFlags,
-		progress:Progress,
-	) -> Result<Self, ErrBox> {
+	pub fn new(flags:flags::DenoFlags, progress:Progress) -> Result<Self, ErrBox> {
 		let custom_root = env::var("DENO_DIR").map(String::into).ok();
 		let dir = deno_dir::DenoDir::new(custom_root)?;
 
@@ -128,25 +119,16 @@ impl ThreadSafeGlobalState {
 		let state1 = self.clone();
 		let state2 = self.clone();
 
-		let source_file = self
-			.file_fetcher
-			.fetch_source_file_async(&module_specifier, maybe_referrer);
+		let source_file =
+			self.file_fetcher.fetch_source_file_async(&module_specifier, maybe_referrer);
 
 		async move {
 			let out = source_file.await?;
 			let compiled_module = match out.media_type {
-				msg::MediaType::Unknown => {
-					state1.js_compiler.compile_async(&out)
-				},
-				msg::MediaType::Json => {
-					state1.json_compiler.compile_async(&out)
-				},
-				msg::MediaType::Wasm => {
-					state1.wasm_compiler.compile_async(state1.clone(), &out)
-				},
-				msg::MediaType::TypeScript
-				| msg::MediaType::TSX
-				| msg::MediaType::JSX => {
+				msg::MediaType::Unknown => state1.js_compiler.compile_async(&out),
+				msg::MediaType::Json => state1.json_compiler.compile_async(&out),
+				msg::MediaType::Wasm => state1.wasm_compiler.compile_async(state1.clone(), &out),
+				msg::MediaType::TypeScript | msg::MediaType::TSX | msg::MediaType::JSX => {
 					state1.ts_compiler.compile_async(state1.clone(), &out)
 				},
 				msg::MediaType::JavaScript => {
@@ -192,9 +174,7 @@ impl ThreadSafeGlobalState {
 	}
 
 	#[inline]
-	pub fn check_env(&self) -> Result<(), ErrBox> {
-		self.permissions.check_env()
-	}
+	pub fn check_env(&self) -> Result<(), ErrBox> { self.permissions.check_env() }
 
 	#[inline]
 	pub fn check_net(&self, hostname:&str, port:u16) -> Result<(), ErrBox> {
@@ -207,14 +187,9 @@ impl ThreadSafeGlobalState {
 	}
 
 	#[inline]
-	pub fn check_run(&self) -> Result<(), ErrBox> {
-		self.permissions.check_run()
-	}
+	pub fn check_run(&self) -> Result<(), ErrBox> { self.permissions.check_run() }
 
-	pub fn check_dyn_import(
-		self: &Self,
-		module_specifier:&ModuleSpecifier,
-	) -> Result<(), ErrBox> {
+	pub fn check_dyn_import(self: &Self, module_specifier:&ModuleSpecifier) -> Result<(), ErrBox> {
 		let u = module_specifier.as_url();
 		match u.scheme() {
 			"http" | "https" => {
@@ -222,12 +197,7 @@ impl ThreadSafeGlobalState {
 				Ok(())
 			},
 			"file" => {
-				let filename = u
-					.to_file_path()
-					.unwrap()
-					.into_os_string()
-					.into_string()
-					.unwrap();
+				let filename = u.to_file_path().unwrap().into_os_string().into_string().unwrap();
 				self.check_read(&filename)?;
 				Ok(())
 			},

@@ -10,11 +10,7 @@ use rustyline::error::ReadlineError;
 use url;
 
 pub use crate::msg::ErrorKind;
-use crate::{
-	diagnostics::Diagnostic,
-	fmt_errors::JSError,
-	import_map::ImportMapError,
-};
+use crate::{diagnostics::Diagnostic, fmt_errors::JSError, import_map::ImportMapError};
 
 #[derive(Debug)]
 pub struct DenoError {
@@ -45,9 +41,7 @@ impl DenoError {
 impl Error for DenoError {}
 
 impl fmt::Display for DenoError {
-	fn fmt(&self, f:&mut fmt::Formatter<'_>) -> fmt::Result {
-		f.pad(self.msg.as_str())
-	}
+	fn fmt(&self, f:&mut fmt::Formatter<'_>) -> fmt::Result { f.pad(self.msg.as_str()) }
 }
 
 #[derive(Debug)]
@@ -59,9 +53,7 @@ impl fmt::Display for StaticError {
 	fn fmt(&self, f:&mut fmt::Formatter<'_>) -> fmt::Result { f.pad(self.1) }
 }
 
-pub fn bad_resource() -> ErrBox {
-	StaticError(ErrorKind::BadResource, "bad resource id").into()
-}
+pub fn bad_resource() -> ErrBox { StaticError(ErrorKind::BadResource, "bad resource id").into() }
 
 pub fn permission_denied() -> ErrBox {
 	StaticError(ErrorKind::PermissionDenied, "permission denied").into()
@@ -80,13 +72,11 @@ pub fn no_buffer_specified() -> ErrBox {
 }
 
 pub fn no_async_support() -> ErrBox {
-	StaticError(ErrorKind::NoAsyncSupport, "op doesn't support async calls")
-		.into()
+	StaticError(ErrorKind::NoAsyncSupport, "op doesn't support async calls").into()
 }
 
 pub fn no_sync_support() -> ErrBox {
-	StaticError(ErrorKind::NoSyncSupport, "op doesn't support sync calls")
-		.into()
+	StaticError(ErrorKind::NoSyncSupport, "op doesn't support sync calls").into()
 }
 
 pub fn invalid_address_syntax() -> ErrBox {
@@ -97,9 +87,7 @@ pub fn too_many_redirects() -> ErrBox {
 	StaticError(ErrorKind::TooManyRedirects, "too many redirects").into()
 }
 
-pub fn type_error(msg:String) -> ErrBox {
-	DenoError::new(ErrorKind::TypeError, msg).into()
-}
+pub fn type_error(msg:String) -> ErrBox { DenoError::new(ErrorKind::TypeError, msg).into() }
 
 pub trait GetErrorKind {
 	fn kind(&self) -> ErrorKind;
@@ -191,9 +179,7 @@ impl GetErrorKind for url::ParseError {
 			InvalidIpv6Address => ErrorKind::InvalidIpv6Address,
 			InvalidPort => ErrorKind::InvalidPort,
 			Overflow => ErrorKind::Overflow,
-			RelativeUrlWithCannotBeABaseBase => {
-				ErrorKind::RelativeUrlWithCannotBeABaseBase
-			},
+			RelativeUrlWithCannotBeABaseBase => ErrorKind::RelativeUrlWithCannotBeABaseBase,
 			RelativeUrlWithoutBase => ErrorKind::RelativeUrlWithoutBase,
 			SetHostOnCannotBeABaseUrl => ErrorKind::SetHostOnCannotBeABaseUrl,
 		}
@@ -218,19 +204,11 @@ impl GetErrorKind for reqwest::Error {
 
 		match self.get_ref() {
 			Some(err_ref) => {
-				None.or_else(|| {
-					err_ref.downcast_ref::<hyper::Error>().map(Get::kind)
-				})
-				.or_else(|| {
-					err_ref.downcast_ref::<url::ParseError>().map(Get::kind)
-				})
-				.or_else(|| err_ref.downcast_ref::<io::Error>().map(Get::kind))
-				.or_else(|| {
-					err_ref
-						.downcast_ref::<serde_json::error::Error>()
-						.map(Get::kind)
-				})
-				.unwrap_or_else(|| ErrorKind::HttpOther)
+				None.or_else(|| err_ref.downcast_ref::<hyper::Error>().map(Get::kind))
+					.or_else(|| err_ref.downcast_ref::<url::ParseError>().map(Get::kind))
+					.or_else(|| err_ref.downcast_ref::<io::Error>().map(Get::kind))
+					.or_else(|| err_ref.downcast_ref::<serde_json::error::Error>().map(Get::kind))
+					.unwrap_or_else(|| ErrorKind::HttpOther)
 			},
 			_ => ErrorKind::HttpOther,
 		}
@@ -315,17 +293,13 @@ impl GetErrorKind for dyn AnyError {
 			.or_else(|| self.downcast_ref::<ImportMapError>().map(Get::kind))
 			.or_else(|| self.downcast_ref::<io::Error>().map(Get::kind))
 			.or_else(|| self.downcast_ref::<JSError>().map(Get::kind))
-			.or_else(|| {
-				self.downcast_ref::<ModuleResolutionError>().map(Get::kind)
-			})
+			.or_else(|| self.downcast_ref::<ModuleResolutionError>().map(Get::kind))
 			.or_else(|| self.downcast_ref::<StaticError>().map(Get::kind))
 			.or_else(|| self.downcast_ref::<uri::InvalidUri>().map(Get::kind))
 			.or_else(|| self.downcast_ref::<url::ParseError>().map(Get::kind))
 			.or_else(|| self.downcast_ref::<VarError>().map(Get::kind))
 			.or_else(|| self.downcast_ref::<ReadlineError>().map(Get::kind))
-			.or_else(|| {
-				self.downcast_ref::<serde_json::error::Error>().map(Get::kind)
-			})
+			.or_else(|| self.downcast_ref::<serde_json::error::Error>().map(Get::kind))
 			.or_else(|| self.downcast_ref::<DlopenError>().map(Get::kind))
 			.or_else(|| unix_error_kind(self))
 			.unwrap_or_else(|| {
@@ -399,9 +373,7 @@ mod tests {
 					end_position:Some(273),
 					source_line:Some("  values: o => [".to_string()),
 					line_number:Some(18),
-					script_resource_name:Some(
-						"deno/tests/complex_diagnostics.ts".to_string(),
-					),
+					script_resource_name:Some("deno/tests/complex_diagnostics.ts".to_string()),
 					start_column:Some(2),
 					end_column:Some(8),
 					related_information:None,
@@ -434,8 +406,7 @@ mod tests {
 
 	#[test]
 	fn test_simple_error() {
-		let err =
-			ErrBox::from(DenoError::new(ErrorKind::NoError, "foo".to_string()));
+		let err = ErrBox::from(DenoError::new(ErrorKind::NoError, "foo".to_string()));
 		assert_eq!(err.kind(), ErrorKind::NoError);
 		assert_eq!(err.to_string(), "foo");
 	}
@@ -462,9 +433,8 @@ mod tests {
 		assert_eq!(err.kind(), ErrorKind::Diagnostic);
 		assert_eq!(
 			strip_ansi_codes(&err.to_string()),
-			"error TS2322: Example 1\n\n► \
-			 deno/tests/complex_diagnostics.ts:19:3\n\n19   values: o => [\n     \
-			 ~~~~~~\n\nerror TS2000: Example 2\n\n► /foo/bar.ts:129:3\n\n129   \
+			"error TS2322: Example 1\n\n► deno/tests/complex_diagnostics.ts:19:3\n\n19   values: \
+			 o => [\n     ~~~~~~\n\nerror TS2000: Example 2\n\n► /foo/bar.ts:129:3\n\n129   \
 			 values: undefined,\n      ~~~~~~\n\n\nFound 2 errors.\n"
 		);
 	}
@@ -503,9 +473,7 @@ mod tests {
 
 	#[test]
 	fn test_permission_denied_msg() {
-		let err = permission_denied_msg(
-			"run again with the --allow-net flag".to_string(),
-		);
+		let err = permission_denied_msg("run again with the --allow-net flag".to_string());
 		assert_eq!(err.kind(), ErrorKind::PermissionDenied);
 		assert_eq!(err.to_string(), "run again with the --allow-net flag");
 	}

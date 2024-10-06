@@ -33,8 +33,7 @@ impl fmt::Display for ModuleResolutionError {
 			},
 			ImportPrefixMissing(ref specifier, ref maybe_referrer) => {
 				let msg = format!(
-					"relative import path \"{}\" not prefixed with / or ./ or \
-					 ../",
+					"relative import path \"{}\" not prefixed with / or ./ or ../",
 					specifier
 				);
 				let msg = if let Some(referrer) = maybe_referrer {
@@ -67,29 +66,24 @@ impl ModuleSpecifier {
 		base:&str,
 	) -> Result<ModuleSpecifier, ModuleResolutionError> {
 		let url = match Url::parse(specifier) {
-			// 1. Apply the URL parser to specifier. If the result is not
-			//    failure, return he result.
+			// 1. Apply the URL parser to specifier. If the result is not failure, return he result.
 			Ok(url) => url,
 
-			// 2. If specifier does not start with the character U+002F SOLIDUS
-			//    (/), the two-character sequence U+002E FULL STOP, U+002F
-			//    SOLIDUS (./), or the three-character sequence U+002E FULL
-			//    STOP, U+002E FULL STOP, U+002F SOLIDUS (../), return failure.
+			// 2. If specifier does not start with the character U+002F SOLIDUS (/), the
+			//    two-character sequence U+002E FULL STOP, U+002F SOLIDUS (./), or the
+			//    three-character sequence U+002E FULL STOP, U+002E FULL STOP, U+002F SOLIDUS (../),
+			//    return failure.
 			Err(ParseError::RelativeUrlWithoutBase)
 				if !(specifier.starts_with('/')
 					|| specifier.starts_with("./")
 					|| specifier.starts_with("../")) =>
 			{
-				let maybe_referrer =
-					if base.is_empty() { None } else { Some(base.to_string()) };
-				return Err(ImportPrefixMissing(
-					specifier.to_string(),
-					maybe_referrer,
-				));
+				let maybe_referrer = if base.is_empty() { None } else { Some(base.to_string()) };
+				return Err(ImportPrefixMissing(specifier.to_string(), maybe_referrer));
 			},
 
-			// 3. Return the result of applying the URL parser to specifier with
-			//    base URL as the base URL.
+			// 3. Return the result of applying the URL parser to specifier with base URL as the
+			//    base URL.
 			Err(ParseError::RelativeUrlWithoutBase) => {
 				let base = if ModuleSpecifier::is_dummy_specifier(base) {
 					// Handle <unknown> case, happening under e.g. repl.
@@ -118,9 +112,7 @@ impl ModuleSpecifier {
 	}
 
 	/// Converts a string representing an absulute URL into a ModuleSpecifier.
-	pub fn resolve_url(
-		url_str:&str,
-	) -> Result<ModuleSpecifier, ModuleResolutionError> {
+	pub fn resolve_url(url_str:&str) -> Result<ModuleSpecifier, ModuleResolutionError> {
 		Url::parse(url_str)
 			.map(ModuleSpecifier)
 			.map_err(ModuleResolutionError::InvalidUrl)
@@ -132,9 +124,7 @@ impl ModuleSpecifier {
 	/// e.g. 'http:' or 'file:' or 'git+ssh:'. If not, it's interpreted as a
 	/// file path; if it is a relative path it's resolved relative to the
 	/// current working directory.
-	pub fn resolve_url_or_path(
-		specifier:&str,
-	) -> Result<ModuleSpecifier, ModuleResolutionError> {
+	pub fn resolve_url_or_path(specifier:&str) -> Result<ModuleSpecifier, ModuleResolutionError> {
 		if Self::specifier_has_uri_scheme(specifier) {
 			Self::resolve_url(specifier)
 		} else {
@@ -145,9 +135,7 @@ impl ModuleSpecifier {
 	/// Converts a string representing a relative or absolute path into a
 	/// ModuleSpecifier. A relative path is considered relative to the current
 	/// working directory.
-	fn resolve_path(
-		path_str:&str,
-	) -> Result<ModuleSpecifier, ModuleResolutionError> {
+	fn resolve_path(path_str:&str) -> Result<ModuleSpecifier, ModuleResolutionError> {
 		let path = current_dir().unwrap().join(path_str);
 		Url::from_file_path(path.clone())
 			.map(ModuleSpecifier)
@@ -176,9 +164,7 @@ impl ModuleSpecifier {
 		// plus sign, minus sign, or dot.
 		loop {
 			match chars.next() {
-				Some(c) if c.is_ascii_alphanumeric() || "+-.".contains(c) => {
-					len += 1
-				},
+				Some(c) if c.is_ascii_alphanumeric() || "+-.".contains(c) => len += 1,
 				Some(':') if len >= 2 => return true,
 				_ => return false,
 			}
@@ -270,9 +256,7 @@ mod tests {
 		];
 
 		for (specifier, base, expected_url) in tests {
-			let url = ModuleSpecifier::resolve_import(specifier, base)
-				.unwrap()
-				.to_string();
+			let url = ModuleSpecifier::resolve_import(specifier, base).unwrap().to_string();
 			assert_eq!(url, expected_url);
 		}
 	}
@@ -288,10 +272,7 @@ mod tests {
 				"http://deno.land/core/tests/006_url_imports.ts",
 				ImportPrefixMissing(
 					"005_more_imports.ts".to_string(),
-					Some(
-						"http://deno.land/core/tests/006_url_imports.ts"
-							.to_string(),
-					),
+					Some("http://deno.land/core/tests/006_url_imports.ts".to_string()),
 				),
 			),
 			(
@@ -299,10 +280,7 @@ mod tests {
 				"http://deno.land/core/tests/006_url_imports.ts",
 				ImportPrefixMissing(
 					".tomato".to_string(),
-					Some(
-						"http://deno.land/core/tests/006_url_imports.ts"
-							.to_string(),
-					),
+					Some("http://deno.land/core/tests/006_url_imports.ts".to_string()),
 				),
 			),
 			(
@@ -310,10 +288,7 @@ mod tests {
 				"http://deno.land/core/tests/006_url_imports.ts",
 				ImportPrefixMissing(
 					"..zucchini.mjs".to_string(),
-					Some(
-						"http://deno.land/core/tests/006_url_imports.ts"
-							.to_string(),
-					),
+					Some("http://deno.land/core/tests/006_url_imports.ts".to_string()),
 				),
 			),
 			(
@@ -321,10 +296,7 @@ mod tests {
 				"http://deno.land/core/tests/006_url_imports.ts",
 				ImportPrefixMissing(
 					r".\yam.es".to_string(),
-					Some(
-						"http://deno.land/core/tests/006_url_imports.ts"
-							.to_string(),
-					),
+					Some("http://deno.land/core/tests/006_url_imports.ts".to_string()),
 				),
 			),
 			(
@@ -332,10 +304,7 @@ mod tests {
 				"http://deno.land/core/tests/006_url_imports.ts",
 				ImportPrefixMissing(
 					r"..\yam.es".to_string(),
-					Some(
-						"http://deno.land/core/tests/006_url_imports.ts"
-							.to_string(),
-					),
+					Some("http://deno.land/core/tests/006_url_imports.ts".to_string()),
 				),
 			),
 			(
@@ -348,16 +317,11 @@ mod tests {
 				"http://deno.land/core/tests/006_url_imports.ts",
 				InvalidUrl(EmptyHost),
 			),
-			(
-				"./foo.ts",
-				"/relative/base/url",
-				InvalidBaseUrl(RelativeUrlWithoutBase),
-			),
+			("./foo.ts", "/relative/base/url", InvalidBaseUrl(RelativeUrlWithoutBase)),
 		];
 
 		for (specifier, base, expected_err) in tests {
-			let err =
-				ModuleSpecifier::resolve_import(specifier, base).unwrap_err();
+			let err = ModuleSpecifier::resolve_import(specifier, base).unwrap_err();
 			assert_eq!(err, expected_err);
 		}
 	}
@@ -386,10 +350,7 @@ mod tests {
 			tests.extend(vec![
 				(r"C:/deno/tests/006_url_imports.ts", expected_url.to_string()),
 				(r"C:\deno\tests\006_url_imports.ts", expected_url.to_string()),
-				(
-					r"\\?\C:\deno\tests\006_url_imports.ts",
-					expected_url.to_string(),
-				),
+				(r"\\?\C:\deno\tests\006_url_imports.ts", expected_url.to_string()),
 				// Not supported: `Url::from_file_path()` fails.
 				// (r"\\.\C:\deno\tests\006_url_imports.ts",
 				// expected_url.to_string()), Not supported:
@@ -399,20 +360,16 @@ mod tests {
 			]);
 
 			// Rooted local path without drive letter.
-			let expected_url = format!(
-				"file:///{}:/deno/tests/006_url_imports.ts",
-				cwd_str.get(..1).unwrap(),
-			);
+			let expected_url =
+				format!("file:///{}:/deno/tests/006_url_imports.ts", cwd_str.get(..1).unwrap(),);
 			tests.extend(vec![
 				(r"/deno/tests/006_url_imports.ts", expected_url.to_string()),
 				(r"\deno\tests\006_url_imports.ts", expected_url.to_string()),
 			]);
 
 			// Relative local path.
-			let expected_url = format!(
-				"file:///{}/tests/006_url_imports.ts",
-				cwd_str.replace("\\", "/")
-			);
+			let expected_url =
+				format!("file:///{}/tests/006_url_imports.ts", cwd_str.replace("\\", "/"));
 			tests.extend(vec![
 				(r"tests/006_url_imports.ts", expected_url.to_string()),
 				(r"tests\006_url_imports.ts", expected_url.to_string()),
@@ -438,8 +395,7 @@ mod tests {
 			]);
 
 			// Relative local path.
-			let expected_url =
-				format!("file://{}/tests/006_url_imports.ts", cwd_str);
+			let expected_url = format!("file://{}/tests/006_url_imports.ts", cwd_str);
 			tests.extend(vec![
 				("tests/006_url_imports.ts", expected_url.to_string()),
 				("./tests/006_url_imports.ts", expected_url.to_string()),
@@ -447,9 +403,7 @@ mod tests {
 		}
 
 		for (specifier, expected_url) in tests {
-			let url = ModuleSpecifier::resolve_url_or_path(specifier)
-				.unwrap()
-				.to_string();
+			let url = ModuleSpecifier::resolve_url_or_path(specifier).unwrap().to_string();
 			assert_eq!(url, expected_url);
 		}
 	}
@@ -469,8 +423,7 @@ mod tests {
 		}
 
 		for (specifier, expected_err) in tests {
-			let err =
-				ModuleSpecifier::resolve_url_or_path(specifier).unwrap_err();
+			let err = ModuleSpecifier::resolve_url_or_path(specifier).unwrap_err();
 			assert_eq!(err, expected_err);
 		}
 	}

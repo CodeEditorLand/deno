@@ -5,18 +5,9 @@ use super::dispatch_json::{Deserialize, JsonOp, Value};
 use crate::{deno_error::type_error, ops::json_op, state::ThreadSafeState};
 
 pub fn init(i:&mut Isolate, s:&ThreadSafeState) {
-	i.register_op(
-		"query_permission",
-		s.core_op(json_op(s.stateful_op(op_query_permission))),
-	);
-	i.register_op(
-		"revoke_permission",
-		s.core_op(json_op(s.stateful_op(op_revoke_permission))),
-	);
-	i.register_op(
-		"request_permission",
-		s.core_op(json_op(s.stateful_op(op_request_permission))),
-	);
+	i.register_op("query_permission", s.core_op(json_op(s.stateful_op(op_query_permission))));
+	i.register_op("revoke_permission", s.core_op(json_op(s.stateful_op(op_revoke_permission))));
+	i.register_op("request_permission", s.core_op(json_op(s.stateful_op(op_request_permission))));
 }
 
 #[derive(Deserialize)]
@@ -75,17 +66,9 @@ pub fn op_request_permission(
 	let mut permissions = state.permissions.lock().unwrap();
 	let perm = match args.name.as_ref() {
 		"run" => Ok(permissions.request_run()),
-		"read" => {
-			Ok(permissions
-				.request_read(&args.path.as_ref().map(String::as_str)))
-		},
-		"write" => {
-			Ok(permissions
-				.request_write(&args.path.as_ref().map(String::as_str)))
-		},
-		"net" => {
-			permissions.request_net(&args.url.as_ref().map(String::as_str))
-		},
+		"read" => Ok(permissions.request_read(&args.path.as_ref().map(String::as_str))),
+		"write" => Ok(permissions.request_write(&args.path.as_ref().map(String::as_str))),
+		"net" => permissions.request_net(&args.url.as_ref().map(String::as_str)),
 		"env" => Ok(permissions.request_env()),
 		"plugin" => Ok(permissions.request_plugin()),
 		"hrtime" => Ok(permissions.request_hrtime()),

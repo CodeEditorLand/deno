@@ -18,10 +18,7 @@ use futures::{
 };
 use tokio::{self, net::TcpStream};
 use tokio_process;
-use tokio_rustls::{
-	client::TlsStream as ClientTlsStream,
-	server::TlsStream as ServerTlsStream,
-};
+use tokio_rustls::{client::TlsStream as ClientTlsStream, server::TlsStream as ServerTlsStream};
 
 use super::dispatch_minimal::MinimalOp;
 use crate::{
@@ -57,21 +54,14 @@ lazy_static! {
 }
 
 pub fn init(i:&mut Isolate, s:&ThreadSafeState) {
-	i.register_op(
-		"read",
-		s.core_op(minimal_op(s.stateful_minimal_op(op_read))),
-	);
-	i.register_op(
-		"write",
-		s.core_op(minimal_op(s.stateful_minimal_op(op_write))),
-	);
+	i.register_op("read", s.core_op(minimal_op(s.stateful_minimal_op(op_read))));
+	i.register_op("write", s.core_op(minimal_op(s.stateful_minimal_op(op_write))));
 }
 
 pub fn get_stdio() -> (StreamResource, StreamResource, StreamResource) {
 	let stdin = StreamResource::Stdin(tokio::io::stdin());
 	let stdout = StreamResource::Stdout({
-		let stdout =
-			STDOUT_HANDLE.try_clone().expect("Unable to clone stdout handle");
+		let stdout = STDOUT_HANDLE.try_clone().expect("Unable to clone stdout handle");
 		tokio::fs::File::from_std(stdout)
 	});
 	let stderr = StreamResource::Stderr(tokio::io::stderr());
@@ -113,28 +103,14 @@ impl DenoAsyncRead for StreamResource {
 	) -> Poll<Result<usize, ErrBox>> {
 		let inner = self.get_mut();
 		let mut f:Box<dyn AsyncRead + Unpin> = match inner {
-			StreamResource::FsFile(f) => {
-				Box::new(AsyncRead01CompatExt::compat(f))
-			},
-			StreamResource::Stdin(f) => {
-				Box::new(AsyncRead01CompatExt::compat(f))
-			},
-			StreamResource::TcpStream(f) => {
-				Box::new(AsyncRead01CompatExt::compat(f))
-			},
-			StreamResource::ClientTlsStream(f) => {
-				Box::new(AsyncRead01CompatExt::compat(f))
-			},
-			StreamResource::ServerTlsStream(f) => {
-				Box::new(AsyncRead01CompatExt::compat(f))
-			},
+			StreamResource::FsFile(f) => Box::new(AsyncRead01CompatExt::compat(f)),
+			StreamResource::Stdin(f) => Box::new(AsyncRead01CompatExt::compat(f)),
+			StreamResource::TcpStream(f) => Box::new(AsyncRead01CompatExt::compat(f)),
+			StreamResource::ClientTlsStream(f) => Box::new(AsyncRead01CompatExt::compat(f)),
+			StreamResource::ServerTlsStream(f) => Box::new(AsyncRead01CompatExt::compat(f)),
 			StreamResource::HttpBody(f) => Box::new(f),
-			StreamResource::ChildStdout(f) => {
-				Box::new(AsyncRead01CompatExt::compat(f))
-			},
-			StreamResource::ChildStderr(f) => {
-				Box::new(AsyncRead01CompatExt::compat(f))
-			},
+			StreamResource::ChildStdout(f) => Box::new(AsyncRead01CompatExt::compat(f)),
+			StreamResource::ChildStderr(f) => Box::new(AsyncRead01CompatExt::compat(f)),
 			_ => {
 				return Poll::Ready(Err(bad_resource()));
 			},
@@ -191,18 +167,13 @@ where
 		}
 
 		let mut table = inner.state.lock_resource_table();
-		let resource = table
-			.get_mut::<StreamResource>(inner.rid)
-			.ok_or_else(bad_resource)?;
-		let nread = match DenoAsyncRead::poll_read(
-			Pin::new(resource),
-			cx,
-			&mut inner.buf.as_mut()[..],
-		) {
-			Poll::Ready(Ok(v)) => v,
-			Poll::Ready(Err(err)) => return Poll::Ready(Err(err)),
-			Poll::Pending => return Poll::Pending,
-		};
+		let resource = table.get_mut::<StreamResource>(inner.rid).ok_or_else(bad_resource)?;
+		let nread =
+			match DenoAsyncRead::poll_read(Pin::new(resource), cx, &mut inner.buf.as_mut()[..]) {
+				Poll::Ready(Ok(v)) => v,
+				Poll::Ready(Err(err)) => return Poll::Ready(Err(err)),
+				Poll::Pending => return Poll::Pending,
+			};
 		inner.io_state = IoState::Done;
 		Poll::Ready(Ok(nread as i32))
 	}
@@ -216,8 +187,7 @@ pub fn op_read(
 	debug!("read rid={}", rid);
 	let zero_copy = match zero_copy {
 		None => {
-			return futures::future::err(deno_error::no_buffer_specified())
-				.boxed();
+			return futures::future::err(deno_error::no_buffer_specified()).boxed();
 		},
 		Some(buf) => buf,
 	};
@@ -230,47 +200,22 @@ pub fn op_read(
 /// `DenoAsyncWrite` is the same as the `tokio_io::AsyncWrite` trait
 /// but uses an `ErrBox` error instead of `std::io:Error`
 pub trait DenoAsyncWrite {
-	fn poll_write(
-		self: Pin<&mut Self>,
-		cx:&mut Context,
-		buf:&[u8],
-	) -> Poll<Result<usize, ErrBox>>;
+	fn poll_write(self: Pin<&mut Self>, cx:&mut Context, buf:&[u8]) -> Poll<Result<usize, ErrBox>>;
 
-	fn poll_close(
-		self: Pin<&mut Self>,
-		cx:&mut Context,
-	) -> Poll<Result<(), ErrBox>>;
+	fn poll_close(self: Pin<&mut Self>, cx:&mut Context) -> Poll<Result<(), ErrBox>>;
 }
 
 impl DenoAsyncWrite for StreamResource {
-	fn poll_write(
-		self: Pin<&mut Self>,
-		cx:&mut Context,
-		buf:&[u8],
-	) -> Poll<Result<usize, ErrBox>> {
+	fn poll_write(self: Pin<&mut Self>, cx:&mut Context, buf:&[u8]) -> Poll<Result<usize, ErrBox>> {
 		let inner = self.get_mut();
 		let mut f:Box<dyn AsyncWrite + Unpin> = match inner {
-			StreamResource::FsFile(f) => {
-				Box::new(AsyncWrite01CompatExt::compat(f))
-			},
-			StreamResource::Stdout(f) => {
-				Box::new(AsyncWrite01CompatExt::compat(f))
-			},
-			StreamResource::Stderr(f) => {
-				Box::new(AsyncWrite01CompatExt::compat(f))
-			},
-			StreamResource::TcpStream(f) => {
-				Box::new(AsyncWrite01CompatExt::compat(f))
-			},
-			StreamResource::ClientTlsStream(f) => {
-				Box::new(AsyncWrite01CompatExt::compat(f))
-			},
-			StreamResource::ServerTlsStream(f) => {
-				Box::new(AsyncWrite01CompatExt::compat(f))
-			},
-			StreamResource::ChildStdin(f) => {
-				Box::new(AsyncWrite01CompatExt::compat(f))
-			},
+			StreamResource::FsFile(f) => Box::new(AsyncWrite01CompatExt::compat(f)),
+			StreamResource::Stdout(f) => Box::new(AsyncWrite01CompatExt::compat(f)),
+			StreamResource::Stderr(f) => Box::new(AsyncWrite01CompatExt::compat(f)),
+			StreamResource::TcpStream(f) => Box::new(AsyncWrite01CompatExt::compat(f)),
+			StreamResource::ClientTlsStream(f) => Box::new(AsyncWrite01CompatExt::compat(f)),
+			StreamResource::ServerTlsStream(f) => Box::new(AsyncWrite01CompatExt::compat(f)),
+			StreamResource::ChildStdin(f) => Box::new(AsyncWrite01CompatExt::compat(f)),
 			_ => {
 				return Poll::Ready(Err(bad_resource()));
 			},
@@ -285,10 +230,7 @@ impl DenoAsyncWrite for StreamResource {
 		}
 	}
 
-	fn poll_close(
-		self: Pin<&mut Self>,
-		_cx:&mut Context,
-	) -> Poll<Result<(), ErrBox>> {
+	fn poll_close(self: Pin<&mut Self>, _cx:&mut Context) -> Poll<Result<(), ErrBox>> {
 		unimplemented!()
 	}
 }
@@ -327,14 +269,9 @@ where
 		}
 
 		let mut table = inner.state.lock_resource_table();
-		let resource = table
-			.get_mut::<StreamResource>(inner.rid)
-			.ok_or_else(bad_resource)?;
-		let nwritten = match DenoAsyncWrite::poll_write(
-			Pin::new(resource),
-			cx,
-			inner.buf.as_ref(),
-		) {
+		let resource = table.get_mut::<StreamResource>(inner.rid).ok_or_else(bad_resource)?;
+		let nwritten = match DenoAsyncWrite::poll_write(Pin::new(resource), cx, inner.buf.as_ref())
+		{
 			Poll::Ready(Ok(v)) => v,
 			Poll::Ready(Err(err)) => return Poll::Ready(Err(err)),
 			Poll::Pending => return Poll::Pending,
@@ -352,8 +289,7 @@ pub fn op_write(
 	debug!("write rid={}", rid);
 	let zero_copy = match zero_copy {
 		None => {
-			return futures::future::err(deno_error::no_buffer_specified())
-				.boxed();
+			return futures::future::err(deno_error::no_buffer_specified()).boxed();
 		},
 		Some(buf) => buf,
 	};

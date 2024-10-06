@@ -38,8 +38,7 @@ impl SourceMap {
 								if !map["sources"].is_array() {
 									return None;
 								}
-								let sources_val =
-									map["sources"].as_array().unwrap();
+								let sources_val = map["sources"].as_array().unwrap();
 								let mut sources = Vec::<String>::new();
 
 								for source_val in sources_val {
@@ -84,10 +83,7 @@ fn builtin_source_map(script_name:&str) -> Option<Vec<u8>> {
 /// Apply a source map to a V8Exception, returning a V8Exception where the
 /// filenames, the lines and the columns point to their original source
 /// location, not their transpiled location if applicable.
-pub fn apply_source_map<G:SourceMapGetter>(
-	v8_exception:&V8Exception,
-	getter:&G,
-) -> V8Exception {
+pub fn apply_source_map<G:SourceMapGetter>(v8_exception:&V8Exception, getter:&G) -> V8Exception {
 	let mut mappings_map:CachedMaps = HashMap::new();
 
 	let mut frames = Vec::<StackFrame>::new();
@@ -96,14 +92,13 @@ pub fn apply_source_map<G:SourceMapGetter>(
 		frames.push(f);
 	}
 
-	let (script_resource_name, line_number, start_column) =
-		get_maybe_orig_position(
-			v8_exception.script_resource_name.clone(),
-			v8_exception.line_number,
-			v8_exception.start_column,
-			&mut mappings_map,
-			getter,
-		);
+	let (script_resource_name, line_number, start_column) = get_maybe_orig_position(
+		v8_exception.script_resource_name.clone(),
+		v8_exception.line_number,
+		v8_exception.start_column,
+		&mut mappings_map,
+		getter,
+	);
 	// It is better to just move end_column to be the same distance away from
 	// start column because sometimes the code point is not available in the
 	// source file map.
@@ -120,14 +115,8 @@ pub fn apply_source_map<G:SourceMapGetter>(
 	// if there is a source line that we might be different in the source file,
 	// we will go fetch it from the getter
 	let source_line = match line_number {
-		Some(ln)
-			if v8_exception.source_line.is_some()
-				&& script_resource_name.is_some() =>
-		{
-			getter.get_source_line(
-				&v8_exception.script_resource_name.clone().unwrap(),
-				ln as usize,
-			)
+		Some(ln) if v8_exception.source_line.is_some() && script_resource_name.is_some() => {
+			getter.get_source_line(&v8_exception.script_resource_name.clone().unwrap(), ln as usize)
 		},
 		_ => v8_exception.source_line.clone(),
 	};
@@ -181,13 +170,8 @@ fn get_maybe_orig_position<G:SourceMapGetter>(
 ) -> (Option<String>, Option<i64>, Option<i64>) {
 	match (script_name, line, column) {
 		(Some(script_name_v), Some(line_v), Some(column_v)) => {
-			let (script_name, line, column) = get_orig_position(
-				script_name_v,
-				line_v - 1,
-				column_v,
-				mappings_map,
-				getter,
-			);
+			let (script_name, line, column) =
+				get_orig_position(script_name_v, line_v - 1, column_v, mappings_map, getter);
 			(Some(script_name), Some(line), Some(column))
 		},
 		_ => (None, None, None),
@@ -207,18 +191,13 @@ pub fn get_orig_position<G:SourceMapGetter>(
 	match maybe_sm {
 		None => default_pos,
 		Some(sm) => {
-			match sm.mappings.original_location_for(
-				line as u32,
-				column as u32,
-				Bias::default(),
-			) {
+			match sm.mappings.original_location_for(line as u32, column as u32, Bias::default()) {
 				None => default_pos,
 				Some(mapping) => {
 					match &mapping.original {
 						None => default_pos,
 						Some(original) => {
-							let orig_source =
-								sm.sources[original.source as usize].clone();
+							let orig_source = sm.sources[original.source as usize].clone();
 							(
 								orig_source,
 								i64::from(original.original_line),
@@ -244,15 +223,10 @@ fn get_mappings<'a, G:SourceMapGetter>(
 
 // TODO(kitsonk) parsed source maps should probably be cached in state in
 // the module meta data.
-fn parse_map_string<G:SourceMapGetter>(
-	script_name:&str,
-	getter:&G,
-) -> Option<SourceMap> {
+fn parse_map_string<G:SourceMapGetter>(script_name:&str, getter:&G) -> Option<SourceMap> {
 	builtin_source_map(script_name)
 		.or_else(|| getter.get_source_map(script_name))
-		.and_then(|raw_source_map| {
-			SourceMap::from_json(str::from_utf8(&raw_source_map).unwrap())
-		})
+		.and_then(|raw_source_map| SourceMap::from_json(str::from_utf8(&raw_source_map).unwrap()))
 }
 
 #[cfg(test)]
@@ -275,11 +249,7 @@ mod tests {
 			Some(s.as_bytes().to_owned())
 		}
 
-		fn get_source_line(
-			&self,
-			script_name:&str,
-			line:usize,
-		) -> Option<String> {
+		fn get_source_line(&self, script_name:&str, line:usize) -> Option<String> {
 			let s = match script_name {
 				"foo_bar.ts" => {
 					vec![
@@ -442,12 +412,8 @@ mod tests {
 		let json = r#"{"version":3,"file":"error_001.js","sourceRoot":"","sources":["file:///Users/rld/src/deno/tests/error_001.ts"],"names":[],"mappings":"AAAA,SAAS,GAAG;IACV,MAAM,KAAK,CAAC,KAAK,CAAC,CAAC;AACrB,CAAC;AAED,SAAS,GAAG;IACV,GAAG,EAAE,CAAC;AACR,CAAC;AAED,GAAG,EAAE,CAAC"}"#;
 		let sm = SourceMap::from_json(json).unwrap();
 		assert_eq!(sm.sources.len(), 1);
-		assert_eq!(
-			sm.sources[0],
-			"file:///Users/rld/src/deno/tests/error_001.ts"
-		);
-		let mapping =
-			sm.mappings.original_location_for(1, 10, Bias::default()).unwrap();
+		assert_eq!(sm.sources[0], "file:///Users/rld/src/deno/tests/error_001.ts");
+		let mapping = sm.mappings.original_location_for(1, 10, Bias::default()).unwrap();
 		assert_eq!(mapping.generated_line, 1);
 		assert_eq!(mapping.generated_column, 10);
 		assert_eq!(

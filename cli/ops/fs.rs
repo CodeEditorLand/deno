@@ -31,10 +31,7 @@ pub fn init(i:&mut Isolate, s:&ThreadSafeState) {
 	i.register_op("symlink", s.core_op(json_op(s.stateful_op(op_symlink))));
 	i.register_op("read_link", s.core_op(json_op(s.stateful_op(op_read_link))));
 	i.register_op("truncate", s.core_op(json_op(s.stateful_op(op_truncate))));
-	i.register_op(
-		"make_temp_dir",
-		s.core_op(json_op(s.stateful_op(op_make_temp_dir))),
-	);
+	i.register_op("make_temp_dir", s.core_op(json_op(s.stateful_op(op_make_temp_dir))));
 	i.register_op("cwd", s.core_op(json_op(s.stateful_op(op_cwd))));
 	i.register_op("utime", s.core_op(json_op(s.stateful_op(op_utime))));
 }
@@ -204,11 +201,7 @@ fn op_copy_file(
 		// See https://github.com/rust-lang/rust/issues/54800
 		// Once the issue is reolved, we should remove this workaround.
 		if cfg!(unix) && !from.is_file() {
-			return Err(DenoError::new(
-				ErrorKind::NotFound,
-				"File not found".to_string(),
-			)
-			.into());
+			return Err(DenoError::new(ErrorKind::NotFound, "File not found".to_string()).into());
 		}
 
 		fs::copy(&from, &to)?;
@@ -247,8 +240,7 @@ fn op_stat(
 ) -> Result<JsonOp, ErrBox> {
 	let args:StatArgs = serde_json::from_value(args)?;
 
-	let (filename, filename_) =
-		deno_fs::resolve_from_cwd(args.filename.as_ref())?;
+	let (filename, filename_) = deno_fs::resolve_from_cwd(args.filename.as_ref())?;
 	let lstat = args.lstat;
 
 	state.check_read(&filename_)?;
@@ -256,11 +248,8 @@ fn op_stat(
 	let is_sync = args.promise_id.is_none();
 	blocking_json(is_sync, move || {
 		debug!("op_stat {} {}", filename.display(), lstat);
-		let metadata = if lstat {
-			fs::symlink_metadata(&filename)?
-		} else {
-			fs::metadata(&filename)?
-		};
+		let metadata =
+			if lstat { fs::symlink_metadata(&filename)? } else { fs::metadata(&filename)? };
 
 		Ok(json!({
 		  "isFile": metadata.is_file(),
@@ -297,8 +286,7 @@ fn op_realpath(
 		// corresponds to the realpath on Unix and
 		// CreateFile and GetFinalPathNameByHandle on Windows
 		let realpath = fs::canonicalize(&path)?;
-		let mut realpath_str =
-			realpath.to_str().unwrap().to_owned().replace("\\", "/");
+		let mut realpath_str = realpath.to_str().unwrap().to_owned().replace("\\", "/");
 		if cfg!(windows) {
 			realpath_str = realpath_str.trim_start_matches("//?/").to_string();
 		}
@@ -425,18 +413,13 @@ fn op_symlink(
 ) -> Result<JsonOp, ErrBox> {
 	let args:SymlinkArgs = serde_json::from_value(args)?;
 
-	let (oldname, _oldname_) =
-		deno_fs::resolve_from_cwd(args.oldname.as_ref())?;
+	let (oldname, _oldname_) = deno_fs::resolve_from_cwd(args.oldname.as_ref())?;
 	let (newname, newname_) = deno_fs::resolve_from_cwd(args.newname.as_ref())?;
 
 	state.check_write(&newname_)?;
 	// TODO Use type for Windows.
 	if cfg!(windows) {
-		return Err(DenoError::new(
-			ErrorKind::Other,
-			"Not implemented".to_string(),
-		)
-		.into());
+		return Err(DenoError::new(ErrorKind::Other, "Not implemented".to_string()).into());
 	}
 	let is_sync = args.promise_id.is_none();
 	blocking_json(is_sync, move || {

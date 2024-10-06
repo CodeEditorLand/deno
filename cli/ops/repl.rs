@@ -4,23 +4,11 @@ use std::sync::{Arc, Mutex};
 use deno::{Resource, *};
 
 use super::dispatch_json::{blocking_json, Deserialize, JsonOp, Value};
-use crate::{
-	deno_error::bad_resource,
-	ops::json_op,
-	repl,
-	repl::Repl,
-	state::ThreadSafeState,
-};
+use crate::{deno_error::bad_resource, ops::json_op, repl, repl::Repl, state::ThreadSafeState};
 
 pub fn init(i:&mut Isolate, s:&ThreadSafeState) {
-	i.register_op(
-		"repl_start",
-		s.core_op(json_op(s.stateful_op(op_repl_start))),
-	);
-	i.register_op(
-		"repl_readline",
-		s.core_op(json_op(s.stateful_op(op_repl_readline))),
-	);
+	i.register_op("repl_start", s.core_op(json_op(s.stateful_op(op_repl_start))));
+	i.register_op("repl_readline", s.core_op(json_op(s.stateful_op(op_repl_readline))));
 }
 
 struct ReplResource(Arc<Mutex<Repl>>);
@@ -41,8 +29,7 @@ fn op_repl_start(
 	let args:ReplStartArgs = serde_json::from_value(args)?;
 
 	debug!("op_repl_start {}", args.history_file);
-	let history_path =
-		repl::history_path(&state.global_state.dir, &args.history_file);
+	let history_path = repl::history_path(&state.global_state.dir, &args.history_file);
 	let repl = repl::Repl::new(history_path);
 	let resource = ReplResource(Arc::new(Mutex::new(repl)));
 	let mut table = state.lock_resource_table();
@@ -69,8 +56,7 @@ fn op_repl_readline(
 
 	blocking_json(false, move || {
 		let table = state.lock_resource_table();
-		let resource =
-			table.get::<ReplResource>(rid).ok_or_else(bad_resource)?;
+		let resource = table.get::<ReplResource>(rid).ok_or_else(bad_resource)?;
 		let repl = resource.0.clone();
 		let line = repl.lock().unwrap().readline(&prompt)?;
 		Ok(json!(line))

@@ -11,15 +11,7 @@ use std::{
 };
 
 pub use deno::v8_set_flags;
-use deno::{
-	js_check,
-	CoreOp,
-	ErrBox,
-	Isolate,
-	ModuleSpecifier,
-	PinnedBuf,
-	StartupData,
-};
+use deno::{js_check, CoreOp, ErrBox, Isolate, ModuleSpecifier, PinnedBuf, StartupData};
 pub use ops::EmitResult;
 use ops::WrittenFile;
 
@@ -81,18 +73,9 @@ impl TSIsolate {
 			written_files:Vec::new(),
 		}));
 
-		isolate.register_op(
-			"readFile",
-			compiler_op(state.clone(), ops::json_op(ops::read_file)),
-		);
-		isolate.register_op(
-			"exit",
-			compiler_op(state.clone(), ops::json_op(ops::exit)),
-		);
-		isolate.register_op(
-			"writeFile",
-			compiler_op(state.clone(), ops::json_op(ops::write_file)),
-		);
+		isolate.register_op("readFile", compiler_op(state.clone(), ops::json_op(ops::read_file)));
+		isolate.register_op("exit", compiler_op(state.clone(), ops::json_op(ops::exit)));
+		isolate.register_op("writeFile", compiler_op(state.clone(), ops::json_op(ops::write_file)));
 		isolate.register_op(
 			"resolveModuleNames",
 			compiler_op(state.clone(), ops::json_op(ops::resolve_module_names)),
@@ -116,11 +99,7 @@ impl TSIsolate {
 		root_names:Vec<String>,
 	) -> Result<Arc<Mutex<TSState>>, ErrBox> {
 		let root_names_json = serde_json::json!(root_names).to_string();
-		let source = &format!(
-			"main({:?}, {})",
-			config_json.to_string(),
-			root_names_json
-		);
+		let source = &format!("main({:?}, {})", config_json.to_string(), root_names_json);
 		self.isolate.execute("<anon>", source)?;
 		Ok(self.state.clone())
 	}
@@ -159,8 +138,7 @@ pub fn compile_bundle(
 			}
 
 			let module_specifier =
-				ModuleSpecifier::resolve_url_or_path(&p.to_string_lossy())
-					.unwrap();
+				ModuleSpecifier::resolve_url_or_path(&p.to_string_lossy()).unwrap();
 			module_specifier.as_str().to_string()
 		})
 		.collect();
@@ -182,10 +160,7 @@ fn print_source_code(code:&str) {
 }
 
 /// Create a V8 snapshot.
-pub fn mksnapshot_bundle(
-	bundle:&Path,
-	state:Arc<Mutex<TSState>>,
-) -> Result<(), ErrBox> {
+pub fn mksnapshot_bundle(bundle:&Path, state:Arc<Mutex<TSState>>) -> Result<(), ErrBox> {
 	let mut runtime_isolate = Isolate::new(StartupData::None, true);
 	let source_code_vec = std::fs::read(bundle)?;
 	let source_code = std::str::from_utf8(&source_code_vec)?;
@@ -194,9 +169,7 @@ pub fn mksnapshot_bundle(
 	js_check(runtime_isolate.execute(&bundle.to_string_lossy(), &source_code));
 
 	let main = state.lock().unwrap().main_module_name();
-	js_check(
-		runtime_isolate.execute("anon", &format!("instantiate('{}')", main)),
-	);
+	js_check(runtime_isolate.execute("anon", &format!("instantiate('{}')", main)));
 
 	write_snapshot(runtime_isolate, bundle)?;
 
@@ -205,10 +178,7 @@ pub fn mksnapshot_bundle(
 
 /// Create a V8 snapshot. This differs from mksnapshot_bundle in that is also
 /// runs typescript.js
-pub fn mksnapshot_bundle_ts(
-	bundle:&Path,
-	state:Arc<Mutex<TSState>>,
-) -> Result<(), ErrBox> {
+pub fn mksnapshot_bundle_ts(bundle:&Path, state:Arc<Mutex<TSState>>) -> Result<(), ErrBox> {
 	let mut runtime_isolate = Isolate::new(StartupData::None, true);
 	let source_code_vec = std::fs::read(bundle)?;
 	let source_code = std::str::from_utf8(&source_code_vec)?;
@@ -218,9 +188,7 @@ pub fn mksnapshot_bundle_ts(
 	js_check(runtime_isolate.execute(&bundle.to_string_lossy(), &source_code));
 
 	let main = state.lock().unwrap().main_module_name();
-	js_check(
-		runtime_isolate.execute("anon", &format!("instantiate('{}')", main)),
-	);
+	js_check(runtime_isolate.execute("anon", &format!("instantiate('{}')", main)));
 
 	write_snapshot(runtime_isolate, bundle)?;
 
@@ -230,9 +198,8 @@ pub fn mksnapshot_bundle_ts(
 fn write_snapshot(runtime_isolate:Isolate, bundle:&Path) -> Result<(), ErrBox> {
 	println!("creating snapshot...");
 	let snapshot = runtime_isolate.snapshot()?;
-	let snapshot_slice = unsafe {
-		std::slice::from_raw_parts(snapshot.data_ptr, snapshot.data_len)
-	};
+	let snapshot_slice =
+		unsafe { std::slice::from_raw_parts(snapshot.data_ptr, snapshot.data_len) };
 	println!("snapshot bytes {}", snapshot_slice.len());
 
 	let snapshot_path = bundle.with_extension("bin");
@@ -246,13 +213,7 @@ fn write_snapshot(runtime_isolate:Isolate, bundle:&Path) -> Result<(), ErrBox> {
 pub fn get_asset2(name:&str) -> Result<&'static str, ErrBox> {
 	match get_asset(name) {
 		Some(a) => Ok(a),
-		None => {
-			Err(std::io::Error::new(
-				std::io::ErrorKind::NotFound,
-				"Asset not found",
-			)
-			.into())
-		},
+		None => Err(std::io::Error::new(std::io::ErrorKind::NotFound, "Asset not found").into()),
 	}
 }
 
@@ -324,9 +285,6 @@ pub fn get_asset(name:&str) -> Option<&'static str> {
 /// Sets the --trace-serializer V8 flag for debugging snapshots.
 pub fn trace_serializer() {
 	let dummy = "foo".to_string();
-	let r = deno::v8_set_flags(vec![
-		dummy.clone(),
-		"--trace-serializer".to_string(),
-	]);
+	let r = deno::v8_set_flags(vec![dummy.clone(), "--trace-serializer".to_string()]);
 	assert_eq!(r, vec![dummy]);
 }

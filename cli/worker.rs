@@ -43,8 +43,7 @@ impl Worker {
 		state:ThreadSafeState,
 		external_channels:WorkerChannels,
 	) -> Self {
-		let isolate =
-			Arc::new(Mutex::new(deno::Isolate::new(startup_data, false)));
+		let isolate = Arc::new(Mutex::new(deno::Isolate::new(startup_data, false)));
 		{
 			let mut i = isolate.lock().unwrap();
 			let op_registry = i.op_registry.clone();
@@ -81,19 +80,11 @@ impl Worker {
 
 			let global_state_ = state.global_state.clone();
 			i.set_js_error_create(move |v8_exception| {
-				JSError::from_v8_exception(
-					v8_exception,
-					&global_state_.ts_compiler,
-				)
+				JSError::from_v8_exception(v8_exception, &global_state_.ts_compiler)
 			})
 		}
 
-		Self {
-			name,
-			isolate,
-			state,
-			external_channels:Arc::new(Mutex::new(external_channels)),
-		}
+		Self { name, isolate, state, external_channels:Arc::new(Mutex::new(external_channels)) }
 	}
 
 	/// Same as execute2() but the filename defaults to "$CWD/__anonymous__".
@@ -105,11 +96,7 @@ impl Worker {
 
 	/// Executes the provided JavaScript source code. The js_filename argument
 	/// is provided only for debugging purposes.
-	pub fn execute2(
-		&mut self,
-		js_filename:&str,
-		js_source:&str,
-	) -> Result<(), ErrBox> {
+	pub fn execute2(&mut self, js_filename:&str, js_source:&str) -> Result<(), ErrBox> {
 		let mut isolate = self.isolate.lock().unwrap();
 		isolate.execute(js_filename, js_source)
 	}
@@ -125,12 +112,8 @@ impl Worker {
 		let loader = self.state.clone();
 		let isolate = self.isolate.clone();
 		let modules = self.state.modules.clone();
-		let recursive_load = RecursiveLoad::main(
-			&module_specifier.to_string(),
-			maybe_code,
-			loader,
-			modules,
-		);
+		let recursive_load =
+			RecursiveLoad::main(&module_specifier.to_string(), maybe_code, loader, modules);
 
 		async move {
 			let id = recursive_load.get_future(isolate).await?;
@@ -148,10 +131,7 @@ impl Worker {
 	/// Post message to worker as a host.
 	///
 	/// This method blocks current thread.
-	pub fn post_message(
-		self: &Self,
-		buf:Buf,
-	) -> impl Future<Output = Result<(), ErrBox>> {
+	pub fn post_message(self: &Self, buf:Buf) -> impl Future<Output = Result<(), ErrBox>> {
 		let channels = self.external_channels.lock().unwrap();
 		let mut sender = channels.sender.clone();
 		async move {
@@ -237,8 +217,7 @@ mod tests {
 			.unwrap()
 			.join("tests/esm_imports_a.js")
 			.to_owned();
-		let module_specifier =
-			ModuleSpecifier::resolve_url_or_path(&p.to_string_lossy()).unwrap();
+		let module_specifier = ModuleSpecifier::resolve_url_or_path(&p.to_string_lossy()).unwrap();
 		let global_state = ThreadSafeGlobalState::new(
 			flags::DenoFlags {
 				argv:vec![String::from("./deno"), module_specifier.to_string()],
@@ -248,20 +227,13 @@ mod tests {
 		)
 		.unwrap();
 		let (int, ext) = ThreadSafeState::create_channels();
-		let state = ThreadSafeState::new(
-			global_state,
-			None,
-			Some(module_specifier.clone()),
-			true,
-			int,
-		)
-		.unwrap();
+		let state =
+			ThreadSafeState::new(global_state, None, Some(module_specifier.clone()), true, int)
+				.unwrap();
 		let state_ = state.clone();
 		tokio_util::run(async move {
-			let mut worker =
-				Worker::new("TEST".to_string(), StartupData::None, state, ext);
-			let result =
-				worker.execute_mod_async(&module_specifier, None, false).await;
+			let mut worker = Worker::new("TEST".to_string(), StartupData::None, state, ext);
+			let result = worker.execute_mod_async(&module_specifier, None, false).await;
 			if let Err(err) = result {
 				eprintln!("execute_mod err {:?}", err);
 			}
@@ -281,8 +253,7 @@ mod tests {
 			.unwrap()
 			.join("tests/circular1.ts")
 			.to_owned();
-		let module_specifier =
-			ModuleSpecifier::resolve_url_or_path(&p.to_string_lossy()).unwrap();
+		let module_specifier = ModuleSpecifier::resolve_url_or_path(&p.to_string_lossy()).unwrap();
 		let global_state = ThreadSafeGlobalState::new(
 			flags::DenoFlags {
 				argv:vec![String::from("deno"), module_specifier.to_string()],
@@ -292,20 +263,13 @@ mod tests {
 		)
 		.unwrap();
 		let (int, ext) = ThreadSafeState::create_channels();
-		let state = ThreadSafeState::new(
-			global_state,
-			None,
-			Some(module_specifier.clone()),
-			true,
-			int,
-		)
-		.unwrap();
+		let state =
+			ThreadSafeState::new(global_state, None, Some(module_specifier.clone()), true, int)
+				.unwrap();
 		let state_ = state.clone();
 		tokio_util::run(async move {
-			let mut worker =
-				Worker::new("TEST".to_string(), StartupData::None, state, ext);
-			let result =
-				worker.execute_mod_async(&module_specifier, None, false).await;
+			let mut worker = Worker::new("TEST".to_string(), StartupData::None, state, ext);
+			let result = worker.execute_mod_async(&module_specifier, None, false).await;
 			if let Err(err) = result {
 				eprintln!("execute_mod err {:?}", err);
 			}
@@ -327,13 +291,11 @@ mod tests {
 			.unwrap()
 			.join("cli/tests/006_url_imports.ts")
 			.to_owned();
-		let module_specifier =
-			ModuleSpecifier::resolve_url_or_path(&p.to_string_lossy()).unwrap();
+		let module_specifier = ModuleSpecifier::resolve_url_or_path(&p.to_string_lossy()).unwrap();
 		let mut flags = flags::DenoFlags::default();
 		flags.argv = vec![String::from("deno"), module_specifier.to_string()];
 		flags.reload = true;
-		let global_state =
-			ThreadSafeGlobalState::new(flags, Progress::new()).unwrap();
+		let global_state = ThreadSafeGlobalState::new(flags, Progress::new()).unwrap();
 		let (int, ext) = ThreadSafeState::create_channels();
 		let state = ThreadSafeState::new(
 			global_state.clone(),
@@ -346,15 +308,10 @@ mod tests {
 		let global_state_ = global_state.clone();
 		let state_ = state.clone();
 		tokio_util::run(async move {
-			let mut worker = Worker::new(
-				"TEST".to_string(),
-				startup_data::deno_isolate_init(),
-				state,
-				ext,
-			);
+			let mut worker =
+				Worker::new("TEST".to_string(), startup_data::deno_isolate_init(), state, ext);
 			worker.execute("denoMain()").unwrap();
-			let result =
-				worker.execute_mod_async(&module_specifier, None, false).await;
+			let result = worker.execute_mod_async(&module_specifier, None, false).await;
 
 			if let Err(err) = result {
 				eprintln!("execute_mod err {:?}", err);
@@ -364,25 +321,16 @@ mod tests {
 
 		assert_eq!(state_.metrics.resolve_count.load(Ordering::SeqCst), 3);
 		// Check that we've only invoked the compiler once.
-		assert_eq!(
-			global_state_.metrics.compiler_starts.load(Ordering::SeqCst),
-			1
-		);
+		assert_eq!(global_state_.metrics.compiler_starts.load(Ordering::SeqCst), 1);
 		drop(http_server_guard);
 	}
 
 	fn create_test_worker() -> Worker {
 		let (int, ext) = ThreadSafeState::create_channels();
-		let state = ThreadSafeState::mock(
-			vec![String::from("./deno"), String::from("hello.js")],
-			int,
-		);
-		let mut worker = Worker::new(
-			"TEST".to_string(),
-			startup_data::deno_isolate_init(),
-			state,
-			ext,
-		);
+		let state =
+			ThreadSafeState::mock(vec![String::from("./deno"), String::from("hello.js")], int);
+		let mut worker =
+			Worker::new("TEST".to_string(), startup_data::deno_isolate_init(), state, ext);
 		worker.execute("denoMain()").unwrap();
 		worker.execute("workerMain()").unwrap();
 		worker
@@ -417,8 +365,7 @@ mod tests {
 
 			tokio::spawn(fut.boxed().compat());
 
-			let msg =
-				json!("hi").to_string().into_boxed_str().into_boxed_bytes();
+			let msg = json!("hi").to_string().into_boxed_str().into_boxed_bytes();
 
 			let r = block_on(worker_.post_message(msg));
 			assert!(r.is_ok());
@@ -428,8 +375,7 @@ mod tests {
 			// Check if message received is [1, 2, 3] in json
 			assert_eq!(*maybe_msg.unwrap(), *b"[1,2,3]");
 
-			let msg =
-				json!("exit").to_string().into_boxed_str().into_boxed_bytes();
+			let msg = json!("exit").to_string().into_boxed_str().into_boxed_bytes();
 			let r = block_on(worker_.post_message(msg));
 			assert!(r.is_ok());
 		})
@@ -439,9 +385,7 @@ mod tests {
 	fn removed_from_resource_table_on_close() {
 		run_in_task(|| {
 			let mut worker = create_test_worker();
-			worker
-				.execute("onmessage = () => { delete window.onmessage; }")
-				.unwrap();
+			worker.execute("onmessage = () => { delete window.onmessage; }").unwrap();
 
 			let worker_ = worker.clone();
 			let worker_future = worker
@@ -453,14 +397,9 @@ mod tests {
 				.shared();
 
 			let worker_future_ = worker_future.clone();
-			tokio::spawn(
-				worker_future_
-					.then(|_:Result<(), ()>| futures::future::ok(()))
-					.compat(),
-			);
+			tokio::spawn(worker_future_.then(|_:Result<(), ()>| futures::future::ok(())).compat());
 
-			let msg =
-				json!("hi").to_string().into_boxed_str().into_boxed_bytes();
+			let msg = json!("hi").to_string().into_boxed_str().into_boxed_bytes();
 			let r = block_on(worker_.post_message(msg));
 			assert!(r.is_ok());
 
@@ -474,13 +413,8 @@ mod tests {
 			// "foo" is not a valid module specifier so this should return an
 			// error.
 			let mut worker = create_test_worker();
-			let module_specifier =
-				ModuleSpecifier::resolve_url_or_path("does-not-exist").unwrap();
-			let result = block_on(worker.execute_mod_async(
-				&module_specifier,
-				None,
-				false,
-			));
+			let module_specifier = ModuleSpecifier::resolve_url_or_path("does-not-exist").unwrap();
+			let result = block_on(worker.execute_mod_async(&module_specifier, None, false));
 			assert!(result.is_err());
 		})
 	}
@@ -497,13 +431,8 @@ mod tests {
 				.join("tests/002_hello.ts")
 				.to_owned();
 			let module_specifier =
-				ModuleSpecifier::resolve_url_or_path(&p.to_string_lossy())
-					.unwrap();
-			let result = block_on(worker.execute_mod_async(
-				&module_specifier,
-				None,
-				false,
-			));
+				ModuleSpecifier::resolve_url_or_path(&p.to_string_lossy()).unwrap();
+			let result = block_on(worker.execute_mod_async(&module_specifier, None, false));
 			assert!(result.is_ok());
 		})
 	}

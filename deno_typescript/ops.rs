@@ -46,8 +46,7 @@ pub fn read_file(_s:&mut TSState, v:Value) -> Result<Value, ErrBox> {
 		(asset, source_code)
 	} else {
 		assert!(!v.file_name.starts_with("$assets$"), "you meant $asset$");
-		let module_specifier =
-			ModuleSpecifier::resolve_url_or_path(&v.file_name)?;
+		let module_specifier = ModuleSpecifier::resolve_url_or_path(&v.file_name)?;
 		let path = module_specifier.as_url().to_file_path().unwrap();
 		println!("cargo:rerun-if-changed={}", path.display());
 		(module_specifier.as_str().to_string(), std::fs::read_to_string(&path)?)
@@ -95,8 +94,7 @@ pub fn resolve_module_names(_s:&mut TSState, v:Value) -> Result<Value, ErrBox> {
 		if specifier.starts_with("$asset$/") {
 			resolved.push(specifier.clone());
 		} else {
-			let ms =
-				ModuleSpecifier::resolve_import(&specifier, referrer.as_str())?;
+			let ms = ModuleSpecifier::resolve_import(&specifier, referrer.as_str())?;
 			resolved.push(ms.as_str().to_string());
 		}
 	}

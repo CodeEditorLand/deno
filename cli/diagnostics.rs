@@ -7,11 +7,7 @@ use serde_json::{self, value::Value};
 
 use crate::{
 	colors,
-	fmt_errors::{
-		format_maybe_source_line,
-		format_maybe_source_name,
-		DisplayFormatter,
-	},
+	fmt_errors::{format_maybe_source_line, format_maybe_source_name, DisplayFormatter},
 };
 
 #[derive(Debug, PartialEq, Clone)]
@@ -120,21 +116,15 @@ impl DiagnosticItem {
 		let obj = v.as_object().unwrap();
 
 		// required attributes
-		let message = obj
-			.get("message")
-			.and_then(|v| v.as_str().map(String::from))
-			.unwrap();
-		let category = DiagnosticCategory::from(
-			obj.get("category").and_then(Value::as_i64).unwrap(),
-		);
+		let message = obj.get("message").and_then(|v| v.as_str().map(String::from)).unwrap();
+		let category =
+			DiagnosticCategory::from(obj.get("category").and_then(Value::as_i64).unwrap());
 		let code = obj.get("code").and_then(Value::as_i64).unwrap();
 
 		// optional attributes
-		let source_line =
-			obj.get("sourceLine").and_then(|v| v.as_str().map(String::from));
-		let script_resource_name = obj
-			.get("scriptResourceName")
-			.and_then(|v| v.as_str().map(String::from));
+		let source_line = obj.get("sourceLine").and_then(|v| v.as_str().map(String::from));
+		let script_resource_name =
+			obj.get("scriptResourceName").and_then(|v| v.as_str().map(String::from));
 		let line_number = obj.get("lineNumber").and_then(Value::as_i64);
 		let start_position = obj.get("startPosition").and_then(Value::as_i64);
 		let end_position = obj.get("endPosition").and_then(Value::as_i64);
@@ -154,8 +144,7 @@ impl DiagnosticItem {
 				let related_info_values = r.as_array().unwrap();
 
 				for related_info_v in related_info_values {
-					related_information
-						.push(DiagnosticItem::from_json_value(related_info_v));
+					related_information.push(DiagnosticItem::from_json_value(related_info_v));
 				}
 
 				Some(related_information)
@@ -192,8 +181,7 @@ impl DisplayFormatter for DiagnosticItem {
 			_ => "".to_string(),
 		};
 
-		let code =
-			colors::bold(format!(" TS{}", self.code.to_string())).to_string();
+		let code = colors::bold(format!(" TS{}", self.code.to_string())).to_string();
 
 		format!("{}{}: ", category, code)
 	}
@@ -278,14 +266,10 @@ pub struct DiagnosticMessageChain {
 impl DiagnosticMessageChain {
 	fn from_value(v:&serde_json::Value) -> Self {
 		let obj = v.as_object().unwrap();
-		let message = obj
-			.get("message")
-			.and_then(|v| v.as_str().map(String::from))
-			.unwrap();
+		let message = obj.get("message").and_then(|v| v.as_str().map(String::from)).unwrap();
 		let code = obj.get("code").and_then(Value::as_i64).unwrap();
-		let category = DiagnosticCategory::from(
-			obj.get("category").and_then(Value::as_i64).unwrap(),
-		);
+		let category =
+			DiagnosticCategory::from(obj.get("category").and_then(Value::as_i64).unwrap());
 
 		let next_v = obj.get("next");
 		let next = match next_v {
@@ -368,25 +352,21 @@ mod tests {
 	fn diagnostic1() -> Diagnostic {
 		Diagnostic {
 			items:vec![DiagnosticItem {
-				message:"Type '(o: T) => { v: any; f: (x: B) => string; }[]' \
-				         is not assignable to type '(r: B) => Value<B>[]'."
+				message:"Type '(o: T) => { v: any; f: (x: B) => string; }[]' is not assignable to \
+				         type '(r: B) => Value<B>[]'."
 					.to_string(),
 				message_chain:Some(DiagnosticMessageChain {
-					message:"Type '(o: T) => { v: any; f: (x: B) => string; \
-					         }[]' is not assignable to type '(r: B) => \
-					         Value<B>[]'."
+					message:"Type '(o: T) => { v: any; f: (x: B) => string; }[]' is not \
+					         assignable to type '(r: B) => Value<B>[]'."
 						.to_string(),
 					code:2322,
 					category:DiagnosticCategory::Error,
 					next:Some(vec![DiagnosticMessageChain {
-						message:"Types of parameters 'o' and 'r' are \
-						         incompatible."
-							.to_string(),
+						message:"Types of parameters 'o' and 'r' are incompatible.".to_string(),
 						code:2328,
 						category:DiagnosticCategory::Error,
 						next:Some(vec![DiagnosticMessageChain {
-							message:"Type 'B' is not assignable to type 'T'."
-								.to_string(),
+							message:"Type 'B' is not assignable to type 'T'.".to_string(),
 							code:2322,
 							category:DiagnosticCategory::Error,
 							next:None,
@@ -399,25 +379,18 @@ mod tests {
 				end_position:Some(273),
 				source_line:Some("  values: o => [".to_string()),
 				line_number:Some(18),
-				script_resource_name:Some(
-					"deno/tests/complex_diagnostics.ts".to_string(),
-				),
+				script_resource_name:Some("deno/tests/complex_diagnostics.ts".to_string()),
 				start_column:Some(2),
 				end_column:Some(8),
 				related_information:Some(vec![DiagnosticItem {
-					message:"The expected type comes from property 'values' \
-					         which is declared here on type \
-					         'SettingsInterface<B>'"
+					message:"The expected type comes from property 'values' which is declared \
+					         here on type 'SettingsInterface<B>'"
 						.to_string(),
 					message_chain:None,
 					related_information:None,
 					code:6500,
-					source_line:Some(
-						"  values?: (r: T) => Array<Value<T>>;".to_string(),
-					),
-					script_resource_name:Some(
-						"deno/tests/complex_diagnostics.ts".to_string(),
-					),
+					source_line:Some("  values?: (r: T) => Array<Value<T>>;".to_string()),
+					script_resource_name:Some("deno/tests/complex_diagnostics.ts".to_string()),
 					line_number:Some(6),
 					start_position:Some(94),
 					end_position:Some(100),
@@ -441,9 +414,7 @@ mod tests {
 					end_position:Some(273),
 					source_line:Some("  values: o => [".to_string()),
 					line_number:Some(18),
-					script_resource_name:Some(
-						"deno/tests/complex_diagnostics.ts".to_string(),
-					),
+					script_resource_name:Some("deno/tests/complex_diagnostics.ts".to_string()),
 					start_column:Some(2),
 					end_column:Some(8),
 					related_information:None,
@@ -501,18 +472,17 @@ mod tests {
 		let r = Diagnostic::from_json_value(&v);
 		let expected = Some(Diagnostic {
 			items:vec![DiagnosticItem {
-				message:"Type \'{ a(): { b: number; }; }\' is not assignable \
-				         to type \'{ a(): { b: string; }; }\'."
+				message:"Type \'{ a(): { b: number; }; }\' is not assignable to type \'{ a(): { \
+				         b: string; }; }\'."
 					.to_string(),
 				message_chain:Some(DiagnosticMessageChain {
-					message:"Type \'{ a(): { b: number; }; }\' is not \
-					         assignable to type \'{ a(): { b: string; }; }\'."
+					message:"Type \'{ a(): { b: number; }; }\' is not assignable to type \'{ a(): \
+					         { b: string; }; }\'."
 						.to_string(),
 					code:2322,
 					category:DiagnosticCategory::Error,
 					next:Some(vec![DiagnosticMessageChain {
-						message:"Types of property \'a\' are incompatible."
-							.to_string(),
+						message:"Types of property \'a\' are incompatible.".to_string(),
 						code:2326,
 						category:DiagnosticCategory::Error,
 						next:None,
@@ -521,9 +491,7 @@ mod tests {
 				related_information:None,
 				source_line:Some("x = y;".to_string()),
 				line_number:Some(29),
-				script_resource_name:Some(
-					"/deno/tests/error_003_typescript.ts".to_string(),
-				),
+				script_resource_name:Some("/deno/tests/error_003_typescript.ts".to_string()),
 				start_position:Some(352),
 				end_position:Some(353),
 				category:DiagnosticCategory::Error,
@@ -579,27 +547,24 @@ mod tests {
 	#[test]
 	fn diagnostic_to_string1() {
 		let d = diagnostic1();
-		let expected =
-			"error TS2322: Type \'(o: T) => { v: any; f: (x: B) => string; \
-			 }[]\' is not assignable to type \'(r: B) => Value<B>[]\'.\n  \
-			 Types of parameters \'o\' and \'r\' are incompatible.\n    Type \
-			 \'B\' is not assignable to type \'T\'.\n\n► \
-			 deno/tests/complex_diagnostics.ts:19:3\n\n19   values: o => [\n     \
-			 ~~~~~~\n\n  The expected type comes from property \'values\' \
-			 which is declared here on type \'SettingsInterface<B>\'\n\n    ► \
-			 deno/tests/complex_diagnostics.ts:7:3\n\n    7   values?: (r: T) \
-			 => Array<Value<T>>;\n        ~~~~~~\n\n";
+		let expected = "error TS2322: Type \'(o: T) => { v: any; f: (x: B) => string; }[]\' is \
+		                not assignable to type \'(r: B) => Value<B>[]\'.\n  Types of parameters \
+		                \'o\' and \'r\' are incompatible.\n    Type \'B\' is not assignable to \
+		                type \'T\'.\n\n► deno/tests/complex_diagnostics.ts:19:3\n\n19   values: o \
+		                => [\n     ~~~~~~\n\n  The expected type comes from property \'values\' \
+		                which is declared here on type \'SettingsInterface<B>\'\n\n    ► \
+		                deno/tests/complex_diagnostics.ts:7:3\n\n    7   values?: (r: T) => \
+		                Array<Value<T>>;\n        ~~~~~~\n\n";
 		assert_eq!(expected, strip_ansi_codes(&d.to_string()));
 	}
 
 	#[test]
 	fn diagnostic_to_string2() {
 		let d = diagnostic2();
-		let expected = "error TS2322: Example 1\n\n► \
-		                deno/tests/complex_diagnostics.ts:19:3\n\n19   \
-		                values: o => [\n     ~~~~~~\n\nerror TS2000: Example \
-		                2\n\n► /foo/bar.ts:129:3\n\n129   values: \
-		                undefined,\n      ~~~~~~\n\n\nFound 2 errors.\n";
+		let expected =
+			"error TS2322: Example 1\n\n► deno/tests/complex_diagnostics.ts:19:3\n\n19   values: \
+			 o => [\n     ~~~~~~\n\nerror TS2000: Example 2\n\n► /foo/bar.ts:129:3\n\n129   \
+			 values: undefined,\n      ~~~~~~\n\n\nFound 2 errors.\n";
 		assert_eq!(expected, strip_ansi_codes(&d.to_string()));
 	}
 }

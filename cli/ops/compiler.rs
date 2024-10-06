@@ -11,14 +11,8 @@ use crate::{
 
 pub fn init(i:&mut Isolate, s:&ThreadSafeState) {
 	i.register_op("cache", s.core_op(json_op(s.stateful_op(op_cache))));
-	i.register_op(
-		"fetch_source_files",
-		s.core_op(json_op(s.stateful_op(op_fetch_source_files))),
-	);
-	i.register_op(
-		"fetch_asset",
-		s.core_op(json_op(s.stateful_op(op_fetch_asset))),
-	);
+	i.register_op("fetch_source_files", s.core_op(json_op(s.stateful_op(op_fetch_source_files))));
+	i.register_op("fetch_asset", s.core_op(json_op(s.stateful_op(op_fetch_asset))));
 }
 
 #[derive(Deserialize)]
@@ -36,8 +30,8 @@ fn op_cache(
 ) -> Result<JsonOp, ErrBox> {
 	let args:CacheArgs = serde_json::from_value(args)?;
 
-	let module_specifier = ModuleSpecifier::resolve_url(&args.module_id)
-		.expect("Should be valid module specifier");
+	let module_specifier =
+		ModuleSpecifier::resolve_url(&args.module_id).expect("Should be valid module specifier");
 
 	state.global_state.ts_compiler.cache_compiler_output(
 		&module_specifier,
@@ -66,8 +60,8 @@ fn op_fetch_source_files(
 	let is_dyn_import = false;
 
 	let (referrer, ref_specifier) = if let Some(referrer) = args.referrer {
-		let specifier = ModuleSpecifier::resolve_url(&referrer)
-			.expect("Referrer is not a valid specifier");
+		let specifier =
+			ModuleSpecifier::resolve_url(&referrer).expect("Referrer is not a valid specifier");
 		(referrer, Some(specifier))
 	} else {
 		// main script import
@@ -76,12 +70,11 @@ fn op_fetch_source_files(
 
 	let mut futures = vec![];
 	for specifier in &args.specifiers {
-		let resolved_specifier =
-			state.resolve(specifier, &referrer, false, is_dyn_import)?;
-		let fut = state.global_state.file_fetcher.fetch_source_file_async(
-			&resolved_specifier,
-			ref_specifier.clone(),
-		);
+		let resolved_specifier = state.resolve(specifier, &referrer, false, is_dyn_import)?;
+		let fut = state
+			.global_state
+			.file_fetcher
+			.fetch_source_file_async(&resolved_specifier, ref_specifier.clone());
 		futures.push(fut);
 	}
 
@@ -103,16 +96,11 @@ fn op_fetch_source_files(
 								.wasm_compiler
 								.compile_async(global_state.clone(), &file)
 								.and_then(|compiled_mod| {
-									futures::future::ok((
-										file,
-										Some(compiled_mod.code),
-									))
+									futures::future::ok((file, Some(compiled_mod.code)))
 								}),
 						);
 					}
-					futures::future::Either::Right(futures::future::ok((
-						file, None,
-					)))
+					futures::future::Either::Right(futures::future::ok((file, None)))
 				})
 				.collect();
 			try_join_all(v)

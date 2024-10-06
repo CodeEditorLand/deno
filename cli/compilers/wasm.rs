@@ -51,9 +51,8 @@ impl WasmCompiler {
 	/// compiler's runtime.
 	fn setup_worker(global_state:ThreadSafeGlobalState) -> Worker {
 		let (int, ext) = ThreadSafeState::create_channels();
-		let worker_state =
-			ThreadSafeState::new(global_state.clone(), None, None, true, int)
-				.expect("Unable to create worker state");
+		let worker_state = ThreadSafeState::new(global_state.clone(), None, None, true, int)
+			.expect("Unable to create worker state");
 
 		// Count how many times we start the compiler worker.
 		global_state.metrics.compiler_starts.fetch_add(1, Ordering::SeqCst);
@@ -76,8 +75,7 @@ impl WasmCompiler {
 		source_file:&SourceFile,
 	) -> Pin<Box<CompiledModuleFuture>> {
 		let cache = self.cache.clone();
-		let maybe_cached =
-			{ cache.lock().unwrap().get(&source_file.url).cloned() };
+		let maybe_cached = { cache.lock().unwrap().get(&source_file.url).cloned() };
 		if let Some(m) = maybe_cached {
 			return futures::future::ok(m.clone()).boxed();
 		}
@@ -91,10 +89,7 @@ impl WasmCompiler {
 
 		let fut = worker
 			.post_message(
-				serde_json::to_string(&base64_data)
-					.unwrap()
-					.into_boxed_str()
-					.into_boxed_bytes(),
+				serde_json::to_string(&base64_data).unwrap().into_boxed_str().into_boxed_bytes(),
 			)
 			.then(|_| worker)
 			.then(move |result| {
@@ -110,8 +105,7 @@ impl WasmCompiler {
 			.and_then(move |maybe_msg:Option<Buf>| {
 				debug!("Received message from worker");
 				let json_msg = maybe_msg.unwrap();
-				let module_info:WasmModuleInfo =
-					serde_json::from_slice(&json_msg).unwrap();
+				let module_info:WasmModuleInfo = serde_json::from_slice(&json_msg).unwrap();
 				debug!("WASM module info: {:#?}", &module_info);
 				let code = wrap_wasm_code(
 					&base64_data,
@@ -160,11 +154,7 @@ fn build_exports(exports:&[String]) -> String {
 	code
 }
 
-fn wrap_wasm_code(
-	base64_data:&str,
-	imports:&[String],
-	exports:&[String],
-) -> String {
+fn wrap_wasm_code(base64_data:&str, imports:&[String], exports:&[String]) -> String {
 	let imports_code = build_imports(imports);
 	let exports_code = build_exports(exports);
 	String::from(WASM_WRAP)

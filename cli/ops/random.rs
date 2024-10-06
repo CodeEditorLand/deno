@@ -6,10 +6,7 @@ use super::dispatch_json::{JsonOp, Value};
 use crate::{ops::json_op, state::ThreadSafeState};
 
 pub fn init(i:&mut Isolate, s:&ThreadSafeState) {
-	i.register_op(
-		"get_random_values",
-		s.core_op(json_op(s.stateful_op(op_get_random_values))),
-	);
+	i.register_op("get_random_values", s.core_op(json_op(s.stateful_op(op_get_random_values))));
 }
 
 fn op_get_random_values(

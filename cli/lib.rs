@@ -72,9 +72,7 @@ static LOGGER:Logger = Logger;
 struct Logger;
 
 impl log::Log for Logger {
-	fn enabled(&self, metadata:&Metadata) -> bool {
-		metadata.level() <= log::max_level()
-	}
+	fn enabled(&self, metadata:&Metadata) -> bool { metadata.level() <= log::max_level() }
 
 	fn log(&self, record:&Record) {
 		if self.enabled(record.metadata()) {
@@ -131,12 +129,7 @@ fn create_worker_and_state(flags:DenoFlags) -> (Worker, ThreadSafeGlobalState) {
 		resource_table.add("stderr", Box::new(stderr));
 	}
 
-	let worker = Worker::new(
-		"main".to_string(),
-		startup_data::deno_isolate_init(),
-		state,
-		ext,
-	);
+	let worker = Worker::new("main".to_string(), startup_data::deno_isolate_init(), state, ext);
 
 	(worker, global_state)
 }
@@ -149,11 +142,7 @@ fn types_command() {
 fn print_cache_info(worker:Worker) {
 	let state = &worker.state.global_state;
 
-	println!(
-		"{} {:?}",
-		colors::bold("DENO_DIR location:".to_string()),
-		state.dir.root
-	);
+	println!("{} {:?}", colors::bold("DENO_DIR location:".to_string()), state.dir.root);
 	println!(
 		"{} {:?}",
 		colors::bold("Remote modules cache:".to_string()),
@@ -179,11 +168,7 @@ async fn print_file_info(worker:Worker, module_specifier:ModuleSpecifier) {
 		return;
 	}
 	let out = maybe_source_file.unwrap();
-	println!(
-		"{} {}",
-		colors::bold("local:".to_string()),
-		out.filename.to_str().unwrap()
-	);
+	println!("{} {}", colors::bold("local:".to_string()), out.filename.to_str().unwrap());
 
 	println!(
 		"{} {}",
@@ -191,10 +176,7 @@ async fn print_file_info(worker:Worker, module_specifier:ModuleSpecifier) {
 		msg::enum_name_media_type(out.media_type)
 	);
 
-	let maybe_compiled = global_state_
-		.clone()
-		.fetch_compiled_module(&module_specifier, None)
-		.await;
+	let maybe_compiled = global_state_.clone().fetch_compiled_module(&module_specifier, None).await;
 	if let Err(e) = maybe_compiled {
 		debug!("compiler error exiting!");
 		eprintln!("\n{}", e.to_string());
@@ -202,13 +184,10 @@ async fn print_file_info(worker:Worker, module_specifier:ModuleSpecifier) {
 	}
 	let compiled = maybe_compiled.unwrap();
 	if out.media_type == msg::MediaType::TypeScript
-		|| (out.media_type == msg::MediaType::JavaScript
-			&& global_state_.ts_compiler.compile_js)
+		|| (out.media_type == msg::MediaType::JavaScript && global_state_.ts_compiler.compile_js)
 	{
-		let compiled_source_file = global_state_
-			.ts_compiler
-			.get_compiled_source_file(&out.url)
-			.unwrap();
+		let compiled_source_file =
+			global_state_.ts_compiler.get_compiled_source_file(&out.url).unwrap();
 
 		println!(
 			"{} {}",
@@ -217,14 +196,9 @@ async fn print_file_info(worker:Worker, module_specifier:ModuleSpecifier) {
 		);
 	}
 
-	if let Ok(source_map) =
-		global_state_.clone().ts_compiler.get_source_map_file(&module_specifier)
+	if let Ok(source_map) = global_state_.clone().ts_compiler.get_source_map_file(&module_specifier)
 	{
-		println!(
-			"{} {}",
-			colors::bold("map:".to_string()),
-			source_map.filename.to_str().unwrap()
-		);
+		println!("{} {}", colors::bold("map:".to_string()), source_map.filename.to_str().unwrap());
 	}
 
 	if let Some(deps) = state_.modules.lock().unwrap().deps(&compiled.name) {
@@ -235,10 +209,7 @@ async fn print_file_info(worker:Worker, module_specifier:ModuleSpecifier) {
 			}
 		}
 	} else {
-		println!(
-			"{} cannot retrieve full dependency graph",
-			colors::bold("deps:".to_string()),
-		);
+		println!("{} cannot retrieve full dependency graph", colors::bold("deps:".to_string()),);
 	}
 }
 
@@ -258,8 +229,7 @@ fn info_command(flags:DenoFlags) {
 	debug!("main_module {}", main_module);
 
 	let main_future = async move {
-		let main_result =
-			worker.execute_mod_async(&main_module, None, true).await;
+		let main_result = worker.execute_mod_async(&main_module, None, true).await;
 		if let Err(e) = main_result {
 			print_err_and_exit(e);
 		}
@@ -294,16 +264,13 @@ fn eval_command(flags:DenoFlags) {
 	let ts_source = flags.argv[1].clone();
 	let (mut worker, _state) = create_worker_and_state(flags);
 	// Force TypeScript compile.
-	let main_module =
-		ModuleSpecifier::resolve_url_or_path("./__$deno$eval.ts").unwrap();
+	let main_module = ModuleSpecifier::resolve_url_or_path("./__$deno$eval.ts").unwrap();
 
 	js_check(worker.execute("denoMain()"));
 	debug!("main_module {}", &main_module);
 
 	let main_future = async move {
-		let exec_result = worker
-			.execute_mod_async(&main_module, Some(ts_source), false)
-			.await;
+		let exec_result = worker.execute_mod_async(&main_module, Some(ts_source), false).await;
 		if let Err(e) = exec_result {
 			print_err_and_exit(e);
 		}
@@ -374,8 +341,7 @@ fn run_script(flags:DenoFlags) {
 	let mut worker_ = worker.clone();
 
 	let main_future = async move {
-		let mod_result =
-			worker.execute_mod_async(&main_module, None, false).await;
+		let mod_result = worker.execute_mod_async(&main_module, None, false).await;
 		if let Err(err) = mod_result {
 			print_err_and_exit(err);
 		}
@@ -386,9 +352,7 @@ fn run_script(flags:DenoFlags) {
 					print_err_and_exit(ErrBox::from(e));
 				}
 			} else {
-				eprintln!(
-					"--lock flag must be specified when using --lock-write"
-				);
+				eprintln!("--lock flag must be specified when using --lock-write");
 				std::process::exit(11);
 			}
 		}

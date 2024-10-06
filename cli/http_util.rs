@@ -20,8 +20,7 @@ use crate::{deno_error, deno_error::DenoError, version};
 /// proxies and doesn't follow redirects.
 pub fn get_client() -> Client {
 	let mut headers = HeaderMap::new();
-	headers
-		.insert(USER_AGENT, format!("Deno/{}", version::DENO).parse().unwrap());
+	headers.insert(USER_AGENT, format!("Deno/{}", version::DENO).parse().unwrap());
 	Client::builder()
 		.redirect(RedirectPolicy::none())
 		.default_headers(headers)
@@ -35,26 +34,21 @@ pub fn get_client() -> Client {
 fn resolve_url_from_location(base_url:&Url, location:&str) -> Url {
 	if location.starts_with("http://") || location.starts_with("https://") {
 		// absolute uri
-		Url::parse(location)
-			.expect("provided redirect url should be a valid url")
+		Url::parse(location).expect("provided redirect url should be a valid url")
 	} else if location.starts_with("//") {
 		// "//" authority path-abempty
 		Url::parse(&format!("{}:{}", base_url.scheme(), location))
 			.expect("provided redirect url should be a valid url")
 	} else if location.starts_with('/') {
 		// path-absolute
-		base_url
-			.join(location)
-			.expect("provided redirect url should be a valid url")
+		base_url.join(location).expect("provided redirect url should be a valid url")
 	} else {
 		// assuming path-noscheme | path-empty
 		let base_url_path_str = base_url.path().to_owned();
 		// Pop last part or url (after last slash)
 		let segs:Vec<&str> = base_url_path_str.rsplitn(2, '/').collect();
 		let new_path = format!("{}/{}", segs.last().unwrap_or(&""), location);
-		base_url
-			.join(&new_path)
-			.expect("provided redirect url should be a valid url")
+		base_url.join(&new_path).expect("provided redirect url should be a valid url")
 	}
 }
 
@@ -70,11 +64,8 @@ pub enum FetchOnceResult {
 /// yields Code(code, maybe_content_type).
 /// If redirect occurs, does not follow and
 /// yields Redirect(url).
-pub fn fetch_string_once(
-	url:&Url,
-) -> impl Future<Output = Result<FetchOnceResult, ErrBox>> {
-	type FetchAttempt =
-		(Option<String>, Option<String>, Option<FetchOnceResult>);
+pub fn fetch_string_once(url:&Url) -> impl Future<Output = Result<FetchOnceResult, ErrBox>> {
+	type FetchAttempt = (Option<String>, Option<String>, Option<FetchOnceResult>);
 
 	let url = url.clone();
 	let client = get_client();
@@ -164,17 +155,13 @@ mod tests {
 	fn test_fetch_sync_string() {
 		let http_server_guard = crate::test_util::http_server();
 		// Relies on external http server. See tools/http_server.py
-		let url =
-			Url::parse("http://127.0.0.1:4545/cli/tests/fixture.json").unwrap();
+		let url = Url::parse("http://127.0.0.1:4545/cli/tests/fixture.json").unwrap();
 
 		let fut = fetch_string_once(&url).then(|result| {
 			match result {
 				Ok(FetchOnceResult::Code(code, maybe_content_type)) => {
 					assert!(!code.is_empty());
-					assert_eq!(
-						maybe_content_type,
-						Some("application/json".to_string())
-					);
+					assert_eq!(maybe_content_type, Some("application/json".to_string()));
 					futures::future::ok(())
 				},
 				_ => panic!(),
@@ -189,11 +176,9 @@ mod tests {
 	fn test_fetch_string_once_with_redirect() {
 		let http_server_guard = crate::test_util::http_server();
 		// Relies on external http server. See tools/http_server.py
-		let url =
-			Url::parse("http://127.0.0.1:4546/cli/tests/fixture.json").unwrap();
+		let url = Url::parse("http://127.0.0.1:4546/cli/tests/fixture.json").unwrap();
 		// Dns resolver substitutes `127.0.0.1` with `localhost`
-		let target_url =
-			Url::parse("http://localhost:4545/cli/tests/fixture.json").unwrap();
+		let target_url = Url::parse("http://localhost:4545/cli/tests/fixture.json").unwrap();
 		let fut = fetch_string_once(&url).then(move |result| {
 			match result {
 				Ok(FetchOnceResult::Redirect(url)) => {

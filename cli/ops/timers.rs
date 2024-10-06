@@ -11,14 +11,8 @@ use super::dispatch_json::{Deserialize, JsonOp, Value};
 use crate::{ops::json_op, state::ThreadSafeState};
 
 pub fn init(i:&mut Isolate, s:&ThreadSafeState) {
-	i.register_op(
-		"global_timer_stop",
-		s.core_op(json_op(s.stateful_op(op_global_timer_stop))),
-	);
-	i.register_op(
-		"global_timer",
-		s.core_op(json_op(s.stateful_op(op_global_timer))),
-	);
+	i.register_op("global_timer_stop", s.core_op(json_op(s.stateful_op(op_global_timer_stop))));
+	i.register_op("global_timer", s.core_op(json_op(s.stateful_op(op_global_timer))));
 	i.register_op("now", s.core_op(json_op(s.stateful_op(op_now))));
 }
 
@@ -49,8 +43,7 @@ fn op_global_timer(
 	let state = state;
 	let mut t = state.global_timer.lock().unwrap();
 	let deadline = Instant::now() + Duration::from_millis(val);
-	let f =
-		t.new_timeout(deadline).then(move |_| futures::future::ok(json!({})));
+	let f = t.new_timeout(deadline).then(move |_| futures::future::ok(json!({})));
 
 	Ok(JsonOp::Async(f.boxed()))
 }

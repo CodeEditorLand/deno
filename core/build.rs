@@ -106,12 +106,10 @@ mod gn {
 					"third_party/python_packages/Pythonwin",
 				]
 				.into_iter()
-				.map(|p| {
-					self.root.join(p).into_os_string().into_string().unwrap()
-				})
+				.map(|p| self.root.join(p).into_os_string().into_string().unwrap())
 				.collect();
-				let orig_path = String::from(";")
-					+ &env::var_os("PATH").unwrap().into_string().unwrap();
+				let orig_path =
+					String::from(";") + &env::var_os("PATH").unwrap().into_string().unwrap();
 				let path = self
 					.root
 					.join("third_party/python_packages/pywin32_system32")

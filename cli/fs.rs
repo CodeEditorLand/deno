@@ -16,11 +16,7 @@ use nix::unistd::{chown as unix_chown, Gid, Uid};
 use rand::{self, Rng};
 use url::Url;
 
-pub fn write_file<T:AsRef<[u8]>>(
-	filename:&Path,
-	data:T,
-	perm:u32,
-) -> std::io::Result<()> {
+pub fn write_file<T:AsRef<[u8]>>(filename:&Path, data:T, perm:u32) -> std::io::Result<()> {
 	write_file_2(filename, data, true, perm, true, false)
 }
 
@@ -117,8 +113,7 @@ pub fn normalize_path(path:&Path) -> String {
 pub fn chown(path:&str, uid:u32, gid:u32) -> Result<(), ErrBox> {
 	let nix_uid = Uid::from_raw(uid);
 	let nix_gid = Gid::from_raw(gid);
-	unix_chown(path, Option::Some(nix_uid), Option::Some(nix_gid))
-		.map_err(ErrBox::from)
+	unix_chown(path, Option::Some(nix_uid), Option::Some(nix_gid)).map_err(ErrBox::from)
 }
 
 #[cfg(not(unix))]
@@ -148,10 +143,9 @@ pub fn resolve_from_cwd(path:&str) -> Result<(PathBuf, String), ErrBox> {
 	// We just want to normalize the path...
 	// This only works on absolute paths - not worth extracting as a public
 	// utility.
-	let resolved_url =
-		Url::from_file_path(resolved_path).expect("Path should be absolute");
-	let normalized_url = Url::parse(resolved_url.as_str())
-		.expect("String from a URL should parse to a URL");
+	let resolved_url = Url::from_file_path(resolved_path).expect("Path should be absolute");
+	let normalized_url =
+		Url::parse(resolved_url.as_str()).expect("String from a URL should parse to a URL");
 	let normalized_path = normalized_url
 		.to_file_path()
 		.expect("URL from a path should contain a valid path");

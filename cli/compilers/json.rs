@@ -16,39 +16,26 @@ static JS_RESERVED_WORDS:&str = r"^(?:do|if|in|for|let|new|try|var|case|else|enu
 pub struct JsonCompiler {}
 
 impl JsonCompiler {
-	pub fn compile_async(
-		self: &Self,
-		source_file:&SourceFile,
-	) -> Pin<Box<CompiledModuleFuture>> {
+	pub fn compile_async(self: &Self, source_file:&SourceFile) -> Pin<Box<CompiledModuleFuture>> {
 		let maybe_json_value:serde_json::Result<serde_json::Value> =
-			serde_json::from_str(
-				&str::from_utf8(&source_file.source_code).unwrap(),
-			);
+			serde_json::from_str(&str::from_utf8(&source_file.source_code).unwrap());
 		if let Err(err) = maybe_json_value {
 			return futures::future::err(ErrBox::from(err)).boxed();
 		}
 
-		let mut code = format!(
-			"export default {};\n",
-			str::from_utf8(&source_file.source_code).unwrap()
-		);
+		let mut code =
+			format!("export default {};\n", str::from_utf8(&source_file.source_code).unwrap());
 
 		if let serde_json::Value::Object(m) = maybe_json_value.unwrap() {
 			// Best effort variable name exports
 			// Actual all allowed JS variable names are way tricker.
 			// We only handle a subset of alphanumeric names.
-			let js_var_regex =
-				Regex::new(r"^[a-zA-Z_$][0-9a-zA-Z_$]*$").unwrap();
+			let js_var_regex = Regex::new(r"^[a-zA-Z_$][0-9a-zA-Z_$]*$").unwrap();
 			// Also avoid collision with reserved words.
 			let reserved_words = Regex::new(JS_RESERVED_WORDS).unwrap();
 			for (key, value) in m.iter() {
-				if js_var_regex.is_match(&key) && !reserved_words.is_match(&key)
-				{
-					code.push_str(&format!(
-						"export const {} = {};\n",
-						key,
-						value.to_string()
-					));
+				if js_var_regex.is_match(&key) && !reserved_words.is_match(&key) {
+					code.push_str(&format!("export const {} = {};\n", key, value.to_string()));
 				}
 			}
 		}

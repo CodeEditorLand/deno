@@ -11,13 +11,7 @@ use sys_info;
 use url::Url;
 
 use super::dispatch_json::{Deserialize, JsonOp, Value};
-use crate::{
-	colors,
-	fs as deno_fs,
-	ops::json_op,
-	state::ThreadSafeState,
-	version,
-};
+use crate::{colors, fs as deno_fs, ops::json_op, state::ThreadSafeState, version};
 
 /// BUILD_OS and BUILD_ARCH match the values in Deno.build. See js/build.ts.
 #[cfg(target_os = "macos")]
@@ -107,10 +101,7 @@ fn op_get_dir(
 		)))
 	} else {
 		Ok(JsonOp::Sync(json!(
-			path.unwrap_or_default()
-				.into_os_string()
-				.into_string()
-				.unwrap_or_default()
+			path.unwrap_or_default().into_os_string().into_string().unwrap_or_default()
 		)))
 	}
 }

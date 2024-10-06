@@ -100,30 +100,18 @@ struct DynImport {
 }
 
 impl fmt::Debug for DynImportStream {
-	fn fmt(&self, f:&mut fmt::Formatter<'_>) -> fmt::Result {
-		write!(f, "DynImportStream(..)")
-	}
+	fn fmt(&self, f:&mut fmt::Formatter<'_>) -> fmt::Result { write!(f, "DynImportStream(..)") }
 }
 
 impl Stream for DynImport {
-	type Item = Result<
-		(deno_dyn_import_id, RecursiveLoadEvent),
-		(deno_dyn_import_id, ErrBox),
-	>;
+	type Item = Result<(deno_dyn_import_id, RecursiveLoadEvent), (deno_dyn_import_id, ErrBox)>;
 
-	fn poll_next(
-		self: Pin<&mut Self>,
-		cx:&mut Context,
-	) -> Poll<Option<Self::Item>> {
+	fn poll_next(self: Pin<&mut Self>, cx:&mut Context) -> Poll<Option<Self::Item>> {
 		let self_inner = self.get_mut();
 		match self_inner.inner.try_poll_next_unpin(cx) {
-			Poll::Ready(Some(Ok(event))) => {
-				Poll::Ready(Some(Ok((self_inner.id, event))))
-			},
+			Poll::Ready(Some(Ok(event))) => Poll::Ready(Some(Ok((self_inner.id, event)))),
 			Poll::Ready(None) => unreachable!(),
-			Poll::Ready(Some(Err(e))) => {
-				Poll::Ready(Some(Err((self_inner.id, e))))
-			},
+			Poll::Ready(Some(Err(e))) => Poll::Ready(Some(Err((self_inner.id, e)))),
 			Poll::Pending => Poll::Pending,
 		}
 	}
@@ -148,10 +136,7 @@ struct OwnedScript {
 
 impl From<Script<'_>> for OwnedScript {
 	fn from(s:Script) -> OwnedScript {
-		OwnedScript {
-			source:s.source.to_string(),
-			filename:s.filename.to_string(),
-		}
+		OwnedScript { source:s.source.to_string(), filename:s.filename.to_string() }
 	}
 }
 
@@ -273,10 +258,7 @@ impl Isolate {
 
 	pub fn set_dyn_import<F>(&mut self, f:F)
 	where
-		F: Fn(deno_dyn_import_id, &str, &str) -> DynImportStream
-			+ Send
-			+ Sync
-			+ 'static, {
+		F: Fn(deno_dyn_import_id, &str, &str) -> DynImportStream + Send + Sync + 'static, {
 		self.dyn_import = Some(Arc::new(f));
 	}
 
@@ -291,21 +273,14 @@ impl Isolate {
 
 	/// Get a thread safe handle on the isolate.
 	pub fn shared_isolate_handle(&mut self) -> IsolateHandle {
-		IsolateHandle {
-			shared_libdeno_isolate:self.shared_libdeno_isolate.clone(),
-		}
+		IsolateHandle { shared_libdeno_isolate:self.shared_libdeno_isolate.clone() }
 	}
 
 	/// Executes a bit of built-in JavaScript to provide Deno.sharedQueue.
 	fn shared_init(&mut self) {
 		if self.needs_init {
 			self.needs_init = false;
-			js_check(
-				self.execute(
-					"shared_queue.js",
-					include_str!("shared_queue.js"),
-				),
-			);
+			js_check(self.execute("shared_queue.js", include_str!("shared_queue.js")));
 			// Maybe execute the startup script.
 			if let Some(s) = self.startup_script.take() {
 				self.execute(&s.filename, &s.source).unwrap()
@@ -329,9 +304,7 @@ impl Isolate {
 			let inner = f(id, specifier, referrer);
 			let stream = DynImport { inner, id };
 			isolate.waker.wake();
-			isolate
-				.pending_dyn_imports
-				.push(stream.into_stream().into_future());
+			isolate.pending_dyn_imports.push(stream.into_stream().into_future());
 		} else {
 			panic!("dyn_import callback not set")
 		}
@@ -345,17 +318,15 @@ impl Isolate {
 	) {
 		let isolate = unsafe { Isolate::from_raw_ptr(user_data) };
 
-		let maybe_op = isolate.op_registry.call(
-			op_id,
-			control_buf.as_ref(),
-			PinnedBuf::new(zero_copy_buf),
-		);
+		let maybe_op =
+			isolate
+				.op_registry
+				.call(op_id, control_buf.as_ref(), PinnedBuf::new(zero_copy_buf));
 
 		let op = match maybe_op {
 			Some(op) => op,
 			None => {
-				return isolate
-					.throw_exception(&format!("Unknown op id: {}", op_id));
+				return isolate.throw_exception(&format!("Unknown op id: {}", op_id));
 			},
 		};
 
@@ -395,11 +366,7 @@ impl Isolate {
 	/// about the V8 exception. By default this type is CoreJSError, however it
 	/// may be a different type if Isolate::set_js_error_create() has been
 	/// used.
-	pub fn execute(
-		&mut self,
-		js_filename:&str,
-		js_source:&str,
-	) -> Result<(), ErrBox> {
+	pub fn execute(&mut self, js_filename:&str, js_source:&str) -> Result<(), ErrBox> {
 		self.shared_init();
 		let filename = CString::new(js_filename).unwrap();
 		let source = CString::new(js_source).unwrap();
@@ -436,63 +403,37 @@ impl Isolate {
 
 	fn throw_exception(&mut self, exception_text:&str) {
 		let text = CString::new(exception_text).unwrap();
-		unsafe {
-			libdeno::deno_throw_exception(self.libdeno_isolate, text.as_ptr())
-		}
+		unsafe { libdeno::deno_throw_exception(self.libdeno_isolate, text.as_ptr()) }
 	}
 
-	fn respond(
-		&mut self,
-		maybe_buf:Option<(OpId, &[u8])>,
-	) -> Result<(), ErrBox> {
+	fn respond(&mut self, maybe_buf:Option<(OpId, &[u8])>) -> Result<(), ErrBox> {
 		let (op_id, buf) = match maybe_buf {
 			None => (0, deno_buf::empty()),
 			Some((op_id, r)) => (op_id, deno_buf::from(r)),
 		};
-		unsafe {
-			libdeno::deno_respond(
-				self.libdeno_isolate,
-				self.as_raw_ptr(),
-				op_id,
-				buf,
-			)
-		}
+		unsafe { libdeno::deno_respond(self.libdeno_isolate, self.as_raw_ptr(), op_id, buf) }
 		self.check_last_exception()
 	}
 
 	/// Low-level module creation.
-	pub fn mod_new(
-		&self,
-		main:bool,
-		name:&str,
-		source:&str,
-	) -> Result<deno_mod, ErrBox> {
+	pub fn mod_new(&self, main:bool, name:&str, source:&str) -> Result<deno_mod, ErrBox> {
 		let name_ = CString::new(name.to_string()).unwrap();
 		let name_ptr = name_.as_ptr() as *const libc::c_char;
 
 		let source_ = CString::new(source.to_string()).unwrap();
 		let source_ptr = source_.as_ptr() as *const libc::c_char;
 
-		let id = unsafe {
-			libdeno::deno_mod_new(
-				self.libdeno_isolate,
-				main,
-				name_ptr,
-				source_ptr,
-			)
-		};
+		let id = unsafe { libdeno::deno_mod_new(self.libdeno_isolate, main, name_ptr, source_ptr) };
 
 		self.check_last_exception().map(|_| id)
 	}
 
 	pub fn mod_get_imports(&self, id:deno_mod) -> Vec<String> {
-		let len =
-			unsafe { libdeno::deno_mod_imports_len(self.libdeno_isolate, id) };
+		let len = unsafe { libdeno::deno_mod_imports_len(self.libdeno_isolate, id) };
 		let mut out = Vec::new();
 		for i in 0..len {
-			let specifier_ptr = unsafe {
-				libdeno::deno_mod_imports_get(self.libdeno_isolate, id, i)
-			};
+			let specifier_ptr =
+				unsafe { libdeno::deno_mod_imports_get(self.libdeno_isolate, id, i) };
 			let specifier_c:&CStr = unsafe { CStr::from_ptr(specifier_ptr) };
 			let specifier:&str = specifier_c.to_str().unwrap();
 
@@ -509,8 +450,7 @@ impl Isolate {
 	/// may be a different type if Isolate::set_js_error_create() has been
 	/// used.
 	pub fn snapshot(&self) -> Result<Snapshot1<'static>, ErrBox> {
-		let snapshot =
-			unsafe { libdeno::deno_snapshot_new(self.libdeno_isolate) };
+		let snapshot = unsafe { libdeno::deno_snapshot_new(self.libdeno_isolate) };
 		match self.check_last_exception() {
 			Ok(..) => Ok(snapshot),
 			Err(err) => {
@@ -548,10 +488,7 @@ impl Isolate {
 		self.check_last_exception()
 	}
 
-	fn poll_dyn_imports(
-		&mut self,
-		cx:&mut Context,
-	) -> Poll<Result<(), ErrBox>> {
+	fn poll_dyn_imports(&mut self, cx:&mut Context) -> Poll<Result<(), ErrBox>> {
 		use RecursiveLoadEvent::*;
 		loop {
 			match self.pending_dyn_imports.poll_next_unpin(cx) {
@@ -569,30 +506,18 @@ impl Isolate {
 					// successful, poll for the next recursive-load event
 					// related to this dynamic import.
 					match stream.get_mut().register(source_code_info, self) {
-						Ok(()) => {
-							self.pending_dyn_imports.push(stream.into_future())
-						},
+						Ok(()) => self.pending_dyn_imports.push(stream.into_future()),
 						Err(err) => {
-							self.dyn_import_done(
-								dyn_import_id,
-								Err(Some(err.to_string())),
-							)?
+							self.dyn_import_done(dyn_import_id, Err(Some(err.to_string())))?
 						},
 					}
 				},
-				Poll::Ready(Some((
-					Some(Ok((dyn_import_id, Instantiate(module_id)))),
-					_,
-				))) => {
+				Poll::Ready(Some((Some(Ok((dyn_import_id, Instantiate(module_id)))), _))) => {
 					// The top-level module from a dynamic import has been
 					// instantiated.
 					match self.mod_evaluate(module_id) {
-						Ok(()) => {
-							self.dyn_import_done(dyn_import_id, Ok(module_id))?
-						},
-						Err(..) => {
-							self.dyn_import_done(dyn_import_id, Err(None))?
-						},
+						Ok(()) => self.dyn_import_done(dyn_import_id, Ok(module_id))?,
+						Err(..) => self.dyn_import_done(dyn_import_id, Err(None))?,
 					}
 				},
 				Poll::Ready(Some((Some(Err((dyn_import_id, err))), _))) => {
@@ -600,10 +525,7 @@ impl Isolate {
 					// an invalid module specifier, or a problem with the
 					// source map, or a failure to fetch the module source
 					// code.
-					self.dyn_import_done(
-						dyn_import_id,
-						Err(Some(err.to_string())),
-					)?
+					self.dyn_import_done(dyn_import_id, Err(Some(err.to_string())))?
 				},
 				Poll::Ready(Some((None, _))) => unreachable!(),
 			}
@@ -625,9 +547,7 @@ impl<'a> ResolveContext<'a> {
 	fn as_raw_ptr(&mut self) -> *mut c_void { self as *mut _ as *mut c_void }
 
 	#[inline]
-	unsafe fn from_raw_ptr(ptr:*mut c_void) -> &'a mut Self {
-		&mut *(ptr as *mut _)
-	}
+	unsafe fn from_raw_ptr(ptr:*mut c_void) -> &'a mut Self { &mut *(ptr as *mut _) }
 }
 
 impl Isolate {
@@ -645,12 +565,7 @@ impl Isolate {
 		let libdeno_isolate = self.libdeno_isolate;
 		let mut ctx = ResolveContext { resolve_fn };
 		unsafe {
-			libdeno::deno_mod_instantiate(
-				libdeno_isolate,
-				ctx.as_raw_ptr(),
-				id,
-				Self::resolve_cb,
-			)
+			libdeno::deno_mod_instantiate(libdeno_isolate, ctx.as_raw_ptr(), id, Self::resolve_cb)
 		};
 		self.check_last_exception()
 	}
@@ -661,8 +576,7 @@ impl Isolate {
 		specifier_ptr:*const libc::c_char,
 		referrer:deno_mod,
 	) -> deno_mod {
-		let ResolveContext { resolve_fn } =
-			unsafe { ResolveContext::from_raw_ptr(user_data) };
+		let ResolveContext { resolve_fn } = unsafe { ResolveContext::from_raw_ptr(user_data) };
 		let specifier_c:&CStr = unsafe { CStr::from_ptr(specifier_ptr) };
 		let specifier:&str = specifier_c.to_str().unwrap();
 
@@ -677,13 +591,7 @@ impl Isolate {
 	/// used.
 	pub fn mod_evaluate(&mut self, id:deno_mod) -> Result<(), ErrBox> {
 		self.shared_init();
-		unsafe {
-			libdeno::deno_mod_evaluate(
-				self.libdeno_isolate,
-				self.as_raw_ptr(),
-				id,
-			)
-		};
+		unsafe { libdeno::deno_mod_evaluate(self.libdeno_isolate, self.as_raw_ptr(), id) };
 		self.check_last_exception()
 	}
 }
@@ -764,8 +672,7 @@ impl Future for Isolate {
 		inner.check_last_exception()?;
 
 		// We're idle if pending_ops is empty.
-		if inner.pending_ops.is_empty() && inner.pending_dyn_imports.is_empty()
-		{
+		if inner.pending_ops.is_empty() && inner.pending_dyn_imports.is_empty() {
 			Poll::Ready(Ok(()))
 		} else {
 			if inner.have_unpolled_ops {
@@ -791,8 +698,7 @@ impl IsolateHandle {
 	/// the isolate.
 	pub fn terminate_execution(&self) {
 		unsafe {
-			if let Some(isolate) = *self.shared_libdeno_isolate.lock().unwrap()
-			{
+			if let Some(isolate) = *self.shared_libdeno_isolate.lock().unwrap() {
 				libdeno::deno_terminate_execution(isolate)
 			}
 		}
@@ -834,10 +740,7 @@ pub mod tests {
 				Poll::Ready(val) => return val,
 			}
 		}
-		panic!(
-			"Isolate still not ready after polling {} times.",
-			max_poll_count
-		)
+		panic!("Isolate still not ready after polling {} times.", max_poll_count)
 	}
 
 	pub enum Mode {
@@ -854,46 +757,45 @@ pub mod tests {
 
 		let mut isolate = Isolate::new(StartupData::None, false);
 
-		let dispatcher =
-			move |control:&[u8], _zero_copy:Option<PinnedBuf>| -> CoreOp {
-				dispatch_count_.fetch_add(1, Ordering::Relaxed);
-				match mode {
-					Mode::Async => {
-						assert_eq!(control.len(), 1);
-						assert_eq!(control[0], 42);
-						let buf = vec![43u8, 0, 0, 0].into_boxed_slice();
-						Op::Async(futures::future::ok(buf).boxed())
-					},
-					Mode::OverflowReqSync => {
-						assert_eq!(control.len(), 100 * 1024 * 1024);
-						let buf = vec![43u8, 0, 0, 0].into_boxed_slice();
-						Op::Sync(buf)
-					},
-					Mode::OverflowResSync => {
-						assert_eq!(control.len(), 1);
-						assert_eq!(control[0], 42);
-						let mut vec = Vec::<u8>::new();
-						vec.resize(100 * 1024 * 1024, 0);
-						vec[0] = 99;
-						let buf = vec.into_boxed_slice();
-						Op::Sync(buf)
-					},
-					Mode::OverflowReqAsync => {
-						assert_eq!(control.len(), 100 * 1024 * 1024);
-						let buf = vec![43u8, 0, 0, 0].into_boxed_slice();
-						Op::Async(futures::future::ok(buf).boxed())
-					},
-					Mode::OverflowResAsync => {
-						assert_eq!(control.len(), 1);
-						assert_eq!(control[0], 42);
-						let mut vec = Vec::<u8>::new();
-						vec.resize(100 * 1024 * 1024, 0);
-						vec[0] = 4;
-						let buf = vec.into_boxed_slice();
-						Op::Async(futures::future::ok(buf).boxed())
-					},
-				}
-			};
+		let dispatcher = move |control:&[u8], _zero_copy:Option<PinnedBuf>| -> CoreOp {
+			dispatch_count_.fetch_add(1, Ordering::Relaxed);
+			match mode {
+				Mode::Async => {
+					assert_eq!(control.len(), 1);
+					assert_eq!(control[0], 42);
+					let buf = vec![43u8, 0, 0, 0].into_boxed_slice();
+					Op::Async(futures::future::ok(buf).boxed())
+				},
+				Mode::OverflowReqSync => {
+					assert_eq!(control.len(), 100 * 1024 * 1024);
+					let buf = vec![43u8, 0, 0, 0].into_boxed_slice();
+					Op::Sync(buf)
+				},
+				Mode::OverflowResSync => {
+					assert_eq!(control.len(), 1);
+					assert_eq!(control[0], 42);
+					let mut vec = Vec::<u8>::new();
+					vec.resize(100 * 1024 * 1024, 0);
+					vec[0] = 99;
+					let buf = vec.into_boxed_slice();
+					Op::Sync(buf)
+				},
+				Mode::OverflowReqAsync => {
+					assert_eq!(control.len(), 100 * 1024 * 1024);
+					let buf = vec![43u8, 0, 0, 0].into_boxed_slice();
+					Op::Async(futures::future::ok(buf).boxed())
+				},
+				Mode::OverflowResAsync => {
+					assert_eq!(control.len(), 1);
+					assert_eq!(control[0], 42);
+					let mut vec = Vec::<u8>::new();
+					vec.resize(100 * 1024 * 1024, 0);
+					vec[0] = 4;
+					let buf = vec.into_boxed_slice();
+					Op::Async(futures::future::ok(buf).boxed())
+				},
+			}
+		};
 
 		isolate.register_op("test", dispatcher);
 
@@ -948,21 +850,18 @@ pub mod tests {
 		let imports = isolate.mod_get_imports(mod_a);
 		assert_eq!(imports, vec!["b.js".to_string()]);
 
-		let mod_b = isolate
-			.mod_new(false, "b.js", "export function b() { return 'b' }")
-			.unwrap();
+		let mod_b = isolate.mod_new(false, "b.js", "export function b() { return 'b' }").unwrap();
 		let imports = isolate.mod_get_imports(mod_b);
 		assert_eq!(imports.len(), 0);
 
 		let resolve_count = Arc::new(AtomicUsize::new(0));
 		let resolve_count_ = resolve_count.clone();
 
-		let mut resolve =
-			move |specifier:&str, _referrer:deno_mod| -> deno_mod {
-				resolve_count_.fetch_add(1, Ordering::SeqCst);
-				assert_eq!(specifier, "b.js");
-				mod_b
-			};
+		let mut resolve = move |specifier:&str, _referrer:deno_mod| -> deno_mod {
+			resolve_count_.fetch_add(1, Ordering::SeqCst);
+			assert_eq!(specifier, "b.js");
+			mod_b
+		};
 
 		js_check(isolate.mod_instantiate(mod_b, &mut resolve));
 		assert_eq!(dispatch_count.load(Ordering::Relaxed), 0);
@@ -1035,13 +934,9 @@ pub mod tests {
 	impl Stream for MockImportStream {
 		type Item = Result<RecursiveLoadEvent, ErrBox>;
 
-		fn poll_next(
-			self: Pin<&mut Self>,
-			_cx:&mut Context,
-		) -> Poll<Option<Self::Item>> {
+		fn poll_next(self: Pin<&mut Self>, _cx:&mut Context) -> Poll<Option<Self::Item>> {
 			let inner = self.get_mut();
-			let event =
-				if inner.0.is_empty() { None } else { Some(inner.0.remove(0)) };
+			let event = if inner.0.is_empty() { None } else { Some(inner.0.remove(0)) };
 			Poll::Ready(event)
 		}
 	}
@@ -1052,15 +947,8 @@ pub mod tests {
 			module_data:SourceCodeInfo,
 			isolate:&mut Isolate,
 		) -> Result<(), ErrBox> {
-			let id = isolate.mod_new(
-				false,
-				&module_data.module_url_found,
-				&module_data.code,
-			)?;
-			println!(
-				"MockImportStream register {} {}",
-				id, module_data.module_url_found
-			);
+			let id = isolate.mod_new(false, &module_data.module_url_found, &module_data.code)?;
+			println!("MockImportStream register {} {}", id, module_data.module_url_found);
 			Ok(())
 		}
 	}
@@ -1197,16 +1085,10 @@ pub mod tests {
 			// Instantiate mod_b
 			{
 				let mut mod_id = mod_b.lock().unwrap();
-				*mod_id = isolate
-					.mod_new(
-						false,
-						"b.js",
-						"export function b() { return 'b' }",
-					)
-					.unwrap();
-				let mut resolve = move |_specifier:&str,
-				                        _referrer:deno_mod|
-				      -> deno_mod { unreachable!() };
+				*mod_id =
+					isolate.mod_new(false, "b.js", "export function b() { return 'b' }").unwrap();
+				let mut resolve =
+					move |_specifier:&str, _referrer:deno_mod| -> deno_mod { unreachable!() };
 				js_check(isolate.mod_instantiate(*mod_id, &mut resolve));
 			}
 			// Dynamically import mod_b
@@ -1278,10 +1160,7 @@ pub mod tests {
 			tx.send(true).ok();
 
 			if let Err(e) = res {
-				assert_eq!(
-					e.to_string(),
-					"Uncaught Error: execution terminated"
-				);
+				assert_eq!(e.to_string(), "Uncaught Error: execution terminated");
 			} else {
 				panic!("should return an error");
 			}
@@ -1289,10 +1168,7 @@ pub mod tests {
 			// make sure the isolate is still unusable
 			let res = isolate.execute("simple.js", "1+1;");
 			if let Err(e) = res {
-				assert_eq!(
-					e.to_string(),
-					"Uncaught Error: execution terminated"
-				);
+				assert_eq!(e.to_string(), "Uncaught Error: execution terminated");
 			} else {
 				panic!("should return an error");
 			}
@@ -1478,10 +1354,7 @@ pub mod tests {
 	fn test_js() {
 		run_in_task(|mut cx| {
 			let (mut isolate, _dispatch_count) = setup(Mode::Async);
-			js_check(isolate.execute(
-				"shared_queue_test.js",
-				include_str!("shared_queue_test.js"),
-			));
+			js_check(isolate.execute("shared_queue_test.js", include_str!("shared_queue_test.js")));
 			if let Poll::Ready(Err(_)) = isolate.poll_unpin(&mut cx) {
 				unreachable!();
 			}

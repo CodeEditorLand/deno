@@ -29,13 +29,7 @@ impl Progress {
 	pub fn add(&self, status:&str, name:&str) -> Job {
 		let mut s = self.0.lock().unwrap();
 		let id = s.job_names.len();
-		s.maybe_call_callback(
-			false,
-			s.complete,
-			s.job_names.len() + 1,
-			status,
-			name,
-		);
+		s.maybe_call_callback(false, s.complete, s.job_names.len() + 1, status, name);
 		s.job_names.push(name.to_string());
 		Job { id, inner:self.0.clone() }
 	}

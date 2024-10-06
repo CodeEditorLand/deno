@@ -25,8 +25,7 @@ impl DenoDir {
 		// We use the OS cache dir because all files deno writes are cache files
 		// Once that changes we need to start using different roots if DENO_DIR
 		// is not set, and keep a single one if it is.
-		let default =
-			dirs::cache_dir().map(|d| d.join("deno")).unwrap_or(fallback);
+		let default = dirs::cache_dir().map(|d| d.join("deno")).unwrap_or(fallback);
 
 		let root:PathBuf = custom_root.unwrap_or(default);
 		let deps_path = root.join("deps");

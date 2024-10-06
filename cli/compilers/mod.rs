@@ -18,5 +18,4 @@ pub struct CompiledModule {
 	pub name:String,
 }
 
-pub type CompiledModuleFuture =
-	dyn Future<Output = Result<CompiledModule, ErrBox>> + Send;
+pub type CompiledModuleFuture = dyn Future<Output = Result<CompiledModule, ErrBox>> + Send;

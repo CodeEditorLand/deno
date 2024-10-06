@@ -85,9 +85,7 @@ impl Shell {
 	pub fn new() -> Shell {
 		Shell {
 			err:ShellOut::Stream {
-				stream:StandardStream::stderr(
-					ColorChoice::CargoAuto.to_termcolor_color_choice(),
-				),
+				stream:StandardStream::stderr(ColorChoice::CargoAuto.to_termcolor_color_choice()),
 				color_choice:ColorChoice::CargoAuto,
 				tty:atty::is(atty::Stream::Stderr),
 			},
@@ -126,9 +124,7 @@ impl Shell {
 	}
 
 	/// Sets whether the next print should clear the current line.
-	pub fn set_needs_clear(&mut self, needs_clear:bool) {
-		self.needs_clear = needs_clear;
-	}
+	pub fn set_needs_clear(&mut self, needs_clear:bool) { self.needs_clear = needs_clear; }
 
 	/// Returns `true` if the `needs_clear` flag is unset.
 	pub fn is_cleared(&self) -> bool { !self.needs_clear }
@@ -226,22 +222,14 @@ impl Shell {
 	}
 
 	/// Updates the verbosity of the shell.
-	pub fn set_verbosity(&mut self, verbosity:Verbosity) {
-		self.verbosity = verbosity;
-	}
+	pub fn set_verbosity(&mut self, verbosity:Verbosity) { self.verbosity = verbosity; }
 
 	/// Gets the verbosity of the shell.
 	pub fn verbosity(&self) -> Verbosity { self.verbosity }
 
 	/// Updates the color choice (always, never, or auto) from a string..
-	pub fn set_color_choice(
-		&mut self,
-		color:Option<&str>,
-	) -> Result<(), ErrBox> {
-		if let ShellOut::Stream {
-			ref mut stream, ref mut color_choice, ..
-		} = self.err
-		{
+	pub fn set_color_choice(&mut self, color:Option<&str>) -> Result<(), ErrBox> {
+		if let ShellOut::Stream { ref mut stream, ref mut color_choice, .. } = self.err {
 			let cfg = match color {
 				Some("always") => ColorChoice::Always,
 				Some("never") => ColorChoice::Never,
@@ -250,8 +238,7 @@ impl Shell {
 
 				Some(arg) => {
 					panic!(
-						"argument for --color must be auto, always, or never, \
-						 but found `{}`",
+						"argument for --color must be auto, always, or never, but found `{}`",
 						arg
 					)
 				},
@@ -316,9 +303,7 @@ impl ShellOut {
 		match *self {
 			ShellOut::Stream { ref mut stream, .. } => {
 				stream.reset()?;
-				stream.set_color(
-					ColorSpec::new().set_bold(true).set_fg(Some(color)),
-				)?;
+				stream.set_color(ColorSpec::new().set_bold(true).set_fg(Some(color)))?;
 				if justified {
 					write!(stream, "{:>12}", status)?;
 				} else {
@@ -382,16 +367,10 @@ mod imp {
 	pub fn stderr_width() -> Option<usize> {
 		unsafe {
 			let mut winsize:libc::winsize = mem::zeroed();
-			if libc::ioctl(libc::STDERR_FILENO, libc::TIOCGWINSZ, &mut winsize)
-				< 0
-			{
+			if libc::ioctl(libc::STDERR_FILENO, libc::TIOCGWINSZ, &mut winsize) < 0 {
 				return None;
 			}
-			if winsize.ws_col > 0 {
-				Some(winsize.ws_col as usize)
-			} else {
-				None
-			}
+			if winsize.ws_col > 0 { Some(winsize.ws_col as usize) } else { None }
 		}
 	}
 
@@ -414,14 +393,7 @@ mod imp {
 mod imp {
 	use std::{cmp, mem, ptr};
 
-	use winapi::um::{
-		fileapi::*,
-		handleapi::*,
-		processenv::*,
-		winbase::*,
-		wincon::*,
-		winnt::*,
-	};
+	use winapi::um::{fileapi::*, handleapi::*, processenv::*, winbase::*, wincon::*, winnt::*};
 
 	pub(super) use super::default_err_erase_line as err_erase_line;
 
@@ -430,9 +402,7 @@ mod imp {
 			let stdout = GetStdHandle(STD_ERROR_HANDLE);
 			let mut csbi:CONSOLE_SCREEN_BUFFER_INFO = mem::zeroed();
 			if GetConsoleScreenBufferInfo(stdout, &mut csbi) != 0 {
-				return Some(
-					(csbi.srWindow.Right - csbi.srWindow.Left) as usize,
-				);
+				return Some((csbi.srWindow.Right - csbi.srWindow.Left) as usize);
 			}
 
 			// On mintty/msys/cygwin based terminals, the above fails with
@@ -471,10 +441,7 @@ mod imp {
 	}
 }
 
-#[cfg(any(
-	all(unix, not(any(target_os = "linux", target_os = "macos"))),
-	windows
-))]
+#[cfg(any(all(unix, not(any(target_os = "linux", target_os = "macos"))), windows))]
 fn default_err_erase_line(shell:&mut Shell) {
 	if let Some(max_width) = imp::stderr_width() {
 		let blank = " ".repeat(max_width);

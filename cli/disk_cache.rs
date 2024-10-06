@@ -46,15 +46,12 @@ impl DiskCache {
 				let mut path_components = path.components();
 
 				if cfg!(target_os = "windows") {
-					if let Some(Component::Prefix(prefix_component)) =
-						path_components.next()
-					{
+					if let Some(Component::Prefix(prefix_component)) = path_components.next() {
 						// Windows doesn't support ":" in filenames, so we need
 						// to extract disk prefix Example: file:///C:/deno/js/unit_test_runner.ts
 						// it should produce: file\c\deno\js\unit_test_runner.ts
 						match prefix_component.kind() {
-							Prefix::Disk(disk_byte)
-							| Prefix::VerbatimDisk(disk_byte) => {
+							Prefix::Disk(disk_byte) | Prefix::VerbatimDisk(disk_byte) => {
 								let disk = (disk_byte as char).to_string();
 								out.push(disk);
 							},
@@ -72,29 +69,21 @@ impl DiskCache {
 				out = out.join(remaining_components);
 			},
 			scheme => {
-				unimplemented!(
-					"Don't know how to create cache name for scheme: {}",
-					scheme
-				);
+				unimplemented!("Don't know how to create cache name for scheme: {}", scheme);
 			},
 		};
 
 		out
 	}
 
-	pub fn get_cache_filename_with_extension(
-		self: &Self,
-		url:&Url,
-		extension:&str,
-	) -> PathBuf {
+	pub fn get_cache_filename_with_extension(self: &Self, url:&Url, extension:&str) -> PathBuf {
 		let base = self.get_cache_filename(url);
 
 		match base.extension() {
 			None => base.with_extension(extension),
 			Some(ext) => {
 				let original_extension = OsStr::to_str(ext).unwrap();
-				let final_extension =
-					format!("{}.{}", original_extension, extension);
+				let final_extension = format!("{}.{}", original_extension, extension);
 				base.with_extension(final_extension)
 			},
 		}
@@ -150,18 +139,13 @@ mod tests {
 		];
 
 		if cfg!(target_os = "windows") {
-			test_cases
-				.push(("file:///D:/a/1/s/format.ts", "file/D/a/1/s/format.ts"));
+			test_cases.push(("file:///D:/a/1/s/format.ts", "file/D/a/1/s/format.ts"));
 		} else {
-			test_cases.push((
-				"file:///std/http/file_server.ts",
-				"file/std/http/file_server.ts",
-			));
+			test_cases.push(("file:///std/http/file_server.ts", "file/std/http/file_server.ts"));
 		}
 
 		for test_case in &test_cases {
-			let cache_filename =
-				cache.get_cache_filename(&Url::parse(test_case.0).unwrap());
+			let cache_filename = cache.get_cache_filename(&Url::parse(test_case.0).unwrap());
 			assert_eq!(cache_filename, PathBuf::from(test_case.1));
 		}
 	}
@@ -190,11 +174,7 @@ mod tests {
 				"file/D/std/http/file_server.js",
 			));
 		} else {
-			test_cases.push((
-				"file:///std/http/file_server",
-				"js",
-				"file/std/http/file_server.js",
-			));
+			test_cases.push(("file:///std/http/file_server", "js", "file/std/http/file_server.js"));
 		}
 
 		for test_case in &test_cases {

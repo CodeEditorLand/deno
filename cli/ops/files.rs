@@ -92,17 +92,15 @@ fn op_open(
 	}
 
 	let is_sync = args.promise_id.is_none();
-	let op =
-		futures::compat::Compat01As03::new(tokio::prelude::Future::map_err(
-			open_options.open(filename),
-			ErrBox::from,
-		))
-		.and_then(move |fs_file| {
-			let mut table = state_.lock_resource_table();
-			let rid =
-				table.add("fsFile", Box::new(StreamResource::FsFile(fs_file)));
-			futures::future::ok(json!(rid))
-		});
+	let op = futures::compat::Compat01As03::new(tokio::prelude::Future::map_err(
+		open_options.open(filename),
+		ErrBox::from,
+	))
+	.and_then(move |fs_file| {
+		let mut table = state_.lock_resource_table();
+		let rid = table.add("fsFile", Box::new(StreamResource::FsFile(fs_file)));
+		futures::future::ok(json!(rid))
+	});
 
 	if is_sync {
 		let buf = futures::executor::block_on(op)?;
@@ -141,9 +139,7 @@ impl Future for SeekFuture {
 	fn poll(self: Pin<&mut Self>, _cx:&mut Context) -> Poll<Self::Output> {
 		let inner = self.get_mut();
 		let mut table = inner.state.lock_resource_table();
-		let resource = table
-			.get_mut::<StreamResource>(inner.rid)
-			.ok_or_else(bad_resource)?;
+		let resource = table.get_mut::<StreamResource>(inner.rid).ok_or_else(bad_resource)?;
 
 		let tokio_file = match resource {
 			StreamResource::FsFile(ref mut file) => file,

@@ -33,9 +33,7 @@ static LOGGER:Logger = Logger;
 struct Logger;
 
 impl log::Log for Logger {
-	fn enabled(&self, metadata:&log::Metadata) -> bool {
-		metadata.level() <= log::max_level()
-	}
+	fn enabled(&self, metadata:&log::Metadata) -> bool { metadata.level() <= log::max_level() }
 
 	fn log(&self, record:&log::Record) {
 		if self.enabled(record.metadata()) {
@@ -55,8 +53,7 @@ pub struct Record {
 
 impl Into<Buf> for Record {
 	fn into(self) -> Buf {
-		let buf32 =
-			vec![self.promise_id, self.arg, self.result].into_boxed_slice();
+		let buf32 = vec![self.promise_id, self.arg, self.result].into_boxed_slice();
 		let ptr = Box::into_raw(buf32) as *mut [u8; 3 * 4];
 		unsafe { Box::from_raw(ptr) }
 	}
@@ -88,10 +85,7 @@ fn test_record_from() {
 	let expected = r.clone();
 	let buf:Buf = r.into();
 	#[cfg(target_endian = "little")]
-	assert_eq!(
-		buf,
-		vec![1u8, 0, 0, 0, 3, 0, 0, 0, 4, 0, 0, 0].into_boxed_slice()
-	);
+	assert_eq!(buf, vec![1u8, 0, 0, 0, 3, 0, 0, 0, 4, 0, 0, 0].into_boxed_slice());
 	let actual = Record::from(buf);
 	assert_eq!(actual, expected);
 	// TODO test From<&[u8]> for Record
@@ -99,12 +93,9 @@ fn test_record_from() {
 
 pub type HttpOp = dyn Future<Output = Result<i32, std::io::Error>> + Send;
 
-pub type HttpOpHandler =
-	fn(record:Record, zero_copy_buf:Option<PinnedBuf>) -> Pin<Box<HttpOp>>;
+pub type HttpOpHandler = fn(record:Record, zero_copy_buf:Option<PinnedBuf>) -> Pin<Box<HttpOp>>;
 
-fn http_op(
-	handler:HttpOpHandler,
-) -> impl Fn(&[u8], Option<PinnedBuf>) -> CoreOp {
+fn http_op(handler:HttpOpHandler) -> impl Fn(&[u8], Option<PinnedBuf>) -> CoreOp {
 	move |control:&[u8], zero_copy_buf:Option<PinnedBuf>| -> CoreOp {
 		let record = Record::from(control);
 		let is_sync = record.promise_id == 0;
@@ -144,10 +135,7 @@ fn main() {
 
 	let js_source = include_str!("http_bench.js");
 
-	let startup_data = StartupData::Script(Script {
-		source:js_source,
-		filename:"http_bench.js",
-	});
+	let startup_data = StartupData::Script(Script { source:js_source, filename:"http_bench.js" });
 
 	let isolate = deno::Isolate::new(startup_data, false);
 	isolate.register_op("listen", http_op(op_listen));
@@ -158,11 +146,7 @@ fn main() {
 
 	let multi_thread = args.iter().any(|a| a == "--multi-thread");
 
-	println!(
-		"num cpus; logical: {}; physical: {}",
-		num_cpus::get(),
-		num_cpus::get_physical()
-	);
+	println!("num cpus; logical: {}; physical: {}", num_cpus::get(), num_cpus::get_physical());
 	let mut builder = tokio::runtime::Builder::new();
 	let builder = if multi_thread {
 		println!("multi-thread");
@@ -172,15 +156,12 @@ fn main() {
 		builder.basic_scheduler()
 	};
 
-	let mut runtime =
-		builder.enable_io().build().expect("Unable to create tokio runtime");
+	let mut runtime = builder.enable_io().build().expect("Unable to create tokio runtime");
 	let result = runtime.block_on(isolate.boxed());
 	js_check(result);
 }
 
-pub fn bad_resource() -> Error {
-	Error::new(ErrorKind::NotFound, "bad resource id")
-}
+pub fn bad_resource() -> Error { Error::new(ErrorKind::NotFound, "bad resource id") }
 
 struct TcpListener(tokio::net::TcpListener);
 
@@ -191,13 +172,10 @@ struct TcpStream(tokio::net::TcpStream);
 impl Resource for TcpStream {}
 
 lazy_static! {
-	static ref RESOURCE_TABLE: Mutex<ResourceTable> =
-		Mutex::new(ResourceTable::default());
+	static ref RESOURCE_TABLE: Mutex<ResourceTable> = Mutex::new(ResourceTable::default());
 }
 
-fn lock_resource_table<'a>() -> MutexGuard<'a, ResourceTable> {
-	RESOURCE_TABLE.lock().unwrap()
-}
+fn lock_resource_table<'a>() -> MutexGuard<'a, ResourceTable> { RESOURCE_TABLE.lock().unwrap() }
 
 struct Accept {
 	rid:ResourceId,
@@ -220,10 +198,7 @@ impl Future for Accept {
 	}
 }
 
-fn op_accept(
-	record:Record,
-	_zero_copy_buf:Option<PinnedBuf>,
-) -> Pin<Box<HttpOp>> {
+fn op_accept(record:Record, _zero_copy_buf:Option<PinnedBuf>) -> Pin<Box<HttpOp>> {
 	let rid = record.arg as u32;
 	debug!("accept {}", rid);
 
@@ -238,10 +213,7 @@ fn op_accept(
 	fut.boxed()
 }
 
-fn op_listen(
-	_record:Record,
-	_zero_copy_buf:Option<PinnedBuf>,
-) -> Pin<Box<HttpOp>> {
+fn op_listen(_record:Record, _zero_copy_buf:Option<PinnedBuf>) -> Pin<Box<HttpOp>> {
 	debug!("listen");
 	let fut = async {
 		let addr = "127.0.0.1:4544".parse::<SocketAddr>().unwrap();
@@ -254,10 +226,7 @@ fn op_listen(
 	fut.boxed()
 }
 
-fn op_close(
-	record:Record,
-	_zero_copy_buf:Option<PinnedBuf>,
-) -> Pin<Box<HttpOp>> {
+fn op_close(record:Record, _zero_copy_buf:Option<PinnedBuf>) -> Pin<Box<HttpOp>> {
 	debug!("close");
 	let fut = async move {
 		let rid = record.arg as u32;
@@ -328,10 +297,7 @@ impl Future for Write {
 	}
 }
 
-fn op_write(
-	record:Record,
-	zero_copy_buf:Option<PinnedBuf>,
-) -> Pin<Box<HttpOp>> {
+fn op_write(record:Record, zero_copy_buf:Option<PinnedBuf>) -> Pin<Box<HttpOp>> {
 	let rid = record.arg as u32;
 	debug!("write rid={}", rid);
 	let zero_copy_buf = zero_copy_buf.unwrap();

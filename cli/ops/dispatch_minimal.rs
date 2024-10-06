@@ -55,10 +55,8 @@ impl Into<Buf> for ErrorRecord {
 
 #[test]
 fn test_error_record() {
-	let expected = vec![
-		1, 0, 0, 0, 255, 255, 255, 255, 10, 0, 0, 0, 69, 114, 114, 111, 114,
-		32, 32, 32,
-	];
+	let expected =
+		vec![1, 0, 0, 0, 255, 255, 255, 255, 10, 0, 0, 0, 69, 114, 114, 111, 114, 32, 32, 32];
 	let err_record = ErrorRecord {
 		promise_id:1,
 		arg:-1,
@@ -89,10 +87,7 @@ pub fn parse_min_record(bytes:&[u8]) -> Option<Record> {
 #[test]
 fn test_parse_min_record() {
 	let buf = vec![1, 0, 0, 0, 3, 0, 0, 0, 4, 0, 0, 0];
-	assert_eq!(
-		parse_min_record(&buf),
-		Some(Record { promise_id:1, arg:3, result:4 })
-	);
+	assert_eq!(parse_min_record(&buf), Some(Record { promise_id:1, arg:3, result:4 }));
 
 	let buf = vec![];
 	assert_eq!(parse_min_record(&buf), None);
@@ -112,10 +107,7 @@ where
 					promise_id:0,
 					arg:-1,
 					error_code:ErrorKind::InvalidInput as i32,
-					error_message:"Unparsable control buffer"
-						.to_string()
-						.as_bytes()
-						.to_owned(),
+					error_message:"Unparsable control buffer".to_string().as_bytes().to_owned(),
 				};
 				return Op::Sync(error_record.into());
 			},

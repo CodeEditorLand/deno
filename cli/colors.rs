@@ -20,9 +20,7 @@ lazy_static! {
 }
 
 /// Helper function to strip ansi codes.
-pub fn strip_ansi_codes(s:&str) -> std::borrow::Cow<str> {
-	STRIP_ANSI_RE.replace_all(s, "")
-}
+pub fn strip_ansi_codes(s:&str) -> std::borrow::Cow<str> { STRIP_ANSI_RE.replace_all(s, "") }
 
 pub fn use_color() -> bool { !(*NO_COLOR) }
 

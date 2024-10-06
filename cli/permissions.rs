@@ -75,9 +75,7 @@ impl From<usize> for PermissionState {
 }
 
 impl From<bool> for PermissionState {
-	fn from(val:bool) -> Self {
-		if val { PermissionState::Allow } else { PermissionState::Ask }
-	}
+	fn from(val:bool) -> Self { if val { PermissionState::Allow } else { PermissionState::Ask } }
 }
 
 impl fmt::Display for PermissionState {
@@ -126,10 +124,8 @@ impl DenoPermissions {
 	}
 
 	pub fn check_run(&self) -> Result<(), ErrBox> {
-		self.allow_run.check(
-			"access to run a subprocess",
-			"run again with the --allow-run flag",
-		)
+		self.allow_run
+			.check("access to run a subprocess", "run again with the --allow-run flag")
 	}
 
 	fn get_state_read(&self, filename:&Option<&str>) -> PermissionState {
@@ -167,21 +163,14 @@ impl DenoPermissions {
 		self.allow_net
 	}
 
-	fn get_state_net_url(
-		&self,
-		url:&Option<&str>,
-	) -> Result<PermissionState, ErrBox> {
+	fn get_state_net_url(&self, url:&Option<&str>) -> Result<PermissionState, ErrBox> {
 		if url.is_none() {
 			return Ok(self.allow_net);
 		}
 		let url:&str = url.unwrap();
 		// If url is invalid, then throw a TypeError.
-		let parsed = Url::parse(url)
-			.map_err(|_| type_error(format!("Invalid url: {}", url)))?;
-		Ok(self.get_state_net(
-			&format!("{}", parsed.host().unwrap()),
-			parsed.port(),
-		))
+		let parsed = Url::parse(url).map_err(|_| type_error(format!("Invalid url: {}", url)))?;
+		Ok(self.get_state_net(&format!("{}", parsed.host().unwrap()), parsed.port()))
 	}
 
 	pub fn check_net(&self, hostname:&str, port:u16) -> Result<(), ErrBox> {
@@ -193,17 +182,12 @@ impl DenoPermissions {
 
 	pub fn check_net_url(&self, url:&url::Url) -> Result<(), ErrBox> {
 		self.get_state_net(&format!("{}", url.host().unwrap()), url.port())
-			.check(
-				&format!("network access to \"{}\"", url),
-				"run again with the --allow-net flag",
-			)
+			.check(&format!("network access to \"{}\"", url), "run again with the --allow-net flag")
 	}
 
 	pub fn check_env(&self) -> Result<(), ErrBox> {
-		self.allow_env.check(
-			"access to environment variables",
-			"run again with the --allow-env flag",
-		)
+		self.allow_env
+			.check("access to environment variables", "run again with the --allow-env flag")
 	}
 
 	pub fn check_plugin(&self, filename:&str) -> Result<(), ErrBox> {
@@ -239,10 +223,7 @@ impl DenoPermissions {
 		})
 	}
 
-	pub fn request_net(
-		&mut self,
-		url:&Option<&str>,
-	) -> Result<PermissionState, ErrBox> {
+	pub fn request_net(&mut self, url:&Option<&str>) -> Result<PermissionState, ErrBox> {
 		if self.get_state_net_url(url)? == PermissionState::Ask {
 			return Ok(self.allow_net.request(&match url {
 				None => "Deno requests network access.".to_string(),
@@ -255,13 +236,11 @@ impl DenoPermissions {
 	}
 
 	pub fn request_env(&mut self) -> PermissionState {
-		self.allow_env
-			.request("Deno requests to access to environment variables.")
+		self.allow_env.request("Deno requests to access to environment variables.")
 	}
 
 	pub fn request_hrtime(&mut self) -> PermissionState {
-		self.allow_hrtime
-			.request("Deno requests to access to high precision time.")
+		self.allow_hrtime.request("Deno requests to access to high precision time.")
 	}
 
 	pub fn request_plugin(&mut self) -> PermissionState {
@@ -294,10 +273,7 @@ fn permission_prompt(message:&str) -> bool {
 	if !atty::is(atty::Stream::Stdin) || !atty::is(atty::Stream::Stderr) {
 		return false;
 	};
-	let msg = format!(
-		"️{}  {}. Grant? [g/d (g = grant, d = deny)] ",
-		PERMISSION_EMOJI, message
-	);
+	let msg = format!("️{}  {}. Grant? [g/d (g = grant, d = deny)] ", PERMISSION_EMOJI, message);
 	// print to stderr so that if deno is > to a file this is still displayed.
 	eprint!("{}", Style::new().bold().paint(msg));
 	loop {
@@ -313,10 +289,8 @@ fn permission_prompt(message:&str) -> bool {
 			'd' => return false,
 			_ => {
 				// If we don't get a recognized option try again.
-				let msg_again = format!(
-					"Unrecognized option '{}' [g/d (g = grant, d = deny)] ",
-					ch
-				);
+				let msg_again =
+					format!("Unrecognized option '{}' [g/d (g = grant, d = deny)] ", ch);
 				eprint!("{}", Style::new().bold().paint(msg_again));
 			},
 		};
@@ -327,32 +301,23 @@ fn permission_prompt(message:&str) -> bool {
 static STUB_PROMPT_VALUE:AtomicBool = AtomicBool::new(true);
 
 #[cfg(test)]
-fn set_prompt_result(value:bool) {
-	STUB_PROMPT_VALUE.store(value, Ordering::SeqCst);
-}
+fn set_prompt_result(value:bool) { STUB_PROMPT_VALUE.store(value, Ordering::SeqCst); }
 
 // When testing, permission prompt returns the value of STUB_PROMPT_VALUE
 // which we set from the test functions.
 #[cfg(test)]
-fn permission_prompt(_message:&str) -> bool {
-	STUB_PROMPT_VALUE.load(Ordering::SeqCst)
-}
+fn permission_prompt(_message:&str) -> bool { STUB_PROMPT_VALUE.load(Ordering::SeqCst) }
 
 fn log_perm_access(message:&str) {
 	if log_enabled!(log::Level::Info) {
 		eprintln!(
 			"{}",
-			Style::new()
-				.bold()
-				.paint(format!("{}️  Granted {}", PERMISSION_EMOJI, message))
+			Style::new().bold().paint(format!("{}️  Granted {}", PERMISSION_EMOJI, message))
 		);
 	}
 }
 
-fn check_path_white_list(
-	filename:&Option<&str>,
-	white_list:&HashSet<String>,
-) -> bool {
+fn check_path_white_list(filename:&Option<&str>, white_list:&HashSet<String>) -> bool {
 	if filename.is_none() {
 		return false;
 	}
@@ -368,14 +333,9 @@ fn check_path_white_list(
 	false
 }
 
-fn check_host_and_port_whitelist(
-	host:&str,
-	port:Option<u16>,
-	whitelist:&HashSet<String>,
-) -> bool {
+fn check_host_and_port_whitelist(host:&str, port:Option<u16>, whitelist:&HashSet<String>) -> bool {
 	whitelist.contains(host)
-		|| (port.is_some()
-			&& whitelist.contains(&format!("{}:{}", host, port.unwrap())))
+		|| (port.is_some() && whitelist.contains(&format!("{}:{}", host, port.unwrap())))
 }
 
 #[cfg(test)]
@@ -519,13 +479,11 @@ mod tests {
 
 	#[test]
 	fn test_permissions_request_run() {
-		let mut perms0 =
-			DenoPermissions::from_flags(&DenoFlags { ..Default::default() });
+		let mut perms0 = DenoPermissions::from_flags(&DenoFlags { ..Default::default() });
 		set_prompt_result(true);
 		assert_eq!(perms0.request_run(), PermissionState::Allow);
 
-		let mut perms1 =
-			DenoPermissions::from_flags(&DenoFlags { ..Default::default() });
+		let mut perms1 = DenoPermissions::from_flags(&DenoFlags { ..Default::default() });
 		set_prompt_result(false);
 		assert_eq!(perms1.request_run(), PermissionState::Deny);
 	}
@@ -540,30 +498,21 @@ mod tests {
 		set_prompt_result(false);
 		// If the whitelist contains the path, then the result is `allow`
 		// regardless of prompt result
-		assert_eq!(
-			perms0.request_read(&Some("/foo/bar")),
-			PermissionState::Allow
-		);
+		assert_eq!(perms0.request_read(&Some("/foo/bar")), PermissionState::Allow);
 
 		let mut perms1 = DenoPermissions::from_flags(&DenoFlags {
 			read_whitelist:whitelist.clone(),
 			..Default::default()
 		});
 		set_prompt_result(true);
-		assert_eq!(
-			perms1.request_read(&Some("/foo/baz")),
-			PermissionState::Allow
-		);
+		assert_eq!(perms1.request_read(&Some("/foo/baz")), PermissionState::Allow);
 
 		let mut perms2 = DenoPermissions::from_flags(&DenoFlags {
 			read_whitelist:whitelist.clone(),
 			..Default::default()
 		});
 		set_prompt_result(false);
-		assert_eq!(
-			perms2.request_read(&Some("/foo/baz")),
-			PermissionState::Deny
-		);
+		assert_eq!(perms2.request_read(&Some("/foo/baz")), PermissionState::Deny);
 	}
 
 	#[test]
@@ -576,30 +525,21 @@ mod tests {
 		set_prompt_result(false);
 		// If the whitelist contains the path, then the result is `allow`
 		// regardless of prompt result
-		assert_eq!(
-			perms0.request_write(&Some("/foo/bar")),
-			PermissionState::Allow
-		);
+		assert_eq!(perms0.request_write(&Some("/foo/bar")), PermissionState::Allow);
 
 		let mut perms1 = DenoPermissions::from_flags(&DenoFlags {
 			write_whitelist:whitelist.clone(),
 			..Default::default()
 		});
 		set_prompt_result(true);
-		assert_eq!(
-			perms1.request_write(&Some("/foo/baz")),
-			PermissionState::Allow
-		);
+		assert_eq!(perms1.request_write(&Some("/foo/baz")), PermissionState::Allow);
 
 		let mut perms2 = DenoPermissions::from_flags(&DenoFlags {
 			write_whitelist:whitelist.clone(),
 			..Default::default()
 		});
 		set_prompt_result(false);
-		assert_eq!(
-			perms2.request_write(&Some("/foo/baz")),
-			PermissionState::Deny
-		);
+		assert_eq!(perms2.request_write(&Some("/foo/baz")), PermissionState::Deny);
 	}
 
 	#[test]
@@ -614,9 +554,7 @@ mod tests {
 		// If the url matches the whitelist item, then the result is `allow`
 		// regardless of prompt result
 		assert_eq!(
-			perms0
-				.request_net(&Some("http://localhost:8080/"))
-				.expect("Testing expect"),
+			perms0.request_net(&Some("http://localhost:8080/")).expect("Testing expect"),
 			PermissionState::Allow
 		);
 
@@ -626,9 +564,7 @@ mod tests {
 		});
 		set_prompt_result(true);
 		assert_eq!(
-			perms1
-				.request_net(&Some("http://deno.land/"))
-				.expect("Testing expect"),
+			perms1.request_net(&Some("http://deno.land/")).expect("Testing expect"),
 			PermissionState::Allow
 		);
 
@@ -638,9 +574,7 @@ mod tests {
 		});
 		set_prompt_result(false);
 		assert_eq!(
-			perms2
-				.request_net(&Some("http://deno.land/"))
-				.expect("Testing expect"),
+			perms2.request_net(&Some("http://deno.land/")).expect("Testing expect"),
 			PermissionState::Deny
 		);
 
@@ -654,39 +588,33 @@ mod tests {
 
 	#[test]
 	fn test_permissions_request_env() {
-		let mut perms0 =
-			DenoPermissions::from_flags(&DenoFlags { ..Default::default() });
+		let mut perms0 = DenoPermissions::from_flags(&DenoFlags { ..Default::default() });
 		set_prompt_result(true);
 		assert_eq!(perms0.request_env(), PermissionState::Allow);
 
-		let mut perms1 =
-			DenoPermissions::from_flags(&DenoFlags { ..Default::default() });
+		let mut perms1 = DenoPermissions::from_flags(&DenoFlags { ..Default::default() });
 		set_prompt_result(false);
 		assert_eq!(perms1.request_env(), PermissionState::Deny);
 	}
 
 	#[test]
 	fn test_permissions_request_plugin() {
-		let mut perms0 =
-			DenoPermissions::from_flags(&DenoFlags { ..Default::default() });
+		let mut perms0 = DenoPermissions::from_flags(&DenoFlags { ..Default::default() });
 		set_prompt_result(true);
 		assert_eq!(perms0.request_plugin(), PermissionState::Allow);
 
-		let mut perms1 =
-			DenoPermissions::from_flags(&DenoFlags { ..Default::default() });
+		let mut perms1 = DenoPermissions::from_flags(&DenoFlags { ..Default::default() });
 		set_prompt_result(false);
 		assert_eq!(perms1.request_plugin(), PermissionState::Deny);
 	}
 
 	#[test]
 	fn test_permissions_request_hrtime() {
-		let mut perms0 =
-			DenoPermissions::from_flags(&DenoFlags { ..Default::default() });
+		let mut perms0 = DenoPermissions::from_flags(&DenoFlags { ..Default::default() });
 		set_prompt_result(true);
 		assert_eq!(perms0.request_hrtime(), PermissionState::Allow);
 
-		let mut perms1 =
-			DenoPermissions::from_flags(&DenoFlags { ..Default::default() });
+		let mut perms1 = DenoPermissions::from_flags(&DenoFlags { ..Default::default() });
 		set_prompt_result(false);
 		assert_eq!(perms1.request_hrtime(), PermissionState::Deny);
 	}

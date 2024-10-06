@@ -148,8 +148,7 @@ impl SharedQueue {
 			self.reset();
 		}
 		println!(
-			"rust:shared_queue:shift: num_records={}, num_shifted_off={}, \
-			 head={}",
+			"rust:shared_queue:shift: num_records={}, num_shifted_off={}, head={}",
 			self.num_records(),
 			self.num_shifted_off(),
 			self.head()
@@ -182,8 +181,7 @@ impl SharedQueue {
 		u32_slice[INDEX_NUM_RECORDS] += 1;
 		u32_slice[INDEX_HEAD] = end as u32;
 		debug!(
-			"rust:shared_queue:push: num_records={}, num_shifted_off={}, \
-			 head={}",
+			"rust:shared_queue:push: num_records={}, num_shifted_off={}, head={}",
 			self.num_records(),
 			self.num_shifted_off(),
 			self.head()

@@ -64,19 +64,14 @@ impl Future for Accept {
 		}
 
 		let mut table = inner.state.lock_resource_table();
-		let listener_resource = table
-			.get_mut::<TcpListenerResource>(inner.rid)
-			.ok_or_else(|| {
-				let e = std::io::Error::new(
-					std::io::ErrorKind::Other,
-					"Listener has been closed",
-				);
+		let listener_resource =
+			table.get_mut::<TcpListenerResource>(inner.rid).ok_or_else(|| {
+				let e = std::io::Error::new(std::io::ErrorKind::Other, "Listener has been closed");
 				ErrBox::from(e)
 			})?;
 
-		let mut listener =
-			futures::compat::Compat01As03::new(&mut listener_resource.listener)
-				.map_err(ErrBox::from);
+		let mut listener = futures::compat::Compat01As03::new(&mut listener_resource.listener)
+			.map_err(ErrBox::from);
 
 		match listener.poll_next_unpin(cx) {
 			Poll::Ready(Some(Ok(stream))) => {
@@ -126,10 +121,7 @@ fn op_accept(
 				Err(e) => return futures::future::err(ErrBox::from(e)),
 			};
 			let mut table = state_.lock_resource_table();
-			let rid = table.add(
-				"tcpStream",
-				Box::new(StreamResource::TcpStream(tcp_stream)),
-			);
+			let rid = table.add("tcpStream", Box::new(StreamResource::TcpStream(tcp_stream)));
 			futures::future::ok((rid, local_addr, remote_addr))
 		})
 		.map_err(ErrBox::from)
@@ -174,10 +166,7 @@ fn op_dial(
 					Err(e) => return futures::future::err(ErrBox::from(e)),
 				};
 				let mut table = state_.lock_resource_table();
-				let rid = table.add(
-					"tcpStream",
-					Box::new(StreamResource::TcpStream(tcp_stream)),
-				);
+				let rid = table.add("tcpStream", Box::new(StreamResource::TcpStream(tcp_stream)));
 				futures::future::ok((rid, local_addr, remote_addr))
 			})
 			.map_err(ErrBox::from)
@@ -216,8 +205,7 @@ fn op_shutdown(
 	};
 
 	let mut table = state.lock_resource_table();
-	let resource =
-		table.get_mut::<StreamResource>(rid).ok_or_else(bad_resource)?;
+	let resource = table.get_mut::<StreamResource>(rid).ok_or_else(bad_resource)?;
 	match resource {
 		StreamResource::TcpStream(ref mut stream) => {
 			TcpStream::shutdown(stream, shutdown_mode).map_err(ErrBox::from)?;
@@ -259,10 +247,8 @@ impl TcpListenerResource {
 		// workers. Caveat: TcpListener by itself also only tracks an accept
 		// task at a time. See https://github.com/tokio-rs/tokio/issues/846#issuecomment-454208883
 		if self.waker.is_some() {
-			let e = std::io::Error::new(
-				std::io::ErrorKind::Other,
-				"Another accept task is ongoing",
-			);
+			let e =
+				std::io::Error::new(std::io::ErrorKind::Other, "Another accept task is ongoing");
 			return Err(ErrBox::from(e));
 		}
 
@@ -298,16 +284,12 @@ fn op_listen(
 
 	state.check_net(&args.hostname, args.port)?;
 
-	let addr =
-		futures::executor::block_on(resolve_addr(&args.hostname, args.port))?;
+	let addr = futures::executor::block_on(resolve_addr(&args.hostname, args.port))?;
 	let listener = TcpListener::bind(&addr)?;
 	let local_addr = listener.local_addr()?;
 	let local_addr_str = local_addr.to_string();
-	let listener_resource = TcpListenerResource {
-		listener:listener.incoming(),
-		waker:None,
-		local_addr,
-	};
+	let listener_resource =
+		TcpListenerResource { listener:listener.incoming(), waker:None, local_addr };
 	let mut table = state.lock_resource_table();
 	let rid = table.add("tcpListener", Box::new(listener_resource));
 	debug!("New listener {} {}", rid, local_addr_str);

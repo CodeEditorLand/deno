@@ -12,14 +12,8 @@ use crate::{
 };
 
 pub fn init(i:&mut Isolate, s:&ThreadSafeState) {
-	i.register_op(
-		"apply_source_map",
-		s.core_op(json_op(s.stateful_op(op_apply_source_map))),
-	);
-	i.register_op(
-		"format_error",
-		s.core_op(json_op(s.stateful_op(op_format_error))),
-	);
+	i.register_op("apply_source_map", s.core_op(json_op(s.stateful_op(op_apply_source_map))));
+	i.register_op("format_error", s.core_op(json_op(s.stateful_op(op_format_error))));
 }
 
 #[derive(Deserialize)]
@@ -33,8 +27,7 @@ fn op_format_error(
 	_zero_copy:Option<PinnedBuf>,
 ) -> Result<JsonOp, ErrBox> {
 	let args:FormatErrorArgs = serde_json::from_value(args)?;
-	let error =
-		JSError::from_json(&args.error, &state.global_state.ts_compiler);
+	let error = JSError::from_json(&args.error, &state.global_state.ts_compiler);
 
 	Ok(JsonOp::Sync(json!({
 	  "error": error.to_string(),

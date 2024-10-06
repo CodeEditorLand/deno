@@ -14,9 +14,7 @@ lazy_static! {
 	static ref GUARD: Mutex<()> = Mutex::new(());
 }
 
-pub fn root_path() -> PathBuf {
-	PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/.."))
-}
+pub fn root_path() -> PathBuf { PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/..")) }
 
 pub fn target_dir() -> PathBuf {
 	let current_exe = std::env::current_exe().unwrap();

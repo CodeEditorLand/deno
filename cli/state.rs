@@ -14,16 +14,7 @@ use std::{
 	time::Instant,
 };
 
-use deno::{
-	Buf,
-	CoreOp,
-	ErrBox,
-	Loader,
-	ModuleSpecifier,
-	Op,
-	PinnedBuf,
-	ResourceTable,
-};
+use deno::{Buf, CoreOp, ErrBox, Loader, ModuleSpecifier, Op, PinnedBuf, ResourceTable};
 use futures::{
 	channel::mpsc,
 	future::{FutureExt, TryFutureExt},
@@ -83,24 +74,17 @@ impl ThreadSafeState {
 	}
 
 	/// Wrap core `OpDispatcher` to collect metrics.
-	pub fn core_op<D>(
-		&self,
-		dispatcher:D,
-	) -> impl Fn(&[u8], Option<PinnedBuf>) -> CoreOp
+	pub fn core_op<D>(&self, dispatcher:D) -> impl Fn(&[u8], Option<PinnedBuf>) -> CoreOp
 	where
 		D: Fn(&[u8], Option<PinnedBuf>) -> CoreOp, {
 		let state = self.clone();
 
 		move |control:&[u8], zero_copy:Option<PinnedBuf>| -> CoreOp {
 			let bytes_sent_control = control.len();
-			let bytes_sent_zero_copy =
-				zero_copy.as_ref().map(|b| b.len()).unwrap_or(0);
+			let bytes_sent_zero_copy = zero_copy.as_ref().map(|b| b.len()).unwrap_or(0);
 
 			let op = dispatcher(control, zero_copy);
-			state.metrics_op_dispatched(
-				bytes_sent_control,
-				bytes_sent_zero_copy,
-			);
+			state.metrics_op_dispatched(bytes_sent_control, bytes_sent_zero_copy);
 
 			match op {
 				Op::Sync(buf) => {
@@ -143,16 +127,10 @@ impl ThreadSafeState {
 		dispatcher:D,
 	) -> impl Fn(Value, Option<PinnedBuf>) -> Result<JsonOp, ErrBox>
 	where
-		D: Fn(
-			&ThreadSafeState,
-			Value,
-			Option<PinnedBuf>,
-		) -> Result<JsonOp, ErrBox>, {
+		D: Fn(&ThreadSafeState, Value, Option<PinnedBuf>) -> Result<JsonOp, ErrBox>, {
 		let state = self.clone();
 
-		move |args:Value,
-		      zero_copy:Option<PinnedBuf>|
-		      -> Result<JsonOp, ErrBox> {
+		move |args:Value, zero_copy:Option<PinnedBuf>| -> Result<JsonOp, ErrBox> {
 			dispatcher(&state, args, zero_copy)
 		}
 	}
@@ -174,8 +152,7 @@ impl Loader for ThreadSafeState {
 				}
 			}
 		}
-		let module_specifier =
-			ModuleSpecifier::resolve_import(specifier, referrer)?;
+		let module_specifier = ModuleSpecifier::resolve_import(specifier, referrer)?;
 
 		if is_dyn_import {
 			self.check_dyn_import(&module_specifier)?;
@@ -213,10 +190,8 @@ impl ThreadSafeState {
 	pub fn create_channels() -> (WorkerChannels, WorkerChannels) {
 		let (in_tx, in_rx) = mpsc::channel::<Buf>(1);
 		let (out_tx, out_rx) = mpsc::channel::<Buf>(1);
-		let internal_channels =
-			WorkerChannels { sender:out_tx, receiver:in_rx };
-		let external_channels =
-			WorkerChannels { sender:in_tx, receiver:out_rx };
+		let internal_channels = WorkerChannels { sender:out_tx, receiver:in_rx };
+		let external_channels = WorkerChannels { sender:in_tx, receiver:out_rx };
 		(internal_channels, external_channels)
 	}
 
@@ -228,11 +203,10 @@ impl ThreadSafeState {
 		include_deno_namespace:bool,
 		internal_channels:WorkerChannels,
 	) -> Result<Self, ErrBox> {
-		let import_map:Option<ImportMap> =
-			match global_state.flags.import_map_path.as_ref() {
-				None => None,
-				Some(file_path) => Some(ImportMap::load(file_path)?),
-			};
+		let import_map:Option<ImportMap> = match global_state.flags.import_map_path.as_ref() {
+			None => None,
+			Some(file_path) => Some(ImportMap::load(file_path)?),
+		};
 
 		let seeded_rng = match global_state.flags.seed {
 			Some(seed) => Some(Mutex::new(StdRng::seed_from_u64(seed))),
@@ -267,8 +241,7 @@ impl ThreadSafeState {
 	}
 
 	pub fn add_child_worker(&self, worker:Worker) -> u32 {
-		let worker_id =
-			self.next_worker_id.fetch_add(1, Ordering::Relaxed) as u32;
+		let worker_id = self.next_worker_id.fetch_add(1, Ordering::Relaxed) as u32;
 		let mut workers_tl = self.workers.lock().unwrap();
 		workers_tl.insert(worker_id, worker);
 		worker_id
@@ -285,9 +258,7 @@ impl ThreadSafeState {
 	}
 
 	#[inline]
-	pub fn check_env(&self) -> Result<(), ErrBox> {
-		self.permissions.lock().unwrap().check_env()
-	}
+	pub fn check_env(&self) -> Result<(), ErrBox> { self.permissions.lock().unwrap().check_env() }
 
 	#[inline]
 	pub fn check_net(&self, hostname:&str, port:u16) -> Result<(), ErrBox> {
@@ -300,19 +271,14 @@ impl ThreadSafeState {
 	}
 
 	#[inline]
-	pub fn check_run(&self) -> Result<(), ErrBox> {
-		self.permissions.lock().unwrap().check_run()
-	}
+	pub fn check_run(&self) -> Result<(), ErrBox> { self.permissions.lock().unwrap().check_run() }
 
 	#[inline]
 	pub fn check_plugin(&self, filename:&str) -> Result<(), ErrBox> {
 		self.permissions.lock().unwrap().check_plugin(filename)
 	}
 
-	pub fn check_dyn_import(
-		self: &Self,
-		module_specifier:&ModuleSpecifier,
-	) -> Result<(), ErrBox> {
+	pub fn check_dyn_import(self: &Self, module_specifier:&ModuleSpecifier) -> Result<(), ErrBox> {
 		let u = module_specifier.as_url();
 		match u.scheme() {
 			"http" | "https" => {
@@ -320,12 +286,7 @@ impl ThreadSafeState {
 				Ok(())
 			},
 			"file" => {
-				let filename = u
-					.to_file_path()
-					.unwrap()
-					.into_os_string()
-					.into_string()
-					.unwrap();
+				let filename = u.to_file_path().unwrap().into_os_string().into_string().unwrap();
 				self.check_read(&filename)?;
 				Ok(())
 			},
@@ -334,16 +295,12 @@ impl ThreadSafeState {
 	}
 
 	#[cfg(test)]
-	pub fn mock(
-		argv:Vec<String>,
-		internal_channels:WorkerChannels,
-	) -> ThreadSafeState {
+	pub fn mock(argv:Vec<String>, internal_channels:WorkerChannels) -> ThreadSafeState {
 		let module_specifier = if argv.is_empty() {
 			None
 		} else {
 			let module_specifier =
-				ModuleSpecifier::resolve_url_or_path(&argv[0])
-					.expect("Invalid entry module");
+				ModuleSpecifier::resolve_url_or_path(&argv[0]).expect("Invalid entry module");
 			Some(module_specifier)
 		};
 
@@ -357,18 +314,10 @@ impl ThreadSafeState {
 		.unwrap()
 	}
 
-	pub fn metrics_op_dispatched(
-		&self,
-		bytes_sent_control:usize,
-		bytes_sent_data:usize,
-	) {
+	pub fn metrics_op_dispatched(&self, bytes_sent_control:usize, bytes_sent_data:usize) {
 		self.metrics.ops_dispatched.fetch_add(1, Ordering::SeqCst);
-		self.metrics
-			.bytes_sent_control
-			.fetch_add(bytes_sent_control, Ordering::SeqCst);
-		self.metrics
-			.bytes_sent_data
-			.fetch_add(bytes_sent_data, Ordering::SeqCst);
+		self.metrics.bytes_sent_control.fetch_add(bytes_sent_control, Ordering::SeqCst);
+		self.metrics.bytes_sent_data.fetch_add(bytes_sent_data, Ordering::SeqCst);
 	}
 
 	pub fn metrics_op_completed(&self, bytes_received:usize) {

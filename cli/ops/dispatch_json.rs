@@ -7,8 +7,7 @@ pub use serde_derive::Deserialize;
 use serde_json::json;
 pub use serde_json::Value;
 
-pub type AsyncJsonOp =
-	Pin<Box<dyn Future<Output = Result<Value, ErrBox>> + Send>>;
+pub type AsyncJsonOp = Pin<Box<dyn Future<Output = Result<Value, ErrBox>> + Send>>;
 
 pub enum JsonOp {
 	Sync(Value),
@@ -23,10 +22,7 @@ fn json_err(err:ErrBox) -> Value {
 	})
 }
 
-fn serialize_result(
-	promise_id:Option<u64>,
-	result:Result<Value, ErrBox>,
-) -> Buf {
+fn serialize_result(promise_id:Option<u64>, result:Result<Value, ErrBox>) -> Buf {
 	let value = match result {
 		Ok(v) => json!({ "ok": v, "promiseId": promise_id }),
 		Err(err) => json!({ "err": json_err(err), "promiseId": promise_id }),
@@ -70,9 +66,8 @@ where
 			},
 			Ok(JsonOp::Async(fut)) => {
 				assert!(promise_id.is_some());
-				let fut2 = fut.then(move |result| {
-					futures::future::ok(serialize_result(promise_id, result))
-				});
+				let fut2 = fut
+					.then(move |result| futures::future::ok(serialize_result(promise_id, result)));
 				CoreOp::Async(fut2.boxed())
 			},
 			Err(sync_err) => {
@@ -95,9 +90,7 @@ where
 	} else {
 		// TODO(afinch7) replace this with something more efficent.
 		let pool = futures::executor::ThreadPool::new().unwrap();
-		let handle = pool
-			.spawn_with_handle(futures::future::lazy(move |_cx| f()))
-			.unwrap();
+		let handle = pool.spawn_with_handle(futures::future::lazy(move |_cx| f())).unwrap();
 		Ok(JsonOp::Async(handle.boxed()))
 	}
 }

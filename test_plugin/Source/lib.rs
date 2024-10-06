@@ -15,10 +15,7 @@ pub fn op_test_sync(data:&[u8], zero_copy:Option<PinnedBuf>) -> CoreOp {
 	if let Some(buf) = zero_copy {
 		let data_str = std::str::from_utf8(&data[..]).unwrap();
 		let buf_str = std::str::from_utf8(&buf[..]).unwrap();
-		println!(
-			"Hello from plugin. data: {} | zero_copy: {}",
-			data_str, buf_str
-		);
+		println!("Hello from plugin. data: {} | zero_copy: {}", data_str, buf_str);
 	}
 	let result = b"test";
 	let result_box:Buf = Box::new(*result);
@@ -30,10 +27,7 @@ pub fn op_test_async(data:&[u8], zero_copy:Option<PinnedBuf>) -> CoreOp {
 	let fut = async move {
 		if let Some(buf) = zero_copy {
 			let buf_str = std::str::from_utf8(&buf[..]).unwrap();
-			println!(
-				"Hello from plugin. data: {} | zero_copy: {}",
-				data_str, buf_str
-			);
+			println!("Hello from plugin. data: {} | zero_copy: {}", data_str, buf_str);
 		}
 		let (tx, rx) = futures::channel::oneshot::channel::<Result<(), ()>>();
 		std::thread::spawn(move || {

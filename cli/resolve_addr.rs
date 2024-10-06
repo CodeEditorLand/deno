@@ -28,11 +28,7 @@ impl Future for ResolveAddrFuture {
 		// so we expose this as a future instead of Result.
 
 		// Default to localhost if given just the port. Example: ":80"
-		let addr:&str = if !inner.hostname.is_empty() {
-			&inner.hostname
-		} else {
-			"0.0.0.0"
-		};
+		let addr:&str = if !inner.hostname.is_empty() { &inner.hostname } else { "0.0.0.0" };
 
 		// If this looks like an ipv6 IP address. Example: "[2001:db8::1]"
 		// Then we remove the brackets.
@@ -64,24 +60,21 @@ mod tests {
 
 	#[test]
 	fn resolve_addr1() {
-		let expected =
-			SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 80));
+		let expected = SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 80));
 		let actual = block_on(resolve_addr("127.0.0.1", 80)).unwrap();
 		assert_eq!(actual, expected);
 	}
 
 	#[test]
 	fn resolve_addr2() {
-		let expected =
-			SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::new(0, 0, 0, 0), 80));
+		let expected = SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::new(0, 0, 0, 0), 80));
 		let actual = block_on(resolve_addr("", 80)).unwrap();
 		assert_eq!(actual, expected);
 	}
 
 	#[test]
 	fn resolve_addr3() {
-		let expected =
-			SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::new(192, 0, 2, 1), 25));
+		let expected = SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::new(192, 0, 2, 1), 25));
 		let actual = block_on(resolve_addr("192.0.2.1", 25)).unwrap();
 		assert_eq!(actual, expected);
 	}

@@ -1,12 +1,10 @@
 pub const TS_VERSION:&str = env!("TS_VERSION");
 
-pub static CLI_SNAPSHOT:&[u8] =
-	include_bytes!(concat!(env!("OUT_DIR"), "/CLI_SNAPSHOT.bin"));
+pub static CLI_SNAPSHOT:&[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/CLI_SNAPSHOT.bin"));
 pub static CLI_SNAPSHOT_MAP:&[u8] =
 	include_bytes!(concat!(env!("OUT_DIR"), "/CLI_SNAPSHOT.js.map"));
 #[allow(dead_code)]
-pub static CLI_SNAPSHOT_DTS:&[u8] =
-	include_bytes!(concat!(env!("OUT_DIR"), "/CLI_SNAPSHOT.d.ts"));
+pub static CLI_SNAPSHOT_DTS:&[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/CLI_SNAPSHOT.d.ts"));
 
 pub static COMPILER_SNAPSHOT:&[u8] =
 	include_bytes!(concat!(env!("OUT_DIR"), "/COMPILER_SNAPSHOT.bin"));
@@ -28,8 +26,7 @@ pub fn get_asset(name:&str) -> Option<&'static str> {
 
 #[test]
 fn cli_snapshot() {
-	let mut isolate =
-		deno::Isolate::new(deno::StartupData::Snapshot(CLI_SNAPSHOT), false);
+	let mut isolate = deno::Isolate::new(deno::StartupData::Snapshot(CLI_SNAPSHOT), false);
 	deno::js_check(isolate.execute(
 		"<anon>",
 		r#"
@@ -43,10 +40,7 @@ fn cli_snapshot() {
 
 #[test]
 fn compiler_snapshot() {
-	let mut isolate = deno::Isolate::new(
-		deno::StartupData::Snapshot(COMPILER_SNAPSHOT),
-		false,
-	);
+	let mut isolate = deno::Isolate::new(deno::StartupData::Snapshot(COMPILER_SNAPSHOT), false);
 	deno::js_check(isolate.execute(
 		"<anon>",
 		r#"

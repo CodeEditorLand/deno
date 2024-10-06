@@ -21,11 +21,7 @@ pub struct HttpBody {
 
 impl HttpBody {
 	pub fn from(body:Decoder) -> Self {
-		Self {
-			decoder:futures::compat::Compat01As03::new(body),
-			chunk:None,
-			pos:0,
-		}
+		Self { decoder:futures::compat::Compat01As03::new(body), chunk:None, pos:0 }
 	}
 }
 
@@ -43,12 +39,7 @@ impl AsyncRead for HttpBody {
 	) -> Poll<Result<usize, io::Error>> {
 		let mut inner = self.get_mut();
 		if let Some(chunk) = inner.chunk.take() {
-			debug!(
-				"HttpBody Fake Read buf {} chunk {} pos {}",
-				buf.len(),
-				chunk.len(),
-				inner.pos
-			);
+			debug!("HttpBody Fake Read buf {} chunk {} pos {}", buf.len(), chunk.len(), inner.pos);
 			let n = min(buf.len(), chunk.len() - inner.pos);
 			{
 				let rest = &chunk[inner.pos..];

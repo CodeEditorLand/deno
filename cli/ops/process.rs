@@ -23,19 +23,11 @@ use super::{
 	dispatch_json::{Deserialize, JsonOp, Value},
 	io::StreamResource,
 };
-use crate::{
-	deno_error::bad_resource,
-	ops::json_op,
-	signal::kill,
-	state::ThreadSafeState,
-};
+use crate::{deno_error::bad_resource, ops::json_op, signal::kill, state::ThreadSafeState};
 
 pub fn init(i:&mut Isolate, s:&ThreadSafeState) {
 	i.register_op("run", s.core_op(json_op(s.stateful_op(op_run))));
-	i.register_op(
-		"run_status",
-		s.core_op(json_op(s.stateful_op(op_run_status))),
-	);
+	i.register_op("run_status", s.core_op(json_op(s.stateful_op(op_run_status))));
 	i.register_op("kill", s.core_op(json_op(s.stateful_op(op_kill))));
 }
 
@@ -50,9 +42,7 @@ impl Future for CloneFileFuture {
 	fn poll(self: Pin<&mut Self>, _cx:&mut Context) -> Poll<Self::Output> {
 		let inner = self.get_mut();
 		let mut table = inner.state.lock_resource_table();
-		let repr = table
-			.get_mut::<StreamResource>(inner.rid)
-			.ok_or_else(bad_resource)?;
+		let repr = table.get_mut::<StreamResource>(inner.rid).ok_or_else(bad_resource)?;
 		match repr {
 			StreamResource::FsFile(ref mut file) => {
 				match file.poll_try_clone().map_err(ErrBox::from) {
@@ -66,12 +56,8 @@ impl Future for CloneFileFuture {
 	}
 }
 
-fn clone_file(
-	rid:u32,
-	state:&ThreadSafeState,
-) -> Result<std::fs::File, ErrBox> {
-	futures::executor::block_on(CloneFileFuture { rid, state:state.clone() })
-		.map(|f| f.into_std())
+fn clone_file(rid:u32, state:&ThreadSafeState) -> Result<std::fs::File, ErrBox> {
+	futures::executor::block_on(CloneFileFuture { rid, state:state.clone() }).map(|f| f.into_std())
 }
 
 fn subprocess_stdio_map(s:&str) -> std::process::Stdio {
@@ -160,10 +146,7 @@ fn op_run(
 
 	let stdin_rid = match child.stdin().take() {
 		Some(child_stdin) => {
-			let rid = table.add(
-				"childStdin",
-				Box::new(StreamResource::ChildStdin(child_stdin)),
-			);
+			let rid = table.add("childStdin", Box::new(StreamResource::ChildStdin(child_stdin)));
 			Some(rid)
 		},
 		None => None,
@@ -171,10 +154,7 @@ fn op_run(
 
 	let stdout_rid = match child.stdout().take() {
 		Some(child_stdout) => {
-			let rid = table.add(
-				"childStdout",
-				Box::new(StreamResource::ChildStdout(child_stdout)),
-			);
+			let rid = table.add("childStdout", Box::new(StreamResource::ChildStdout(child_stdout)));
 			Some(rid)
 		},
 		None => None,
@@ -182,17 +162,13 @@ fn op_run(
 
 	let stderr_rid = match child.stderr().take() {
 		Some(child_stderr) => {
-			let rid = table.add(
-				"childStderr",
-				Box::new(StreamResource::ChildStderr(child_stderr)),
-			);
+			let rid = table.add("childStderr", Box::new(StreamResource::ChildStderr(child_stderr)));
 			Some(rid)
 		},
 		None => None,
 	};
 
-	let child_resource =
-		ChildResource { child:futures::compat::Compat01As03::new(child) };
+	let child_resource = ChildResource { child:futures::compat::Compat01As03::new(child) };
 	let child_rid = table.add("child", Box::new(child_resource));
 
 	Ok(JsonOp::Sync(json!({
@@ -215,9 +191,7 @@ impl Future for ChildStatus {
 	fn poll(self: Pin<&mut Self>, cx:&mut Context) -> Poll<Self::Output> {
 		let inner = self.get_mut();
 		let mut table = inner.state.lock_resource_table();
-		let child_resource = table
-			.get_mut::<ChildResource>(inner.rid)
-			.ok_or_else(bad_resource)?;
+		let child_resource = table.get_mut::<ChildResource>(inner.rid).ok_or_else(bad_resource)?;
 		let child = &mut child_resource.child;
 		child.map_err(ErrBox::from).poll_unpin(cx)
 	}

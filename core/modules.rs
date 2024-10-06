@@ -22,18 +22,12 @@ use futures::{
 
 use crate::{
 	any_error::ErrBox,
-	isolate::{
-		ImportStream,
-		Isolate,
-		RecursiveLoadEvent as Event,
-		SourceCodeInfo,
-	},
+	isolate::{ImportStream, Isolate, RecursiveLoadEvent as Event, SourceCodeInfo},
 	libdeno::{deno_dyn_import_id, deno_mod},
 	module_specifier::ModuleSpecifier,
 };
 
-pub type SourceCodeInfoFuture =
-	dyn Future<Output = Result<SourceCodeInfo, ErrBox>> + Send;
+pub type SourceCodeInfoFuture = dyn Future<Output = Result<SourceCodeInfo, ErrBox>> + Send;
 
 pub trait Loader: Send + Sync {
 	/// Returns an absolute URL.
@@ -104,8 +98,7 @@ impl<L:Loader + Unpin> RecursiveLoad<L> {
 		modules:Arc<Mutex<Modules>>,
 	) -> Self {
 		let kind = Kind::DynamicImport(id);
-		let state =
-			State::ResolveImport(specifier.to_owned(), referrer.to_owned());
+		let state = State::ResolveImport(specifier.to_owned(), referrer.to_owned());
 		Self::new(kind, state, loader, modules)
 	}
 
@@ -116,12 +109,7 @@ impl<L:Loader + Unpin> RecursiveLoad<L> {
 		}
 	}
 
-	fn new(
-		kind:Kind,
-		state:State,
-		loader:L,
-		modules:Arc<Mutex<Modules>>,
-	) -> Self {
+	fn new(kind:Kind, state:State, loader:L, modules:Arc<Mutex<Modules>>) -> Self {
 		Self {
 			kind,
 			state,
@@ -135,20 +123,11 @@ impl<L:Loader + Unpin> RecursiveLoad<L> {
 	fn add_root(&mut self) -> Result<(), ErrBox> {
 		let module_specifier = match self.state {
 			State::ResolveMain(ref specifier, _) => {
-				self.loader.resolve(
-					specifier,
-					".",
-					true,
-					self.dyn_import_id().is_some(),
-				)?
+				self.loader.resolve(specifier, ".", true, self.dyn_import_id().is_some())?
 			},
 			State::ResolveImport(ref specifier, ref referrer) => {
-				self.loader.resolve(
-					specifier,
-					referrer,
-					false,
-					self.dyn_import_id().is_some(),
-				)?
+				self.loader
+					.resolve(specifier, referrer, false, self.dyn_import_id().is_some())?
 			},
 			_ => unreachable!(),
 		};
@@ -177,26 +156,19 @@ impl<L:Loader + Unpin> RecursiveLoad<L> {
 		referrer:&str,
 		parent_id:deno_mod,
 	) -> Result<(), ErrBox> {
-		let referrer_specifier = ModuleSpecifier::resolve_url(referrer)
-			.expect("Referrer should be a valid specifier");
-		let module_specifier = self.loader.resolve(
-			specifier,
-			referrer,
-			false,
-			self.dyn_import_id().is_some(),
-		)?;
+		let referrer_specifier =
+			ModuleSpecifier::resolve_url(referrer).expect("Referrer should be a valid specifier");
+		let module_specifier =
+			self.loader
+				.resolve(specifier, referrer, false, self.dyn_import_id().is_some())?;
 		let module_name = module_specifier.as_str();
 
 		let mut modules = self.modules.lock().unwrap();
 
 		modules.add_child(parent_id, module_name);
 
-		if !modules.is_registered(module_name)
-			&& !self.is_pending.contains(&module_specifier)
-		{
-			let fut = self
-				.loader
-				.load(&module_specifier, Some(referrer_specifier.clone()));
+		if !modules.is_registered(module_name) && !self.is_pending.contains(&module_specifier) {
+			let fut = self.loader.load(&module_specifier, Some(referrer_specifier.clone()));
 			self.pending.push(fut.boxed());
 			self.is_pending.insert(module_specifier);
 		}
@@ -234,18 +206,16 @@ impl<L:Loader + Unpin> ImportStream for RecursiveLoad<L> {
 		isolate:&mut Isolate,
 	) -> Result<(), ErrBox> {
 		// #A There are 3 cases to handle at this moment:
-		// 1. Source code resolved result have the same module name as requested
-		//    and is not yet registered -> register
+		// 1. Source code resolved result have the same module name as requested and is
+		//    not yet registered -> register
 		// 2. Source code resolved result have a different name as requested:
 		//   2a. The module with resolved module name has been registered
 		//     -> alias
 		//   2b. The module with resolved module name has not yet been registerd
 		//     -> register & alias
-		let SourceCodeInfo { code, module_url_specified, module_url_found } =
-			source_code_info;
+		let SourceCodeInfo { code, module_url_specified, module_url_found } = source_code_info;
 
-		let is_main =
-			self.kind == Kind::Main && self.state == State::LoadingRoot;
+		let is_main = self.kind == Kind::Main && self.state == State::LoadingRoot;
 
 		let module_id = {
 			let mut modules = self.modules.lock().unwrap();
@@ -258,16 +228,12 @@ impl<L:Loader + Unpin> ImportStream for RecursiveLoad<L> {
 			match modules.get_id(&module_url_found) {
 				// Module has already been registered.
 				Some(id) => {
-					debug!(
-						"Already-registered module fetched again: {}",
-						module_url_found
-					);
+					debug!("Already-registered module fetched again: {}", module_url_found);
 					id
 				},
 				// Module not registered yet, do it now.
 				None => {
-					let id =
-						isolate.mod_new(is_main, &module_url_found, &code)?;
+					let id = isolate.mod_new(is_main, &module_url_found, &code)?;
 					modules.register(id, &module_url_found);
 					id
 				},
@@ -295,24 +261,21 @@ impl<L:Loader + Unpin> ImportStream for RecursiveLoad<L> {
 				_ => unreachable!(),
 			};
 
-			let mut resolve_cb =
-				|specifier:&str, referrer_id:deno_mod| -> deno_mod {
-					let modules = self.modules.lock().unwrap();
-					let referrer = modules.get_name(referrer_id).unwrap();
-					match self.loader.resolve(
-						specifier,
-						&referrer,
-						is_main,
-						self.dyn_import_id().is_some(),
-					) {
-						Ok(specifier) => {
-							modules.get_id(specifier.as_str()).unwrap_or(0)
-						},
-						// We should have already resolved and Ready this
-						// module, so resolve() will not fail this time.
-						Err(..) => unreachable!(),
-					}
-				};
+			let mut resolve_cb = |specifier:&str, referrer_id:deno_mod| -> deno_mod {
+				let modules = self.modules.lock().unwrap();
+				let referrer = modules.get_name(referrer_id).unwrap();
+				match self.loader.resolve(
+					specifier,
+					&referrer,
+					is_main,
+					self.dyn_import_id().is_some(),
+				) {
+					Ok(specifier) => modules.get_id(specifier.as_str()).unwrap_or(0),
+					// We should have already resolved and Ready this
+					// module, so resolve() will not fail this time.
+					Err(..) => unreachable!(),
+				}
+			};
 			isolate.mod_instantiate(root_id, &mut resolve_cb)?;
 
 			self.state = State::Instantiated(root_id);
@@ -325,19 +288,12 @@ impl<L:Loader + Unpin> ImportStream for RecursiveLoad<L> {
 impl<L:Loader + Unpin> Stream for RecursiveLoad<L> {
 	type Item = Result<Event, ErrBox>;
 
-	fn poll_next(
-		self: Pin<&mut Self>,
-		cx:&mut Context,
-	) -> Poll<Option<Self::Item>> {
+	fn poll_next(self: Pin<&mut Self>, cx:&mut Context) -> Poll<Option<Self::Item>> {
 		let inner = self.get_mut();
 		match inner.state {
 			State::ResolveMain(ref specifier, Some(ref code)) => {
-				let module_specifier = inner.loader.resolve(
-					specifier,
-					".",
-					true,
-					inner.dyn_import_id().is_some(),
-				)?;
+				let module_specifier =
+					inner.loader.resolve(specifier, ".", true, inner.dyn_import_id().is_some())?;
 				let info = SourceCodeInfo {
 					code:code.to_owned(),
 					module_url_specified:module_specifier.to_string(),
@@ -355,15 +311,11 @@ impl<L:Loader + Unpin> Stream for RecursiveLoad<L> {
 			State::LoadingRoot | State::LoadingImports(..) => {
 				match inner.pending.try_poll_next_unpin(cx)? {
 					Poll::Ready(None) => unreachable!(),
-					Poll::Ready(Some(info)) => {
-						Poll::Ready(Some(Ok(Event::Fetch(info))))
-					},
+					Poll::Ready(Some(info)) => Poll::Ready(Some(Ok(Event::Fetch(info)))),
 					Poll::Pending => Poll::Pending,
 				}
 			},
-			State::Instantiated(id) => {
-				Poll::Ready(Some(Ok(Event::Instantiate(id))))
-			},
+			State::Instantiated(id) => Poll::Ready(Some(Ok(Event::Instantiate(id)))),
 		}
 	}
 }
@@ -452,13 +404,9 @@ pub struct Modules {
 }
 
 impl Modules {
-	pub fn new() -> Modules {
-		Self { info:HashMap::new(), by_name:ModuleNameMap::new() }
-	}
+	pub fn new() -> Modules { Self { info:HashMap::new(), by_name:ModuleNameMap::new() } }
 
-	pub fn get_id(&self, name:&str) -> Option<deno_mod> {
-		self.by_name.get(name)
-	}
+	pub fn get_id(&self, name:&str) -> Option<deno_mod> { self.by_name.get(name) }
 
 	pub fn get_children(&self, id:deno_mod) -> Option<&Vec<String>> {
 		self.info.get(&id).map(|i| &i.children)
@@ -468,13 +416,9 @@ impl Modules {
 		self.get_id(name).and_then(|id| self.get_children(id))
 	}
 
-	pub fn get_name(&self, id:deno_mod) -> Option<&String> {
-		self.info.get(&id).map(|i| &i.name)
-	}
+	pub fn get_name(&self, id:deno_mod) -> Option<&String> { self.info.get(&id).map(|i| &i.name) }
 
-	pub fn is_registered(&self, name:&str) -> bool {
-		self.by_name.get(name).is_some()
-	}
+	pub fn is_registered(&self, name:&str) -> bool { self.by_name.get(name).is_some() }
 
 	pub fn add_child(&mut self, parent_id:deno_mod, child_name:&str) -> bool {
 		self.info
@@ -548,12 +492,7 @@ impl Deps {
         // If any of the children are missing, return None.
         .collect::<Option<_>>()?;
 
-			Some(Deps {
-				name:name.to_string(),
-				prefix,
-				deps:Some(deps),
-				is_last,
-			})
+			Some(Deps { name:name.to_string(), prefix, deps:Some(deps), is_last })
 		}
 	}
 
@@ -639,16 +578,10 @@ mod tests {
 			"/redirect1.js" => Some((REDIRECT1_SRC, "file:///redirect1.js")),
 			// pretend redirect - real module name is different than one
 			// requested
-			"/redirect2.js" => {
-				Some((REDIRECT2_SRC, "file:///dir/redirect2.js"))
-			},
-			"/dir/redirect3.js" => {
-				Some((REDIRECT3_SRC, "file:///redirect3.js"))
-			},
+			"/redirect2.js" => Some((REDIRECT2_SRC, "file:///dir/redirect2.js")),
+			"/dir/redirect3.js" => Some((REDIRECT3_SRC, "file:///redirect3.js")),
 			"/slow.js" => Some((SLOW_SRC, "file:///slow.js")),
-			"/never_ready.js" => {
-				Some(("should never be Ready", "file:///never_ready.js"))
-			},
+			"/never_ready.js" => Some(("should never be Ready", "file:///never_ready.js")),
 			"/main.js" => Some((MAIN_SRC, "file:///main.js")),
 			"/bad_import.js" => Some((BAD_IMPORT_SRC, "file:///bad_import.js")),
 			// deliberately empty code.
@@ -664,9 +597,7 @@ mod tests {
 	}
 
 	impl fmt::Display for MockError {
-		fn fmt(&self, _f:&mut fmt::Formatter) -> fmt::Result {
-			unimplemented!()
-		}
+		fn fmt(&self, _f:&mut fmt::Formatter) -> fmt::Result { unimplemented!() }
 	}
 
 	impl Error for MockError {
@@ -718,11 +649,10 @@ mod tests {
 
 			eprintln!(">> RESOLVING, S: {}, R: {}", specifier, referrer);
 
-			let output_specifier =
-				match ModuleSpecifier::resolve_import(specifier, referrer) {
-					Ok(specifier) => specifier,
-					Err(..) => return Err(MockError::ResolveErr.into()),
-				};
+			let output_specifier = match ModuleSpecifier::resolve_import(specifier, referrer) {
+				Ok(specifier) => specifier,
+				Err(..) => return Err(MockError::ResolveErr.into()),
+			};
 
 			if mock_source_code(&output_specifier.to_string()).is_some() {
 				Ok(output_specifier)
@@ -789,8 +719,7 @@ mod tests {
 			let isolate = loader.isolate.clone();
 			let isolate_ = isolate.clone();
 			let loads = loader.loads.clone();
-			let mut recursive_load =
-				RecursiveLoad::main("/a.js", None, loader, modules);
+			let mut recursive_load = RecursiveLoad::main("/a.js", None, loader, modules);
 
 			let a_id = loop {
 				match recursive_load.try_poll_next_unpin(&mut cx) {
@@ -809,12 +738,7 @@ mod tests {
 			let l = loads.lock().unwrap();
 			assert_eq!(
 				l.to_vec(),
-				vec![
-					"file:///a.js",
-					"file:///b.js",
-					"file:///c.js",
-					"file:///d.js"
-				]
+				vec!["file:///a.js", "file:///b.js", "file:///c.js", "file:///d.js"]
 			);
 
 			let modules = modules_.lock().unwrap();
@@ -826,19 +750,10 @@ mod tests {
 
 			assert_eq!(
 				modules.get_children(a_id),
-				Some(&vec![
-					"file:///b.js".to_string(),
-					"file:///c.js".to_string()
-				])
+				Some(&vec!["file:///b.js".to_string(), "file:///c.js".to_string()])
 			);
-			assert_eq!(
-				modules.get_children(b_id),
-				Some(&vec!["file:///c.js".to_string()])
-			);
-			assert_eq!(
-				modules.get_children(c_id),
-				Some(&vec!["file:///d.js".to_string()])
-			);
+			assert_eq!(modules.get_children(b_id), Some(&vec!["file:///c.js".to_string()]));
+			assert_eq!(modules.get_children(c_id), Some(&vec!["file:///d.js".to_string()]));
 			assert_eq!(modules.get_children(d_id), Some(&vec![]));
 		})
 	}
@@ -868,10 +783,8 @@ mod tests {
 			let modules = loader.modules.clone();
 			let modules_ = modules.clone();
 			let loads = loader.loads.clone();
-			let recursive_load =
-				RecursiveLoad::main("/circular1.js", None, loader, modules);
-			let mut load_fut =
-				recursive_load.get_future(isolate.clone()).boxed();
+			let recursive_load = RecursiveLoad::main("/circular1.js", None, loader, modules);
+			let mut load_fut = recursive_load.get_future(isolate.clone()).boxed();
 			let result = Pin::new(&mut load_fut).poll(&mut cx);
 			assert!(result.is_ready());
 			if let Poll::Ready(Ok(circular1_id)) = result {
@@ -881,21 +794,13 @@ mod tests {
 				let l = loads.lock().unwrap();
 				assert_eq!(
 					l.to_vec(),
-					vec![
-						"file:///circular1.js",
-						"file:///circular2.js",
-						"file:///circular3.js"
-					]
+					vec!["file:///circular1.js", "file:///circular2.js", "file:///circular3.js"]
 				);
 
 				let modules = modules_.lock().unwrap();
 
-				assert_eq!(
-					modules.get_id("file:///circular1.js"),
-					Some(circular1_id)
-				);
-				let circular2_id =
-					modules.get_id("file:///circular2.js").unwrap();
+				assert_eq!(modules.get_id("file:///circular1.js"), Some(circular1_id));
+				let circular2_id = modules.get_id("file:///circular2.js").unwrap();
 
 				assert_eq!(
 					modules.get_children(circular1_id),
@@ -908,8 +813,7 @@ mod tests {
 				);
 
 				assert!(modules.get_id("file:///circular3.js").is_some());
-				let circular3_id =
-					modules.get_id("file:///circular3.js").unwrap();
+				let circular3_id = modules.get_id("file:///circular3.js").unwrap();
 				assert_eq!(
 					modules.get_children(circular3_id),
 					Some(&vec![
@@ -946,10 +850,8 @@ mod tests {
 			let modules = loader.modules.clone();
 			let modules_ = modules.clone();
 			let loads = loader.loads.clone();
-			let recursive_load =
-				RecursiveLoad::main("/redirect1.js", None, loader, modules);
-			let mut load_fut =
-				recursive_load.get_future(isolate.clone()).boxed();
+			let recursive_load = RecursiveLoad::main("/redirect1.js", None, loader, modules);
+			let mut load_fut = recursive_load.get_future(isolate.clone()).boxed();
 			let result = Pin::new(&mut load_fut).poll(&mut cx);
 			println!(">> result {:?}", result);
 			assert!(result.is_ready());
@@ -968,28 +870,17 @@ mod tests {
 
 				let modules = modules_.lock().unwrap();
 
-				assert_eq!(
-					modules.get_id("file:///redirect1.js"),
-					Some(redirect1_id)
-				);
+				assert_eq!(modules.get_id("file:///redirect1.js"), Some(redirect1_id));
 
-				let redirect2_id =
-					modules.get_id("file:///dir/redirect2.js").unwrap();
+				let redirect2_id = modules.get_id("file:///dir/redirect2.js").unwrap();
 				assert!(modules.is_alias("file:///redirect2.js"));
 				assert!(!modules.is_alias("file:///dir/redirect2.js"));
-				assert_eq!(
-					modules.get_id("file:///redirect2.js"),
-					Some(redirect2_id)
-				);
+				assert_eq!(modules.get_id("file:///redirect2.js"), Some(redirect2_id));
 
-				let redirect3_id =
-					modules.get_id("file:///redirect3.js").unwrap();
+				let redirect3_id = modules.get_id("file:///redirect3.js").unwrap();
 				assert!(modules.is_alias("file:///dir/redirect3.js"));
 				assert!(!modules.is_alias("file:///redirect3.js"));
-				assert_eq!(
-					modules.get_id("file:///dir/redirect3.js"),
-					Some(redirect3_id)
-				);
+				assert_eq!(modules.get_id("file:///dir/redirect3.js"), Some(redirect3_id));
 			} else {
 				unreachable!();
 			}
@@ -1019,10 +910,9 @@ mod tests {
 			let isolate = loader.isolate.clone();
 			let modules = loader.modules.clone();
 			let loads = loader.loads.clone();
-			let mut recursive_load =
-				RecursiveLoad::main("/main.js", None, loader, modules)
-					.get_future(isolate)
-					.boxed();
+			let mut recursive_load = RecursiveLoad::main("/main.js", None, loader, modules)
+				.get_future(isolate)
+				.boxed();
 
 			let result = recursive_load.poll_unpin(&mut cx);
 			assert!(result.is_pending());
@@ -1067,15 +957,11 @@ mod tests {
 			let loader = MockLoader::new();
 			let isolate = loader.isolate.clone();
 			let modules = loader.modules.clone();
-			let recursive_load =
-				RecursiveLoad::main("/bad_import.js", None, loader, modules);
+			let recursive_load = RecursiveLoad::main("/bad_import.js", None, loader, modules);
 			let mut load_fut = recursive_load.get_future(isolate).boxed();
 			let result = load_fut.poll_unpin(&mut cx);
 			if let Poll::Ready(Err(err)) = result {
-				assert_eq!(
-					err.downcast_ref::<MockError>().unwrap(),
-					&MockError::ResolveErr
-				);
+				assert_eq!(err.downcast_ref::<MockError>().unwrap(), &MockError::ResolveErr);
 			} else {
 				unreachable!();
 			}
@@ -1125,36 +1011,21 @@ mod tests {
 			js_check(isolate.mod_evaluate(main_id));
 
 			let l = loads.lock().unwrap();
-			assert_eq!(
-				l.to_vec(),
-				vec!["file:///b.js", "file:///c.js", "file:///d.js"]
-			);
+			assert_eq!(l.to_vec(), vec!["file:///b.js", "file:///c.js", "file:///d.js"]);
 
 			let modules = modules_.lock().unwrap();
 
-			assert_eq!(
-				modules.get_id("file:///main_with_code.js"),
-				Some(main_id)
-			);
+			assert_eq!(modules.get_id("file:///main_with_code.js"), Some(main_id));
 			let b_id = modules.get_id("file:///b.js").unwrap();
 			let c_id = modules.get_id("file:///c.js").unwrap();
 			let d_id = modules.get_id("file:///d.js").unwrap();
 
 			assert_eq!(
 				modules.get_children(main_id),
-				Some(&vec![
-					"file:///b.js".to_string(),
-					"file:///c.js".to_string()
-				])
+				Some(&vec!["file:///b.js".to_string(), "file:///c.js".to_string()])
 			);
-			assert_eq!(
-				modules.get_children(b_id),
-				Some(&vec!["file:///c.js".to_string()])
-			);
-			assert_eq!(
-				modules.get_children(c_id),
-				Some(&vec!["file:///d.js".to_string()])
-			);
+			assert_eq!(modules.get_children(b_id), Some(&vec!["file:///c.js".to_string()]));
+			assert_eq!(modules.get_children(c_id), Some(&vec!["file:///d.js".to_string()]));
 			assert_eq!(modules.get_children(d_id), Some(&vec![]));
 		})
 	}

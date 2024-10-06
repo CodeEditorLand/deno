@@ -26,31 +26,16 @@ use crate::{
 };
 
 pub fn init(i:&mut Isolate, s:&ThreadSafeState) {
-	i.register_op(
-		"create_worker",
-		s.core_op(json_op(s.stateful_op(op_create_worker))),
-	);
+	i.register_op("create_worker", s.core_op(json_op(s.stateful_op(op_create_worker))));
 	i.register_op(
 		"host_get_worker_closed",
 		s.core_op(json_op(s.stateful_op(op_host_get_worker_closed))),
 	);
-	i.register_op(
-		"host_post_message",
-		s.core_op(json_op(s.stateful_op(op_host_post_message))),
-	);
-	i.register_op(
-		"host_get_message",
-		s.core_op(json_op(s.stateful_op(op_host_get_message))),
-	);
+	i.register_op("host_post_message", s.core_op(json_op(s.stateful_op(op_host_post_message))));
+	i.register_op("host_get_message", s.core_op(json_op(s.stateful_op(op_host_get_message))));
 	// TODO: make sure these two ops are only accessible to appropriate Worker
-	i.register_op(
-		"worker_post_message",
-		s.core_op(json_op(s.stateful_op(op_worker_post_message))),
-	);
-	i.register_op(
-		"worker_get_message",
-		s.core_op(json_op(s.stateful_op(op_worker_get_message))),
-	);
+	i.register_op("worker_post_message", s.core_op(json_op(s.stateful_op(op_worker_post_message))));
+	i.register_op("worker_get_message", s.core_op(json_op(s.stateful_op(op_worker_get_message))));
 	i.register_op("metrics", s.core_op(json_op(s.stateful_op(op_metrics))));
 }
 
@@ -123,8 +108,7 @@ fn op_create_worker(
 	let specifier = args.specifier.as_ref();
 	// Only include deno namespace if requested AND current worker
 	// has included namespace (to avoid escalation).
-	let include_deno_namespace =
-		args.include_deno_namespace && state.include_deno_namespace;
+	let include_deno_namespace = args.include_deno_namespace && state.include_deno_namespace;
 	let has_source_code = args.has_source_code;
 	let source_code = args.source_code;
 
@@ -135,8 +119,7 @@ fn op_create_worker(
 	if !has_source_code {
 		if let Some(referrer) = parent_state.main_module.as_ref() {
 			let referrer = referrer.clone().to_string();
-			module_specifier =
-				ModuleSpecifier::resolve_import(specifier, &referrer)?;
+			module_specifier = ModuleSpecifier::resolve_import(specifier, &referrer)?;
 		}
 	}
 
@@ -152,8 +135,7 @@ fn op_create_worker(
 	// with parent (aka .clone(), requests from child won't reflect in parent)
 	let name = format!("USER-WORKER-{}", specifier);
 	let deno_main_call = format!("denoMain({})", include_deno_namespace);
-	let mut worker =
-		Worker::new(name, startup_data::deno_isolate_init(), child_state, ext);
+	let mut worker = Worker::new(name, startup_data::deno_isolate_init(), child_state, ext);
 	js_check(worker.execute(&deno_main_call));
 	js_check(worker.execute("workerMain()"));
 
@@ -255,14 +237,13 @@ fn op_host_get_message(
 	let mut table = state.workers.lock().unwrap();
 	// TODO: don't return bad resource anymore
 	let worker = table.get_mut(&id).ok_or_else(bad_resource)?;
-	let op = worker
-		.get_message()
-		.map_err(move |_| -> ErrBox { unimplemented!() })
-		.and_then(move |maybe_buf| {
+	let op = worker.get_message().map_err(move |_| -> ErrBox { unimplemented!() }).and_then(
+		move |maybe_buf| {
 			futures::future::ok(json!({
 			  "data": maybe_buf.map(|buf| buf.to_owned())
 			}))
-		});
+		},
+	);
 
 	Ok(JsonOp::Async(op.boxed()))
 }

@@ -36,59 +36,45 @@ pub struct ImportMap {
 
 impl ImportMap {
 	pub fn load(file_path:&str) -> Result<Self, ErrBox> {
-		let file_url =
-			ModuleSpecifier::resolve_url_or_path(file_path)?.to_string();
+		let file_url = ModuleSpecifier::resolve_url_or_path(file_path)?.to_string();
 		let resolved_path = std::env::current_dir().unwrap().join(file_path);
-		debug!(
-			"Attempt to load import map: {}",
-			resolved_path.to_str().unwrap()
-		);
+		debug!("Attempt to load import map: {}", resolved_path.to_str().unwrap());
 
 		// Load the contents of import map
-		let json_string =
-			fs::read_to_string(&resolved_path).map_err(|err| {
-				io::Error::new(
-					io::ErrorKind::InvalidInput,
-					format!(
-						"Error retrieving import map file at \"{}\": {}",
-						resolved_path.to_str().unwrap(),
-						err.to_string()
-					)
-					.as_str(),
+		let json_string = fs::read_to_string(&resolved_path).map_err(|err| {
+			io::Error::new(
+				io::ErrorKind::InvalidInput,
+				format!(
+					"Error retrieving import map file at \"{}\": {}",
+					resolved_path.to_str().unwrap(),
+					err.to_string()
 				)
-			})?;
+				.as_str(),
+			)
+		})?;
 		// The URL of the import map is the base URL for its values.
 		ImportMap::from_json(&file_url, &json_string).map_err(ErrBox::from)
 	}
 
-	pub fn from_json(
-		base_url:&str,
-		json_string:&str,
-	) -> Result<Self, ImportMapError> {
+	pub fn from_json(base_url:&str, json_string:&str) -> Result<Self, ImportMapError> {
 		let v:Value = match serde_json::from_str(json_string) {
 			Ok(v) => v,
 			Err(_) => {
-				return Err(ImportMapError::new(
-					"Unable to parse import map JSON",
-				));
+				return Err(ImportMapError::new("Unable to parse import map JSON"));
 			},
 		};
 
 		match v {
 			Value::Object(_) => {},
 			_ => {
-				return Err(ImportMapError::new(
-					"Import map JSON must be an object",
-				));
+				return Err(ImportMapError::new("Import map JSON must be an object"));
 			},
 		}
 
 		let normalized_imports = match &v.get("imports") {
 			Some(imports_map) => {
 				if !imports_map.is_object() {
-					return Err(ImportMapError::new(
-						"Import map's 'imports' must be an object",
-					));
+					return Err(ImportMapError::new("Import map's 'imports' must be an object"));
 				}
 
 				let imports_map = imports_map.as_object().unwrap();
@@ -100,9 +86,7 @@ impl ImportMap {
 		let normalized_scopes = match &v.get("scopes") {
 			Some(scope_map) => {
 				if !scope_map.is_object() {
-					return Err(ImportMapError::new(
-						"Import map's 'scopes' must be an object",
-					));
+					return Err(ImportMapError::new("Import map's 'scopes' must be an object"));
 				}
 
 				let scope_map = scope_map.as_object().unwrap();
@@ -122,9 +106,7 @@ impl ImportMap {
 
 	fn try_url_like_specifier(specifier:&str, base:&str) -> Option<Url> {
 		// this should never fail
-		if specifier.starts_with('/')
-			|| specifier.starts_with("./")
-			|| specifier.starts_with("../")
+		if specifier.starts_with('/') || specifier.starts_with("./") || specifier.starts_with("../")
 		{
 			let base_url = Url::parse(base).unwrap();
 			let url = base_url.join(specifier).unwrap();
@@ -145,18 +127,13 @@ impl ImportMap {
 	/// Specifiers must be valid URLs (eg. "https://deno.land/x/std/testing/mod.ts")
 	/// or "bare" specifiers (eg. "moment").
 	// TODO: add proper error handling: https://github.com/WICG/import-maps/issues/100
-	fn normalize_specifier_key(
-		specifier_key:&str,
-		base_url:&str,
-	) -> Option<String> {
+	fn normalize_specifier_key(specifier_key:&str, base_url:&str) -> Option<String> {
 		// ignore empty keys
 		if specifier_key.is_empty() {
 			return None;
 		}
 
-		if let Some(url) =
-			ImportMap::try_url_like_specifier(specifier_key, base_url)
-		{
+		if let Some(url) = ImportMap::try_url_like_specifier(specifier_key, base_url) {
 			return Some(url.to_string());
 		}
 
@@ -175,10 +152,7 @@ impl ImportMap {
 		let mut normalized_addresses:Vec<ModuleSpecifier> = vec![];
 
 		for potential_address in potential_addresses {
-			let url = match ImportMap::try_url_like_specifier(
-				&potential_address,
-				base_url,
-			) {
+			let url = match ImportMap::try_url_like_specifier(&potential_address, base_url) {
 				Some(url) => url,
 				None => continue,
 			};
@@ -186,8 +160,8 @@ impl ImportMap {
 			let url_string = url.to_string();
 			if specifier_key.ends_with('/') && !url_string.ends_with('/') {
 				eprintln!(
-					"Invalid target address {:?} for package specifier \
-					 {:?}.Package address targets must end with \"/\".",
+					"Invalid target address {:?} for package specifier {:?}.Package address \
+					 targets must end with \"/\".",
 					url_string, specifier_key
 				);
 				continue;
@@ -204,20 +178,14 @@ impl ImportMap {
 	/// From specification:
 	/// - order of iteration must be retained
 	/// - SpecifierMap's keys are sorted in longest and alphabetic order
-	fn parse_specifier_map(
-		json_map:&Map<String, Value>,
-		base_url:&str,
-	) -> SpecifierMap {
+	fn parse_specifier_map(json_map:&Map<String, Value>, base_url:&str) -> SpecifierMap {
 		let mut normalized_map:SpecifierMap = SpecifierMap::new();
 
 		// Order is preserved because of "preserve_order" feature of
 		// "serde_json".
 		for (specifier_key, value) in json_map.iter() {
 			let normalized_specifier_key =
-				match ImportMap::normalize_specifier_key(
-					specifier_key,
-					base_url,
-				) {
+				match ImportMap::normalize_specifier_key(specifier_key, base_url) {
 					Some(s) => s,
 					None => continue,
 				};
@@ -229,9 +197,7 @@ impl ImportMap {
 
 					for address in address_array {
 						match address {
-							Value::String(address) => {
-								string_addresses.push(address.to_string())
-							},
+							Value::String(address) => string_addresses.push(address.to_string()),
 							_ => continue,
 						}
 					}
@@ -252,8 +218,7 @@ impl ImportMap {
 				"normalized specifier {:?}; {:?}",
 				normalized_specifier_key, normalized_address_array
 			);
-			normalized_map
-				.insert(normalized_specifier_key, normalized_address_array);
+			normalized_map.insert(normalized_specifier_key, normalized_address_array);
 		}
 
 		// Sort in longest and alphabetical order.
@@ -291,29 +256,23 @@ impl ImportMap {
 				)));
 			}
 
-			let potential_specifier_map =
-				potential_specifier_map.as_object().unwrap();
+			let potential_specifier_map = potential_specifier_map.as_object().unwrap();
 
-			let scope_prefix_url =
-				match Url::parse(base_url).unwrap().join(scope_prefix) {
-					Ok(url) => {
-						if !SUPPORTED_FETCH_SCHEMES.contains(&url.scheme()) {
-							eprintln!(
-								"Invalid scope {:?}. Scope URLs must have a \
-								 valid fetch scheme.",
-								url.to_string()
-							);
-							continue;
-						}
-						url.to_string()
-					},
-					_ => continue,
-				};
+			let scope_prefix_url = match Url::parse(base_url).unwrap().join(scope_prefix) {
+				Ok(url) => {
+					if !SUPPORTED_FETCH_SCHEMES.contains(&url.scheme()) {
+						eprintln!(
+							"Invalid scope {:?}. Scope URLs must have a valid fetch scheme.",
+							url.to_string()
+						);
+						continue;
+					}
+					url.to_string()
+				},
+				_ => continue,
+			};
 
-			let norm_map = ImportMap::parse_specifier_map(
-				potential_specifier_map,
-				base_url,
-			);
+			let norm_map = ImportMap::parse_specifier_map(potential_specifier_map, base_url);
 
 			normalized_map.insert(scope_prefix_url, norm_map);
 		}
@@ -339,10 +298,9 @@ impl ImportMap {
 	) -> Result<Option<ModuleSpecifier>, ImportMapError> {
 		// exact-match
 		if let Some(scope_imports) = scopes.get(referrer) {
-			if let Ok(scope_match) = ImportMap::resolve_imports_match(
-				scope_imports,
-				normalized_specifier,
-			) {
+			if let Ok(scope_match) =
+				ImportMap::resolve_imports_match(scope_imports, normalized_specifier)
+			{
 				// Return only if there was actual match (not None).
 				if scope_match.is_some() {
 					return Ok(scope_match);
@@ -351,13 +309,10 @@ impl ImportMap {
 		}
 
 		for (normalized_scope_key, scope_imports) in scopes.iter() {
-			if normalized_scope_key.ends_with('/')
-				&& referrer.starts_with(normalized_scope_key)
-			{
-				if let Ok(scope_match) = ImportMap::resolve_imports_match(
-					scope_imports,
-					normalized_specifier,
-				) {
+			if normalized_scope_key.ends_with('/') && referrer.starts_with(normalized_scope_key) {
+				if let Ok(scope_match) =
+					ImportMap::resolve_imports_match(scope_imports, normalized_specifier)
+				{
 					// Return only if there was actual match (not None).
 					if scope_match.is_some() {
 						return Ok(scope_match);
@@ -384,15 +339,10 @@ impl ImportMap {
 				)));
 			} else if address_vec.len() == 1 {
 				let address = address_vec.first().unwrap();
-				debug!(
-					"Specifier {:?} was mapped to {:?}.",
-					normalized_specifier, address
-				);
+				debug!("Specifier {:?} was mapped to {:?}.", normalized_specifier, address);
 				return Ok(Some(address.clone()));
 			} else {
-				return Err(ImportMapError::new(
-					"Multi-address mappings are not yet supported",
-				));
+				return Err(ImportMapError::new("Multi-address mappings are not yet supported"));
 			}
 		}
 
@@ -401,25 +351,21 @@ impl ImportMap {
 		// choose the longest.
 		// https://github.com/WICG/import-maps/issues/102
 		for (specifier_key, address_vec) in imports.iter() {
-			if specifier_key.ends_with('/')
-				&& normalized_specifier.starts_with(specifier_key)
-			{
+			if specifier_key.ends_with('/') && normalized_specifier.starts_with(specifier_key) {
 				if address_vec.is_empty() {
 					return Err(ImportMapError::new(&format!(
-						"Specifier {:?} was mapped to no addresses (via \
-						 prefix specifier key {:?}).",
+						"Specifier {:?} was mapped to no addresses (via prefix specifier key \
+						 {:?}).",
 						normalized_specifier, specifier_key
 					)));
 				} else if address_vec.len() == 1 {
 					let address = address_vec.first().unwrap();
-					let after_prefix =
-						&normalized_specifier[specifier_key.len()..];
+					let after_prefix = &normalized_specifier[specifier_key.len()..];
 
 					let base_url = address.as_url();
 					if let Ok(url) = base_url.join(after_prefix) {
 						debug!(
-							"Specifier {:?} was mapped to {:?} (via prefix \
-							 specifier key {:?}).",
+							"Specifier {:?} was mapped to {:?} (via prefix specifier key {:?}).",
 							normalized_specifier, url, address
 						);
 						return Ok(Some(ModuleSpecifier::from(url)));
@@ -434,10 +380,7 @@ impl ImportMap {
 			}
 		}
 
-		debug!(
-			"Specifier {:?} was not mapped in import map.",
-			normalized_specifier
-		);
+		debug!("Specifier {:?} was not mapped in import map.", normalized_specifier);
 
 		Ok(None)
 	}
@@ -455,8 +398,7 @@ impl ImportMap {
 		specifier:&str,
 		referrer:&str,
 	) -> Result<Option<ModuleSpecifier>, ImportMapError> {
-		let resolved_url:Option<Url> =
-			ImportMap::try_url_like_specifier(specifier, referrer);
+		let resolved_url:Option<Url> = ImportMap::try_url_like_specifier(specifier, referrer);
 		let normalized_specifier = match &resolved_url {
 			Some(url) => url.to_string(),
 			None => specifier.to_string(),
@@ -473,10 +415,7 @@ impl ImportMap {
 			return Ok(scopes_match);
 		}
 
-		let imports_match = ImportMap::resolve_imports_match(
-			&self.imports,
-			&normalized_specifier,
-		)?;
+		let imports_match = ImportMap::resolve_imports_match(&self.imports, &normalized_specifier)?;
 
 		// match found in import map
 		if imports_match.is_some() {
@@ -522,22 +461,16 @@ mod tests {
 		// invalid schema: 'imports' is non-object
 		for non_object in non_object_strings.to_vec() {
 			assert!(
-				ImportMap::from_json(
-					base_url,
-					&format!("{{\"imports\": {}}}", non_object),
-				)
-				.is_err()
+				ImportMap::from_json(base_url, &format!("{{\"imports\": {}}}", non_object),)
+					.is_err()
 			);
 		}
 
 		// invalid schema: 'scopes' is non-object
 		for non_object in non_object_strings.to_vec() {
 			assert!(
-				ImportMap::from_json(
-					base_url,
-					&format!("{{\"scopes\": {}}}", non_object),
-				)
-				.is_err()
+				ImportMap::from_json(base_url, &format!("{{\"scopes\": {}}}", non_object),)
+					.is_err()
 			);
 		}
 	}
@@ -566,21 +499,14 @@ mod tests {
         "/foo": "/slash"
       }
     }"#;
-		let import_map = ImportMap::from_json(
-			"https://base.example/path1/path2/path3",
-			json_map,
-		)
-		.unwrap();
+		let import_map =
+			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
 		assert_eq!(
-			import_map
-				.imports
-				.get("https://base.example/path1/path2/foo")
-				.unwrap()[0],
+			import_map.imports.get("https://base.example/path1/path2/foo").unwrap()[0],
 			"https://base.example/dotslash".to_string()
 		);
 		assert_eq!(
-			import_map.imports.get("https://base.example/path1/foo").unwrap()
-				[0],
+			import_map.imports.get("https://base.example/path1/foo").unwrap()[0],
 			"https://base.example/dotdotslash".to_string()
 		);
 		assert_eq!(
@@ -596,16 +522,10 @@ mod tests {
         "/": "/slash/"
       }
     }"#;
-		let import_map = ImportMap::from_json(
-			"https://base.example/path1/path2/path3",
-			json_map,
-		)
-		.unwrap();
+		let import_map =
+			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
 		assert_eq!(
-			import_map
-				.imports
-				.get("https://base.example/path1/path2/")
-				.unwrap()[0],
+			import_map.imports.get("https://base.example/path1/path2/").unwrap()[0],
 			"https://base.example/dotslash/".to_string()
 		);
 		assert_eq!(
@@ -630,11 +550,8 @@ mod tests {
         "%2E%2E%2F": "/dotDotSlash3"
       }
     }"#;
-		let import_map = ImportMap::from_json(
-			"https://base.example/path1/path2/path3",
-			json_map,
-		)
-		.unwrap();
+		let import_map =
+			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
 		assert_eq!(
 			import_map.imports.get("%2E/").unwrap()[0],
 			"https://base.example/dotSlash1/".to_string()
@@ -685,11 +602,8 @@ mod tests {
         "wss:bad": "/wss"
       }
     }"#;
-		let import_map = ImportMap::from_json(
-			"https://base.example/path1/path2/path3",
-			json_map,
-		)
-		.unwrap();
+		let import_map =
+			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
 		assert_eq!(
 			import_map.imports.get("http://good/").unwrap()[0],
 			"https://base.example/http/".to_string()
@@ -749,11 +663,8 @@ mod tests {
         "https://example.com/%41": "/noPercentDecoding"
       }
     }"#;
-		let import_map = ImportMap::from_json(
-			"https://base.example/path1/path2/path3",
-			json_map,
-		)
-		.unwrap();
+		let import_map =
+			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
 		assert_eq!(
 			import_map.imports.get("https://ex ample.org/").unwrap()[0],
 			"https://base.example/unparseable1/".to_string()
@@ -796,16 +707,9 @@ mod tests {
         "foo": {}
       }
     }"#;
-		let import_map = ImportMap::from_json(
-			"https://base.example/path1/path2/path3",
-			json_map,
-		)
-		.unwrap();
-		assert!(
-			import_map
-				.scopes
-				.contains_key("https://base.example/path1/path2/foo")
-		);
+		let import_map =
+			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
+		assert!(import_map.scopes.contains_key("https://base.example/path1/path2/foo"));
 
 		// Should work with ./, ../, and / prefixes..
 		let json_map = r#"{
@@ -815,19 +719,10 @@ mod tests {
         "/foo": {}
       }
     }"#;
-		let import_map = ImportMap::from_json(
-			"https://base.example/path1/path2/path3",
-			json_map,
-		)
-		.unwrap();
-		assert!(
-			import_map
-				.scopes
-				.contains_key("https://base.example/path1/path2/foo")
-		);
-		assert!(
-			import_map.scopes.contains_key("https://base.example/path1/foo")
-		);
+		let import_map =
+			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
+		assert!(import_map.scopes.contains_key("https://base.example/path1/path2/foo"));
+		assert!(import_map.scopes.contains_key("https://base.example/path1/foo"));
 		assert!(import_map.scopes.contains_key("https://base.example/foo"));
 
 		// Should work with /s, ?s, and #s..
@@ -836,15 +731,12 @@ mod tests {
         "foo/bar?baz#qux": {}
       }
     }"#;
-		let import_map = ImportMap::from_json(
-			"https://base.example/path1/path2/path3",
-			json_map,
-		)
-		.unwrap();
+		let import_map =
+			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
 		assert!(
-			import_map.scopes.contains_key(
-				"https://base.example/path1/path2/foo/bar?baz#qux"
-			)
+			import_map
+				.scopes
+				.contains_key("https://base.example/path1/path2/foo/bar?baz#qux")
 		);
 
 		// Should work with an empty string scope key..
@@ -853,16 +745,9 @@ mod tests {
         "": {}
       }
     }"#;
-		let import_map = ImportMap::from_json(
-			"https://base.example/path1/path2/path3",
-			json_map,
-		)
-		.unwrap();
-		assert!(
-			import_map
-				.scopes
-				.contains_key("https://base.example/path1/path2/path3")
-		);
+		let import_map =
+			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
+		assert!(import_map.scopes.contains_key("https://base.example/path1/path2/path3"));
 
 		// Should work with / suffixes..
 		let json_map = r#"{
@@ -874,24 +759,11 @@ mod tests {
         "/foo//": {}
       }
     }"#;
-		let import_map = ImportMap::from_json(
-			"https://base.example/path1/path2/path3",
-			json_map,
-		)
-		.unwrap();
-		assert!(
-			import_map
-				.scopes
-				.contains_key("https://base.example/path1/path2/foo/")
-		);
-		assert!(
-			import_map
-				.scopes
-				.contains_key("https://base.example/path1/path2/foo/")
-		);
-		assert!(
-			import_map.scopes.contains_key("https://base.example/path1/foo/")
-		);
+		let import_map =
+			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
+		assert!(import_map.scopes.contains_key("https://base.example/path1/path2/foo/"));
+		assert!(import_map.scopes.contains_key("https://base.example/path1/path2/foo/"));
+		assert!(import_map.scopes.contains_key("https://base.example/path1/foo/"));
 		assert!(import_map.scopes.contains_key("https://base.example/foo/"));
 		assert!(import_map.scopes.contains_key("https://base.example/foo//"));
 
@@ -903,16 +775,9 @@ mod tests {
         "foo\\\\": {}
       }
     }"#;
-		let import_map = ImportMap::from_json(
-			"https://base.example/path1/path2/path3",
-			json_map,
-		)
-		.unwrap();
-		assert!(
-			import_map
-				.scopes
-				.contains_key("https://base.example/path1/path2/foo//")
-		);
+		let import_map =
+			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
+		assert!(import_map.scopes.contains_key("https://base.example/path1/path2/foo//"));
 		assert_eq!(import_map.scopes.len(), 1);
 	}
 
@@ -935,11 +800,8 @@ mod tests {
         "wss:bad": {}
       }
     }"#;
-		let import_map = ImportMap::from_json(
-			"https://base.example/path1/path2/path3",
-			json_map,
-		)
-		.unwrap();
+		let import_map =
+			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
 		assert!(import_map.scopes.contains_key("http://good/"));
 		assert!(import_map.scopes.contains_key("https://good/"));
 		assert!(import_map.scopes.contains_key("file:///good"));
@@ -958,17 +820,10 @@ mod tests {
         "https://example.com/%41": {}
       }
     }"#;
-		let import_map = ImportMap::from_json(
-			"https://base.example/path1/path2/path3",
-			json_map,
-		)
-		.unwrap();
+		let import_map =
+			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
 		// tricky case! remember we have a base URL
-		assert!(
-			import_map
-				.scopes
-				.contains_key("https://base.example/path1/path2/example.org")
-		);
+		assert!(import_map.scopes.contains_key("https://base.example/path1/path2/example.org"));
 		assert!(import_map.scopes.contains_key("https://example.com///"));
 		assert!(import_map.scopes.contains_key("https://example.net/"));
 		assert!(import_map.scopes.contains_key("https://example.com/foo/"));
@@ -986,11 +841,8 @@ mod tests {
         "slash": "/foo"
        }
     }"#;
-		let import_map = ImportMap::from_json(
-			"https://base.example/path1/path2/path3",
-			json_map,
-		)
-		.unwrap();
+		let import_map =
+			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
 
 		assert_eq!(
 			import_map.imports.get("dotSlash").unwrap(),
@@ -1013,11 +865,8 @@ mod tests {
         "slash": "/"
        }
     }"#;
-		let import_map = ImportMap::from_json(
-			"https://base.example/path1/path2/path3",
-			json_map,
-		)
-		.unwrap();
+		let import_map =
+			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
 
 		assert_eq!(
 			import_map.imports.get("dotSlash").unwrap(),
@@ -1044,11 +893,8 @@ mod tests {
         "dotDotSlash3": "%2E%2E%2F"
       }
     }"#;
-		let import_map = ImportMap::from_json(
-			"https://base.example/path1/path2/path3",
-			json_map,
-		)
-		.unwrap();
+		let import_map =
+			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
 
 		assert!(import_map.imports.get("dotSlash1").unwrap().is_empty());
 		assert!(import_map.imports.get("dotDotSlash1").unwrap().is_empty());
@@ -1078,24 +924,12 @@ mod tests {
         "wss": "wss:bad"
       }
     }"#;
-		let import_map = ImportMap::from_json(
-			"https://base.example/path1/path2/path3",
-			json_map,
-		)
-		.unwrap();
+		let import_map =
+			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
 
-		assert_eq!(
-			import_map.imports.get("file").unwrap(),
-			&vec!["file:///good".to_string()]
-		);
-		assert_eq!(
-			import_map.imports.get("http").unwrap(),
-			&vec!["http://good/".to_string()]
-		);
-		assert_eq!(
-			import_map.imports.get("https").unwrap(),
-			&vec!["https://good/".to_string()]
-		);
+		assert_eq!(import_map.imports.get("file").unwrap(), &vec!["file:///good".to_string()]);
+		assert_eq!(import_map.imports.get("http").unwrap(), &vec!["http://good/".to_string()]);
+		assert_eq!(import_map.imports.get("https").unwrap(), &vec!["https://good/".to_string()]);
 
 		assert!(import_map.imports.get("about").unwrap().is_empty());
 		assert!(import_map.imports.get("blob").unwrap().is_empty());
@@ -1128,24 +962,12 @@ mod tests {
         "wss": ["wss:bad"]
       }
     }"#;
-		let import_map = ImportMap::from_json(
-			"https://base.example/path1/path2/path3",
-			json_map,
-		)
-		.unwrap();
+		let import_map =
+			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
 
-		assert_eq!(
-			import_map.imports.get("file").unwrap(),
-			&vec!["file:///good".to_string()]
-		);
-		assert_eq!(
-			import_map.imports.get("http").unwrap(),
-			&vec!["http://good/".to_string()]
-		);
-		assert_eq!(
-			import_map.imports.get("https").unwrap(),
-			&vec!["https://good/".to_string()]
-		);
+		assert_eq!(import_map.imports.get("file").unwrap(), &vec!["file:///good".to_string()]);
+		assert_eq!(import_map.imports.get("http").unwrap(), &vec!["http://good/".to_string()]);
+		assert_eq!(import_map.imports.get("https").unwrap(), &vec!["https://good/".to_string()]);
 
 		assert!(import_map.imports.get("about").unwrap().is_empty());
 		assert!(import_map.imports.get("blob").unwrap().is_empty());
@@ -1173,11 +995,8 @@ mod tests {
         "noPercentDecoding": "https://example.com/%41"
       }
     }"#;
-		let import_map = ImportMap::from_json(
-			"https://base.example/path1/path2/path3",
-			json_map,
-		)
-		.unwrap();
+		let import_map =
+			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
 
 		assert_eq!(
 			import_map.imports.get("invalidButParseable1").unwrap(),
@@ -1220,11 +1039,8 @@ mod tests {
         "noPercentDecoding": ["https://example.com/%41"]
       }
     }"#;
-		let import_map = ImportMap::from_json(
-			"https://base.example/path1/path2/path3",
-			json_map,
-		)
-		.unwrap();
+		let import_map =
+			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
 
 		assert_eq!(
 			import_map.imports.get("invalidButParseable1").unwrap(),
@@ -1260,11 +1076,8 @@ mod tests {
         "trailer/": "/notrailer"
       }
     }"#;
-		let import_map = ImportMap::from_json(
-			"https://base.example/path1/path2/path3",
-			json_map,
-		)
-		.unwrap();
+		let import_map =
+			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
 
 		assert!(import_map.imports.get("trailer/").unwrap().is_empty());
 		// TODO: I'd be good to assert that warning was shown
@@ -1278,11 +1091,8 @@ mod tests {
         "trailer/": ["/notrailer"]
       }
     }"#;
-		let import_map = ImportMap::from_json(
-			"https://base.example/path1/path2/path3",
-			json_map,
-		)
-		.unwrap();
+		let import_map =
+			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
 
 		assert!(import_map.imports.get("trailer/").unwrap().is_empty());
 		// TODO: I'd be good to assert that warning was shown
@@ -1296,11 +1106,8 @@ mod tests {
         "trailer/": ["/atrailer/", "/notrailer"]
       }
     }"#;
-		let import_map = ImportMap::from_json(
-			"https://base.example/path1/path2/path3",
-			json_map,
-		)
-		.unwrap();
+		let import_map =
+			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
 
 		assert_eq!(
 			import_map.imports.get("trailer/").unwrap(),
@@ -1336,15 +1143,9 @@ mod tests {
 		}
 	}
 
-	fn assert_resolve(
-		result:Result<Option<ModuleSpecifier>, ImportMapError>,
-		expected_url:&str,
-	) {
-		let maybe_url = result.unwrap_or_else(|err| {
-			panic!("ImportMap::resolve failed: {:?}", err)
-		});
-		let resolved_url =
-			maybe_url.unwrap_or_else(|| panic!("Unexpected None resolved URL"));
+	fn assert_resolve(result:Result<Option<ModuleSpecifier>, ImportMapError>, expected_url:&str) {
+		let maybe_url = result.unwrap_or_else(|err| panic!("ImportMap::resolve failed: {:?}", err));
+		let resolved_url = maybe_url.unwrap_or_else(|| panic!("Unexpected None resolved URL"));
 		assert_eq!(resolved_url, expected_url.to_string());
 	}
 
@@ -1354,10 +1155,7 @@ mod tests {
 		let import_map = get_empty_import_map();
 
 		// Should resolve ./ specifiers as URLs.
-		assert_resolve(
-			import_map.resolve("./foo", referrer_url),
-			"https://example.com/js/foo",
-		);
+		assert_resolve(import_map.resolve("./foo", referrer_url), "https://example.com/js/foo");
 		assert_resolve(
 			import_map.resolve("./foo/bar", referrer_url),
 			"https://example.com/js/foo/bar",
@@ -1372,10 +1170,7 @@ mod tests {
 		);
 
 		// Should resolve ../ specifiers as URLs.
-		assert_resolve(
-			import_map.resolve("../foo", referrer_url),
-			"https://example.com/foo",
-		);
+		assert_resolve(import_map.resolve("../foo", referrer_url), "https://example.com/foo");
 		assert_resolve(
 			import_map.resolve("../foo/bar", referrer_url),
 			"https://example.com/foo/bar",
@@ -1392,14 +1187,8 @@ mod tests {
 		let import_map = get_empty_import_map();
 
 		// Should resolve / specifiers as URLs.
-		assert_resolve(
-			import_map.resolve("/foo", referrer_url),
-			"https://example.com/foo",
-		);
-		assert_resolve(
-			import_map.resolve("/foo/bar", referrer_url),
-			"https://example.com/foo/bar",
-		);
+		assert_resolve(import_map.resolve("/foo", referrer_url), "https://example.com/foo");
+		assert_resolve(import_map.resolve("/foo/bar", referrer_url), "https://example.com/foo/bar");
 		assert_resolve(
 			import_map.resolve("../../foo/bar", referrer_url),
 			"https://example.com/foo/bar",
@@ -1449,17 +1238,9 @@ mod tests {
 		assert!(import_map.resolve("%2E/foo", referrer_url).is_err());
 		assert!(import_map.resolve("%2E%2Efoo", referrer_url).is_err());
 		assert!(import_map.resolve(".%2Efoo", referrer_url).is_err());
-		assert!(
-			import_map.resolve("https://ex ample.org", referrer_url).is_err()
-		);
-		assert!(
-			import_map
-				.resolve("https://example.org:deno", referrer_url)
-				.is_err()
-		);
-		assert!(
-			import_map.resolve("https://[example.org]", referrer_url).is_err()
-		);
+		assert!(import_map.resolve("https://ex ample.org", referrer_url).is_err());
+		assert!(import_map.resolve("https://example.org:deno", referrer_url).is_err());
+		assert!(import_map.resolve("https://[example.org]", referrer_url).is_err());
 	}
 
 	#[test]
@@ -1566,10 +1347,7 @@ mod tests {
 		);
 
 		// Should work when the specifier has punctuation.
-		assert_resolve(
-			import_map.resolve(".", referrer_url),
-			"https://example.com/lib/dot.mjs",
-		);
+		assert_resolve(import_map.resolve(".", referrer_url), "https://example.com/lib/dot.mjs");
 		assert_resolve(
 			import_map.resolve("..", referrer_url),
 			"https://example.com/lib/dotdot.mjs",
@@ -1621,8 +1399,7 @@ mod tests {
 			"https://example.com/app/more/bar.mjs",
 		);
 		assert_resolve(
-			import_map
-				.resolve("https://///example.com/lib/foo.mjs", referrer_url),
+			import_map.resolve("https://///example.com/lib/foo.mjs", referrer_url),
 			"https://example.com/app/more/bar.mjs",
 		);
 		assert_resolve(
@@ -1630,10 +1407,7 @@ mod tests {
 			"https://example.com/app/more/bar.mjs",
 		);
 		assert_resolve(
-			import_map.resolve(
-				"https://example.com/app/dotrelative/foo.mjs",
-				referrer_url,
-			),
+			import_map.resolve("https://example.com/app/dotrelative/foo.mjs", referrer_url),
 			"https://example.com/lib/dot.mjs",
 		);
 		assert_resolve(
@@ -1641,10 +1415,7 @@ mod tests {
 			"https://example.com/lib/dot.mjs",
 		);
 		assert_resolve(
-			import_map.resolve(
-				"https://example.com/dotdotrelative/foo.mjs",
-				referrer_url,
-			),
+			import_map.resolve("https://example.com/dotdotrelative/foo.mjs", referrer_url),
 			"https://example.com/lib/dotdot.mjs",
 		);
 		assert_resolve(
@@ -1653,31 +1424,16 @@ mod tests {
 		);
 
 		// Should fail for URLs that remap to empty arrays.
-		assert!(
-			import_map
-				.resolve("https://example.com/lib/no.mjs", referrer_url)
-				.is_err()
-		);
+		assert!(import_map.resolve("https://example.com/lib/no.mjs", referrer_url).is_err());
 		assert!(import_map.resolve("/lib/no.mjs", referrer_url).is_err());
 		assert!(import_map.resolve("../lib/no.mjs", referrer_url).is_err());
 		assert!(
 			import_map
-				.resolve(
-					"https://example.com/app/dotrelative/no.mjs",
-					referrer_url
-				)
+				.resolve("https://example.com/app/dotrelative/no.mjs", referrer_url)
 				.is_err()
 		);
-		assert!(
-			import_map
-				.resolve("/app/dotrelative/no.mjs", referrer_url)
-				.is_err()
-		);
-		assert!(
-			import_map
-				.resolve("../app/dotrelative/no.mjs", referrer_url)
-				.is_err()
-		);
+		assert!(import_map.resolve("/app/dotrelative/no.mjs", referrer_url).is_err());
+		assert!(import_map.resolve("../app/dotrelative/no.mjs", referrer_url).is_err());
 
 		// Should remap URLs that are just composed from / and ..
 		assert_resolve(
@@ -1712,8 +1468,7 @@ mod tests {
 			"https://example.com/lib/url-trailing-slash/foo.mjs",
 		);
 		assert_resolve(
-			import_map
-				.resolve("https://example.com/app/test/foo.mjs", referrer_url),
+			import_map.resolve("https://example.com/app/test/foo.mjs", referrer_url),
 			"https://example.com/lib/url-trailing-slash-dot/foo.mjs",
 		);
 
@@ -1745,26 +1500,11 @@ mod tests {
     }"#;
 			let import_map = ImportMap::from_json(base_url, json_map).unwrap();
 
-			assert_resolve(
-				import_map.resolve("a", referrer_url),
-				"https://example.com/1",
-			);
-			assert_resolve(
-				import_map.resolve("a/", referrer_url),
-				"https://example.com/2/",
-			);
-			assert_resolve(
-				import_map.resolve("a/b", referrer_url),
-				"https://example.com/3",
-			);
-			assert_resolve(
-				import_map.resolve("a/b/", referrer_url),
-				"https://example.com/4/",
-			);
-			assert_resolve(
-				import_map.resolve("a/b/c", referrer_url),
-				"https://example.com/4/c",
-			);
+			assert_resolve(import_map.resolve("a", referrer_url), "https://example.com/1");
+			assert_resolve(import_map.resolve("a/", referrer_url), "https://example.com/2/");
+			assert_resolve(import_map.resolve("a/b", referrer_url), "https://example.com/3");
+			assert_resolve(import_map.resolve("a/b/", referrer_url), "https://example.com/4/");
+			assert_resolve(import_map.resolve("a/b/c", referrer_url), "https://example.com/4/c");
 		}
 
 		// Should favor the most-specific key when empty arrays are involved for
@@ -1783,18 +1523,9 @@ mod tests {
 			assert!(import_map.resolve("a", referrer_url).is_err());
 			assert!(import_map.resolve("a/", referrer_url).is_err());
 			assert!(import_map.resolve("a/x", referrer_url).is_err());
-			assert_resolve(
-				import_map.resolve("a/b", referrer_url),
-				"https://example.com/3",
-			);
-			assert_resolve(
-				import_map.resolve("a/b/", referrer_url),
-				"https://example.com/4/",
-			);
-			assert_resolve(
-				import_map.resolve("a/b/c", referrer_url),
-				"https://example.com/4/c",
-			);
+			assert_resolve(import_map.resolve("a/b", referrer_url), "https://example.com/3");
+			assert_resolve(import_map.resolve("a/b/", referrer_url), "https://example.com/4/");
+			assert_resolve(import_map.resolve("a/b/c", referrer_url), "https://example.com/4/c");
 			assert!(import_map.resolve("a/x/c", referrer_url).is_err());
 		}
 	}
@@ -2048,46 +1779,19 @@ mod tests {
 		let scope_3_url = "https://example.com/scope2/scope3/foo.mjs";
 
 		// Should fall back to "imports" when none match.
-		assert_resolve(
-			import_map.resolve("a", scope_1_url),
-			"https://example.com/a-1.mjs",
-		);
-		assert_resolve(
-			import_map.resolve("b", scope_1_url),
-			"https://example.com/b-1.mjs",
-		);
-		assert_resolve(
-			import_map.resolve("c", scope_1_url),
-			"https://example.com/c-1.mjs",
-		);
+		assert_resolve(import_map.resolve("a", scope_1_url), "https://example.com/a-1.mjs");
+		assert_resolve(import_map.resolve("b", scope_1_url), "https://example.com/b-1.mjs");
+		assert_resolve(import_map.resolve("c", scope_1_url), "https://example.com/c-1.mjs");
 
 		// Should use a direct scope override.
-		assert_resolve(
-			import_map.resolve("a", scope_2_url),
-			"https://example.com/a-2.mjs",
-		);
-		assert_resolve(
-			import_map.resolve("b", scope_2_url),
-			"https://example.com/b-1.mjs",
-		);
-		assert_resolve(
-			import_map.resolve("c", scope_2_url),
-			"https://example.com/c-1.mjs",
-		);
+		assert_resolve(import_map.resolve("a", scope_2_url), "https://example.com/a-2.mjs");
+		assert_resolve(import_map.resolve("b", scope_2_url), "https://example.com/b-1.mjs");
+		assert_resolve(import_map.resolve("c", scope_2_url), "https://example.com/c-1.mjs");
 
 		// Should use an indirect scope override.
-		assert_resolve(
-			import_map.resolve("a", scope_3_url),
-			"https://example.com/a-2.mjs",
-		);
-		assert_resolve(
-			import_map.resolve("b", scope_3_url),
-			"https://example.com/b-3.mjs",
-		);
-		assert_resolve(
-			import_map.resolve("c", scope_3_url),
-			"https://example.com/c-1.mjs",
-		);
+		assert_resolve(import_map.resolve("a", scope_3_url), "https://example.com/a-2.mjs");
+		assert_resolve(import_map.resolve("b", scope_3_url), "https://example.com/b-3.mjs");
+		assert_resolve(import_map.resolve("c", scope_3_url), "https://example.com/c-1.mjs");
 	}
 
 	#[test]
@@ -2118,20 +1822,11 @@ mod tests {
 		let in_dir_above_map = "https://example.com/foo.mjs";
 
 		// Should resolve an empty string scope using the import map URL.
-		assert_resolve(
-			import_map.resolve("a", base_url),
-			"https://example.com/a-empty-string.mjs",
-		);
-		assert_resolve(
-			import_map.resolve("a", in_same_dir_as_map),
-			"https://example.com/a-1.mjs",
-		);
+		assert_resolve(import_map.resolve("a", base_url), "https://example.com/a-empty-string.mjs");
+		assert_resolve(import_map.resolve("a", in_same_dir_as_map), "https://example.com/a-1.mjs");
 
 		// Should resolve a ./ scope using the import map URL's directory.
-		assert_resolve(
-			import_map.resolve("b", base_url),
-			"https://example.com/b-dot-slash.mjs",
-		);
+		assert_resolve(import_map.resolve("b", base_url), "https://example.com/b-dot-slash.mjs");
 		assert_resolve(
 			import_map.resolve("b", in_same_dir_as_map),
 			"https://example.com/b-dot-slash.mjs",

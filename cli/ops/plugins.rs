@@ -63,9 +63,7 @@ pub fn op_open_plugin(
 	let rid = table.add("plugin", Box::new(plugin_resource));
 	let plugin_resource = table.get_mut::<PluginResource>(rid).unwrap();
 
-	let init_fn = *unsafe {
-		plugin_resource.lib.symbol::<PluginInitFn>("deno_plugin_init")
-	}?;
+	let init_fn = *unsafe { plugin_resource.lib.symbol::<PluginInitFn>("deno_plugin_init") }?;
 	let mut init_context = InitContext { ops:HashMap::new() };
 	init_fn(&mut init_context);
 	for op in init_context.ops {
@@ -74,8 +72,7 @@ pub fn op_open_plugin(
 		// The inclusion of prefix and rid is designed to avoid any
 		// op name collision beyond the bound of a single loaded
 		// plugin instance.
-		let op_id = registry
-			.register(&format!("plugin_{}_{}", rid, op.0), state.core_op(op.1));
+		let op_id = registry.register(&format!("plugin_{}_{}", rid, op.0), state.core_op(op.1));
 		plugin_resource.ops.insert(op.0, op_id);
 	}
 

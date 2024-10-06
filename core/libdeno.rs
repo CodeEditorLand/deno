@@ -44,18 +44,14 @@ impl deno_buf {
 /// Converts Rust &Buf to libdeno `deno_buf`.
 impl<'a> From<&'a [u8]> for deno_buf {
 	#[inline]
-	fn from(x:&'a [u8]) -> Self {
-		Self { data_ptr:x.as_ref().as_ptr(), data_len:x.len() }
-	}
+	fn from(x:&'a [u8]) -> Self { Self { data_ptr:x.as_ref().as_ptr(), data_len:x.len() } }
 }
 
 impl Deref for deno_buf {
 	type Target = [u8];
 
 	#[inline]
-	fn deref(&self) -> &[u8] {
-		unsafe { std::slice::from_raw_parts(self.data_ptr, self.data_len) }
-	}
+	fn deref(&self) -> &[u8] { unsafe { std::slice::from_raw_parts(self.data_ptr, self.data_len) } }
 }
 
 impl AsRef<[u8]> for deno_buf {
@@ -88,11 +84,7 @@ unsafe impl Send for PinnedBufRaw {}
 impl PinnedBuf {
 	pub fn new(raw:PinnedBufRaw) -> Option<Self> {
 		NonNull::new(raw.data_ptr).map(|data_ptr| {
-			PinnedBuf {
-				data_ptr,
-				data_len:raw.data_len,
-				pin:NonNull::new(raw.pin).unwrap(),
-			}
+			PinnedBuf { data_ptr, data_len:raw.data_len, pin:NonNull::new(raw.pin).unwrap() }
 		})
 	}
 }
@@ -116,9 +108,7 @@ impl Deref for PinnedBuf {
 
 impl DerefMut for PinnedBuf {
 	fn deref_mut(&mut self) -> &mut [u8] {
-		unsafe {
-			slice::from_raw_parts_mut(self.data_ptr.as_ptr(), self.data_len)
-		}
+		unsafe { slice::from_raw_parts_mut(self.data_ptr.as_ptr(), self.data_len) }
 	}
 }
 
@@ -156,19 +146,13 @@ pub type Snapshot2<'a> = deno_snapshot<'a>;
 impl<'a> From<&'a [u8]> for Snapshot2<'a> {
 	#[inline]
 	fn from(x:&'a [u8]) -> Self {
-		Self {
-			data_ptr:x.as_ref().as_ptr(),
-			data_len:x.len(),
-			_marker:PhantomData,
-		}
+		Self { data_ptr:x.as_ref().as_ptr(), data_len:x.len(), _marker:PhantomData }
 	}
 }
 
 impl Snapshot2<'_> {
 	#[inline]
-	pub fn empty() -> Self {
-		Self { data_ptr:null(), data_len:0, _marker:PhantomData }
-	}
+	pub fn empty() -> Self { Self { data_ptr:null(), data_len:0, _marker:PhantomData } }
 }
 
 #[allow(non_camel_case_types)]
@@ -197,11 +181,8 @@ pub type deno_mod = i32;
 pub type deno_dyn_import_id = i32;
 
 #[allow(non_camel_case_types)]
-type deno_resolve_cb = unsafe extern fn(
-	user_data:*mut c_void,
-	specifier:*const c_char,
-	referrer:deno_mod,
-) -> deno_mod;
+type deno_resolve_cb =
+	unsafe extern fn(user_data:*mut c_void, specifier:*const c_char, referrer:deno_mod) -> deno_mod;
 
 #[repr(C)]
 pub struct deno_config<'a> {
@@ -251,12 +232,7 @@ extern {
 	pub fn deno_lock(i:*const isolate);
 	pub fn deno_unlock(i:*const isolate);
 	pub fn deno_throw_exception(i:*const isolate, text:*const c_char);
-	pub fn deno_respond(
-		i:*const isolate,
-		user_data:*const c_void,
-		op_id:OpId,
-		buf:deno_buf,
-	);
+	pub fn deno_respond(i:*const isolate, user_data:*const c_void, op_id:OpId, buf:deno_buf);
 	pub fn deno_pinned_buf_delete(buf:&mut deno_pinned_buf);
 	pub fn deno_execute(
 		i:*const isolate,
@@ -279,11 +255,7 @@ extern {
 
 	pub fn deno_mod_imports_len(i:*const isolate, id:deno_mod) -> size_t;
 
-	pub fn deno_mod_imports_get(
-		i:*const isolate,
-		id:deno_mod,
-		index:size_t,
-	) -> *const c_char;
+	pub fn deno_mod_imports_get(i:*const isolate, id:deno_mod, index:size_t) -> *const c_char;
 
 	pub fn deno_mod_instantiate(
 		i:*const isolate,
@@ -292,11 +264,7 @@ extern {
 		resolve_cb:deno_resolve_cb,
 	);
 
-	pub fn deno_mod_evaluate(
-		i:*const isolate,
-		user_data:*const c_void,
-		id:deno_mod,
-	);
+	pub fn deno_mod_evaluate(i:*const isolate, user_data:*const c_void, id:deno_mod);
 
 	/// Call exactly once for every deno_dyn_import_cb.
 	pub fn deno_dyn_import_done(

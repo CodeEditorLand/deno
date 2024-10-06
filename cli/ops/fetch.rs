@@ -12,12 +12,7 @@ use super::{
 	dispatch_json::{Deserialize, JsonOp, Value},
 	io::StreamResource,
 };
-use crate::{
-	http_body::HttpBody,
-	http_util::get_client,
-	ops::json_op,
-	state::ThreadSafeState,
-};
+use crate::{http_body::HttpBody, http_util::get_client, ops::json_op, state::ThreadSafeState};
 
 pub fn init(i:&mut Isolate, s:&ThreadSafeState) {
 	i.register_op("fetch", s.core_op(json_op(s.stateful_op(op_fetch))));
@@ -68,16 +63,12 @@ pub fn op_fetch(
 			let status = res.status();
 			let mut res_headers = Vec::new();
 			for (key, val) in res.headers().iter() {
-				res_headers
-					.push((key.to_string(), val.to_str().unwrap().to_owned()));
+				res_headers.push((key.to_string(), val.to_str().unwrap().to_owned()));
 			}
 
 			let body = HttpBody::from(res.into_body());
 			let mut table = state_.lock_resource_table();
-			let rid = table.add(
-				"httpBody",
-				Box::new(StreamResource::HttpBody(Box::new(body))),
-			);
+			let rid = table.add("httpBody", Box::new(StreamResource::HttpBody(Box::new(body))));
 
 			let json_res = json!({
 			  "bodyRid": rid,

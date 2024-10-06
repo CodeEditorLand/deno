@@ -9,8 +9,7 @@ use crate::js::{CLI_SNAPSHOT, COMPILER_SNAPSHOT};
 pub fn deno_isolate_init() -> StartupData<'static> {
 	debug!("Deno isolate init without snapshots.");
 	#[cfg(not(feature = "check-only"))]
-	let source =
-		include_str!(concat!(env!("GN_OUT_DIR"), "/gen/cli/bundle/main.js"));
+	let source = include_str!(concat!(env!("GN_OUT_DIR"), "/gen/cli/bundle/main.js"));
 	#[cfg(feature = "check-only")]
 	let source = "";
 
@@ -32,17 +31,11 @@ pub fn deno_isolate_init() -> StartupData<'static> {
 pub fn compiler_isolate_init() -> StartupData<'static> {
 	debug!("Compiler isolate init without snapshots.");
 	#[cfg(not(feature = "check-only"))]
-	let source = include_str!(concat!(
-		env!("GN_OUT_DIR"),
-		"/gen/cli/bundle/compiler.js"
-	));
+	let source = include_str!(concat!(env!("GN_OUT_DIR"), "/gen/cli/bundle/compiler.js"));
 	#[cfg(feature = "check-only")]
 	let source = "";
 
-	StartupData::Script(Script {
-		filename:"gen/cli/bundle/compiler.js",
-		source,
-	})
+	StartupData::Script(Script { filename:"gen/cli/bundle/compiler.js", source })
 }
 
 #[cfg(not(feature = "no-snapshot-init"))]
