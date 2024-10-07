@@ -22,7 +22,7 @@ str6 = """\
        fox jumps over \
        the lazy dog.\
        """
-lines  = '''
+lines = '''
 The first newline is
 trimmed in raw strings.
    All other whitespace

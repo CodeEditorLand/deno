@@ -1,4 +1,3 @@
-
 [[bin]]
 name = "deno"
 path = "cli/main.rs"
