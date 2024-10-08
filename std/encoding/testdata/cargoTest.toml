@@ -8,26 +8,29 @@ dob = 2009-05-27T07:32:00
 
 [database]
 server = "192.168.1.1"
-ports = [8001, 8001, 8002]
+ports = [ 8001, 8001, 8002 ]
 connection_max = 5000
 enabled = true
 
 [servers]
 
-# Indentation (tabs and/or spaces) is allowed but not required
-[servers.alpha]
-ip = "10.0.0.1"
-dc = "eqdc10"
+  # Indentation (tabs and/or spaces) is allowed but not required
+  [servers.alpha]
+  ip = "10.0.0.1"
+  dc = "eqdc10"
 
-[servers.beta]
-ip = "10.0.0.2"
-dc = "eqdc10"
+  [servers.beta]
+  ip = "10.0.0.2"
+  dc = "eqdc10"
 
 [clients]
-data = [["gamma", "delta"], [1, 2]]
+data = [ ["gamma", "delta"], [1, 2] ]
 
 # Line breaks are OK when inside arrays
-hosts = ["alpha", "omega"]
+hosts = [
+  "alpha",
+  "omega"
+]
 
 [strings]
 str0 = "deno"
@@ -54,7 +57,7 @@ str6 = """\
        fox jumps over \
        the lazy dog.\
        """
-lines = '''
+lines  = '''
 The first newline is
 trimmed in raw strings.
    All other whitespace
@@ -68,7 +71,7 @@ int3 = 0
 int4 = -17
 int5 = 1_000
 int6 = 5_349_221
-int7 = 1_2_3_4_5 # VALID but discouraged
+int7 = 1_2_3_4_5     # VALID but discouraged
 
 # hexadecimal with prefix `0x`
 hex1 = 0xDEADBEEF
@@ -77,7 +80,7 @@ hex3 = 0xdead_beef
 
 # octal with prefix `0o`
 oct1 = 0o01234567
-oct2 = 0o755      # useful for Unix file permissions
+oct2 = 0o755 # useful for Unix file permissions
 
 # binary with prefix `0b`
 bin1 = 0b11010110
@@ -88,8 +91,8 @@ odt2 = 1979-05-27T00:32:00-07:00
 odt3 = 1979-05-27T00:32:00.999999-07:00
 odt4 = 1979-05-27 07:32:00Z
 ld1 = 1979-05-27
-lt1 = 07:32:00                          #buggy
-lt2 = 00:32:00.999999                   #buggy
+lt1 = 07:32:00 #buggy
+lt2 = 00:32:00.999999 #buggy
 
 [boolean]
 bool1 = true
@@ -125,20 +128,20 @@ point = { x = 1, y = 2 }
 animal = { type.name = "pug" }
 
 [[fruit]]
-name = "apple"
+  name = "apple"
 
-[fruit.physical]
-color = "red"
-shape = "round"
+  [fruit.physical]
+    color = "red"
+    shape = "round"
 
-[[fruit.variety]]
-name = "red delicious"
+  [[fruit.variety]]
+    name = "red delicious"
 
-[[fruit.variety]]
-name = "granny smith"
+  [[fruit.variety]]
+    name = "granny smith"
 
 [[fruit]]
-name = "banana"
+  name = "banana"
 
-[[fruit.variety]]
-name = "plantain"
+  [[fruit.variety]]
+    name = "plantain"

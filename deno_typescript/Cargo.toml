@@ -8,11 +8,11 @@ authors = ["the Deno authors"]
 edition = "2018"
 
 exclude = [
-	"typescript/tests/*",
-	"typescript/src/*",
-	"typescript/scripts/*",
-	"typescript/doc/*",
-	"typescript/lib/*/*.json",
+  "typescript/tests/*",
+  "typescript/src/*",
+  "typescript/scripts/*",
+  "typescript/doc/*",
+  "typescript/lib/*/*.json",
 ]
 
 [lib]
@@ -20,5 +20,5 @@ path = "lib.rs"
 
 [dependencies]
 deno = { path = "../core", version = "0.26.0" }
-serde_json = "1.0.128"
-serde = { version = "1.0.210", features = ["derive"] }
+serde_json = "1.0.41"
+serde = { version = "1.0.102", features = ["derive"] }

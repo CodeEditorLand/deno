@@ -14,8 +14,9 @@ pub use wasm::WasmCompiler;
 
 #[derive(Debug, Clone)]
 pub struct CompiledModule {
-	pub code:String,
-	pub name:String,
+  pub code: String,
+  pub name: String,
 }
 
-pub type CompiledModuleFuture = dyn Future<Output = Result<CompiledModule, ErrBox>> + Send;
+pub type CompiledModuleFuture =
+  dyn Future<Output = Result<CompiledModule, ErrBox>> + Send;

@@ -7,78 +7,78 @@
 export type Any = any;
 
 export function isNothing(subject: unknown): subject is never {
-	return typeof subject === "undefined" || subject === null;
+  return typeof subject === "undefined" || subject === null;
 }
 
 export function isArray(value: unknown): value is Any[] {
-	return Array.isArray(value);
+  return Array.isArray(value);
 }
 
 export function isBoolean(value: unknown): value is boolean {
-	return typeof value === "boolean" || value instanceof Boolean;
+  return typeof value === "boolean" || value instanceof Boolean;
 }
 
 export function isNull(value: unknown): value is null {
-	return value === null;
+  return value === null;
 }
 
 export function isNullOrUndefined(value: unknown): value is null | undefined {
-	return value === null || value === undefined;
+  return value === null || value === undefined;
 }
 
 export function isNumber(value: unknown): value is number {
-	return typeof value === "number" || value instanceof Number;
+  return typeof value === "number" || value instanceof Number;
 }
 
 export function isString(value: unknown): value is string {
-	return typeof value === "string" || value instanceof String;
+  return typeof value === "string" || value instanceof String;
 }
 
 export function isSymbol(value: unknown): value is symbol {
-	return typeof value === "symbol";
+  return typeof value === "symbol";
 }
 
 export function isUndefined(value: unknown): value is undefined {
-	return value === undefined;
+  return value === undefined;
 }
 
 export function isObject(value: unknown): value is object {
-	return value !== null && typeof value === "object";
+  return value !== null && typeof value === "object";
 }
 
 export function isError(e: unknown): boolean {
-	return e instanceof Error;
+  return e instanceof Error;
 }
 
 export function isFunction(value: unknown): value is () => void {
-	return typeof value === "function";
+  return typeof value === "function";
 }
 
 export function isRegExp(value: unknown): value is RegExp {
-	return value instanceof RegExp;
+  return value instanceof RegExp;
 }
 
 export function toArray<T>(sequence: T): T | [] | [T] {
-	if (isArray(sequence)) return sequence;
-	if (isNothing(sequence)) return [];
+  if (isArray(sequence)) return sequence;
+  if (isNothing(sequence)) return [];
 
-	return [sequence];
+  return [sequence];
 }
 
 export function repeat(str: string, count: number): string {
-	let result = "";
+  let result = "";
 
-	for (let cycle = 0; cycle < count; cycle++) {
-		result += str;
-	}
+  for (let cycle = 0; cycle < count; cycle++) {
+    result += str;
+  }
 
-	return result;
+  return result;
 }
 
 export function isNegativeZero(i: number): boolean {
-	return i === 0 && Number.NEGATIVE_INFINITY === 1 / i;
+  return i === 0 && Number.NEGATIVE_INFINITY === 1 / i;
 }
 
 export interface ArrayObject<T = Any> {
-	[P: string]: T;
+  [P: string]: T;
 }

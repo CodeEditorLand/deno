@@ -1,9 +1,10 @@
 // Copyright the Browserify authors. MIT License.
 // Ported from https://github.com/browserify/path-browserify/
 
-import { isWindows } from "./constants.ts";
-import * as _posix from "./posix.ts";
 import * as _win32 from "./win32.ts";
+import * as _posix from "./posix.ts";
+
+import { isWindows } from "./constants.ts";
 
 const path = isWindows ? _win32 : _posix;
 

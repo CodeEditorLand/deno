@@ -1,6 +1,6 @@
 // Copyright 2018-2019 the Deno authors. All rights reserved. MIT license.
-import { readAll, readAllSync } from "./buffer.ts";
 import { open, openSync } from "./files.ts";
+import { readAll, readAllSync } from "./buffer.ts";
 
 /** Read the entire contents of a file synchronously.
  *
@@ -9,10 +9,10 @@ import { open, openSync } from "./files.ts";
  *       console.log(decoder.decode(data));
  */
 export function readFileSync(filename: string): Uint8Array {
-	const file = openSync(filename);
-	const contents = readAllSync(file);
-	file.close();
-	return contents;
+  const file = openSync(filename);
+  const contents = readAllSync(file);
+  file.close();
+  return contents;
 }
 
 /** Read the entire contents of a file.
@@ -22,8 +22,8 @@ export function readFileSync(filename: string): Uint8Array {
  *       console.log(decoder.decode(data));
  */
 export async function readFile(filename: string): Promise<Uint8Array> {
-	const file = await open(filename);
-	const contents = await readAll(file);
-	file.close();
-	return contents;
+  const file = await open(filename);
+  const contents = await readAll(file);
+  file.close();
+  return contents;
 }

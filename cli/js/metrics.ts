@@ -1,13 +1,13 @@
 // Copyright 2018-2019 the Deno authors. All rights reserved. MIT license.
-import { sendSync } from "./dispatch_json.ts";
 import * as dispatch from "./dispatch.ts";
+import { sendSync } from "./dispatch_json.ts";
 
 export interface Metrics {
-	opsDispatched: number;
-	opsCompleted: number;
-	bytesSentControl: number;
-	bytesSentData: number;
-	bytesReceived: number;
+  opsDispatched: number;
+  opsCompleted: number;
+  bytesSentControl: number;
+  bytesSentData: number;
+  bytesReceived: number;
 }
 
 /** Receive metrics from the privileged side of Deno.
@@ -24,5 +24,5 @@ export interface Metrics {
  *      └──────────────────┴────────┘
  */
 export function metrics(): Metrics {
-	return sendSync(dispatch.OP_METRICS);
+  return sendSync(dispatch.OP_METRICS);
 }

@@ -57,8 +57,8 @@ import "./version_test.ts";
 import { runIfMain } from "../../std/testing/mod.ts";
 
 async function main(): Promise<void> {
-	// Testing entire test suite serially
-	runIfMain(import.meta);
+  // Testing entire test suite serially
+  runIfMain(import.meta);
 }
 
 main();

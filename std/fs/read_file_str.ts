@@ -1,7 +1,7 @@
 // Copyright 2018-2019 the Deno authors. All rights reserved. MIT license.
 
 export interface ReadOptions {
-	encoding?: string;
+  encoding?: string;
 }
 
 /**
@@ -11,11 +11,11 @@ export interface ReadOptions {
  * @param opts Read options
  */
 export function readFileStrSync(
-	filename: string,
-	opts: ReadOptions = {},
+  filename: string,
+  opts: ReadOptions = {}
 ): string {
-	const decoder = new TextDecoder(opts.encoding);
-	return decoder.decode(Deno.readFileSync(filename));
+  const decoder = new TextDecoder(opts.encoding);
+  return decoder.decode(Deno.readFileSync(filename));
 }
 
 /**
@@ -25,9 +25,9 @@ export function readFileStrSync(
  * @param opts Read options
  */
 export async function readFileStr(
-	filename: string,
-	opts: ReadOptions = {},
+  filename: string,
+  opts: ReadOptions = {}
 ): Promise<string> {
-	const decoder = new TextDecoder(opts.encoding);
-	return decoder.decode(await Deno.readFile(filename));
+  const decoder = new TextDecoder(opts.encoding);
+  return decoder.decode(await Deno.readFile(filename));
 }

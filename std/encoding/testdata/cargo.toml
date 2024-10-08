@@ -6,7 +6,10 @@
 # crates.
 
 [workspace]
-members = ["./", "core"]
+members = [
+  "./",
+  "core",
+]
 
 [[bin]]
 name = "deno"

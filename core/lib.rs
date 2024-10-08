@@ -18,27 +18,27 @@ mod plugins;
 mod resources;
 mod shared_queue;
 
-pub use crate::{
-	any_error::*,
-	flags::v8_set_flags,
-	isolate::*,
-	js_errors::*,
-	libdeno::{deno_mod, OpId, PinnedBuf},
-	module_specifier::*,
-	modules::*,
-	ops::*,
-	plugins::*,
-	resources::*,
-};
+pub use crate::any_error::*;
+pub use crate::flags::v8_set_flags;
+pub use crate::isolate::*;
+pub use crate::js_errors::*;
+pub use crate::libdeno::deno_mod;
+pub use crate::libdeno::OpId;
+pub use crate::libdeno::PinnedBuf;
+pub use crate::module_specifier::*;
+pub use crate::modules::*;
+pub use crate::ops::*;
+pub use crate::plugins::*;
+pub use crate::resources::*;
 
 pub fn v8_version() -> &'static str {
-	use std::ffi::CStr;
-	let version = unsafe { libdeno::deno_v8_version() };
-	let c_str = unsafe { CStr::from_ptr(version) };
-	c_str.to_str().unwrap()
+  use std::ffi::CStr;
+  let version = unsafe { libdeno::deno_v8_version() };
+  let c_str = unsafe { CStr::from_ptr(version) };
+  c_str.to_str().unwrap()
 }
 
 #[test]
 fn test_v8_version() {
-	assert!(v8_version().len() > 3);
+  assert!(v8_version().len() > 3);
 }

@@ -1,9 +1,9 @@
 // Copyright 2018-2019 the Deno authors. All rights reserved. MIT license.
-import { sendAsync, sendSync } from "./dispatch_json.ts";
+import { sendSync, sendAsync } from "./dispatch_json.ts";
 import * as dispatch from "./dispatch.ts";
 
 export interface RemoveOption {
-	recursive?: boolean;
+  recursive?: boolean;
 }
 
 /** Removes the named file or directory synchronously. Would throw
@@ -14,7 +14,7 @@ export interface RemoveOption {
  *       Deno.removeSync("/path/to/dir/or/file", {recursive: false});
  */
 export function removeSync(path: string, options: RemoveOption = {}): void {
-	sendSync(dispatch.OP_REMOVE, { path, recursive: !!options.recursive });
+  sendSync(dispatch.OP_REMOVE, { path, recursive: !!options.recursive });
 }
 
 /** Removes the named file or directory. Would throw error if
@@ -25,11 +25,8 @@ export function removeSync(path: string, options: RemoveOption = {}): void {
  *       await Deno.remove("/path/to/dir/or/file", {recursive: false});
  */
 export async function remove(
-	path: string,
-	options: RemoveOption = {},
+  path: string,
+  options: RemoveOption = {}
 ): Promise<void> {
-	await sendAsync(dispatch.OP_REMOVE, {
-		path,
-		recursive: !!options.recursive,
-	});
+  await sendAsync(dispatch.OP_REMOVE, { path, recursive: !!options.recursive });
 }
