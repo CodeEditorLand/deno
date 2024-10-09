@@ -2,74 +2,74 @@
 
 // Public deno module.
 export {
-  env,
-  exit,
-  isTTY,
-  execPath,
-  homeDir,
-  cacheDir,
-  configDir,
-  dataDir,
-  dataLocalDir,
-  audioDir,
-  desktopDir,
-  documentDir,
-  downloadDir,
-  fontDir,
-  pictureDir,
-  publicDir,
-  templateDir,
-  videoDir,
-  hostname
+	env,
+	exit,
+	isTTY,
+	execPath,
+	homeDir,
+	cacheDir,
+	configDir,
+	dataDir,
+	dataLocalDir,
+	audioDir,
+	desktopDir,
+	documentDir,
+	downloadDir,
+	fontDir,
+	pictureDir,
+	publicDir,
+	templateDir,
+	videoDir,
+	hostname,
 } from "./os.ts";
 export { chdir, cwd } from "./dir.ts";
 export {
-  File,
-  open,
-  openSync,
-  stdin,
-  stdout,
-  stderr,
-  read,
-  readSync,
-  write,
-  writeSync,
-  seek,
-  seekSync,
-  close,
-  OpenMode
+	File,
+	open,
+	openSync,
+	stdin,
+	stdout,
+	stderr,
+	read,
+	readSync,
+	write,
+	writeSync,
+	seek,
+	seekSync,
+	close,
+	OpenMode,
 } from "./files.ts";
 export {
-  EOF,
-  copy,
-  toAsyncIterator,
-  SeekMode,
-  Reader,
-  SyncReader,
-  Writer,
-  SyncWriter,
-  Closer,
-  Seeker,
-  SyncSeeker,
-  ReadCloser,
-  WriteCloser,
-  ReadSeeker,
-  WriteSeeker,
-  ReadWriteCloser,
-  ReadWriteSeeker
+	EOF,
+	copy,
+	toAsyncIterator,
+	SeekMode,
+	Reader,
+	SyncReader,
+	Writer,
+	SyncWriter,
+	Closer,
+	Seeker,
+	SyncSeeker,
+	ReadCloser,
+	WriteCloser,
+	ReadSeeker,
+	WriteSeeker,
+	ReadWriteCloser,
+	ReadWriteSeeker,
 } from "./io.ts";
 export {
-  Buffer,
-  readAll,
-  readAllSync,
-  writeAll,
-  writeAllSync
+	Buffer,
+	readAll,
+	readAllSync,
+	writeAll,
+	writeAllSync,
 } from "./buffer.ts";
 export { mkdirSync, mkdir } from "./mkdir.ts";
 export {
-  makeTempDirSync,
-  makeTempDir,
-  MakeTempDirOptions
+	makeTempDirSync,
+	makeTempDir,
+	MakeTempDirOptions,
 } from "./make_temp_dir.ts";
 export { chmodSync, chmod } from "./chmod.ts";
 export { chownSync, chown } from "./chown.ts";
@@ -88,11 +88,11 @@ export { writeFileSync, writeFile, WriteFileOptions } from "./write_file.ts";
 export { applySourceMap } from "./error_stack.ts";
 export { ErrorKind, DenoError } from "./errors.ts";
 export {
-  permissions,
-  PermissionName,
-  PermissionState,
-  PermissionStatus,
-  Permissions
+	permissions,
+	PermissionName,
+	PermissionState,
+	PermissionStatus,
+	Permissions,
 } from "./permissions.ts";
 export { truncateSync, truncate } from "./truncate.ts";
 export { FileInfo } from "./file_info.ts";
@@ -102,12 +102,12 @@ export { dialTLS, listenTLS } from "./tls.ts";
 export { metrics, Metrics } from "./metrics.ts";
 export { resources } from "./resources.ts";
 export {
-  kill,
-  run,
-  RunOptions,
-  Process,
-  ProcessStatus,
-  Signal
+	kill,
+	run,
+	RunOptions,
+	Process,
+	ProcessStatus,
+	Signal,
 } from "./process.ts";
 export { inspect, customInspect } from "./console.ts";
 export { build, OperatingSystem, Arch } from "./build.ts";

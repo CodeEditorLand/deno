@@ -3,8 +3,8 @@ const { build, run } = Deno;
 
 // Runs a command in cross-platform way
 export function xrun(opts: Deno.RunOptions): Deno.Process {
-  return run({
-    ...opts,
-    args: build.os === "win" ? ["cmd.exe", "/c", ...opts.args] : opts.args
-  });
+	return run({
+		...opts,
+		args: build.os === "win" ? ["cmd.exe", "/c", ...opts.args] : opts.args,
+	});
 }

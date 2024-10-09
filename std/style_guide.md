@@ -50,9 +50,9 @@ When designing function interfaces, stick to the following rules.
 
 2. Optional parameters should generally go into the options object.
 
-   An optional parameter that's not in an options object might be acceptable if
-   there is only one, and it seems inconceivable that we would add more optional
-   parameters in the future.
+    An optional parameter that's not in an options object might be acceptable if
+    there is only one, and it seems inconceivable that we would add more
+    optional parameters in the future.
 
 <!-- prettier-ignore-start -->
 <!-- see https://github.com/prettier/prettier/issues/3679 -->

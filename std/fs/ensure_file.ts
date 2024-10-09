@@ -11,26 +11,26 @@ import { getFileInfoType } from "./utils.ts";
  * it is NOTMODIFIED.
  */
 export async function ensureFile(filePath: string): Promise<void> {
-  let pathExists = false;
-  try {
-    // if file exists
-    const stat = await Deno.lstat(filePath);
-    pathExists = true;
-    if (!stat.isFile()) {
-      throw new Error(
-        `Ensure path exists, expected 'file', got '${getFileInfoType(stat)}'`
-      );
-    }
-  } catch (err) {
-    if (pathExists) {
-      throw err;
-    }
-    // if file not exists
-    // ensure dir exists
-    await ensureDir(path.dirname(filePath));
-    // create file
-    await Deno.writeFile(filePath, new Uint8Array());
-  }
+	let pathExists = false;
+	try {
+		// if file exists
+		const stat = await Deno.lstat(filePath);
+		pathExists = true;
+		if (!stat.isFile()) {
+			throw new Error(
+				`Ensure path exists, expected 'file', got '${getFileInfoType(stat)}'`,
+			);
+		}
+	} catch (err) {
+		if (pathExists) {
+			throw err;
+		}
+		// if file not exists
+		// ensure dir exists
+		await ensureDir(path.dirname(filePath));
+		// create file
+		await Deno.writeFile(filePath, new Uint8Array());
+	}
 }
 
 /**
@@ -41,24 +41,24 @@ export async function ensureFile(filePath: string): Promise<void> {
  * it is NOT MODIFIED.
  */
 export function ensureFileSync(filePath: string): void {
-  let pathExists = false;
-  try {
-    // if file exists
-    const stat = Deno.statSync(filePath);
-    pathExists = true;
-    if (!stat.isFile()) {
-      throw new Error(
-        `Ensure path exists, expected 'file', got '${getFileInfoType(stat)}'`
-      );
-    }
-  } catch (err) {
-    if (pathExists) {
-      throw err;
-    }
-    // if file not exists
-    // ensure dir exists
-    ensureDirSync(path.dirname(filePath));
-    // create file
-    Deno.writeFileSync(filePath, new Uint8Array());
-  }
+	let pathExists = false;
+	try {
+		// if file exists
+		const stat = Deno.statSync(filePath);
+		pathExists = true;
+		if (!stat.isFile()) {
+			throw new Error(
+				`Ensure path exists, expected 'file', got '${getFileInfoType(stat)}'`,
+			);
+		}
+	} catch (err) {
+		if (pathExists) {
+			throw err;
+		}
+		// if file not exists
+		// ensure dir exists
+		ensureDirSync(path.dirname(filePath));
+		// create file
+		Deno.writeFileSync(filePath, new Uint8Array());
+	}
 }

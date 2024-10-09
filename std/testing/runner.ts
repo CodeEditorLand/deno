@@ -1,15 +1,16 @@
 #!/usr/bin/env -S deno -A
 // Copyright 2018-2019 the Deno authors. All rights reserved. MIT license.
 import { parse } from "../flags/mod.ts";
-import { ExpandGlobOptions, expandGlob } from "../fs/mod.ts";
+import { expandGlob, ExpandGlobOptions } from "../fs/mod.ts";
 import { isWindows, join } from "../path/mod.ts";
-import { RunTestsOptions, runTests } from "./mod.ts";
+import { runTests, RunTestsOptions } from "./mod.ts";
+
 const { DenoError, ErrorKind, args, cwd, exit } = Deno;
 
 const DIR_GLOBS = [join("**", "?(*_)test.{js,ts}")];
 
 function showHelp(): void {
-  console.log(`Deno test runner
+	console.log(`Deno test runner
 
 USAGE:
   deno -A https://deno.land/std/testing/runner.ts [OPTIONS] [MODULES...]
@@ -25,7 +26,7 @@ ARGS:
   [MODULES...]  List of test modules to run.
                 A directory <dir> will expand to:
                   ${DIR_GLOBS.map((s: string): string => `${join("<dir>", s)}`)
-                    .join(`
+						.join(`
                   `)}
                 Defaults to "." when none are provided.
 
@@ -38,24 +39,27 @@ Examples:
 }
 
 function isRemoteUrl(url: string): boolean {
-  return /^https?:\/\//.test(url);
+	return /^https?:\/\//.test(url);
 }
 
 function partition(
-  arr: string[],
-  callback: (el: string) => boolean
+	arr: string[],
+	callback: (el: string) => boolean,
 ): [string[], string[]] {
-  return arr.reduce(
-    (paritioned: [string[], string[]], el: string): [string[], string[]] => {
-      paritioned[callback(el) ? 1 : 0].push(el);
-      return paritioned;
-    },
-    [[], []]
-  );
+	return arr.reduce(
+		(
+			paritioned: [string[], string[]],
+			el: string,
+		): [string[], string[]] => {
+			paritioned[callback(el) ? 1 : 0].push(el);
+			return paritioned;
+		},
+		[[], []],
+	);
 }
 
 function filePathToUrl(path: string): string {
-  return `file://${isWindows ? "/" : ""}${path.replace(/\\/g, "/")}`;
+	return `file://${isWindows ? "/" : ""}${path.replace(/\\/g, "/")}`;
 }
 
 /**
@@ -64,56 +68,56 @@ function filePathToUrl(path: string): string {
  * (file: or remote) that should be imported for the test runner.
  */
 export async function* findTestModules(
-  includeModules: string[],
-  excludeModules: string[],
-  root: string = cwd()
+	includeModules: string[],
+	excludeModules: string[],
+	root: string = cwd(),
 ): AsyncIterableIterator<string> {
-  const [includePaths, includeUrls] = partition(includeModules, isRemoteUrl);
-  const [excludePaths, excludeUrls] = partition(excludeModules, isRemoteUrl);
+	const [includePaths, includeUrls] = partition(includeModules, isRemoteUrl);
+	const [excludePaths, excludeUrls] = partition(excludeModules, isRemoteUrl);
 
-  const expandGlobOpts: ExpandGlobOptions = {
-    root,
-    exclude: excludePaths,
-    includeDirs: true,
-    extended: true,
-    globstar: true
-  };
+	const expandGlobOpts: ExpandGlobOptions = {
+		root,
+		exclude: excludePaths,
+		includeDirs: true,
+		extended: true,
+		globstar: true,
+	};
 
-  async function* expandDirectory(d: string): AsyncIterableIterator<string> {
-    for (const dirGlob of DIR_GLOBS) {
-      for await (const walkInfo of expandGlob(dirGlob, {
-        ...expandGlobOpts,
-        root: d,
-        includeDirs: false
-      })) {
-        yield filePathToUrl(walkInfo.filename);
-      }
-    }
-  }
+	async function* expandDirectory(d: string): AsyncIterableIterator<string> {
+		for (const dirGlob of DIR_GLOBS) {
+			for await (const walkInfo of expandGlob(dirGlob, {
+				...expandGlobOpts,
+				root: d,
+				includeDirs: false,
+			})) {
+				yield filePathToUrl(walkInfo.filename);
+			}
+		}
+	}
 
-  for (const globString of includePaths) {
-    for await (const walkInfo of expandGlob(globString, expandGlobOpts)) {
-      if (walkInfo.info.isDirectory()) {
-        yield* expandDirectory(walkInfo.filename);
-      } else {
-        yield filePathToUrl(walkInfo.filename);
-      }
-    }
-  }
+	for (const globString of includePaths) {
+		for await (const walkInfo of expandGlob(globString, expandGlobOpts)) {
+			if (walkInfo.info.isDirectory()) {
+				yield* expandDirectory(walkInfo.filename);
+			} else {
+				yield filePathToUrl(walkInfo.filename);
+			}
+		}
+	}
 
-  const excludeUrlPatterns = excludeUrls.map(
-    (url: string): RegExp => RegExp(url)
-  );
-  const shouldIncludeUrl = (url: string): boolean =>
-    !excludeUrlPatterns.some((p: RegExp): boolean => !!url.match(p));
+	const excludeUrlPatterns = excludeUrls.map(
+		(url: string): RegExp => RegExp(url),
+	);
+	const shouldIncludeUrl = (url: string): boolean =>
+		!excludeUrlPatterns.some((p: RegExp): boolean => !!url.match(p));
 
-  yield* includeUrls.filter(shouldIncludeUrl);
+	yield* includeUrls.filter(shouldIncludeUrl);
 }
 
 export interface RunTestModulesOptions extends RunTestsOptions {
-  include?: string[];
-  exclude?: string[];
-  allowNone?: boolean;
+	include?: string[];
+	exclude?: string[];
+	allowNone?: boolean;
 }
 
 /**
@@ -126,16 +130,16 @@ export interface RunTestModulesOptions extends RunTestsOptions {
  * @param testModules
  */
 function renderTestFile(testModules: string[]): string {
-  let testFile = "";
+	let testFile = "";
 
-  for (const testModule of testModules) {
-    // NOTE: this is intentional that template string is not used
-    // because of TS compiler quirkness of trying to import it
-    // rather than treating it like a variable
-    testFile += 'import "' + testModule + '"\n';
-  }
+	for (const testModule of testModules) {
+		// NOTE: this is intentional that template string is not used
+		// because of TS compiler quirkness of trying to import it
+		// rather than treating it like a variable
+		testFile += 'import "' + testModule + '"\n';
+	}
 
-  return testFile;
+	return testFile;
 }
 
 /**
@@ -165,132 +169,134 @@ function renderTestFile(testModules: string[]): string {
 // TODO: Change return type to `Promise<void>` once, `runTests` is updated
 // to return boolean instead of exiting.
 export async function runTestModules({
-  include = ["."],
-  exclude = [],
-  allowNone = false,
-  parallel = false,
-  exitOnFail = false,
-  only = /[^\s]/,
-  skip = /^\s*$/,
-  disableLog = false
+	include = ["."],
+	exclude = [],
+	allowNone = false,
+	parallel = false,
+	exitOnFail = false,
+	only = /[^\s]/,
+	skip = /^\s*$/,
+	disableLog = false,
 }: RunTestModulesOptions = {}): Promise<void> {
-  let moduleCount = 0;
-  const testModules = [];
-  for await (const testModule of findTestModules(include, exclude)) {
-    testModules.push(testModule);
-    moduleCount++;
-  }
+	let moduleCount = 0;
+	const testModules = [];
+	for await (const testModule of findTestModules(include, exclude)) {
+		testModules.push(testModule);
+		moduleCount++;
+	}
 
-  if (moduleCount == 0) {
-    const noneFoundMessage = "No matching test modules found.";
-    if (!allowNone) {
-      throw new DenoError(ErrorKind.NotFound, noneFoundMessage);
-    } else if (!disableLog) {
-      console.log(noneFoundMessage);
-    }
-    return;
-  }
+	if (moduleCount == 0) {
+		const noneFoundMessage = "No matching test modules found.";
+		if (!allowNone) {
+			throw new DenoError(ErrorKind.NotFound, noneFoundMessage);
+		} else if (!disableLog) {
+			console.log(noneFoundMessage);
+		}
+		return;
+	}
 
-  // Create temporary test file which contains
-  // all matched modules as import statements.
-  const testFile = renderTestFile(testModules);
-  // Select where temporary test file will be stored.
-  // If `DENO_DIR` is set it means that user intentionally wants to store
-  // modules there - so it's a sane default to store there.
-  // Fallback is current directory which again seems like a sane default,
-  // user is probably working on project in this directory or even
-  // cd'ed into current directory to quickly run test from this directory.
-  const root = Deno.env("DENO_DIR") || Deno.cwd();
-  const testFilePath = join(root, ".deno.test.ts");
-  const data = new TextEncoder().encode(testFile);
-  await Deno.writeFile(testFilePath, data);
+	// Create temporary test file which contains
+	// all matched modules as import statements.
+	const testFile = renderTestFile(testModules);
+	// Select where temporary test file will be stored.
+	// If `DENO_DIR` is set it means that user intentionally wants to store
+	// modules there - so it's a sane default to store there.
+	// Fallback is current directory which again seems like a sane default,
+	// user is probably working on project in this directory or even
+	// cd'ed into current directory to quickly run test from this directory.
+	const root = Deno.env("DENO_DIR") || Deno.cwd();
+	const testFilePath = join(root, ".deno.test.ts");
+	const data = new TextEncoder().encode(testFile);
+	await Deno.writeFile(testFilePath, data);
 
-  // Import temporary test file and delete it immediately after importing so it's not cluttering disk.
-  //
-  // You may think that this will cause recompilation on each run, but this actually
-  // tricks Deno to not recompile files if there's no need.
-  // Eg.
-  //   1. On first run of $DENO_DIR/.deno.test.ts Deno will compile and cache temporary test file and all of its imports
-  //   2. Temporary test file is removed by test runner
-  //   3. On next test run file is created again. If no new modules were added then temporary file contents are identical.
-  //      Deno will not compile temporary test file again, but load it directly into V8.
-  //   4. Deno starts loading imports one by one.
-  //   5. If imported file is outdated, Deno will recompile this single file.
-  let err;
-  try {
-    await import(`file://${testFilePath}`);
-  } catch (e) {
-    err = e;
-  } finally {
-    await Deno.remove(testFilePath);
-  }
+	// Import temporary test file and delete it immediately after importing so it's not cluttering disk.
+	//
+	// You may think that this will cause recompilation on each run, but this actually
+	// tricks Deno to not recompile files if there's no need.
+	// Eg.
+	//   1. On first run of $DENO_DIR/.deno.test.ts Deno will compile and cache temporary test file and all of its imports
+	//   2. Temporary test file is removed by test runner
+	//   3. On next test run file is created again. If no new modules were added then temporary file contents are identical.
+	//      Deno will not compile temporary test file again, but load it directly into V8.
+	//   4. Deno starts loading imports one by one.
+	//   5. If imported file is outdated, Deno will recompile this single file.
+	let err;
+	try {
+		await import(`file://${testFilePath}`);
+	} catch (e) {
+		err = e;
+	} finally {
+		await Deno.remove(testFilePath);
+	}
 
-  if (err) {
-    throw err;
-  }
+	if (err) {
+		throw err;
+	}
 
-  if (!disableLog) {
-    console.log(`Found ${moduleCount} matching test modules.`);
-  }
+	if (!disableLog) {
+		console.log(`Found ${moduleCount} matching test modules.`);
+	}
 
-  await runTests({
-    parallel,
-    exitOnFail,
-    only,
-    skip,
-    disableLog
-  });
+	await runTests({
+		parallel,
+		exitOnFail,
+		only,
+		skip,
+		disableLog,
+	});
 }
 
 async function main(): Promise<void> {
-  const parsedArgs = parse(args.slice(1), {
-    boolean: ["allow-none", "failfast", "help", "quiet"],
-    string: ["exclude"],
-    alias: {
-      exclude: ["e"],
-      failfast: ["f"],
-      help: ["h"],
-      quiet: ["q"]
-    },
-    default: {
-      "allow-none": false,
-      failfast: false,
-      help: false,
-      quiet: false
-    }
-  });
-  if (parsedArgs.help) {
-    return showHelp();
-  }
+	const parsedArgs = parse(args.slice(1), {
+		boolean: ["allow-none", "failfast", "help", "quiet"],
+		string: ["exclude"],
+		alias: {
+			exclude: ["e"],
+			failfast: ["f"],
+			help: ["h"],
+			quiet: ["q"],
+		},
+		default: {
+			"allow-none": false,
+			failfast: false,
+			help: false,
+			quiet: false,
+		},
+	});
+	if (parsedArgs.help) {
+		return showHelp();
+	}
 
-  const include =
-    parsedArgs._.length > 0
-      ? (parsedArgs._ as string[]).flatMap((fileGlob: string): string[] =>
-          fileGlob.split(",")
-        )
-      : ["."];
-  const exclude =
-    parsedArgs.exclude != null ? (parsedArgs.exclude as string).split(",") : [];
-  const allowNone = parsedArgs["allow-none"];
-  const exitOnFail = parsedArgs.failfast;
-  const disableLog = parsedArgs.quiet;
+	const include =
+		parsedArgs._.length > 0
+			? (parsedArgs._ as string[]).flatMap((fileGlob: string): string[] =>
+					fileGlob.split(","),
+				)
+			: ["."];
+	const exclude =
+		parsedArgs.exclude != null
+			? (parsedArgs.exclude as string).split(",")
+			: [];
+	const allowNone = parsedArgs["allow-none"];
+	const exitOnFail = parsedArgs.failfast;
+	const disableLog = parsedArgs.quiet;
 
-  try {
-    await runTestModules({
-      include,
-      exclude,
-      allowNone,
-      exitOnFail,
-      disableLog
-    });
-  } catch (error) {
-    if (!disableLog) {
-      console.error(error.message);
-    }
-    exit(1);
-  }
+	try {
+		await runTestModules({
+			include,
+			exclude,
+			allowNone,
+			exitOnFail,
+			disableLog,
+		});
+	} catch (error) {
+		if (!disableLog) {
+			console.error(error.message);
+		}
+		exit(1);
+	}
 }
 
 if (import.meta.main) {
-  main();
+	main();
 }

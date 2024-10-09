@@ -3,19 +3,19 @@
 // Copyright 2018-2019 the Deno authors. All rights reserved. MIT license.
 
 import { BufReader } from "../io/bufio.ts";
-import { TextProtoReader } from "../textproto/mod.ts";
 import { StringReader } from "../io/readers.ts";
+import { TextProtoReader } from "../textproto/mod.ts";
 
 const INVALID_RUNE = ["\r", "\n", '"'];
 
 export class ParseError extends Error {
-  StartLine: number;
-  Line: number;
-  constructor(start: number, line: number, message: string) {
-    super(message);
-    this.StartLine = start;
-    this.Line = line;
-  }
+	StartLine: number;
+	Line: number;
+	constructor(start: number, line: number, message: string) {
+		super(message);
+		this.StartLine = start;
+		this.Line = line;
+	}
 }
 
 /**
@@ -29,125 +29,133 @@ export class ParseError extends Error {
  *           If == 0, first row is used as referal for the number of fields.
  */
 export interface ParseOptions {
-  comma?: string;
-  comment?: string;
-  trimLeadingSpace?: boolean;
-  lazyQuotes?: boolean;
-  fieldsPerRecord?: number;
+	comma?: string;
+	comment?: string;
+	trimLeadingSpace?: boolean;
+	lazyQuotes?: boolean;
+	fieldsPerRecord?: number;
 }
 
 function chkOptions(opt: ParseOptions): void {
-  if (!opt.comma) opt.comma = ",";
-  if (!opt.trimLeadingSpace) opt.trimLeadingSpace = false;
-  if (
-    INVALID_RUNE.includes(opt.comma!) ||
-    INVALID_RUNE.includes(opt.comment!) ||
-    opt.comma === opt.comment
-  ) {
-    throw new Error("Invalid Delimiter");
-  }
+	if (!opt.comma) opt.comma = ",";
+	if (!opt.trimLeadingSpace) opt.trimLeadingSpace = false;
+	if (
+		INVALID_RUNE.includes(opt.comma!) ||
+		INVALID_RUNE.includes(opt.comment!) ||
+		opt.comma === opt.comment
+	) {
+		throw new Error("Invalid Delimiter");
+	}
 }
 
 async function read(
-  Startline: number,
-  reader: BufReader,
-  opt: ParseOptions = { comma: ",", trimLeadingSpace: false }
+	Startline: number,
+	reader: BufReader,
+	opt: ParseOptions = { comma: ",", trimLeadingSpace: false },
 ): Promise<string[] | Deno.EOF> {
-  const tp = new TextProtoReader(reader);
-  let line: string;
-  let result: string[] = [];
-  const lineIndex = Startline;
+	const tp = new TextProtoReader(reader);
+	let line: string;
+	let result: string[] = [];
+	const lineIndex = Startline;
 
-  const r = await tp.readLine();
-  if (r === Deno.EOF) return Deno.EOF;
-  line = r;
-  // Normalize \r\n to \n on all input lines.
-  if (
-    line.length >= 2 &&
-    line[line.length - 2] === "\r" &&
-    line[line.length - 1] === "\n"
-  ) {
-    line = line.substring(0, line.length - 2);
-    line = line + "\n";
-  }
+	const r = await tp.readLine();
+	if (r === Deno.EOF) return Deno.EOF;
+	line = r;
+	// Normalize \r\n to \n on all input lines.
+	if (
+		line.length >= 2 &&
+		line[line.length - 2] === "\r" &&
+		line[line.length - 1] === "\n"
+	) {
+		line = line.substring(0, line.length - 2);
+		line = line + "\n";
+	}
 
-  const trimmedLine = line.trimLeft();
-  if (trimmedLine.length === 0) {
-    return [];
-  }
+	const trimmedLine = line.trimLeft();
+	if (trimmedLine.length === 0) {
+		return [];
+	}
 
-  // line starting with comment character is ignored
-  if (opt.comment && trimmedLine[0] === opt.comment) {
-    return [];
-  }
+	// line starting with comment character is ignored
+	if (opt.comment && trimmedLine[0] === opt.comment) {
+		return [];
+	}
 
-  result = line.split(opt.comma!);
+	result = line.split(opt.comma!);
 
-  let quoteError = false;
-  result = result.map((r): string => {
-    if (opt.trimLeadingSpace) {
-      r = r.trimLeft();
-    }
-    if (r[0] === '"' && r[r.length - 1] === '"') {
-      r = r.substring(1, r.length - 1);
-    } else if (r[0] === '"') {
-      r = r.substring(1, r.length);
-    }
+	let quoteError = false;
+	result = result.map((r): string => {
+		if (opt.trimLeadingSpace) {
+			r = r.trimLeft();
+		}
+		if (r[0] === '"' && r[r.length - 1] === '"') {
+			r = r.substring(1, r.length - 1);
+		} else if (r[0] === '"') {
+			r = r.substring(1, r.length);
+		}
 
-    if (!opt.lazyQuotes) {
-      if (r[0] !== '"' && r.indexOf('"') !== -1) {
-        quoteError = true;
-      }
-    }
-    return r;
-  });
-  if (quoteError) {
-    throw new ParseError(Startline, lineIndex, 'bare " in non-quoted-field');
-  }
-  return result;
+		if (!opt.lazyQuotes) {
+			if (r[0] !== '"' && r.indexOf('"') !== -1) {
+				quoteError = true;
+			}
+		}
+		return r;
+	});
+	if (quoteError) {
+		throw new ParseError(
+			Startline,
+			lineIndex,
+			'bare " in non-quoted-field',
+		);
+	}
+	return result;
 }
 
 export async function readAll(
-  reader: BufReader,
-  opt: ParseOptions = {
-    comma: ",",
-    trimLeadingSpace: false,
-    lazyQuotes: false
-  }
+	reader: BufReader,
+	opt: ParseOptions = {
+		comma: ",",
+		trimLeadingSpace: false,
+		lazyQuotes: false,
+	},
 ): Promise<string[][]> {
-  const result: string[][] = [];
-  let _nbFields: number;
-  let lineResult: string[];
-  let first = true;
-  let lineIndex = 0;
-  chkOptions(opt);
+	const result: string[][] = [];
+	let _nbFields: number;
+	let lineResult: string[];
+	let first = true;
+	let lineIndex = 0;
+	chkOptions(opt);
 
-  for (;;) {
-    const r = await read(lineIndex, reader, opt);
-    if (r === Deno.EOF) break;
-    lineResult = r;
-    lineIndex++;
-    // If fieldsPerRecord is 0, Read sets it to
-    // the number of fields in the first record
-    if (first) {
-      first = false;
-      if (opt.fieldsPerRecord !== undefined) {
-        if (opt.fieldsPerRecord === 0) {
-          _nbFields = lineResult.length;
-        } else {
-          _nbFields = opt.fieldsPerRecord;
-        }
-      }
-    }
+	for (;;) {
+		const r = await read(lineIndex, reader, opt);
+		if (r === Deno.EOF) break;
+		lineResult = r;
+		lineIndex++;
+		// If fieldsPerRecord is 0, Read sets it to
+		// the number of fields in the first record
+		if (first) {
+			first = false;
+			if (opt.fieldsPerRecord !== undefined) {
+				if (opt.fieldsPerRecord === 0) {
+					_nbFields = lineResult.length;
+				} else {
+					_nbFields = opt.fieldsPerRecord;
+				}
+			}
+		}
 
-    if (lineResult.length > 0) {
-      if (_nbFields! && _nbFields! !== lineResult.length) {
-        throw new ParseError(lineIndex, lineIndex, "wrong number of fields");
-      }
-      result.push(lineResult);
-    }
-  }
-  return result;
+		if (lineResult.length > 0) {
+			if (_nbFields! && _nbFields! !== lineResult.length) {
+				throw new ParseError(
+					lineIndex,
+					lineIndex,
+					"wrong number of fields",
+				);
+			}
+			result.push(lineResult);
+		}
+	}
+	return result;
 }
 
 /**
@@ -156,13 +164,13 @@ export async function readAll(
  * column.
  */
 export interface HeaderOption {
-  name: string;
-  parse?: (input: string) => unknown;
+	name: string;
+	parse?: (input: string) => unknown;
 }
 
 export interface ExtendedParseOptions extends ParseOptions {
-  header: boolean | string[] | HeaderOption[];
-  parse?: (input: unknown) => unknown;
+	header: boolean | string[] | HeaderOption[];
+	parse?: (input: unknown) => unknown;
 }
 
 /**
@@ -187,65 +195,61 @@ export interface ExtendedParseOptions extends ParseOptions {
  * ]
  */
 export async function parse(
-  input: string | BufReader,
-  opt: ExtendedParseOptions = {
-    header: false
-  }
+	input: string | BufReader,
+	opt: ExtendedParseOptions = {
+		header: false,
+	},
 ): Promise<unknown[]> {
-  let r: string[][];
-  if (input instanceof BufReader) {
-    r = await readAll(input, opt);
-  } else {
-    r = await readAll(new BufReader(new StringReader(input)), opt);
-  }
-  if (opt.header) {
-    let headers: HeaderOption[] = [];
-    let i = 0;
-    if (Array.isArray(opt.header)) {
-      if (typeof opt.header[0] !== "string") {
-        headers = opt.header as HeaderOption[];
-      } else {
-        const h = opt.header as string[];
-        headers = h.map(
-          (e): HeaderOption => {
-            return {
-              name: e
-            };
-          }
-        );
-      }
-    } else {
-      headers = r.shift()!.map(
-        (e): HeaderOption => {
-          return {
-            name: e
-          };
-        }
-      );
-      i++;
-    }
-    return r.map((e): unknown => {
-      if (e.length !== headers.length) {
-        throw `Error number of fields line:${i}`;
-      }
-      i++;
-      const out: Record<string, unknown> = {};
-      for (let j = 0; j < e.length; j++) {
-        const h = headers[j];
-        if (h.parse) {
-          out[h.name] = h.parse(e[j]);
-        } else {
-          out[h.name] = e[j];
-        }
-      }
-      if (opt.parse) {
-        return opt.parse(out);
-      }
-      return out;
-    });
-  }
-  if (opt.parse) {
-    return r.map((e: string[]): unknown => opt.parse!(e));
-  }
-  return r;
+	let r: string[][];
+	if (input instanceof BufReader) {
+		r = await readAll(input, opt);
+	} else {
+		r = await readAll(new BufReader(new StringReader(input)), opt);
+	}
+	if (opt.header) {
+		let headers: HeaderOption[] = [];
+		let i = 0;
+		if (Array.isArray(opt.header)) {
+			if (typeof opt.header[0] !== "string") {
+				headers = opt.header as HeaderOption[];
+			} else {
+				const h = opt.header as string[];
+				headers = h.map((e): HeaderOption => {
+					return {
+						name: e,
+					};
+				});
+			}
+		} else {
+			headers = r.shift()!.map((e): HeaderOption => {
+				return {
+					name: e,
+				};
+			});
+			i++;
+		}
+		return r.map((e): unknown => {
+			if (e.length !== headers.length) {
+				throw `Error number of fields line:${i}`;
+			}
+			i++;
+			const out: Record<string, unknown> = {};
+			for (let j = 0; j < e.length; j++) {
+				const h = headers[j];
+				if (h.parse) {
+					out[h.name] = h.parse(e[j]);
+				} else {
+					out[h.name] = e[j];
+				}
+			}
+			if (opt.parse) {
+				return opt.parse(out);
+			}
+			return out;
+		});
+	}
+	if (opt.parse) {
+		return r.map((e: string[]): unknown => opt.parse!(e));
+	}
+	return r;
 }
