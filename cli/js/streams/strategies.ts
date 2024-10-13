@@ -14,26 +14,27 @@
 import { QueuingStrategy } from "../dom_types.ts";
 
 export class ByteLengthQueuingStrategy
-  implements QueuingStrategy<ArrayBufferView> {
-  highWaterMark: number;
+	implements QueuingStrategy<ArrayBufferView>
+{
+	highWaterMark: number;
 
-  constructor(options: { highWaterMark: number }) {
-    this.highWaterMark = options.highWaterMark;
-  }
+	constructor(options: { highWaterMark: number }) {
+		this.highWaterMark = options.highWaterMark;
+	}
 
-  size(chunk: ArrayBufferView): number {
-    return chunk.byteLength;
-  }
+	size(chunk: ArrayBufferView): number {
+		return chunk.byteLength;
+	}
 }
 
 export class CountQueuingStrategy implements QueuingStrategy<any> {
-  highWaterMark: number;
+	highWaterMark: number;
 
-  constructor(options: { highWaterMark: number }) {
-    this.highWaterMark = options.highWaterMark;
-  }
+	constructor(options: { highWaterMark: number }) {
+		this.highWaterMark = options.highWaterMark;
+	}
 
-  size(): number {
-    return 1;
-  }
+	size(): number {
+		return 1;
+	}
 }

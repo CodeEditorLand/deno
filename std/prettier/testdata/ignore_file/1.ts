@@ -1,1 +1,1 @@
-console.log("typescript1"   )
+console.log("typescript1");
