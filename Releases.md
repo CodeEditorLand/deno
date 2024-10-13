@@ -817,14 +817,14 @@ details.
 
 ### v0.2.0 / 2018.11.27 / Mildly usable
 
-[An intro talk was recorded.](https://www.youtube.com/watch?v=FlTG0UXRAkE)
+[`An intro talk was recorded.`](https://www.youtube.com/watch?v=FlTG0UXRAkE)
 
 Stability and usability improvements. `fetch()` is 90% functional now. Basic
 REPL support was added. Shebang support was added. Command-line argument parsing
 was improved. A forwarding service `https://deno.land/x` was set up for Deno
 code. Example code has been posted to
-[deno.land/x/examples](https://github.com/denoland/deno_examples) and
-[deno.land/x/net](https://github.com/denoland/net).
+[`deno.land/x/examples`](https://github.com/denoland/deno_examples) and
+[`deno.land/x/net`](https://github.com/denoland/net).
 
 The resources table was added to abstract various types of I/O streams and other
 allocated state. A resource is an integer identifier which maps to some Rust
