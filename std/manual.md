@@ -1285,7 +1285,7 @@ Before submitting, please make sure the following is done:
 
 ### Changes to `third_party`
 
-[`deno_third_party``](https://github.com/denoland/deno_third_party) contains most
+[`deno_third_party`](https://github.com/denoland/deno_third_party) contains most
 of the external code that Deno depends on, so that we know exactly what we are
 executing at any given time. It is carefully maintained with a mixture of manual
 labor and private scripts. It's likely you will need help from @ry or
