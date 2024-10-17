@@ -1,8 +1,2 @@
 [workspace]
-members = [
-  "cli",
-  "core",
-  "tools/hyper_hello",
-  "deno_typescript",
-  "test_plugin"
-]
+members = ["cli", "core", "tools/hyper_hello", "deno_typescript", "test_plugin"]
