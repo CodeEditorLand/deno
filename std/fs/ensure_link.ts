@@ -14,7 +14,9 @@ import { getFileInfoType } from "./utils.ts";
 export async function ensureLink(src: string, dest: string): Promise<void> {
 	if (await exists(dest)) {
 		const destStatInfo = await Deno.lstat(dest);
+
 		const destFilePathType = getFileInfoType(destStatInfo);
+
 		if (destFilePathType !== "file") {
 			throw new Error(
 				`Ensure path exists, expected 'file', got '${destFilePathType}'`,
@@ -38,7 +40,9 @@ export async function ensureLink(src: string, dest: string): Promise<void> {
 export function ensureLinkSync(src: string, dest: string): void {
 	if (existsSync(dest)) {
 		const destStatInfo = Deno.lstatSync(dest);
+
 		const destFilePathType = getFileInfoType(destStatInfo);
+
 		if (destFilePathType !== "file") {
 			throw new Error(
 				`Ensure path exists, expected 'file', got '${destFilePathType}'`,

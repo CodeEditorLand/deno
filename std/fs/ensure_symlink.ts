@@ -13,11 +13,14 @@ import { getFileInfoType } from "./utils.ts";
  */
 export async function ensureSymlink(src: string, dest: string): Promise<void> {
 	const srcStatInfo = await Deno.lstat(src);
+
 	const srcFilePathType = getFileInfoType(srcStatInfo);
 
 	if (await exists(dest)) {
 		const destStatInfo = await Deno.lstat(dest);
+
 		const destFilePathType = getFileInfoType(destStatInfo);
+
 		if (destFilePathType !== "symlink") {
 			throw new Error(
 				`Ensure path exists, expected 'symlink', got '${destFilePathType}'`,
@@ -40,11 +43,14 @@ export async function ensureSymlink(src: string, dest: string): Promise<void> {
  */
 export function ensureSymlinkSync(src: string, dest: string): void {
 	const srcStatInfo = Deno.lstatSync(src);
+
 	const srcFilePathType = getFileInfoType(srcStatInfo);
 
 	if (existsSync(dest)) {
 		const destStatInfo = Deno.lstatSync(dest);
+
 		const destFilePathType = getFileInfoType(destStatInfo);
+
 		if (destFilePathType !== "symlink") {
 			throw new Error(
 				`Ensure path exists, expected 'symlink', got '${destFilePathType}'`,

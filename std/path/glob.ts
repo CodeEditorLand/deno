@@ -42,6 +42,7 @@ export function globToRegExp(
 	options: GlobToRegExpOptions = {},
 ): RegExp {
 	const result = globrex(glob, { ...options, strict: false, filepath: true });
+
 	return result.path!.regex;
 }
 
@@ -60,14 +61,18 @@ export function isGlob(str: string): boolean {
 
 	while ((match = regex.exec(str))) {
 		if (match[2]) return true;
+
 		let idx = match.index + match[0].length;
 
 		// if an open bracket/brace/paren is escaped,
 		// set the index to the next closing character
 		const open = match[1];
+
 		const close = open ? chars[open] : null;
+
 		if (open && close) {
 			const n = str.indexOf(close, idx);
+
 			if (n !== -1) {
 				idx = n + 1;
 			}
@@ -94,10 +99,12 @@ export function normalizeGlob(
 		return normalize(glob);
 	}
 	const s = SEP_PATTERN.source;
+
 	const badParentPattern = new RegExp(
 		`(?<=(${s}|^)\\*\\*${s})\\.\\.(?=${s}|$)`,
 		"g",
 	);
+
 	return normalize(glob.replace(badParentPattern, "\0")).replace(/\0/g, "..");
 }
 
@@ -110,14 +117,19 @@ export function joinGlobs(
 		return join(...globs);
 	}
 	if (globs.length === 0) return ".";
+
 	let joined: string | undefined;
+
 	for (const glob of globs) {
 		const path = glob;
+
 		if (path.length > 0) {
 			if (!joined) joined = path;
+
 			else joined += `${SEP}${path}`;
 		}
 	}
 	if (!joined) return ".";
+
 	return normalizeGlob(joined, { extended, globstar });
 }

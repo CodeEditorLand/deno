@@ -19,6 +19,7 @@ testPerm({ read: true }, async function statSyncSuccess(): Promise<void> {
 
 testPerm({ read: false }, async function statSyncPerm(): Promise<void> {
 	let caughtError = false;
+
 	try {
 		Deno.statSync("README.md");
 	} catch (e) {
@@ -31,6 +32,7 @@ testPerm({ read: false }, async function statSyncPerm(): Promise<void> {
 
 testPerm({ read: true }, async function statSyncNotFound(): Promise<void> {
 	let caughtError = false;
+
 	let badInfo;
 
 	try {
@@ -61,6 +63,7 @@ testPerm({ read: true }, async function lstatSyncSuccess(): Promise<void> {
 
 testPerm({ read: false }, async function lstatSyncPerm(): Promise<void> {
 	let caughtError = false;
+
 	try {
 		Deno.lstatSync("README.md");
 	} catch (e) {
@@ -73,6 +76,7 @@ testPerm({ read: false }, async function lstatSyncPerm(): Promise<void> {
 
 testPerm({ read: true }, async function lstatSyncNotFound(): Promise<void> {
 	let caughtError = false;
+
 	let badInfo;
 
 	try {
@@ -103,6 +107,7 @@ testPerm({ read: true }, async function statSuccess(): Promise<void> {
 
 testPerm({ read: false }, async function statPerm(): Promise<void> {
 	let caughtError = false;
+
 	try {
 		await Deno.stat("README.md");
 	} catch (e) {
@@ -115,6 +120,7 @@ testPerm({ read: false }, async function statPerm(): Promise<void> {
 
 testPerm({ read: true }, async function statNotFound(): Promise<void> {
 	let caughtError = false;
+
 	let badInfo;
 
 	try {
@@ -145,6 +151,7 @@ testPerm({ read: true }, async function lstatSuccess(): Promise<void> {
 
 testPerm({ read: false }, async function lstatPerm(): Promise<void> {
 	let caughtError = false;
+
 	try {
 		await Deno.lstat("README.md");
 	} catch (e) {
@@ -157,6 +164,7 @@ testPerm({ read: false }, async function lstatPerm(): Promise<void> {
 
 testPerm({ read: true }, async function lstatNotFound(): Promise<void> {
 	let caughtError = false;
+
 	let badInfo;
 
 	try {

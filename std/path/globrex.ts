@@ -3,12 +3,19 @@
 // Copyright (c) 2018 Terkel Gjervig Nielsen
 
 const isWin = Deno.build.os === "win";
+
 const SEP = isWin ? `(\\\\+|\\/)` : `\\/`;
+
 const SEP_ESC = isWin ? `\\\\` : `/`;
+
 const SEP_RAW = isWin ? `\\` : `/`;
+
 const GLOBSTAR = `((?:[^${SEP_ESC}/]*(?:${SEP_ESC}|\/|$))*)`;
+
 const WILDCARD = `([^${SEP_ESC}/]*)`;
+
 const GLOBSTAR_SEGMENT = `((?:[^${SEP_ESC}/]*(?:${SEP_ESC}|\/|$))*)`;
+
 const WILDCARD_SEGMENT = `([^${SEP_ESC}/]*)`;
 
 export interface GlobrexOptions {
@@ -58,13 +65,17 @@ export function globrex(
 	}: GlobrexOptions = {},
 ): GlobrexResult {
 	let regex = "";
+
 	let segment = "";
+
 	let pathRegexStr = "";
+
 	const pathSegments = [];
 
 	// If we are doing extended matching, this boolean is true when we are inside
 	// a group (eg {*.html,*.js}), and false otherwise.
 	let inGroup = false;
+
 	let inRange = false;
 
 	// extglob stack. Keep track of scope
@@ -82,11 +93,15 @@ export function globrex(
 		options: AddOptions = { split: false, last: false, only: "" },
 	): void {
 		const { split, last, only } = options;
+
 		if (only !== "path") regex += str;
+
 		if (filepath && only !== "regex") {
 			pathRegexStr += str.match(new RegExp(`^${SEP}$`)) ? SEP : str;
+
 			if (split) {
 				if (last) segment += str;
+
 				if (segment !== "") {
 					// change it 'includes'
 					if (!flags.includes("g")) segment = `^${segment}$`;
@@ -100,34 +115,42 @@ export function globrex(
 	}
 
 	let c, n;
+
 	for (let i = 0; i < glob.length; i++) {
 		c = glob[i];
 		n = glob[i + 1];
 
 		if (["\\", "$", "^", ".", "="].includes(c)) {
 			add(`\\${c}`);
+
 			continue;
 		}
 
 		if (c === "/") {
 			add(`\\${c}`, { split: true });
+
 			if (n === "/" && !strict) regex += "?";
+
 			continue;
 		}
 
 		if (c === "(") {
 			if (ext.length) {
 				add(c);
+
 				continue;
 			}
 			add(`\\${c}`);
+
 			continue;
 		}
 
 		if (c === ")") {
 			if (ext.length) {
 				add(c);
+
 				const type: string | undefined = ext.pop();
+
 				if (type === "@") {
 					add("{1}");
 				} else if (type === "!") {
@@ -138,30 +161,36 @@ export function globrex(
 				continue;
 			}
 			add(`\\${c}`);
+
 			continue;
 		}
 
 		if (c === "|") {
 			if (ext.length) {
 				add(c);
+
 				continue;
 			}
 			add(`\\${c}`);
+
 			continue;
 		}
 
 		if (c === "+") {
 			if (n === "(" && extended) {
 				ext.push(c);
+
 				continue;
 			}
 			add(`\\${c}`);
+
 			continue;
 		}
 
 		if (c === "@" && extended) {
 			if (n === "(") {
 				ext.push(c);
+
 				continue;
 			}
 		}
@@ -170,18 +199,22 @@ export function globrex(
 			if (extended) {
 				if (inRange) {
 					add("^");
+
 					continue;
 				}
 				if (n === "(") {
 					ext.push(c);
 					add("(?!");
 					i++;
+
 					continue;
 				}
 				add(`\\${c}`);
+
 				continue;
 			}
 			add(`\\${c}`);
+
 			continue;
 		}
 
@@ -195,6 +228,7 @@ export function globrex(
 				continue;
 			}
 			add(`\\${c}`);
+
 			continue;
 		}
 
@@ -202,9 +236,13 @@ export function globrex(
 			if (inRange && n === ":") {
 				i++; // skip [
 				let value = "";
+
 				while (glob[++i] !== ":") value += glob[i];
+
 				if (value === "alnum") add("(\\w|\\d)");
+
 				else if (value === "space") add("\\s");
+
 				else if (value === "digit") add("\\d");
 				i++; // skip last ]
 				continue;
@@ -212,9 +250,11 @@ export function globrex(
 			if (extended) {
 				inRange = true;
 				add(c);
+
 				continue;
 			}
 			add(`\\${c}`);
+
 			continue;
 		}
 
@@ -222,9 +262,11 @@ export function globrex(
 			if (extended) {
 				inRange = false;
 				add(c);
+
 				continue;
 			}
 			add(`\\${c}`);
+
 			continue;
 		}
 
@@ -232,9 +274,11 @@ export function globrex(
 			if (extended) {
 				inGroup = true;
 				add("(");
+
 				continue;
 			}
 			add(`\\${c}`);
+
 			continue;
 		}
 
@@ -242,35 +286,43 @@ export function globrex(
 			if (extended) {
 				inGroup = false;
 				add(")");
+
 				continue;
 			}
 			add(`\\${c}`);
+
 			continue;
 		}
 
 		if (c === ",") {
 			if (inGroup) {
 				add("|");
+
 				continue;
 			}
 			add(`\\${c}`);
+
 			continue;
 		}
 
 		if (c === "*") {
 			if (n === "(" && extended) {
 				ext.push(c);
+
 				continue;
 			}
 			// Move over all consecutive "*"'s.
 			// Also store the previous and next characters
 			const prevChar = glob[i - 1];
+
 			let starCount = 1;
+
 			while (glob[i + 1] === "*") {
 				starCount++;
 				i++;
 			}
 			const nextChar = glob[i + 1];
+
 			if (!globstar) {
 				// globstar is disabled, so treat any number of "*" as one
 				add(".*");
@@ -282,6 +334,7 @@ export function globrex(
 					[SEP_RAW, "/", undefined].includes(prevChar) &&
 					// to the end of the segment
 					[SEP_RAW, "/", undefined].includes(nextChar);
+
 				if (isGlobstar) {
 					// it's a globstar, so match zero or more path segments
 					add(GLOBSTAR, { only: "regex" });
@@ -308,6 +361,7 @@ export function globrex(
 	if (!flags.includes("g")) {
 		regex = `^${regex}$`;
 		segment = `^${segment}$`;
+
 		if (filepath) pathRegexStr = `^${pathRegexStr}$`;
 	}
 

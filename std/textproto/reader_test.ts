@@ -16,6 +16,7 @@ import { ProtocolError, TextProtoReader } from "./mod.ts";
 
 function assertNotEOF<T extends {}>(val: T | Deno.EOF): T {
 	assertNotEquals(val, Deno.EOF);
+
 	return val as T;
 }
 
@@ -32,12 +33,14 @@ function reader(s: string): TextProtoReader {
 
 test(async function textprotoReadEmpty(): Promise<void> {
 	const r = reader("");
+
 	const m = await r.readMIMEHeader();
 	assertEquals(m, Deno.EOF);
 });
 
 test(async function textprotoReader(): Promise<void> {
 	const r = reader("line1\nline2\n");
+
 	let s = await r.readLine();
 	assertEquals(s, "line1");
 
@@ -54,7 +57,9 @@ test({
 		const input =
 			"my-key: Value 1  \r\nLong-key: Even Longer Value\r\nmy-Key: " +
 			"Value 2\r\n\n";
+
 		const r = reader(input);
+
 		const m = assertNotEOF(await r.readMIMEHeader());
 		assertEquals(m.get("My-Key"), "Value 1, Value 2");
 		assertEquals(m.get("Long-key"), "Even Longer Value");
@@ -65,7 +70,9 @@ test({
 	name: "[textproto] Reader : MIME Header Single",
 	async fn(): Promise<void> {
 		const input = "Foo: bar\n\n";
+
 		const r = reader(input);
+
 		const m = assertNotEOF(await r.readMIMEHeader());
 		assertEquals(m.get("Foo"), "bar");
 	},
@@ -75,7 +82,9 @@ test({
 	name: "[textproto] Reader : MIME Header No Key",
 	async fn(): Promise<void> {
 		const input = ": bar\ntest-1: 1\n\n";
+
 		const r = reader(input);
+
 		const m = assertNotEOF(await r.readMIMEHeader());
 		assertEquals(m.get("Test-1"), "1");
 	},
@@ -90,7 +99,9 @@ test({
 			data.push("x");
 		}
 		const sdata = data.join("");
+
 		const r = reader(`Cookie: ${sdata}\r\n\r\n`);
+
 		const m = assertNotEOF(await r.readMIMEHeader());
 		assertEquals(m.get("Cookie"), sdata);
 	},
@@ -107,7 +118,9 @@ test({
 			"SID : 0\r\n" +
 			"Audio Mode : None\r\n" +
 			"Privilege : 127\r\n\r\n";
+
 		const r = reader(input);
+
 		const m = assertNotEOF(await r.readMIMEHeader());
 		assertEquals(m.get("Foo"), "bar");
 		assertEquals(m.get("Content-Language"), "en");
@@ -131,9 +144,11 @@ test({
 			"\tFirst: line with leading tab\r\nFoo: foo\r\n\r\n",
 			"Foo: foo\r\nNo colon second line\r\n\r\n",
 		];
+
 		const r = reader(input.join(""));
 
 		let err;
+
 		try {
 			await r.readMIMEHeader();
 		} catch (e) {
@@ -154,8 +169,11 @@ test({
 			"c: 2\r\n" +
 			" 3\t\n" +
 			"  \t 4  \r\n\n";
+
 		const r = reader(input);
+
 		let err;
+
 		try {
 			await r.readMIMEHeader();
 		} catch (e) {
@@ -174,7 +192,9 @@ test({
 			" \r\n",
 			"------WebKitFormBoundaryimeZ2Le9LjohiUiG--\r\n\n",
 		];
+
 		const r = reader(input.join(""));
+
 		const m = assertNotEOF(await r.readMIMEHeader());
 		assertEquals(m.get("Accept"), "*/*");
 		assertEquals(m.get("Content-Disposition"), 'form-data; name="test"');

@@ -22,8 +22,10 @@ const TIMEOUT_MAX = 2 ** 31 - 1;
 let globalTimeoutDue: number | null = null;
 
 let nextTimerId = 1;
+
 const idMap = new Map<number, Timer>();
 type DueNode = { due: number; timers: Timer[] };
+
 const dueTree = new RBTree<DueNode>((a, b) => a.due - b.due);
 
 function clearGlobalTimeout(): void {
@@ -32,8 +34,11 @@ function clearGlobalTimeout(): void {
 }
 
 let pendingEvents = 0;
+
 const pendingFireTimers: Timer[] = [];
+
 let hasPendingFireTimers = false;
+
 let pendingScheduleTimers: Timer[] = [];
 
 async function setGlobalTimeout(due: number, now: number): Promise<void> {
@@ -69,11 +74,14 @@ function schedule(timer: Timer, now: number): void {
 	// (This also implies behavior of setInterval)
 	if (hasPendingFireTimers) {
 		pendingScheduleTimers.push(timer);
+
 		return;
 	}
 	// Find or create the list of timers that will fire at point-in-time `due`.
 	const maybeNewDueNode = { due: timer.due, timers: [] };
+
 	let dueNode = dueTree.find(maybeNewDueNode);
+
 	if (dueNode === null) {
 		dueTree.insert(maybeNewDueNode);
 		dueNode = maybeNewDueNode;
@@ -93,12 +101,15 @@ function unschedule(timer: Timer): void {
 	// If either is true, they are not in tree, and their idMap entry
 	// will be deleted soon. Remove it from queue.
 	let index = -1;
+
 	if ((index = pendingScheduleTimers.indexOf(timer)) >= 0) {
 		pendingScheduleTimers.splice(index);
+
 		return;
 	}
 	if ((index = pendingFireTimers.indexOf(timer)) >= 0) {
 		pendingFireTimers.splice(index);
+
 		return;
 	}
 	// If timer is not in the 2 pending queues and is unscheduled,
@@ -109,6 +120,7 @@ function unschedule(timer: Timer): void {
 	const searchKey = { due: timer.due, timers: [] };
 	// Find the list of timers that will fire at point-in-time `due`.
 	const list = dueTree.find(searchKey)!.timers;
+
 	if (list.length === 1) {
 		// Time timer is the only one in the list. Remove the entire list.
 		assert(list[0] === timer);
@@ -117,6 +129,7 @@ function unschedule(timer: Timer): void {
 		// still exists is due, and update the global alarm accordingly.
 		if (timer.due === globalTimeoutDue) {
 			const nextDueNode: DueNode | null = dueTree.min();
+
 			setOrClearGlobalTimeout(nextDueNode && nextDueNode.due, Date.now());
 		}
 	} else {
@@ -160,6 +173,7 @@ function fireTimers(): void {
 	// After firing the timers that are due now, this will hold the first timer
 	// list that hasn't fired yet.
 	let nextDueNode: DueNode | null;
+
 	while ((nextDueNode = dueTree.min()) !== null && nextDueNode.due <= now) {
 		dueTree.remove(nextDueNode);
 		// Fire all the timers in the list.
@@ -185,6 +199,7 @@ function firePendingTimers(): void {
 		hasPendingFireTimers = false;
 		// Schedule all new timers pushed during previous timer executions
 		const now = Date.now();
+
 		for (const newTimer of pendingScheduleTimers) {
 			newTimer.due = Math.max(newTimer.due, now);
 			schedule(newTimer, now);
@@ -192,7 +207,9 @@ function firePendingTimers(): void {
 		pendingScheduleTimers = [];
 		// Reschedule for next round of timeout.
 		const nextDueNode = dueTree.min();
+
 		const due = nextDueNode && Math.max(nextDueNode.due, now);
+
 		setOrClearGlobalTimeout(due, now);
 	} else {
 		// Fire a single timer and allow its children microtasks scheduled first.
@@ -228,6 +245,7 @@ function setTimer(
 	// and INT32_MAX. Any other value will cause the timer to fire immediately.
 	// We emulate this behavior.
 	const now = Date.now();
+
 	if (delay > TIMEOUT_MAX) {
 		console.warn(
 			`${delay} does not fit into` +
@@ -252,6 +270,7 @@ function setTimer(
 	idMap.set(timer.id, timer);
 	// Schedule the timer in the due table.
 	schedule(timer, now);
+
 	return timer.id;
 }
 
@@ -264,6 +283,7 @@ export function setTimeout(
 	checkBigInt(delay);
 	// @ts-ignore
 	checkThis(this);
+
 	return setTimer(cb, delay, args, false);
 }
 
@@ -276,13 +296,16 @@ export function setInterval(
 	checkBigInt(delay);
 	// @ts-ignore
 	checkThis(this);
+
 	return setTimer(cb, delay, args, true);
 }
 
 /** Clears a previously set timer by id. AKA clearTimeout and clearInterval. */
 function clearTimer(id: number): void {
 	id = Number(id);
+
 	const timer = idMap.get(id);
+
 	if (timer === undefined) {
 		// Timer doesn't exist any more or never existed. This is not an error.
 		return;
@@ -294,6 +317,7 @@ function clearTimer(id: number): void {
 
 export function clearTimeout(id = 0): void {
 	checkBigInt(id);
+
 	if (id === 0) {
 		return;
 	}
@@ -302,6 +326,7 @@ export function clearTimeout(id = 0): void {
 
 export function clearInterval(id = 0): void {
 	checkBigInt(id);
+
 	if (id === 0) {
 		return;
 	}

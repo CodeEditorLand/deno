@@ -51,6 +51,7 @@ testCopy(
 	"[fs] copy file if it does no exist",
 	async (tempDir: string): Promise<void> => {
 		const srcFile = path.join(testdataDir, "copy_file_not_exists.txt");
+
 		const destFile = path.join(tempDir, "copy_file_not_exists_1.txt");
 		await assertThrowsAsync(async (): Promise<void> => {
 			await copy(srcFile, destFile);
@@ -62,6 +63,7 @@ testCopy(
 	"[fs] copy if src and dest are the same paths",
 	async (tempDir: string): Promise<void> => {
 		const srcFile = path.join(tempDir, "copy_file_same.txt");
+
 		const destFile = path.join(tempDir, "copy_file_same.txt");
 		await assertThrowsAsync(
 			async (): Promise<void> => {
@@ -75,6 +77,7 @@ testCopy(
 
 testCopy("[fs] copy file", async (tempDir: string): Promise<void> => {
 	const srcFile = path.join(testdataDir, "copy_file.txt");
+
 	const destFile = path.join(tempDir, "copy_file_copy.txt");
 
 	const srcContent = new TextDecoder().decode(await Deno.readFile(srcFile));
@@ -138,6 +141,7 @@ testCopy(
 	"[fs] copy with preserve timestamps",
 	async (tempDir: string): Promise<void> => {
 		const srcFile = path.join(testdataDir, "copy_file.txt");
+
 		const destFile = path.join(tempDir, "copy_file_copy.txt");
 
 		const srcStatInfo = await Deno.stat(srcFile);
@@ -164,6 +168,7 @@ testCopy(
 	"[fs] copy directory to its subdirectory",
 	async (tempDir: string): Promise<void> => {
 		const srcDir = path.join(tempDir, "parent");
+
 		const destDir = path.join(srcDir, "child");
 
 		await ensureDir(srcDir);
@@ -182,6 +187,7 @@ testCopy(
 	"[fs] copy directory and destination exist and not a directory",
 	async (tempDir: string): Promise<void> => {
 		const srcDir = path.join(tempDir, "parent");
+
 		const destDir = path.join(tempDir, "child.txt");
 
 		await ensureDir(srcDir);
@@ -199,10 +205,15 @@ testCopy(
 
 testCopy("[fs] copy directory", async (tempDir: string): Promise<void> => {
 	const srcDir = path.join(testdataDir, "copy_dir");
+
 	const destDir = path.join(tempDir, "copy_dir");
+
 	const srcFile = path.join(srcDir, "0.txt");
+
 	const destFile = path.join(destDir, "0.txt");
+
 	const srcNestFile = path.join(srcDir, "nest", "0.txt");
+
 	const destNestFile = path.join(destDir, "nest", "0.txt");
 
 	await copy(srcDir, destDir);
@@ -248,7 +259,9 @@ testCopy("[fs] copy directory", async (tempDir: string): Promise<void> => {
 
 testCopy("[fs] copy symlink file", async (tempDir: string): Promise<void> => {
 	const dir = path.join(testdataDir, "copy_dir_link_file");
+
 	const srcLink = path.join(dir, "0.txt");
+
 	const destLink = path.join(tempDir, "0_copy.txt");
 
 	if (isWindows) {
@@ -256,6 +269,7 @@ testCopy("[fs] copy symlink file", async (tempDir: string): Promise<void> => {
 			// (): Promise<void> => copy(srcLink, destLink),
 			(): Promise<void> => ensureSymlink(srcLink, destLink),
 		);
+
 		return;
 	}
 
@@ -275,7 +289,9 @@ testCopy(
 	"[fs] copy symlink directory",
 	async (tempDir: string): Promise<void> => {
 		const srcDir = path.join(testdataDir, "copy_dir");
+
 		const srcLink = path.join(tempDir, "copy_dir_link");
+
 		const destLink = path.join(tempDir, "copy_dir_link_copy");
 
 		if (isWindows) {
@@ -283,6 +299,7 @@ testCopy(
 				// (): Promise<void> => copy(srcLink, destLink),
 				(): Promise<void> => ensureSymlink(srcLink, destLink),
 			);
+
 			return;
 		}
 
@@ -305,6 +322,7 @@ testCopySync(
 	"[fs] copy file synchronously if it does not exist",
 	(tempDir: string): void => {
 		const srcFile = path.join(testdataDir, "copy_file_not_exists_sync.txt");
+
 		const destFile = path.join(tempDir, "copy_file_not_exists_1_sync.txt");
 		assertThrows((): void => {
 			copySync(srcFile, destFile);
@@ -316,6 +334,7 @@ testCopySync(
 	"[fs] copy synchronously with preserve timestamps",
 	(tempDir: string): void => {
 		const srcFile = path.join(testdataDir, "copy_file.txt");
+
 		const destFile = path.join(tempDir, "copy_file_copy.txt");
 
 		const srcStatInfo = Deno.statSync(srcFile);
@@ -356,6 +375,7 @@ testCopySync(
 
 testCopySync("[fs] copy file synchronously", (tempDir: string): void => {
 	const srcFile = path.join(testdataDir, "copy_file.txt");
+
 	const destFile = path.join(tempDir, "copy_file_copy_sync.txt");
 
 	const srcContent = new TextDecoder().decode(Deno.readFileSync(srcFile));
@@ -400,6 +420,7 @@ testCopySync(
 	"[fs] copy directory synchronously to its subdirectory",
 	(tempDir: string): void => {
 		const srcDir = path.join(tempDir, "parent");
+
 		const destDir = path.join(srcDir, "child");
 
 		ensureDirSync(srcDir);
@@ -419,6 +440,7 @@ testCopySync(
 		"directory",
 	(tempDir: string): void => {
 		const srcDir = path.join(tempDir, "parent_sync");
+
 		const destDir = path.join(tempDir, "child.txt");
 
 		ensureDirSync(srcDir);
@@ -436,10 +458,15 @@ testCopySync(
 
 testCopySync("[fs] copy directory synchronously", (tempDir: string): void => {
 	const srcDir = path.join(testdataDir, "copy_dir");
+
 	const destDir = path.join(tempDir, "copy_dir_copy_sync");
+
 	const srcFile = path.join(srcDir, "0.txt");
+
 	const destFile = path.join(destDir, "0.txt");
+
 	const srcNestFile = path.join(srcDir, "nest", "0.txt");
+
 	const destNestFile = path.join(destDir, "nest", "0.txt");
 
 	copySync(srcDir, destDir);
@@ -487,7 +514,9 @@ testCopySync(
 	"[fs] copy symlink file synchronously",
 	(tempDir: string): void => {
 		const dir = path.join(testdataDir, "copy_dir_link_file");
+
 		const srcLink = path.join(dir, "0.txt");
+
 		const destLink = path.join(tempDir, "0_copy.txt");
 
 		if (isWindows) {
@@ -495,6 +524,7 @@ testCopySync(
 				// (): void => copySync(srcLink, destLink),
 				(): void => ensureSymlinkSync(srcLink, destLink),
 			);
+
 			return;
 		}
 
@@ -515,7 +545,9 @@ testCopySync(
 	"[fs] copy symlink directory synchronously",
 	(tempDir: string): void => {
 		const originDir = path.join(testdataDir, "copy_dir");
+
 		const srcLink = path.join(tempDir, "copy_dir_link");
+
 		const destLink = path.join(tempDir, "copy_dir_link_copy");
 
 		if (isWindows) {
@@ -523,6 +555,7 @@ testCopySync(
 				// (): void => copySync(srcLink, destLink),
 				(): void => ensureSymlinkSync(srcLink, destLink),
 			);
+
 			return;
 		}
 

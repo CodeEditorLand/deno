@@ -13,6 +13,7 @@ async function startServer(): Promise<void> {
 	});
 	// Once racing server is ready it will write to its stdout.
 	const r = new TextProtoReader(new BufReader(server.stdout!));
+
 	const s = await r.readLine();
 	assert(s !== Deno.EOF && s.includes("Racing server listening..."));
 }
@@ -30,7 +31,9 @@ GET / HTTP/1.1
 GET / HTTP/1.1
 
 `;
+
 const HUGE_BODY_SIZE = 1024 * 1024;
+
 const output = `HTTP/1.1 200 OK
 content-length: 8
 
@@ -51,8 +54,10 @@ test(async function serverPipelineRace(): Promise<void> {
 	await startServer();
 
 	const conn = await dial({ port: 4501 });
+
 	const r = new TextProtoReader(new BufReader(conn));
 	await conn.write(new TextEncoder().encode(input));
+
 	const outLines = output.split("\n");
 	// length - 1 to disregard last empty line
 	for (let i = 0; i < outLines.length - 1; i++) {

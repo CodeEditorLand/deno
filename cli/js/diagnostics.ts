@@ -79,12 +79,16 @@ function fromDiagnosticCategory(
 	switch (category) {
 		case ts.DiagnosticCategory.Error:
 			return DiagnosticCategory.Error;
+
 		case ts.DiagnosticCategory.Message:
 			return DiagnosticCategory.Info;
+
 		case ts.DiagnosticCategory.Suggestion:
 			return DiagnosticCategory.Suggestion;
+
 		case ts.DiagnosticCategory.Warning:
 			return DiagnosticCategory.Warning;
+
 		default:
 			throw new Error(
 				`Unexpected DiagnosticCategory: "${category}"/"${ts.DiagnosticCategory[category]}"`,
@@ -98,25 +102,33 @@ function getSourceInformation(
 	length: number,
 ): SourceInformation {
 	const scriptResourceName = sourceFile.fileName;
+
 	const { line: lineNumber, character: startColumn } =
 		sourceFile.getLineAndCharacterOfPosition(start);
+
 	const endPosition = sourceFile.getLineAndCharacterOfPosition(
 		start + length,
 	);
+
 	const endColumn =
 		lineNumber === endPosition.line ? endPosition.character : startColumn;
+
 	const lastLineInFile = sourceFile.getLineAndCharacterOfPosition(
 		sourceFile.text.length,
 	).line;
+
 	const lineStart = sourceFile.getPositionOfLineAndCharacter(lineNumber, 0);
+
 	const lineEnd =
 		lineNumber < lastLineInFile
 			? sourceFile.getPositionOfLineAndCharacter(lineNumber + 1, 0)
 			: sourceFile.text.length;
+
 	const sourceLine = sourceFile.text
 		.slice(lineStart, lineEnd)
 		.replace(/\s+$/g, "")
 		.replace("\t", " ");
+
 	return {
 		sourceLine,
 		lineNumber,
@@ -158,16 +170,21 @@ function parseDiagnostic(
 		start: startPosition,
 		length,
 	} = item;
+
 	const sourceInfo =
 		file && startPosition && length
 			? getSourceInformation(file, startPosition, length)
 			: undefined;
+
 	const endPosition =
 		startPosition && length ? startPosition + length : undefined;
+
 	const category = fromDiagnosticCategory(sourceCategory);
 
 	let message: string;
+
 	let messageChain: DiagnosticMessageChain | undefined;
+
 	if (typeof messageText === "string") {
 		message = messageText;
 	} else {
@@ -193,6 +210,7 @@ function parseRelatedInformation(
 	relatedInformation: readonly ts.DiagnosticRelatedInformation[],
 ): DiagnosticItem[] {
 	const result: DiagnosticItem[] = [];
+
 	for (const item of relatedInformation) {
 		result.push(parseDiagnostic(item));
 	}
@@ -204,8 +222,10 @@ export function fromTypeScriptDiagnostic(
 	diagnostics: readonly ts.Diagnostic[],
 ): Diagnostic {
 	const items: DiagnosticItem[] = [];
+
 	for (const sourceDiagnostic of diagnostics) {
 		const item: DiagnosticItem = parseDiagnostic(sourceDiagnostic);
+
 		if (sourceDiagnostic.relatedInformation) {
 			item.relatedInformation = parseRelatedInformation(
 				sourceDiagnostic.relatedInformation,

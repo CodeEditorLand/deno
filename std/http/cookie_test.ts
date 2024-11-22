@@ -50,18 +50,22 @@ test({
 		const res: Response = {};
 
 		res.headers = new Headers();
+
 		setCookie(res, { name: "Space", value: "Cat" });
 		assertEquals(res.headers.get("Set-Cookie"), "Space=Cat");
 
 		res.headers = new Headers();
+
 		setCookie(res, { name: "Space", value: "Cat", secure: true });
 		assertEquals(res.headers.get("Set-Cookie"), "Space=Cat; Secure");
 
 		res.headers = new Headers();
+
 		setCookie(res, { name: "Space", value: "Cat", httpOnly: true });
 		assertEquals(res.headers.get("Set-Cookie"), "Space=Cat; HttpOnly");
 
 		res.headers = new Headers();
+
 		setCookie(res, {
 			name: "Space",
 			value: "Cat",
@@ -74,6 +78,7 @@ test({
 		);
 
 		res.headers = new Headers();
+
 		setCookie(res, {
 			name: "Space",
 			value: "Cat",
@@ -88,6 +93,7 @@ test({
 
 		let error = false;
 		res.headers = new Headers();
+
 		try {
 			setCookie(res, {
 				name: "Space",
@@ -102,6 +108,7 @@ test({
 		assert(error);
 
 		res.headers = new Headers();
+
 		setCookie(res, {
 			name: "Space",
 			value: "Cat",
@@ -116,6 +123,7 @@ test({
 		);
 
 		res.headers = new Headers();
+
 		setCookie(res, {
 			name: "Space",
 			value: "Cat",
@@ -132,6 +140,7 @@ test({
 		);
 
 		res.headers = new Headers();
+
 		setCookie(res, {
 			name: "Space",
 			value: "Cat",
@@ -147,6 +156,7 @@ test({
 		);
 
 		res.headers = new Headers();
+
 		setCookie(res, {
 			name: "Space",
 			value: "Cat",
@@ -162,6 +172,7 @@ test({
 		);
 
 		res.headers = new Headers();
+
 		setCookie(res, {
 			name: "Space",
 			value: "Cat",
@@ -179,6 +190,7 @@ test({
 		);
 
 		res.headers = new Headers();
+
 		setCookie(res, {
 			name: "Space",
 			value: "Cat",
@@ -196,6 +208,7 @@ test({
 		);
 
 		res.headers = new Headers();
+
 		setCookie(res, { name: "__Secure-Kitty", value: "Meow" });
 		assertEquals(
 			res.headers.get("Set-Cookie"),
@@ -203,6 +216,7 @@ test({
 		);
 
 		res.headers = new Headers();
+
 		setCookie(res, {
 			name: "__Host-Kitty",
 			value: "Meow",

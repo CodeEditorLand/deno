@@ -11,6 +11,7 @@ class TestHandler extends BaseHandler {
 
 	handle(record: LogRecord): void {
 		this.records.push({ ...record });
+
 		super.handle(record);
 	}
 
@@ -21,6 +22,7 @@ class TestHandler extends BaseHandler {
 
 test(function simpleLogger(): void {
 	const handler = new TestHandler("DEBUG");
+
 	let logger = new Logger("DEBUG");
 
 	assertEquals(logger.level, LogLevel.DEBUG);
@@ -34,6 +36,7 @@ test(function simpleLogger(): void {
 
 test(function customHandler(): void {
 	const handler = new TestHandler("DEBUG");
+
 	const logger = new Logger("DEBUG", [handler]);
 
 	logger.debug("foo", 1, 2);
@@ -50,12 +53,14 @@ test(function customHandler(): void {
 test(function logFunctions(): void {
 	const doLog = (level: string): TestHandler => {
 		const handler = new TestHandler(level);
+
 		const logger = new Logger(level, [handler]);
 		logger.debug("foo");
 		logger.info("bar");
 		logger.warning("baz");
 		logger.error("boo");
 		logger.critical("doo");
+
 		return handler;
 	};
 

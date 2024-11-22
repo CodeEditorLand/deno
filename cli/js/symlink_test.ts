@@ -3,9 +3,12 @@ import { assert, assertEquals, test, testPerm } from "./test_util.ts";
 
 testPerm({ read: true, write: true }, function symlinkSyncSuccess(): void {
 	const testDir = Deno.makeTempDirSync();
+
 	const oldname = testDir + "/oldname";
+
 	const newname = testDir + "/newname";
 	Deno.mkdirSync(oldname);
+
 	let errOnWindows;
 	// Just for now, until we implement symlink for Windows.
 	try {
@@ -19,6 +22,7 @@ testPerm({ read: true, write: true }, function symlinkSyncSuccess(): void {
 		assertEquals(errOnWindows.message, "Not implemented");
 	} else {
 		const newNameInfoLStat = Deno.lstatSync(newname);
+
 		const newNameInfoStat = Deno.statSync(newname);
 		assert(newNameInfoLStat.isSymlink());
 		assert(newNameInfoStat.isDirectory());
@@ -27,6 +31,7 @@ testPerm({ read: true, write: true }, function symlinkSyncSuccess(): void {
 
 test(function symlinkSyncPerm(): void {
 	let err;
+
 	try {
 		Deno.symlinkSync("oldbaddir", "newbaddir");
 	} catch (e) {
@@ -40,9 +45,13 @@ test(function symlinkSyncPerm(): void {
 // Symlink with type should succeed on other platforms with type ignored
 testPerm({ write: true }, function symlinkSyncNotImplemented(): void {
 	const testDir = Deno.makeTempDirSync();
+
 	const oldname = testDir + "/oldname";
+
 	const newname = testDir + "/newname";
+
 	let err;
+
 	try {
 		Deno.symlinkSync(oldname, newname, "dir");
 	} catch (e) {
@@ -58,9 +67,12 @@ testPerm(
 	{ read: true, write: true },
 	async function symlinkSuccess(): Promise<void> {
 		const testDir = Deno.makeTempDirSync();
+
 		const oldname = testDir + "/oldname";
+
 		const newname = testDir + "/newname";
 		Deno.mkdirSync(oldname);
+
 		let errOnWindows;
 		// Just for now, until we implement symlink for Windows.
 		try {
@@ -73,6 +85,7 @@ testPerm(
 			assertEquals(errOnWindows.message, "Not implemented");
 		} else {
 			const newNameInfoLStat = Deno.lstatSync(newname);
+
 			const newNameInfoStat = Deno.statSync(newname);
 			assert(newNameInfoLStat.isSymlink());
 			assert(newNameInfoStat.isDirectory());

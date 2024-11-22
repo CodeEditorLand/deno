@@ -8,11 +8,14 @@ function deferred(): {
 	reject: (reason?: any) => void;
 } {
 	let resolve;
+
 	let reject;
+
 	const promise = new Promise((res, rej): void => {
 		resolve = res;
 		reject = rej;
 	});
+
 	return {
 		promise,
 		resolve,
@@ -26,7 +29,9 @@ async function waitForMs(ms): Promise<number> {
 
 test(async function timeoutSuccess(): Promise<void> {
 	const { promise, resolve } = deferred();
+
 	let count = 0;
+
 	setTimeout((): void => {
 		count++;
 		resolve();
@@ -38,7 +43,9 @@ test(async function timeoutSuccess(): Promise<void> {
 
 test(async function timeoutArgs(): Promise<void> {
 	const { promise, resolve } = deferred();
+
 	const arg = 1;
+
 	setTimeout(
 		(a, b, c): void => {
 			assertEquals(a, arg);
@@ -56,6 +63,7 @@ test(async function timeoutArgs(): Promise<void> {
 
 test(async function timeoutCancelSuccess(): Promise<void> {
 	let count = 0;
+
 	const id = setTimeout((): void => {
 		count++;
 	}, 1);
@@ -72,7 +80,9 @@ test(async function timeoutCancelMultiple(): Promise<void> {
 
 	// Set timers and cancel them in the same order.
 	const t1 = setTimeout(uncalled, 10);
+
 	const t2 = setTimeout(uncalled, 10);
+
 	const t3 = setTimeout(uncalled, 10);
 	clearTimeout(t1);
 	clearTimeout(t2);
@@ -80,7 +90,9 @@ test(async function timeoutCancelMultiple(): Promise<void> {
 
 	// Set timers and cancel them in reverse order.
 	const t4 = setTimeout(uncalled, 20);
+
 	const t5 = setTimeout(uncalled, 20);
+
 	const t6 = setTimeout(uncalled, 20);
 	clearTimeout(t6);
 	clearTimeout(t5);
@@ -93,7 +105,9 @@ test(async function timeoutCancelMultiple(): Promise<void> {
 test(async function timeoutCancelInvalidSilentFail(): Promise<void> {
 	// Expect no panic
 	const { promise, resolve } = deferred();
+
 	let count = 0;
+
 	const id = setTimeout((): void => {
 		count++;
 		// Should have no effect
@@ -109,7 +123,9 @@ test(async function timeoutCancelInvalidSilentFail(): Promise<void> {
 
 test(async function intervalSuccess(): Promise<void> {
 	const { promise, resolve } = deferred();
+
 	let count = 0;
+
 	const id = setInterval((): void => {
 		count++;
 		clearInterval(id);
@@ -124,6 +140,7 @@ test(async function intervalSuccess(): Promise<void> {
 
 test(async function intervalCancelSuccess(): Promise<void> {
 	let count = 0;
+
 	const id = setInterval((): void => {
 		count++;
 	}, 1);
@@ -134,9 +151,12 @@ test(async function intervalCancelSuccess(): Promise<void> {
 
 test(async function intervalOrdering(): Promise<void> {
 	const timers = [];
+
 	let timeouts = 0;
+
 	function onTimeout(): void {
 		++timeouts;
+
 		for (let i = 1; i < timers.length; i++) {
 			clearTimeout(timers[i]);
 		}
@@ -156,6 +176,7 @@ test(async function intervalCancelInvalidSilentFail(): Promise<void> {
 test(
 	async function fireCallbackImmediatelyWhenDelayOverMaxValue(): Promise<void> {
 		let count = 0;
+
 		setTimeout((): void => {
 			count++;
 		}, 2 ** 31);
@@ -166,12 +187,14 @@ test(
 
 test(async function timeoutCallbackThis(): Promise<void> {
 	const { promise, resolve } = deferred();
+
 	const obj = {
 		foo(): void {
 			assertEquals(this, window);
 			resolve();
 		},
 	};
+
 	setTimeout(obj.foo, 1);
 	await promise;
 });
@@ -197,6 +220,7 @@ test(async function timeoutBindThis(): Promise<void> {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		(thisArg: any): void => {
 			let hasThrown = 0;
+
 			try {
 				setTimeout.call(thisArg, noop, 1);
 				hasThrown = 1;
@@ -215,6 +239,7 @@ test(async function timeoutBindThis(): Promise<void> {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		(thisArg: any): void => {
 			let hasThrown = 0;
+
 			try {
 				setTimeout.call(thisArg, noop, 1);
 				hasThrown = 1;
@@ -232,9 +257,11 @@ test(async function timeoutBindThis(): Promise<void> {
 
 test(async function clearTimeoutShouldConvertToNumber(): Promise<void> {
 	let called = false;
+
 	const obj = {
 		valueOf(): number {
 			called = true;
+
 			return 1;
 		},
 	};
@@ -244,6 +271,7 @@ test(async function clearTimeoutShouldConvertToNumber(): Promise<void> {
 
 test(function setTimeoutShouldThrowWithBigint(): void {
 	let hasThrown = 0;
+
 	try {
 		setTimeout((): void => {}, 1n as unknown as number);
 		hasThrown = 1;
@@ -259,6 +287,7 @@ test(function setTimeoutShouldThrowWithBigint(): void {
 
 test(function clearTimeoutShouldThrowWithBigint(): void {
 	let hasThrown = 0;
+
 	try {
 		clearTimeout(1n as unknown as number);
 		hasThrown = 1;
@@ -295,6 +324,7 @@ test(async function timerMaxCpuBug(): Promise<void> {
 	// Certainly less than 10 ops should have been dispatched in next 100 ms.
 	const { opsDispatched } = Deno.metrics();
 	await waitForMs(100);
+
 	const opsDispatched_ = Deno.metrics().opsDispatched;
 	console.log(
 		"opsDispatched",
@@ -307,20 +337,26 @@ test(async function timerMaxCpuBug(): Promise<void> {
 
 test(async function timerBasicMicrotaskOrdering(): Promise<void> {
 	let s = "";
+
 	let count = 0;
+
 	const { promise, resolve } = deferred();
+
 	setTimeout(() => {
 		Promise.resolve().then(() => {
 			count++;
 			s += "de";
+
 			if (count === 2) {
 				resolve();
 			}
 		});
 	});
+
 	setTimeout(() => {
 		count++;
 		s += "no";
+
 		if (count === 2) {
 			resolve();
 		}
@@ -331,10 +367,13 @@ test(async function timerBasicMicrotaskOrdering(): Promise<void> {
 
 test(async function timerNestedMicrotaskOrdering(): Promise<void> {
 	let s = "";
+
 	const { promise, resolve } = deferred();
 	s += "0";
+
 	setTimeout(() => {
 		s += "4";
+
 		setTimeout(() => (s += "8"));
 		Promise.resolve().then(() => {
 			setTimeout(() => {
@@ -343,6 +382,7 @@ test(async function timerNestedMicrotaskOrdering(): Promise<void> {
 			});
 		});
 	});
+
 	setTimeout(() => (s += "5"));
 	Promise.resolve().then(() => (s += "2"));
 	Promise.resolve().then(() =>

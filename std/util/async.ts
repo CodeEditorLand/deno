@@ -20,9 +20,11 @@ export interface Deferred<T> extends Promise<T> {
  */
 export function deferred<T>(): Deferred<T> {
 	let methods;
+
 	const promise = new Promise<T>((resolve, reject): void => {
 		methods = { resolve, reject };
 	});
+
 	return Object.assign(promise, methods)! as Deferred<T>;
 }
 
@@ -51,6 +53,7 @@ export class MuxAsyncIterator<T> implements AsyncIterable<T> {
 		iterator: AsyncIterableIterator<T>,
 	): Promise<void> {
 		const { value, done } = await iterator.next();
+
 		if (done) {
 			--this.iteratorCount;
 		} else {
@@ -67,6 +70,7 @@ export class MuxAsyncIterator<T> implements AsyncIterable<T> {
 			// Note that while we're looping over `yields`, new items may be added.
 			for (let i = 0; i < this.yields.length; i++) {
 				const { iterator, value } = this.yields[i];
+
 				yield value;
 				this.callIteratorNext(iterator);
 			}
@@ -89,7 +93,9 @@ export async function collectUint8Arrays(
 	it: AsyncIterable<Uint8Array>,
 ): Promise<Uint8Array> {
 	const chunks = [];
+
 	let length = 0;
+
 	for await (const chunk of it) {
 		chunks.push(chunk);
 		length += chunk.length;
@@ -99,7 +105,9 @@ export async function collectUint8Arrays(
 		return chunks[0];
 	}
 	const collected = new Uint8Array(length);
+
 	let offset = 0;
+
 	for (const chunk of chunks) {
 		collected.set(chunk, offset);
 		offset += chunk.length;

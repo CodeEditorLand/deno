@@ -6,13 +6,21 @@ const { setPrepareStackTrace } = Deno as any;
 
 interface CallSite {
 	getThis(): unknown;
+
 	getTypeName(): string;
+
 	getFunction(): Function;
+
 	getFunctionName(): string;
+
 	getMethodName(): string;
+
 	getFileName(): string;
+
 	getLineNumber(): number | null;
+
 	getColumnNumber(): number | null;
+
 	getEvalOrigin(): string | null;
 	isToplevel(): boolean;
 	isEval(): boolean;
@@ -20,6 +28,7 @@ interface CallSite {
 	isConstructor(): boolean;
 	isAsync(): boolean;
 	isPromiseAll(): boolean;
+
 	getPromiseIndex(): number | null;
 }
 
@@ -83,12 +92,15 @@ function getMockCallSite(
 test(function prepareStackTrace(): void {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const MockError = {} as any;
+
 	setPrepareStackTrace(MockError);
 	assert(typeof MockError.prepareStackTrace === "function");
+
 	const prepareStackTrace: (
 		error: Error,
 		structuredStackTrace: CallSite[],
 	) => string = MockError.prepareStackTrace;
+
 	const result = prepareStackTrace(new Error("foo"), [
 		getMockCallSite("CLI_SNAPSHOT.js", 23, 0),
 	]);

@@ -75,17 +75,25 @@ export const permissionCombinations: Map<string, Permissions> = new Map();
 
 function permToString(perms: Permissions): string {
 	const r = perms.read ? 1 : 0;
+
 	const w = perms.write ? 1 : 0;
+
 	const n = perms.net ? 1 : 0;
+
 	const e = perms.env ? 1 : 0;
+
 	const u = perms.run ? 1 : 0;
+
 	const p = perms.plugin ? 1 : 0;
+
 	const h = perms.hrtime ? 1 : 0;
+
 	return `permR${r}W${w}N${n}E${e}U${u}P${p}H${h}`;
 }
 
 function registerPermCombination(perms: Permissions): void {
 	const key = permToString(perms);
+
 	if (!permissionCombinations.has(key)) {
 		permissionCombinations.set(key, perms);
 	}
@@ -146,6 +154,7 @@ export function parseUnitTestOutput(
 	print: boolean,
 ): { actual?: number; expected?: number; resultOutput?: string } {
 	const decoder = new TextDecoder();
+
 	const output = decoder.decode(rawOutput);
 
 	let expected, actual, result;
@@ -263,6 +272,7 @@ test(function permissionsMatches(): void {
 
 testPerm({ read: true }, async function parsingUnitTestOutput(): Promise<void> {
 	const cwd = Deno.cwd();
+
 	const testDataPath = `${cwd}/tools/testdata/`;
 
 	let result;

@@ -23,6 +23,7 @@ function permsToCliFlags(perms: Permissions): string[] {
 				/\.?([A-Z])/g,
 				(x, y): string => `-${y.toLowerCase()}`,
 			);
+
 			return `--allow-${cliFlag}`;
 		})
 		.filter((e): boolean => e.length > 0);
@@ -53,6 +54,7 @@ async function main(): Promise<void> {
 	for (const perms of permissionCombinations.values()) {
 		const permsFmt = fmtPerms(perms);
 		console.log(`Running tests for: ${permsFmt}`);
+
 		const cliPerms = permsToCliFlags(perms);
 		// run subsequent tests using same deno executable
 		const args = [

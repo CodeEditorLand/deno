@@ -75,6 +75,7 @@ function isRecoverableError(e: Error): boolean {
 type Value = any;
 
 let lastEvalResult: Value = undefined;
+
 let lastThrownError: Value = undefined;
 
 // Evaluate code.
@@ -82,6 +83,7 @@ let lastThrownError: Value = undefined;
 // Returns false if error is recoverable
 function evaluate(code: string): boolean {
 	const [result, errInfo] = core.evalContext(code);
+
 	if (!errInfo) {
 		lastEvalResult = result;
 		replLog(result);
@@ -90,6 +92,7 @@ function evaluate(code: string): boolean {
 		return false; // don't consume code.
 	} else {
 		lastThrownError = errInfo.thrown;
+
 		if (errInfo.isNativeError) {
 			const formattedError = formatError(
 				core.errorToJSON(errInfo.thrown as Error),
@@ -108,6 +111,7 @@ export async function replLoop(): Promise<void> {
 	Object.defineProperties(window, replCommands);
 
 	const historyFile = "deno_history.txt";
+
 	const rid = startRepl(historyFile);
 
 	const quitRepl = (exitCode: number): void => {
@@ -153,6 +157,7 @@ export async function replLoop(): Promise<void> {
 		// Top level read
 		try {
 			code = await readline(rid, "> ");
+
 			if (code.trim() === "") {
 				continue;
 			}
@@ -174,6 +179,7 @@ export async function replLoop(): Promise<void> {
 		// Start continued read
 		while (!evaluate(code)) {
 			code += "\n";
+
 			try {
 				code += await readline(rid, "  ");
 			} catch (err) {

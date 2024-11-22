@@ -3,12 +3,15 @@ import { assertEquals, test } from "./test_util.ts";
 
 test(function customEventInitializedWithDetail(): void {
 	const type = "touchstart";
+
 	const detail = { message: "hello" };
+
 	const customEventInit = {
 		bubbles: true,
 		cancelable: true,
 		detail,
 	} as CustomEventInit;
+
 	const event = new CustomEvent(type, customEventInit);
 
 	assertEquals(event.bubbles, true);
@@ -22,6 +25,7 @@ test(function customEventInitializedWithDetail(): void {
 
 test(function toStringShouldBeWebCompatibility(): void {
 	const type = "touchstart";
+
 	const event = new CustomEvent(type, {});
 	assertEquals(event.toString(), "[object CustomEvent]");
 });

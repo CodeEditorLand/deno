@@ -29,8 +29,10 @@ function createColor(diffType: DiffType): (s: string) => string {
 	switch (diffType) {
 		case DiffType.added:
 			return (s: string): string => green(bold(s));
+
 		case DiffType.removed:
 			return (s: string): string => red(bold(s));
+
 		default:
 			return white;
 	}
@@ -40,8 +42,10 @@ function createSign(diffType: DiffType): string {
 	switch (diffType) {
 		case DiffType.added:
 			return "+   ";
+
 		case DiffType.removed:
 			return "-   ";
+
 		default:
 			return "    ";
 	}
@@ -71,6 +75,7 @@ function isKeyedCollection(x: unknown): x is Set<unknown> {
 
 export function equal(c: unknown, d: unknown): boolean {
 	const seen = new Map();
+
 	return (function compare(a: unknown, b: unknown): boolean {
 		// Have to render RegExp & Date for string comparison
 		// unless it's mistreated as object
@@ -117,13 +122,16 @@ export function equal(c: unknown, d: unknown): boolean {
 				return unmatchedEntries === 0;
 			}
 			const merged = { ...a, ...b };
+
 			for (const key in merged) {
 				type Key = keyof typeof merged;
+
 				if (!compare(a && a[key as Key], b && b[key as Key])) {
 					return false;
 				}
 			}
 			seen.set(a, b);
+
 			return true;
 		}
 		return false;
@@ -150,8 +158,11 @@ export function assertEquals(
 		return;
 	}
 	let message = "";
+
 	const actualString = createStr(actual);
+
 	const expectedString = createStr(expected);
+
 	try {
 		const diffResult = diff(
 			actualString.split("\n"),
@@ -180,7 +191,9 @@ export function assertNotEquals(
 		return;
 	}
 	let actualString: string;
+
 	let expectedString: string;
+
 	try {
 		actualString = String(actual);
 	} catch (e) {
@@ -208,7 +221,9 @@ export function assertStrictEq(
 ): void {
 	if (actual !== expected) {
 		let actualString: string;
+
 		let expectedString: string;
+
 		try {
 			actualString = String(actual);
 		} catch (e) {
@@ -253,11 +268,14 @@ export function assertArrayContains(
 	msg?: string,
 ): void {
 	const missing: unknown[] = [];
+
 	for (let i = 0; i < expected.length; i++) {
 		let found = false;
+
 		for (let j = 0; j < actual.length; j++) {
 			if (equal(expected[i], actual[j])) {
 				found = true;
+
 				break;
 			}
 		}
@@ -312,7 +330,9 @@ export function assertThrows(
 	msg?: string,
 ): Error {
 	let doesThrow = false;
+
 	let error = null;
+
 	try {
 		fn();
 	} catch (e) {
@@ -323,12 +343,14 @@ export function assertThrows(
 			msg = `Expected error to be instance of "${ErrorClass.name}"${
 				msg ? `: ${msg}` : "."
 			}`;
+
 			throw new AssertionError(msg);
 		}
 		if (msgIncludes && !e.message.includes(msgIncludes)) {
 			msg = `Expected error message to include "${msgIncludes}", but got "${
 				e.message
 			}"${msg ? `: ${msg}` : "."}`;
+
 			throw new AssertionError(msg);
 		}
 		doesThrow = true;
@@ -336,6 +358,7 @@ export function assertThrows(
 	}
 	if (!doesThrow) {
 		msg = `Expected function to throw${msg ? `: ${msg}` : "."}`;
+
 		throw new AssertionError(msg);
 	}
 	return error;
@@ -348,7 +371,9 @@ export async function assertThrowsAsync(
 	msg?: string,
 ): Promise<Error> {
 	let doesThrow = false;
+
 	let error = null;
+
 	try {
 		await fn();
 	} catch (e) {
@@ -359,12 +384,14 @@ export async function assertThrowsAsync(
 			msg = `Expected error to be instance of "${ErrorClass.name}"${
 				msg ? `: ${msg}` : "."
 			}`;
+
 			throw new AssertionError(msg);
 		}
 		if (msgIncludes && !e.message.includes(msgIncludes)) {
 			msg = `Expected error message to include "${msgIncludes}", but got "${
 				e.message
 			}"${msg ? `: ${msg}` : "."}`;
+
 			throw new AssertionError(msg);
 		}
 		doesThrow = true;
@@ -372,6 +399,7 @@ export async function assertThrowsAsync(
 	}
 	if (!doesThrow) {
 		msg = `Expected function to throw${msg ? `: ${msg}` : "."}`;
+
 		throw new AssertionError(msg);
 	}
 	return error;

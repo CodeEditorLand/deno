@@ -23,6 +23,7 @@ export async function exists(filePath: string): Promise<boolean> {
 export function existsSync(filePath: string): boolean {
 	try {
 		lstatSync(filePath);
+
 		return true;
 	} catch (err) {
 		if (err instanceof DenoError) {

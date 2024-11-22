@@ -16,8 +16,11 @@ function resolveYamlBinary(data: Any): boolean {
 	if (data === null) return false;
 
 	let code: number;
+
 	let bitlen = 0;
+
 	const max = data.length;
+
 	const map = BASE64_MAP;
 
 	// Convert one by one.
@@ -40,13 +43,17 @@ function resolveYamlBinary(data: Any): boolean {
 function constructYamlBinary(data: string): Deno.Buffer {
 	// remove CR/LF & padding to simplify scan
 	const input = data.replace(/[\r\n=]/g, "");
+
 	const max = input.length;
+
 	const map = BASE64_MAP;
 
 	// Collect by 6*4 bits (3 bytes)
 
 	const result = [];
+
 	let bits = 0;
+
 	for (let idx = 0; idx < max; idx++) {
 		if (idx % 4 === 0 && idx) {
 			result.push((bits >> 16) & 0xff);
@@ -77,12 +84,15 @@ function constructYamlBinary(data: string): Deno.Buffer {
 
 function representYamlBinary(object: Uint8Array): string {
 	const max = object.length;
+
 	const map = BASE64_MAP;
 
 	// Convert every three bytes to 4 ASCII characters.
 
 	let result = "";
+
 	let bits = 0;
+
 	for (let idx = 0; idx < max; idx++) {
 		if (idx % 3 === 0 && idx) {
 			result += map[(bits >> 18) & 0x3f];
@@ -120,8 +130,10 @@ function representYamlBinary(object: Uint8Array): string {
 
 function isBinary(obj: Any): obj is Deno.Buffer {
 	const buf = new Buffer();
+
 	try {
 		if (0 > buf.readFromSync(obj as Deno.Buffer)) return true;
+
 		return false;
 	} catch {
 		return false;

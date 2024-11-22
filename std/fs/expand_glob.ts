@@ -32,10 +32,13 @@ interface SplitPath {
 // TODO: Maybe make this public somewhere.
 function split(path: string): SplitPath {
 	const s = SEP_PATTERN.source;
+
 	const segments = path
 		.replace(new RegExp(`^${s}|${s}$`, "g"), "")
 		.split(SEP_PATTERN);
+
 	const isAbsolute_ = isAbsolute(path);
+
 	return {
 		segments,
 		isAbsolute: isAbsolute_,
@@ -65,26 +68,33 @@ export async function* expandGlob(
 	}: ExpandGlobOptions = {},
 ): AsyncIterableIterator<WalkInfo> {
 	const globOptions: GlobOptions = { extended, globstar };
+
 	const absRoot = isAbsolute(root)
 		? normalize(root)
 		: joinGlobs([cwd(), root], globOptions);
+
 	const resolveFromRoot = (path: string): string =>
 		isAbsolute(path)
 			? normalize(path)
 			: joinGlobs([absRoot, path], globOptions);
+
 	const excludePatterns = exclude
 		.map(resolveFromRoot)
 		.map((s: string): RegExp => globToRegExp(s, globOptions));
+
 	const shouldInclude = (filename: string): boolean =>
 		!excludePatterns.some((p: RegExp): boolean => !!filename.match(p));
+
 	const { segments, hasTrailingSep, winRoot } = split(resolveFromRoot(glob));
 
 	let fixedRoot = winRoot != undefined ? winRoot : "/";
+
 	while (segments.length > 0 && !isGlob(segments[0])) {
 		fixedRoot = joinGlobs([fixedRoot, segments.shift()!], globOptions);
 	}
 
 	let fixedRootInfo: WalkInfo;
+
 	try {
 		fixedRootInfo = { filename: fixedRoot, info: await stat(fixedRoot) };
 	} catch (error) {
@@ -102,6 +112,7 @@ export async function* expandGlob(
 				[walkInfo.filename, ".."],
 				globOptions,
 			);
+
 			try {
 				if (shouldInclude(parentPath)) {
 					return yield {
@@ -132,10 +143,12 @@ export async function* expandGlob(
 	}
 
 	let currentMatches: WalkInfo[] = [fixedRootInfo];
+
 	for (const segment of segments) {
 		// Advancing the list of current matches may introduce duplicates, so we
 		// pass everything through this Map.
 		const nextMatchMap: Map<string, FileInfo> = new Map();
+
 		for (const currentMatch of currentMatches) {
 			for await (const nextMatch of advanceMatch(currentMatch, segment)) {
 				nextMatchMap.set(nextMatch.filename, nextMatch.info);
@@ -173,26 +186,33 @@ export function* expandGlobSync(
 	}: ExpandGlobOptions = {},
 ): IterableIterator<WalkInfo> {
 	const globOptions: GlobOptions = { extended, globstar };
+
 	const absRoot = isAbsolute(root)
 		? normalize(root)
 		: joinGlobs([cwd(), root], globOptions);
+
 	const resolveFromRoot = (path: string): string =>
 		isAbsolute(path)
 			? normalize(path)
 			: joinGlobs([absRoot, path], globOptions);
+
 	const excludePatterns = exclude
 		.map(resolveFromRoot)
 		.map((s: string): RegExp => globToRegExp(s, globOptions));
+
 	const shouldInclude = (filename: string): boolean =>
 		!excludePatterns.some((p: RegExp): boolean => !!filename.match(p));
+
 	const { segments, hasTrailingSep, winRoot } = split(resolveFromRoot(glob));
 
 	let fixedRoot = winRoot != undefined ? winRoot : "/";
+
 	while (segments.length > 0 && !isGlob(segments[0])) {
 		fixedRoot = joinGlobs([fixedRoot, segments.shift()!], globOptions);
 	}
 
 	let fixedRootInfo: WalkInfo;
+
 	try {
 		fixedRootInfo = { filename: fixedRoot, info: statSync(fixedRoot) };
 	} catch (error) {
@@ -210,6 +230,7 @@ export function* expandGlobSync(
 				[walkInfo.filename, ".."],
 				globOptions,
 			);
+
 			try {
 				if (shouldInclude(parentPath)) {
 					return yield {
@@ -240,10 +261,12 @@ export function* expandGlobSync(
 	}
 
 	let currentMatches: WalkInfo[] = [fixedRootInfo];
+
 	for (const segment of segments) {
 		// Advancing the list of current matches may introduce duplicates, so we
 		// pass everything through this Map.
 		const nextMatchMap: Map<string, FileInfo> = new Map();
+
 		for (const currentMatch of currentMatches) {
 			for (const nextMatch of advanceMatch(currentMatch, segment)) {
 				nextMatchMap.set(nextMatch.filename, nextMatch.info);

@@ -23,6 +23,7 @@ function genFunc(grant: Deno.PermissionName): () => Promise<void> {
 	};
 	// Properly name these generated functions.
 	Object.defineProperty(gen, "name", { value: grant + "Granted" });
+
 	return gen;
 }
 

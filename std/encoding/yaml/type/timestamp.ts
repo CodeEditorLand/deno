@@ -26,13 +26,17 @@ const YAML_TIMESTAMP_REGEXP = new RegExp(
 
 function resolveYamlTimestamp(data: string): boolean {
 	if (data === null) return false;
+
 	if (YAML_DATE_REGEXP.exec(data) !== null) return true;
+
 	if (YAML_TIMESTAMP_REGEXP.exec(data) !== null) return true;
+
 	return false;
 }
 
 function constructYamlTimestamp(data: string): Date {
 	let match = YAML_DATE_REGEXP.exec(data);
+
 	if (match === null) match = YAML_TIMESTAMP_REGEXP.exec(data);
 
 	if (match === null) throw new Error("Date resolve error");
@@ -40,6 +44,7 @@ function constructYamlTimestamp(data: string): Date {
 	// match: [1] year [2] month [3] day
 
 	const year = +match[1];
+
 	const month = +match[2] - 1; // JS month starts with 0
 	const day = +match[3];
 
@@ -51,12 +56,16 @@ function constructYamlTimestamp(data: string): Date {
 	// match: [4] hour [5] minute [6] second [7] fraction
 
 	const hour = +match[4];
+
 	const minute = +match[5];
+
 	const second = +match[6];
 
 	let fraction = 0;
+
 	if (match[7]) {
 		let partFraction = match[7].slice(0, 3);
+
 		while (partFraction.length < 3) {
 			// milli-seconds
 			partFraction += "0";
@@ -67,8 +76,10 @@ function constructYamlTimestamp(data: string): Date {
 	// match: [8] tz [9] tz_sign [10] tz_hour [11] tz_minute
 
 	let delta = null;
+
 	if (match[9]) {
 		const tzHour = +match[10];
+
 		const tzMinute = +(match[11] || 0);
 		delta = (tzHour * 60 + tzMinute) * 60000; // delta in mili-seconds
 		if (match[9] === "-") delta = -delta;

@@ -33,6 +33,7 @@ test(function fromRequest(): void {
 test(async function cloneRequestBodyStream(): Promise<void> {
 	// hack to get a stream
 	const stream = new Request("", { body: "a test body" }).body;
+
 	const r1 = new Request("https://example.com", {
 		body: stream,
 	});
@@ -40,6 +41,7 @@ test(async function cloneRequestBodyStream(): Promise<void> {
 	const r2 = r1.clone();
 
 	const b1 = await r1.text();
+
 	const b2 = await r2.text();
 
 	assertEquals(b1, b2);

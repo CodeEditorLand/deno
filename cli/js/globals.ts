@@ -37,13 +37,21 @@ import * as workers from "./workers.ts";
 declare global {
 	interface CallSite {
 		getThis(): unknown;
+
 		getTypeName(): string;
+
 		getFunction(): Function;
+
 		getFunctionName(): string;
+
 		getMethodName(): string;
+
 		getFileName(): string;
+
 		getLineNumber(): number | null;
+
 		getColumnNumber(): number | null;
+
 		getEvalOrigin(): string | null;
 		isToplevel(): boolean;
 		isEval(): boolean;
@@ -51,6 +59,7 @@ declare global {
 		isConstructor(): boolean;
 		isAsync(): boolean;
 		isPromiseAll(): boolean;
+
 		getPromiseIndex(): number | null;
 	}
 
@@ -166,6 +175,7 @@ window.removeEventListener =
 // Registers the handler for window.onload function.
 window.addEventListener("load", (e: domTypes.Event): void => {
 	const onload = window.onload;
+
 	if (typeof onload === "function") {
 		onload(e);
 	}
@@ -173,6 +183,7 @@ window.addEventListener("load", (e: domTypes.Event): void => {
 // Registers the handler for window.onunload function.
 window.addEventListener("unload", (e: domTypes.Event): void => {
 	const onunload = window.onunload;
+
 	if (typeof onunload === "function") {
 		onunload(e);
 	}
@@ -187,6 +198,7 @@ export interface ImportMeta {
 
 export interface Crypto {
 	readonly subtle: null;
+
 	getRandomValues: <
 		T extends
 			| Int8Array

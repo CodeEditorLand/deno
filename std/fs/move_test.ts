@@ -15,6 +15,7 @@ const testdataDir = path.resolve("fs", "testdata");
 
 test(async function moveDirectoryIfSrcNotExists(): Promise<void> {
 	const srcDir = path.join(testdataDir, "move_test_src_1");
+
 	const destDir = path.join(testdataDir, "move_test_dest_1");
 	// if src directory not exist
 	await assertThrowsAsync(async (): Promise<void> => {
@@ -24,6 +25,7 @@ test(async function moveDirectoryIfSrcNotExists(): Promise<void> {
 
 test(async function moveDirectoryIfDestNotExists(): Promise<void> {
 	const srcDir = path.join(testdataDir, "move_test_src_2");
+
 	const destDir = path.join(testdataDir, "move_test_dest_2");
 
 	await Deno.mkdir(srcDir, true);
@@ -32,6 +34,7 @@ test(async function moveDirectoryIfDestNotExists(): Promise<void> {
 	await assertThrowsAsync(
 		async (): Promise<void> => {
 			await move(srcDir, destDir);
+
 			throw new Error("should not throw error");
 		},
 		Error,
@@ -43,6 +46,7 @@ test(async function moveDirectoryIfDestNotExists(): Promise<void> {
 
 test(async function moveFileIfSrcNotExists(): Promise<void> {
 	const srcFile = path.join(testdataDir, "move_test_src_3", "test.txt");
+
 	const destFile = path.join(testdataDir, "move_test_dest_3", "test.txt");
 
 	// if src directory not exist
@@ -53,10 +57,15 @@ test(async function moveFileIfSrcNotExists(): Promise<void> {
 
 test(async function moveFileIfDestExists(): Promise<void> {
 	const srcDir = path.join(testdataDir, "move_test_src_4");
+
 	const destDir = path.join(testdataDir, "move_test_dest_4");
+
 	const srcFile = path.join(srcDir, "test.txt");
+
 	const destFile = path.join(destDir, "test.txt");
+
 	const srcContent = new TextEncoder().encode("src");
+
 	const destContent = new TextEncoder().encode("dest");
 
 	// make sure files exists
@@ -88,6 +97,7 @@ test(async function moveFileIfDestExists(): Promise<void> {
 	await assertThrowsAsync(
 		async (): Promise<void> => {
 			await move(srcFile, destFile, { overwrite: true });
+
 			throw new Error("should not throw error");
 		},
 		Error,
@@ -109,9 +119,13 @@ test(async function moveFileIfDestExists(): Promise<void> {
 
 test(async function moveDirectory(): Promise<void> {
 	const srcDir = path.join(testdataDir, "move_test_src_5");
+
 	const destDir = path.join(testdataDir, "move_test_dest_5");
+
 	const srcFile = path.join(srcDir, "test.txt");
+
 	const destFile = path.join(destDir, "test.txt");
+
 	const srcContent = new TextEncoder().encode("src");
 
 	await Deno.mkdir(srcDir, true);
@@ -135,10 +149,15 @@ test(async function moveDirectory(): Promise<void> {
 test(
 	async function moveIfSrcAndDestDirectoryExistsAndOverwrite(): Promise<void> {
 		const srcDir = path.join(testdataDir, "move_test_src_6");
+
 		const destDir = path.join(testdataDir, "move_test_dest_6");
+
 		const srcFile = path.join(srcDir, "test.txt");
+
 		const destFile = path.join(destDir, "test.txt");
+
 		const srcContent = new TextEncoder().encode("src");
+
 		const destContent = new TextEncoder().encode("dest");
 
 		await Promise.all([
@@ -169,6 +188,7 @@ test(
 
 test(async function moveIntoSubDir(): Promise<void> {
 	const srcDir = path.join(testdataDir, "move_test_src_7");
+
 	const destDir = path.join(srcDir, "nest");
 
 	await ensureDir(destDir);
@@ -185,6 +205,7 @@ test(async function moveIntoSubDir(): Promise<void> {
 
 test(function moveSyncDirectoryIfSrcNotExists(): void {
 	const srcDir = path.join(testdataDir, "move_sync_test_src_1");
+
 	const destDir = path.join(testdataDir, "move_sync_test_dest_1");
 	// if src directory not exist
 	assertThrows((): void => {
@@ -194,6 +215,7 @@ test(function moveSyncDirectoryIfSrcNotExists(): void {
 
 test(function moveSyncDirectoryIfDestNotExists(): void {
 	const srcDir = path.join(testdataDir, "move_sync_test_src_2");
+
 	const destDir = path.join(testdataDir, "move_sync_test_dest_2");
 
 	Deno.mkdirSync(srcDir, true);
@@ -202,6 +224,7 @@ test(function moveSyncDirectoryIfDestNotExists(): void {
 	assertThrows(
 		(): void => {
 			moveSync(srcDir, destDir);
+
 			throw new Error("should not throw error");
 		},
 		Error,
@@ -213,6 +236,7 @@ test(function moveSyncDirectoryIfDestNotExists(): void {
 
 test(function moveSyncFileIfSrcNotExists(): void {
 	const srcFile = path.join(testdataDir, "move_sync_test_src_3", "test.txt");
+
 	const destFile = path.join(
 		testdataDir,
 		"move_sync_test_dest_3",
@@ -227,10 +251,15 @@ test(function moveSyncFileIfSrcNotExists(): void {
 
 test(function moveSyncFileIfDestExists(): void {
 	const srcDir = path.join(testdataDir, "move_sync_test_src_4");
+
 	const destDir = path.join(testdataDir, "move_sync_test_dest_4");
+
 	const srcFile = path.join(srcDir, "test.txt");
+
 	const destFile = path.join(destDir, "test.txt");
+
 	const srcContent = new TextEncoder().encode("src");
+
 	const destContent = new TextEncoder().encode("dest");
 
 	// make sure files exists
@@ -258,6 +287,7 @@ test(function moveSyncFileIfDestExists(): void {
 	assertThrows(
 		(): void => {
 			moveSync(srcFile, destFile, { overwrite: true });
+
 			throw new Error("should not throw error");
 		},
 		Error,
@@ -274,9 +304,13 @@ test(function moveSyncFileIfDestExists(): void {
 
 test(function moveSyncDirectory(): void {
 	const srcDir = path.join(testdataDir, "move_sync_test_src_5");
+
 	const destDir = path.join(testdataDir, "move_sync_test_dest_5");
+
 	const srcFile = path.join(srcDir, "test.txt");
+
 	const destFile = path.join(destDir, "test.txt");
+
 	const srcContent = new TextEncoder().encode("src");
 
 	Deno.mkdirSync(srcDir, true);
@@ -299,10 +333,15 @@ test(function moveSyncDirectory(): void {
 
 test(function moveSyncIfSrcAndDestDirectoryExistsAndOverwrite(): void {
 	const srcDir = path.join(testdataDir, "move_sync_test_src_6");
+
 	const destDir = path.join(testdataDir, "move_sync_test_dest_6");
+
 	const srcFile = path.join(srcDir, "test.txt");
+
 	const destFile = path.join(destDir, "test.txt");
+
 	const srcContent = new TextEncoder().encode("src");
+
 	const destContent = new TextEncoder().encode("dest");
 
 	Deno.mkdirSync(srcDir, true);
@@ -328,6 +367,7 @@ test(function moveSyncIfSrcAndDestDirectoryExistsAndOverwrite(): void {
 
 test(function moveSyncIntoSubDir(): void {
 	const srcDir = path.join(testdataDir, "move_sync_test_src_7");
+
 	const destDir = path.join(srcDir, "nest");
 
 	ensureDirSync(destDir);

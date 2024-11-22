@@ -8,6 +8,7 @@ const testdataDir = path.resolve("fs", "testdata");
 
 test(async function ensureFileIfItNotExist(): Promise<void> {
 	const testDir = path.join(testdataDir, "ensure_file_1");
+
 	const testFile = path.join(testDir, "test.txt");
 
 	await ensureFile(testFile);
@@ -23,12 +24,14 @@ test(async function ensureFileIfItNotExist(): Promise<void> {
 
 test(function ensureFileSyncIfItNotExist(): void {
 	const testDir = path.join(testdataDir, "ensure_file_2");
+
 	const testFile = path.join(testDir, "test.txt");
 
 	ensureFileSync(testFile);
 
 	assertThrows((): void => {
 		Deno.statSync(testFile);
+
 		throw new Error("test file should exists.");
 	});
 
@@ -37,6 +40,7 @@ test(function ensureFileSyncIfItNotExist(): void {
 
 test(async function ensureFileIfItExist(): Promise<void> {
 	const testDir = path.join(testdataDir, "ensure_file_3");
+
 	const testFile = path.join(testDir, "test.txt");
 
 	await Deno.mkdir(testDir, true);
@@ -55,6 +59,7 @@ test(async function ensureFileIfItExist(): Promise<void> {
 
 test(function ensureFileSyncIfItExist(): void {
 	const testDir = path.join(testdataDir, "ensure_file_4");
+
 	const testFile = path.join(testDir, "test.txt");
 
 	Deno.mkdirSync(testDir, true);
@@ -64,6 +69,7 @@ test(function ensureFileSyncIfItExist(): void {
 
 	assertThrows((): void => {
 		Deno.statSync(testFile);
+
 		throw new Error("test file should exists.");
 	});
 

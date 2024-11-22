@@ -25,6 +25,7 @@ test(async function catSmoke(): Promise<void> {
 		],
 		stdout: "piped",
 	});
+
 	const s = await p.status();
 	assertEquals(s.code, 0);
 });

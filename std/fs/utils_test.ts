@@ -23,8 +23,11 @@ test(function _isSubdir(): void {
 
 	pairs.forEach(function (p): void {
 		const src = p[0] as string;
+
 		const dest = p[1] as string;
+
 		const expected = p[2] as boolean;
+
 		const sep = p[3] as string;
 		assertEquals(
 			isSubdir(src, dest, sep),
@@ -42,14 +45,20 @@ test(function _getFileInfoType(): void {
 
 	pairs.forEach(function (p): void {
 		const filePath = p[0] as string;
+
 		const type = p[1] as PathType;
+
 		switch (type) {
 			case "file":
 				ensureFileSync(filePath);
+
 				break;
+
 			case "dir":
 				ensureDirSync(filePath);
+
 				break;
+
 			case "symlink":
 				// TODO(axetroy): test symlink
 				break;

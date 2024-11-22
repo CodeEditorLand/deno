@@ -35,7 +35,9 @@ function resolveYamlFloat(data: string): boolean {
 
 function constructYamlFloat(data: string): number {
 	let value = data.replace(/_/g, "").toLowerCase();
+
 	const sign = value[0] === "-" ? -1 : 1;
+
 	const digits: number[] = [];
 
 	if ("+-".indexOf(value[0]) >= 0) {
@@ -54,6 +56,7 @@ function constructYamlFloat(data: string): number {
 		});
 
 		let valueNb = 0.0;
+
 		let base = 1;
 
 		digits.forEach((d): void => {
@@ -73,8 +76,10 @@ function representYamlFloat(object: Any, style?: StyleVariant): Any {
 		switch (style) {
 			case "lowercase":
 				return ".nan";
+
 			case "uppercase":
 				return ".NAN";
+
 			case "camelcase":
 				return ".NaN";
 		}
@@ -82,8 +87,10 @@ function representYamlFloat(object: Any, style?: StyleVariant): Any {
 		switch (style) {
 			case "lowercase":
 				return ".inf";
+
 			case "uppercase":
 				return ".INF";
+
 			case "camelcase":
 				return ".Inf";
 		}
@@ -91,8 +98,10 @@ function representYamlFloat(object: Any, style?: StyleVariant): Any {
 		switch (style) {
 			case "lowercase":
 				return "-.inf";
+
 			case "uppercase":
 				return "-.INF";
+
 			case "camelcase":
 				return "-.Inf";
 		}

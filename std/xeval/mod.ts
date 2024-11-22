@@ -33,8 +33,11 @@ const DEFAULT_DELIMITER = "\n";
 function createLPS(pat: Uint8Array): Uint8Array {
 	const lps = new Uint8Array(pat.length);
 	lps[0] = 0;
+
 	let prefixEnd = 0;
+
 	let i = 1;
+
 	while (i < lps.length) {
 		if (pat[i] == pat[prefixEnd]) {
 			prefixEnd++;
@@ -59,24 +62,33 @@ async function* chunks(
 	delim: string,
 ): AsyncIterableIterator<string> {
 	const encoder = new TextEncoder();
+
 	const decoder = new TextDecoder();
 	// Avoid unicode problems
 	const delimArr = encoder.encode(delim);
+
 	const delimLen = delimArr.length;
+
 	const delimLPS = createLPS(delimArr);
 
 	let inputBuffer = new Buffer();
+
 	const inspectArr = new Uint8Array(Math.max(1024, delimLen + 1));
 
 	// Modified KMP
 	let inspectIndex = 0;
+
 	let matchIndex = 0;
+
 	while (true) {
 		const result = await reader.read(inspectArr);
+
 		if (result === EOF) {
 			// Yield last chunk.
 			const lastChunk = inputBuffer.toString();
+
 			yield lastChunk;
+
 			return;
 		}
 		if ((result as number) < 0) {
@@ -87,17 +99,22 @@ async function* chunks(
 		await writeAll(inputBuffer, sliceRead);
 
 		let sliceToProcess = inputBuffer.bytes();
+
 		while (inspectIndex < sliceToProcess.length) {
 			if (sliceToProcess[inspectIndex] === delimArr[matchIndex]) {
 				inspectIndex++;
 				matchIndex++;
+
 				if (matchIndex === delimLen) {
 					// Full match
 					const matchEnd = inspectIndex - delimLen;
+
 					const readyBytes = sliceToProcess.subarray(0, matchEnd);
 					// Copy
 					const pendingBytes = sliceToProcess.slice(inspectIndex);
+
 					const readyChunk = decoder.decode(readyBytes);
+
 					yield readyChunk;
 					// Reset match, different from KMP.
 					sliceToProcess = pendingBytes;
@@ -144,6 +161,7 @@ async function main(): Promise<void> {
 			replvar: "$",
 		},
 	});
+
 	if (parsedArgs._.length != 1) {
 		console.error(HELP_MSG);
 		exit(1);
@@ -153,7 +171,9 @@ async function main(): Promise<void> {
 	}
 
 	const delimiter = parsedArgs.delim;
+
 	const replVar = parsedArgs.replvar;
+
 	const code = parsedArgs._[0];
 
 	// new AsyncFunction()'s error message for this particular case isn't great.

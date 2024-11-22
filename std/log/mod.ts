@@ -22,6 +22,7 @@ export interface LogConfig {
 }
 
 const DEFAULT_LEVEL = "INFO";
+
 const DEFAULT_CONFIG: LogConfig = {
 	handlers: {
 		default: new ConsoleHandler(DEFAULT_LEVEL),
@@ -56,6 +57,7 @@ export function getLogger(name?: string): Logger {
 	if (!state.loggers.has(name)) {
 		const logger = new Logger("NOTSET", []);
 		state.loggers.set(name, logger);
+
 		return logger;
 	}
 
@@ -99,9 +101,12 @@ export async function setup(config: LogConfig): Promise<void> {
 
 	// setup loggers
 	const loggers = state.config.loggers || {};
+
 	for (const loggerName in loggers) {
 		const loggerConfig = loggers[loggerName];
+
 		const handlerNames = loggerConfig.handlers || [];
+
 		const handlers: BaseHandler[] = [];
 
 		handlerNames.forEach((handlerName): void => {
@@ -111,6 +116,7 @@ export async function setup(config: LogConfig): Promise<void> {
 		});
 
 		const levelName = loggerConfig.level || DEFAULT_LEVEL;
+
 		const logger = new Logger(levelName, handlers);
 		state.loggers.set(loggerName, logger);
 	}

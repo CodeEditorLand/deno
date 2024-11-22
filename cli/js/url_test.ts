@@ -127,6 +127,7 @@ test(function urlSearchParamsReuse(): void {
 	const url = new URL(
 		"https://foo:bar@baz.qat:8000/qux/quux?foo=bar&baz=12#qat",
 	);
+
 	const sp = url.searchParams;
 	url.host = "baz.qat";
 	assert(sp === url.searchParams, "Search params should be reused.");
@@ -136,6 +137,7 @@ test(function urlBaseURL(): void {
 	const base = new URL(
 		"https://foo:bar@baz.qat:8000/qux/quux?foo=bar&baz=12#qat",
 	);
+
 	const url = new URL("/foo/bar?baz=foo#qux", base);
 	assertEquals(url.href, "https://foo:bar@baz.qat:8000/foo/bar?baz=foo#qux");
 });

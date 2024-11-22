@@ -44,11 +44,14 @@ const searchParamsMethods: Array<keyof urlSearchParams.URLSearchParams> = [
 
 function parse(url: string): URLParts | undefined {
 	const urlMatch = urlRegExp.exec(url);
+
 	if (urlMatch) {
 		const [, , authority] = urlMatch;
+
 		const authorityMatch = authority
 			? authorityRegExp.exec(authority)
 			: [null, null, null, null, null];
+
 		if (authorityMatch) {
 			return {
 				protocol: urlMatch[1] || "",
@@ -86,11 +89,14 @@ function isAbsolutePath(path: string): boolean {
 function normalizePath(path: string): string {
 	const isAbsolute = isAbsolutePath(path);
 	path = path.replace(/^\//, "");
+
 	const pathSegments = path.split("/");
 
 	const newPathSegments: string[] = [];
+
 	for (let i = 0; i < pathSegments.length; i++) {
 		const previous = newPathSegments[newPathSegments.length - 1];
+
 		if (
 			pathSegments[i] == ".." &&
 			previous != ".." &&
@@ -103,6 +109,7 @@ function normalizePath(path: string): string {
 	}
 
 	let newPath = newPathSegments.join("/");
+
 	if (!isAbsolute) {
 		if (newPathSegments.length == 0) {
 			newPath = ".";
@@ -116,10 +123,12 @@ function normalizePath(path: string): string {
 // Standard URL basing logic, applied to paths.
 function resolvePathFromBase(path: string, basePath: string): string {
 	const normalizedPath = normalizePath(path);
+
 	if (isAbsolutePath(normalizedPath)) {
 		return normalizedPath;
 	}
 	const normalizedBasePath = normalizePath(basePath);
+
 	if (!isAbsolutePath(normalizedBasePath)) {
 		throw new TypeError("Base path must be absolute.");
 	}
@@ -155,9 +164,11 @@ export class URL {
 			"hash",
 			"search",
 		];
+
 		const objectString = keys
 			.map((key: string) => `${key}: "${this[key as keyof this] || ""}"`)
 			.join(", ");
+
 		return `URL { ${objectString} }`;
 	}
 
@@ -186,6 +197,7 @@ export class URL {
 
 	set hash(value: string) {
 		value = unescape(String(value));
+
 		if (!value) {
 			this._parts.hash = "";
 		} else {
@@ -205,6 +217,7 @@ export class URL {
 
 	set host(value: string) {
 		value = String(value);
+
 		const url = new URL(`http://${value}`);
 		this._parts.hostname = url.hostname;
 		this._parts.port = url.port;
@@ -224,7 +237,9 @@ export class URL {
 			this.username || this.password
 				? `${this.username}${this.password ? ":" + this.password : ""}@`
 				: "";
+
 		let slash = "";
+
 		if (this.host || this.protocol === "file:") {
 			slash = "//";
 		}
@@ -233,6 +248,7 @@ export class URL {
 
 	set href(value: string) {
 		value = String(value);
+
 		if (value !== this.href) {
 			const url = new URL(value);
 			this._parts = { ...url._parts };
@@ -262,6 +278,7 @@ export class URL {
 
 	set pathname(value: string) {
 		value = unescape(String(value));
+
 		if (!value || value.charAt(0) !== "/") {
 			value = `/${value}`;
 		}
@@ -286,6 +303,7 @@ export class URL {
 
 	set protocol(value: string) {
 		value = String(value);
+
 		if (value) {
 			if (value.charAt(value.length - 1) === ":") {
 				value = value.slice(0, -1);
@@ -304,6 +322,7 @@ export class URL {
 
 	set search(value: string) {
 		value = String(value);
+
 		let query: string | null;
 
 		if (value === "") {
@@ -333,14 +352,17 @@ export class URL {
 
 	constructor(url: string, base?: string | URL) {
 		let baseParts: URLParts | undefined;
+
 		if (base) {
 			baseParts = typeof base === "string" ? parse(base) : base._parts;
+
 			if (!baseParts || baseParts.protocol == "") {
 				throw new TypeError("Invalid base URL.");
 			}
 		}
 
 		const urlParts = parse(url);
+
 		if (!urlParts) {
 			throw new TypeError("Invalid URL.");
 		}
@@ -375,13 +397,16 @@ export class URL {
 	// TODO(kevinkassimo): implement MediaSource version in the future.
 	static createObjectURL(b: domTypes.Blob): string {
 		const origin = window.location.origin || "http://deno-opaque-origin";
+
 		const key = `blob:${origin}/${generateUUID()}`;
 		blobURLMap.set(key, b);
+
 		return key;
 	}
 
 	static revokeObjectURL(url: string): void {
 		let urlObject;
+
 		try {
 			urlObject = new URL(url);
 		} catch {

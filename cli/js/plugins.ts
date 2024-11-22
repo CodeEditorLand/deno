@@ -11,6 +11,7 @@ interface PluginOp {
 		control: Uint8Array,
 		zeroCopy?: ArrayBufferView | null,
 	): Uint8Array | null;
+
 	setAsyncHandler(handler: AsyncHandler): void;
 }
 
@@ -65,5 +66,6 @@ export function openPlugin(filename: string): Plugin {
 	const response: OpenPluginResponse = sendSync(OP_OPEN_PLUGIN, {
 		filename,
 	});
+
 	return new PluginImpl(response.rid, response.ops);
 }

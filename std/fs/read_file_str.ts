@@ -15,6 +15,7 @@ export function readFileStrSync(
 	opts: ReadOptions = {},
 ): string {
 	const decoder = new TextDecoder(opts.encoding);
+
 	return decoder.decode(Deno.readFileSync(filename));
 }
 
@@ -29,5 +30,6 @@ export async function readFileStr(
 	opts: ReadOptions = {},
 ): Promise<string> {
 	const decoder = new TextDecoder(opts.encoding);
+
 	return decoder.decode(await Deno.readFile(filename));
 }

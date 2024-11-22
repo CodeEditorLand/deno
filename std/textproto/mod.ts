@@ -29,6 +29,7 @@ export function append(a: Uint8Array, b: Uint8Array): Uint8Array {
 		const output = new Uint8Array(a.length + b.length);
 		output.set(a, 0);
 		output.set(b, a.length);
+
 		return output;
 	}
 }
@@ -41,7 +42,9 @@ export class TextProtoReader {
 	 */
 	async readLine(): Promise<string | Deno.EOF> {
 		const s = await this.readLineSlice();
+
 		if (s === Deno.EOF) return Deno.EOF;
+
 		return str(s);
 	}
 
@@ -67,10 +70,12 @@ export class TextProtoReader {
 	 */
 	async readMIMEHeader(): Promise<Headers | Deno.EOF> {
 		const m = new Headers();
+
 		let line: Uint8Array;
 
 		// The first line cannot start with a leading space.
 		let buf = await this.r.peek(1);
+
 		if (buf === Deno.EOF) {
 			return Deno.EOF;
 		} else if (buf[0] == charCode(" ") || buf[0] == charCode("\t")) {
@@ -78,6 +83,7 @@ export class TextProtoReader {
 		}
 
 		buf = await this.r.peek(1);
+
 		if (buf === Deno.EOF) {
 			throw new UnexpectedEOFError();
 		} else if (buf[0] == charCode(" ") || buf[0] == charCode("\t")) {
@@ -89,23 +95,27 @@ export class TextProtoReader {
 		while (true) {
 			const kv = await this.readLineSlice(); // readContinuedLineSlice
 			if (kv === Deno.EOF) throw new UnexpectedEOFError();
+
 			if (kv.byteLength === 0) return m;
 
 			// Key ends at first colon; should not have trailing spaces
 			// but they appear in the wild, violating specs, so we remove
 			// them if present.
 			let i = kv.indexOf(charCode(":"));
+
 			if (i < 0) {
 				throw new ProtocolError(
 					`malformed MIME header line: ${str(kv)}`,
 				);
 			}
 			let endKey = i;
+
 			while (endKey > 0 && kv[endKey - 1] == charCode(" ")) {
 				endKey--;
 			}
 
 			//let key = canonicalMIMEHeaderKey(kv.subarray(0, endKey));
+
 			const key = str(kv.subarray(0, endKey));
 
 			// As per RFC 7230 field-name is a token,
@@ -137,10 +147,14 @@ export class TextProtoReader {
 
 	async readLineSlice(): Promise<Uint8Array | Deno.EOF> {
 		// this.closeDot();
+
 		let line: Uint8Array;
+
 		while (true) {
 			const r = await this.r.readLine();
+
 			if (r === Deno.EOF) return Deno.EOF;
+
 			const { line: l, more } = r;
 
 			// Avoid the copy if the first call produced a full line.
@@ -156,6 +170,7 @@ export class TextProtoReader {
 
 			// @ts-ignore
 			line = append(line, l);
+
 			if (!more) {
 				break;
 			}
@@ -165,6 +180,7 @@ export class TextProtoReader {
 
 	skipSpace(l: Uint8Array): number {
 		let n = 0;
+
 		for (let i = 0; i < l.length; i++) {
 			if (l[i] === charCode(" ") || l[i] === charCode("\t")) {
 				continue;

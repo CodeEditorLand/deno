@@ -27,15 +27,19 @@ class ParserContext {
 class Parser {
 	tomlLines: string[];
 	context: ParserContext;
+
 	constructor(tomlString: string) {
 		this.tomlLines = this._split(tomlString);
 		this.context = new ParserContext();
 	}
 	_sanitize(): void {
 		const out: string[] = [];
+
 		for (let i = 0; i < this.tomlLines.length; i++) {
 			const s = this.tomlLines[i];
+
 			const trimmed = s.trim();
+
 			if (trimmed !== "" && trimmed[0] !== "#") {
 				out.push(s);
 			}
@@ -47,6 +51,7 @@ class Parser {
 	_mergeMultilines(): void {
 		function arrayStart(line: string): boolean {
 			const reg = /.*=\s*\[/g;
+
 			return reg.test(line) && !(line[line.length - 1] === "]");
 		}
 
@@ -56,6 +61,7 @@ class Parser {
 
 		function stringStart(line: string): boolean {
 			const m = line.match(/.*=\s*(?:\"\"\"|''')/);
+
 			if (!m) {
 				return false;
 			}
@@ -71,6 +77,7 @@ class Parser {
 		}
 
 		const merged = [];
+
 		let acc = [],
 			isLiteral = false,
 			capture = false,
@@ -79,7 +86,9 @@ class Parser {
 
 		for (let i = 0; i < this.tomlLines.length; i++) {
 			const line = this.tomlLines[i];
+
 			const trimmed = line.trim();
+
 			if (!capture && arrayStart(trimmed)) {
 				capture = true;
 				captureType = "array";
@@ -110,6 +119,7 @@ class Parser {
 			if (merge) {
 				capture = false;
 				merge = false;
+
 				if (captureType === "string") {
 					merged.push(
 						acc
@@ -130,6 +140,7 @@ class Parser {
 	}
 	_unflat(keys: string[], values: object = {}, cObj: object = {}): object {
 		const out: Record<string, unknown> = {};
+
 		if (keys.length === 0) {
 			return cObj;
 		} else {
@@ -137,6 +148,7 @@ class Parser {
 				cObj = values;
 			}
 			const key: string | undefined = keys.pop();
+
 			if (key) {
 				out[key] = cObj;
 			}
@@ -148,7 +160,9 @@ class Parser {
 			.currentGroup!.name.replace(/"/g, "")
 			.replace(/'/g, "")
 			.split(".");
+
 		let u = {};
+
 		if (this.context.currentGroup!.type === "array") {
 			u = this._unflat(arrProperty, this.context.currentGroup!.arrValues);
 		} else {
@@ -160,10 +174,12 @@ class Parser {
 	_split(str: string): string[] {
 		const out = [];
 		out.push(...str.split("\n"));
+
 		return out;
 	}
 	_isGroup(line: string): boolean {
 		const t = line.trim();
+
 		return t[0] === "[" && /\[(.*)\]/.exec(t) ? true : false;
 	}
 	_isDeclaration(line: string): boolean {
@@ -171,12 +187,15 @@ class Parser {
 	}
 	_createGroup(line: string): void {
 		const captureReg = /\[(.*)\]/;
+
 		if (this.context.currentGroup) {
 			this._groupToOutput();
 		}
 
 		let type;
+
 		let name = line.match(captureReg)![1];
+
 		if (name.match(/\[.*\]/)) {
 			type = "array";
 			name = name.match(captureReg)![1];
@@ -187,8 +206,11 @@ class Parser {
 	}
 	_processDeclaration(line: string): KeyValuePair {
 		const idx = line.indexOf("=");
+
 		const key = line.substring(0, idx).trim();
+
 		const value = this._parseData(line.slice(idx + 1));
+
 		return new KeyValuePair(key, value);
 	}
 	// TODO (zekth) Need refactor using ACC
@@ -204,7 +226,9 @@ class Parser {
 		}
 
 		const cut3 = dataString.substring(0, 3).toLowerCase();
+
 		const cut4 = dataString.substring(0, 4).toLowerCase();
+
 		if (cut3 === "inf" || cut4 === "+inf") {
 			return Infinity;
 		}
@@ -218,20 +242,24 @@ class Parser {
 
 		// If binary / octal / hex
 		const hex = /(0(?:x|o|b)[0-9a-f_]*)[^#]/gi.exec(dataString);
+
 		if (hex && hex[0]) {
 			return hex[0].trim();
 		}
 
 		const testNumber = this._isParsableNumber(dataString);
+
 		if (testNumber && !isNaN(testNumber as number)) {
 			return testNumber;
 		}
 
 		const invalidArr = /,\]/g.exec(dataString);
+
 		if (invalidArr) {
 			dataString = dataString.replace(/,]/g, "]");
 		}
 		const m = /(?:\'|\[|{|\").*(?:\'|\]|\"|})\s*[^#]/g.exec(dataString);
+
 		if (m) {
 			dataString = m[0].trim();
 		}
@@ -240,9 +268,12 @@ class Parser {
 			dataString[dataString.length - 1] === "}"
 		) {
 			const reg = /([a-zA-Z0-9-_\.]*) (=)/gi;
+
 			let result;
+
 			while ((result = reg.exec(dataString))) {
 				const ogVal = result[0];
+
 				const newVal = ogVal
 					.replace(result[1], `"${result[1]}"`)
 					.replace(result[2], ":");
@@ -266,10 +297,12 @@ class Parser {
 	}
 	_isLocalTime(str: string): boolean {
 		const reg = /(\d{2}):(\d{2}):(\d{2})/;
+
 		return reg.test(str);
 	}
 	_isParsableNumber(dataString: string): number | boolean {
 		const m = /((?:\+|-|)[0-9_\.e+\-]*)[^#]/i.exec(dataString.trim());
+
 		if (!m) {
 			return false;
 		} else {
@@ -278,14 +311,19 @@ class Parser {
 	}
 	_isDate(dateStr: string): boolean {
 		const reg = /\d{4}-\d{2}-\d{2}/;
+
 		return reg.test(dateStr);
 	}
 	_parseDeclarationName(declaration: string): string[] {
 		const out = [];
+
 		let acc = [];
+
 		let inLiteral = false;
+
 		for (let i = 0; i < declaration.length; i++) {
 			const c = declaration[i];
+
 			switch (c) {
 				case ".":
 					if (!inLiteral) {
@@ -295,6 +333,7 @@ class Parser {
 						acc.push(c);
 					}
 					break;
+
 				case `"`:
 					if (inLiteral) {
 						inLiteral = false;
@@ -302,8 +341,10 @@ class Parser {
 						inLiteral = true;
 					}
 					break;
+
 				default:
 					acc.push(c);
+
 					break;
 			}
 		}
@@ -337,13 +378,17 @@ class Parser {
 							line.replace(/\[/g, "").replace(/\]/g, ""))
 				) {
 					this._createGroup(line);
+
 					continue;
 				}
 			}
 			if (this._isDeclaration(line)) {
 				const kv = this._processDeclaration(line);
+
 				const key = kv.key;
+
 				const value = kv.value;
+
 				if (!this.context.currentGroup) {
 					this.context.output[key] = value;
 				} else {
@@ -365,14 +410,19 @@ class Parser {
 	}
 	_propertyClean(obj: Record<string, unknown>): void {
 		const keys = Object.keys(obj);
+
 		for (let i = 0; i < keys.length; i++) {
 			let k = keys[i];
+
 			if (k) {
 				let v = obj[k];
+
 				const pathDeclaration = this._parseDeclarationName(k);
 				delete obj[k];
+
 				if (pathDeclaration.length > 1) {
 					const shift = pathDeclaration.shift();
+
 					if (shift) {
 						k = shift.replace(/"/g, "");
 						v = this._unflat(pathDeclaration, v as object);
@@ -381,6 +431,7 @@ class Parser {
 					k = k.replace(/"/g, "");
 				}
 				obj[k] = v;
+
 				if (v instanceof Object) {
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					this._propertyClean(v as any);
@@ -392,6 +443,7 @@ class Parser {
 		this._sanitize();
 		this._parseLines();
 		this._cleanOutput();
+
 		return this.context.output;
 	}
 }
@@ -412,6 +464,7 @@ class Dumper {
 	maxPad = 0;
 	srcObject: object;
 	output: string[] = [];
+
 	constructor(srcObjc: object) {
 		this.srcObject = srcObjc;
 	}
@@ -419,29 +472,39 @@ class Dumper {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		this.output = this._parse(this.srcObject as any);
 		this.output = this._format();
+
 		return this.output;
 	}
 	_parse(obj: Record<string, unknown>, keys: string[] = []): string[] {
 		const out = [];
+
 		const props = Object.keys(obj);
+
 		const propObj = props.filter((e: string): boolean => {
 			if (obj[e] instanceof Array) {
 				const d: unknown[] = obj[e] as unknown[];
+
 				return !this._isSimplySerializable(d[0]);
 			}
 			return !this._isSimplySerializable(obj[e]);
 		});
+
 		const propPrim = props.filter((e: string): boolean => {
 			if (obj[e] instanceof Array) {
 				const d: unknown[] = obj[e] as unknown[];
+
 				return this._isSimplySerializable(d[0]);
 			}
 			return this._isSimplySerializable(obj[e]);
 		});
+
 		const k = propPrim.concat(propObj);
+
 		for (let i = 0; i < k.length; i++) {
 			const prop = k[i];
+
 			const value = obj[prop];
+
 			if (value instanceof Date) {
 				out.push(this._dateDeclaration([prop], value));
 			} else if (typeof value === "string" || value instanceof RegExp) {
@@ -467,6 +530,7 @@ class Dumper {
 			} else if (typeof value === "object") {
 				out.push("");
 				out.push(this._header([...keys, prop]));
+
 				if (value) {
 					const toParse = value as Record<string, unknown>;
 					out.push(...this._parse(toParse, [...keys, prop]));
@@ -475,6 +539,7 @@ class Dumper {
 			}
 		}
 		out.push("");
+
 		return out;
 	}
 	_isSimplySerializable(value: unknown): boolean {
@@ -494,6 +559,7 @@ class Dumper {
 	}
 	_declaration(keys: string[]): string {
 		const title = joinKeys(keys);
+
 		if (title.length > this.maxPad) {
 			this.maxPad = title.length;
 		}
@@ -509,8 +575,10 @@ class Dumper {
 		switch (value) {
 			case Infinity:
 				return `${this._declaration(keys)}inf`;
+
 			case -Infinity:
 				return `${this._declaration(keys)}-inf`;
+
 			default:
 				return `${this._declaration(keys)}${value}`;
 		}
@@ -520,18 +588,26 @@ class Dumper {
 			return pad(v, lPad, { char: "0" });
 		}
 		const m = dtPad((value.getUTCMonth() + 1).toString());
+
 		const d = dtPad(value.getUTCDate().toString());
+
 		const h = dtPad(value.getUTCHours().toString());
+
 		const min = dtPad(value.getUTCMinutes().toString());
+
 		const s = dtPad(value.getUTCSeconds().toString());
+
 		const ms = dtPad(value.getUTCMilliseconds().toString(), 3);
 		// formated date
 		const fData = `${value.getUTCFullYear()}-${m}-${d}T${h}:${min}:${s}.${ms}`;
+
 		return `${this._declaration(keys)}${fData}`;
 	}
 	_format(): string[] {
 		const rDeclaration = /(.*)\s=/;
+
 		const out = [];
+
 		for (let i = 0; i < this.output.length; i++) {
 			const l = this.output[i];
 			// we keep empty entry for array of objects
@@ -539,11 +615,13 @@ class Dumper {
 				// empty object
 				if (this.output[i + 1] === "") {
 					i += 1;
+
 					continue;
 				}
 				out.push(l);
 			} else {
 				const m = rDeclaration.exec(l);
+
 				if (m) {
 					out.push(
 						l.replace(
@@ -558,8 +636,10 @@ class Dumper {
 		}
 		// Cleaning multiple spaces
 		const cleanedOutput = [];
+
 		for (let i = 0; i < out.length; i++) {
 			const l = out[i];
+
 			if (!(l === "" && out[i + 1] === "")) {
 				cleanedOutput.push(l);
 			}
@@ -575,5 +655,6 @@ export function stringify(srcObj: object): string {
 export function parse(tomlString: string): object {
 	// File is potentially using EOL CRLF
 	tomlString = tomlString.replace(/\r\n/g, "\n").replace(/\\\n/g, "\n");
+
 	return new Parser(tomlString).parse();
 }

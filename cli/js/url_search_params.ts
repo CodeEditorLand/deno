@@ -9,11 +9,13 @@ export class URLSearchParams {
 	constructor(init: string | string[][] | Record<string, string> = "") {
 		if (typeof init === "string") {
 			this._handleStringInitialization(init);
+
 			return;
 		}
 
 		if (Array.isArray(init) || isIterable(init)) {
 			this._handleArrayInitialization(init);
+
 			return;
 		}
 
@@ -23,6 +25,7 @@ export class URLSearchParams {
 
 		if (init instanceof URLSearchParams) {
 			this.params = init.params;
+
 			return;
 		}
 
@@ -38,6 +41,7 @@ export class URLSearchParams {
 		}
 
 		let query: string | null = this.toString();
+
 		if (query === "") {
 			query = null;
 		}
@@ -65,7 +69,9 @@ export class URLSearchParams {
 	delete(name: string): void {
 		requiredArguments("URLSearchParams.delete", arguments.length, 1);
 		name = String(name);
+
 		let i = 0;
+
 		while (i < this.params.length) {
 			if (this.params[i][0] === name) {
 				this.params.splice(i, 1);
@@ -84,7 +90,9 @@ export class URLSearchParams {
 	getAll(name: string): string[] {
 		requiredArguments("URLSearchParams.getAll", arguments.length, 1);
 		name = String(name);
+
 		const values = [];
+
 		for (const entry of this.params) {
 			if (entry[0] === name) {
 				values.push(entry[1]);
@@ -101,6 +109,7 @@ export class URLSearchParams {
 	get(name: string): string | null {
 		requiredArguments("URLSearchParams.get", arguments.length, 1);
 		name = String(name);
+
 		for (const entry of this.params) {
 			if (entry[0] === name) {
 				return entry[1];
@@ -118,6 +127,7 @@ export class URLSearchParams {
 	has(name: string): boolean {
 		requiredArguments("URLSearchParams.has", arguments.length, 1);
 		name = String(name);
+
 		return this.params.some((entry): boolean => entry[0] === name);
 	}
 
@@ -136,8 +146,11 @@ export class URLSearchParams {
 		// and remove the others.
 		name = String(name);
 		value = String(value);
+
 		let found = false;
+
 		let i = 0;
+
 		while (i < this.params.length) {
 			if (this.params[i][0] === name) {
 				if (!found) {
@@ -274,10 +287,12 @@ export class URLSearchParams {
 				continue;
 			}
 			const position = pair.indexOf("=");
+
 			const name = pair.slice(
 				0,
 				position === -1 ? pair.length : position,
 			);
+
 			const value = pair.slice(name.length + 1);
 			this.append(decodeURIComponent(name), decodeURIComponent(value));
 		}

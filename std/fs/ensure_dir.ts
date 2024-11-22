@@ -7,10 +7,12 @@ import { getFileInfoType } from "./utils.ts";
  */
 export async function ensureDir(dir: string): Promise<void> {
 	let pathExists = false;
+
 	try {
 		// if dir exists
 		const stat = await Deno.stat(dir);
 		pathExists = true;
+
 		if (!stat.isDirectory()) {
 			throw new Error(
 				`Ensure path exists, expected 'dir', got '${getFileInfoType(stat)}'`,
@@ -31,10 +33,12 @@ export async function ensureDir(dir: string): Promise<void> {
  */
 export function ensureDirSync(dir: string): void {
 	let pathExists = false;
+
 	try {
 		// if dir exists
 		const stat = Deno.statSync(dir);
 		pathExists = true;
+
 		if (!stat.isDirectory()) {
 			throw new Error(
 				`Ensure path exists, expected 'dir', got '${getFileInfoType(stat)}'`,

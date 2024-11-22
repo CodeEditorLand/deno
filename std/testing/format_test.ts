@@ -157,6 +157,7 @@ test({
 	name: "prints an anonymous callback function",
 	fn(): void {
 		let val;
+
 		function f(cb: () => void): void {
 			val = cb;
 		}
@@ -171,6 +172,7 @@ test({
 	fn(): void {
 		// tslint:disable-next-line:no-empty
 		const val = (): void => {};
+
 		const formatted = format(val);
 		assertEquals(
 			formatted === "[Function anonymous]" ||
@@ -194,7 +196,9 @@ test({
 	fn(): void {
 		const val = function* generate(): IterableIterator<number> {
 			yield 1;
+
 			yield 2;
+
 			yield 3;
 		};
 		assertEquals(format(val), "[Function generate]");
@@ -270,6 +274,7 @@ test({
 			[["array", "key"], "array"],
 			[{ key: "value" }, "object"],
 		]);
+
 		const expected = [
 			"Map {",
 			'  false => "boolean",',
@@ -400,6 +405,7 @@ test({
 		const val = {
 			enumerable: true,
 		};
+
 		const key = "non-enumerable";
 		Object.defineProperty(val, key, {
 			enumerable: false,
@@ -415,6 +421,7 @@ test({
 		const val = {
 			enumerable: true,
 		};
+
 		const key = Symbol("non-enumerable");
 		Object.defineProperty(val, key, {
 			enumerable: false,
@@ -543,6 +550,7 @@ test({
 			},
 			type: "polyline",
 		};
+
 		const val = {
 			props: {
 				children: polyline,
@@ -629,6 +637,7 @@ test({
 	name: "prints parallel references",
 	fn(): void {
 		const inner = {};
+
 		const val = { prop1: inner, prop2: inner };
 		assertEquals(
 			format(val),
@@ -732,6 +741,7 @@ test({
 	fn(): void {
 		const obj = Object.create(null);
 		obj.constructor = "constructor";
+
 		const expected = [
 			"Object {", // Object instead of undefined
 			'  "constructor": "constructor",',

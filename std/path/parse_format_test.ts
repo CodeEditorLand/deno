@@ -87,6 +87,7 @@ const unixSpecialCaseFormatTests = [
 function checkParseFormat(path: any, paths: any): void {
 	paths.forEach(function (p: Array<Record<string, unknown>>) {
 		const element = p[0];
+
 		const output = path.parse(element);
 		assertEquals(typeof output.root, "string");
 		assertEquals(typeof output.dir, "string");
@@ -103,7 +104,9 @@ function checkParseFormat(path: any, paths: any): void {
 function checkSpecialCaseParseFormat(path: any, testCases: any): void {
 	testCases.forEach(function (testCase: Array<Record<string, unknown>>) {
 		const element = testCase[0];
+
 		const expect = testCase[1];
+
 		const output = path.parse(element);
 		Object.keys(expect).forEach(function (key) {
 			assertEquals(output[key], expect[key]);
@@ -169,6 +172,7 @@ const posixTrailingTests = [
 test(function parseTrailingWin32() {
 	windowsTrailingTests.forEach(function (p) {
 		const actual = path.win32.parse(p[0] as string);
+
 		const expected = p[1];
 		assertEquals(actual, expected);
 	});
@@ -177,6 +181,7 @@ test(function parseTrailingWin32() {
 test(function parseTrailing() {
 	posixTrailingTests.forEach(function (p) {
 		const actual = path.posix.parse(p[0] as string);
+
 		const expected = p[1];
 		assertEquals(actual, expected);
 	});

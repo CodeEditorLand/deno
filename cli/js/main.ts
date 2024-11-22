@@ -16,13 +16,16 @@ function denoMain(preserveDenoNamespace = true, name?: string): void {
 	const s = os.start(preserveDenoNamespace, name);
 
 	setBuildInfo(s.os, s.arch);
+
 	setSignals();
+
 	setVersions(s.denoVersion, s.v8Version, s.tsVersion);
 
 	setPrepareStackTrace(Error);
 
 	if (s.mainModule) {
 		assert(s.mainModule.length > 0);
+
 		setLocation(s.mainModule);
 	}
 

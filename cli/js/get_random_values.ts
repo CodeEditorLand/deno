@@ -21,11 +21,13 @@ export function getRandomValues<
 >(typedArray: T): T {
 	assert(typedArray !== null, "Input must not be null");
 	assert(typedArray.length <= 65536, "Input must not be longer than 65536");
+
 	const ui8 = new Uint8Array(
 		typedArray.buffer,
 		typedArray.byteOffset,
 		typedArray.byteLength,
 	);
 	sendSync(dispatch.OP_GET_RANDOM_VALUES, {}, ui8);
+
 	return typedArray;
 }

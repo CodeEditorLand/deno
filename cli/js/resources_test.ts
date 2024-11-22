@@ -11,7 +11,9 @@ test(function resourcesStdio(): void {
 
 testPerm({ net: true }, async function resourcesNet(): Promise<void> {
 	const listener = Deno.listen({ port: 4501 });
+
 	const dialerConn = await Deno.dial({ port: 4501 });
+
 	const listenerConn = await listener.accept();
 
 	const res = Deno.resources();
@@ -32,6 +34,7 @@ testPerm({ net: true }, async function resourcesNet(): Promise<void> {
 testPerm({ read: true }, async function resourcesFile(): Promise<void> {
 	const resourcesBefore = Deno.resources();
 	await Deno.open("tests/hello.txt");
+
 	const resourcesAfter = Deno.resources();
 
 	// check that exactly one new resource (file) was added
@@ -39,6 +42,7 @@ testPerm({ read: true }, async function resourcesFile(): Promise<void> {
 		Object.keys(resourcesAfter).length,
 		Object.keys(resourcesBefore).length + 1,
 	);
+
 	const newRid = Object.keys(resourcesAfter).find((rid): boolean => {
 		return !resourcesBefore.hasOwnProperty(rid);
 	});

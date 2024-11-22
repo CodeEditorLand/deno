@@ -116,10 +116,13 @@ test(function testingEqual(): void {
 
 test(function testingNotEquals(): void {
 	const a = { foo: "bar" };
+
 	const b = { bar: "foo" };
 	assertNotEquals(a, b);
 	assertNotEquals("Denosaurus", "Tyrannosaurus");
+
 	let didThrow;
+
 	try {
 		assertNotEquals("Raptor", "Raptor");
 		didThrow = false;
@@ -134,7 +137,9 @@ test(function testingAssertStringContains(): void {
 	assertStrContains("Denosaurus", "saur");
 	assertStrContains("Denosaurus", "Deno");
 	assertStrContains("Denosaurus", "rus");
+
 	let didThrow;
+
 	try {
 		assertStrContains("Denosaurus", "Raptor");
 		didThrow = false;
@@ -147,10 +152,13 @@ test(function testingAssertStringContains(): void {
 
 test(function testingArrayContains(): void {
 	const fixture = ["deno", "iz", "luv"];
+
 	const fixtureObject = [{ deno: "luv" }, { deno: "Js" }];
 	assertArrayContains(fixture, ["deno"]);
 	assertArrayContains(fixtureObject, [{ deno: "luv" }]);
+
 	let didThrow;
+
 	try {
 		assertArrayContains(fixtureObject, [{ deno: "node" }]);
 		didThrow = false;
@@ -163,6 +171,7 @@ test(function testingArrayContains(): void {
 
 test(function testingAssertStringContainsThrow(): void {
 	let didThrow = false;
+
 	try {
 		assertStrContains("Denosaurus from Jurassic", "Raptor");
 	} catch (e) {
@@ -182,6 +191,7 @@ test(function testingAssertStringMatching(): void {
 
 test(function testingAssertStringMatchingThrows(): void {
 	let didThrow = false;
+
 	try {
 		assertMatch("Denosaurus from Jurassic", RegExp(/Raptor/));
 	} catch (e) {
@@ -197,6 +207,7 @@ test(function testingAssertStringMatchingThrows(): void {
 
 test(function testingAssertsUnimplemented(): void {
 	let didThrow = false;
+
 	try {
 		unimplemented();
 	} catch (e) {
@@ -209,6 +220,7 @@ test(function testingAssertsUnimplemented(): void {
 
 test(function testingAssertsUnreachable(): void {
 	let didThrow = false;
+
 	try {
 		unreachable();
 	} catch (e) {
@@ -239,6 +251,7 @@ const createHeader = (): string[] => [
 ];
 
 const added: (s: string) => string = (s: string): string => green(bold(s));
+
 const removed: (s: string) => string = (s: string): string => red(bold(s));
 
 test({

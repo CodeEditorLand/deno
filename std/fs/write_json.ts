@@ -23,6 +23,7 @@ export async function writeJson(
 		);
 	} catch (err) {
 		err.message = `${filePath}: ${err.message}`;
+
 		throw err;
 	}
 
@@ -45,6 +46,7 @@ export function writeJsonSync(
 		);
 	} catch (err) {
 		err.message = `${filePath}: ${err.message}`;
+
 		throw err;
 	}
 

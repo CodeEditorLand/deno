@@ -57,6 +57,7 @@ function getClassInstanceName(instance: unknown): string {
 	}
 
 	const proto = Object.getPrototypeOf(instance);
+
 	if (proto && proto.constructor) {
 		return proto.constructor.name; // could be "Object" or "Array"
 	}
@@ -67,6 +68,7 @@ function getClassInstanceName(instance: unknown): string {
 function createFunctionString(value: Function, _ctx: ConsoleContext): string {
 	// Might be Function/AsyncFunction/GeneratorFunction
 	const cstrName = Object.getPrototypeOf(value).constructor.name;
+
 	if (value.name && value.name !== "anonymous") {
 		// from MDN spec
 		return `[${cstrName}: ${value.name}]`;
@@ -106,8 +108,11 @@ function createIterableString<T>(
 		}
 	} catch (e) {}
 	ctx.delete(value);
+
 	const iPrefix = `${config.displayName ? config.displayName + " " : ""}`;
+
 	const iContent = entries.length === 0 ? "" : ` ${entries.join(", ")} `;
+
 	return `${iPrefix}${config.delims[0]}${iContent}${config.delims[1]}`;
 }
 
@@ -120,17 +125,22 @@ function stringify(
 	switch (typeof value) {
 		case "string":
 			return value;
+
 		case "number":
 			// Special handling of -0
 			return Object.is(value, -0) ? "-0" : `${value}`;
+
 		case "boolean":
 		case "undefined":
 		case "symbol":
 			return String(value);
+
 		case "bigint":
 			return `${value}n`;
+
 		case "function":
 			return createFunctionString(value as Function, ctx);
+
 		case "object":
 			if (value === null) {
 				return "null";
@@ -141,6 +151,7 @@ function stringify(
 			}
 
 			return createObjectString(value, ctx, level, maxLevel);
+
 		default:
 			return "[Not Implemented]";
 	}
@@ -159,7 +170,9 @@ function stringifyWithQuotes(
 				value.length > STR_ABBREVIATE_SIZE
 					? value.slice(0, STR_ABBREVIATE_SIZE) + "..."
 					: value;
+
 			return JSON.stringify(trunc);
+
 		default:
 			return stringify(value, ctx, level, maxLevel);
 	}
@@ -178,6 +191,7 @@ function createArrayString(
 		entryHandler: (el, ctx, level, maxLevel): string =>
 			stringifyWithQuotes(el, ctx, level + 1, maxLevel),
 	};
+
 	return createIterableString(value, ctx, level, maxLevel, printConfig);
 }
 
@@ -195,6 +209,7 @@ function createTypedArrayString(
 		entryHandler: (el, ctx, level, maxLevel): string =>
 			stringifyWithQuotes(el, ctx, level + 1, maxLevel),
 	};
+
 	return createIterableString(value, ctx, level, maxLevel, printConfig);
 }
 
@@ -211,6 +226,7 @@ function createSetString(
 		entryHandler: (el, ctx, level, maxLevel): string =>
 			stringifyWithQuotes(el, ctx, level + 1, maxLevel),
 	};
+
 	return createIterableString(value, ctx, level, maxLevel, printConfig);
 }
 
@@ -226,6 +242,7 @@ function createMapString(
 		delims: ["{", "}"],
 		entryHandler: (el, ctx, level, maxLevel): string => {
 			const [key, val] = el;
+
 			return `${stringifyWithQuotes(
 				key,
 				ctx,
@@ -234,6 +251,7 @@ function createMapString(
 			)} => ${stringifyWithQuotes(val, ctx, level + 1, maxLevel)}`;
 		},
 	};
+
 	return createIterableString(value, ctx, level, maxLevel, printConfig);
 }
 
@@ -287,11 +305,14 @@ function createRawObjectString(
 	let baseString = "";
 
 	const className = getClassInstanceName(value);
+
 	let shouldShowClassName = false;
+
 	if (className && className !== "Object" && className !== "anonymous") {
 		shouldShowClassName = true;
 	}
 	const keys = Object.keys(value);
+
 	const entries: string[] = keys.map((key): string => {
 		if (keys.length > OBJ_ABBREVIATE_SIZE) {
 			return key;
@@ -371,27 +392,35 @@ export function stringifyArgs(
 	options: ConsoleOptions = {},
 ): string {
 	const first = args[0];
+
 	let a = 0;
+
 	let str = "";
+
 	let join = "";
 
 	if (typeof first === "string") {
 		let tempStr: string;
+
 		let lastPos = 0;
 
 		for (let i = 0; i < first.length - 1; i++) {
 			if (first.charCodeAt(i) === CHAR_PERCENT) {
 				const nextChar = first.charCodeAt(++i);
+
 				if (a + 1 !== args.length) {
 					switch (nextChar) {
 						case CHAR_LOWERCASE_S:
 							// format as a string
 							tempStr = String(args[++a]);
+
 							break;
+
 						case CHAR_LOWERCASE_D:
 						case CHAR_LOWERCASE_I:
 							// format as an integer
 							const tempInteger = args[++a];
+
 							if (typeof tempInteger === "bigint") {
 								tempStr = `${tempInteger}n`;
 							} else if (typeof tempInteger === "symbol") {
@@ -400,15 +429,18 @@ export function stringifyArgs(
 								tempStr = `${parseInt(String(tempInteger), 10)}`;
 							}
 							break;
+
 						case CHAR_LOWERCASE_F:
 							// format as a floating point value
 							const tempFloat = args[++a];
+
 							if (typeof tempFloat === "symbol") {
 								tempStr = "NaN";
 							} else {
 								tempStr = `${parseFloat(String(tempFloat))}`;
 							}
 							break;
+
 						case CHAR_LOWERCASE_O:
 						case CHAR_UPPERCASE_O:
 							// format as an object
@@ -420,14 +452,19 @@ export function stringifyArgs(
 									? options.depth
 									: DEFAULT_MAX_DEPTH,
 							);
+
 							break;
+
 						case CHAR_PERCENT:
 							str += first.slice(lastPos, i);
 							lastPos = i + 1;
+
 							continue;
+
 						case CHAR_LOWERCASE_C:
 							// TODO: applies CSS style rules to the output string as specified
 							continue;
+
 						default:
 							// any other character is not a correct placeholder
 							continue;
@@ -449,6 +486,7 @@ export function stringifyArgs(
 		if (lastPos !== 0) {
 			a++;
 			join = " ";
+
 			if (lastPos < first.length) {
 				str += first.slice(lastPos);
 			}
@@ -458,6 +496,7 @@ export function stringifyArgs(
 	while (a < args.length) {
 		const value = args[a];
 		str += join;
+
 		if (typeof value === "string") {
 			str += value;
 		} else {
@@ -474,8 +513,10 @@ export function stringifyArgs(
 	}
 
 	const { indentLevel } = options;
+
 	if (indentLevel != null && indentLevel > 0) {
 		const groupIndent = " ".repeat(indentLevel);
+
 		if (str.indexOf("\n") !== -1) {
 			str = str.replace(/\n/g, `\n${groupIndent}`);
 		}
@@ -488,7 +529,9 @@ export function stringifyArgs(
 type PrintFunc = (x: string, isErr?: boolean) => void;
 
 const countMap = new Map<string, number>();
+
 const timerMap = new Map<string, number>();
+
 const isConsoleInstance = Symbol("isConsoleInstance");
 
 export class Console {
@@ -506,6 +549,7 @@ export class Console {
 		// by ObjectCreate(%ObjectPrototype%), instead of %ObjectPrototype%.
 		const console = Object.create({}) as Console;
 		Object.assign(console, this);
+
 		return console;
 	}
 
@@ -566,6 +610,7 @@ export class Console {
 
 		if (args.length === 0) {
 			this.error("Assertion failed");
+
 			return;
 		}
 
@@ -573,6 +618,7 @@ export class Console {
 
 		if (typeof first === "string") {
 			this.error(`Assertion failed: ${first}`, ...rest);
+
 			return;
 		}
 
@@ -615,13 +661,17 @@ export class Console {
 		}
 
 		const objectValues: { [key: string]: string[] } = {};
+
 		const indexKeys: string[] = [];
+
 		const values: string[] = [];
 
 		const stringifyValue = (value: unknown): string =>
 			stringifyWithQuotes(value, new Set<unknown>(), 0, 1);
+
 		const toTable = (header: string[], body: string[][]): void =>
 			this.log(cliTable(header, body));
+
 		const createColumn = (value: unknown, shift?: number): string[] => [
 			...(shift ? [...new Array(shift)].map((): string => "") : []),
 			stringifyValue(value),
@@ -629,9 +679,13 @@ export class Console {
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		let resultData: any;
+
 		const isSet = data instanceof Set;
+
 		const isMap = data instanceof Map;
+
 		const valuesKey = "Values";
+
 		const indexKey = isSet || isMap ? "(iteration index)" : "(index)";
 
 		if (data instanceof Set) {
@@ -675,7 +729,9 @@ export class Console {
 		});
 
 		const headerKeys = Object.keys(objectValues);
+
 		const bodyValues = Object.values(objectValues);
+
 		const header = [
 			indexKey,
 			...(properties || [
@@ -683,6 +739,7 @@ export class Console {
 				!isMap && values.length > 0 && valuesKey,
 			]),
 		].filter(Boolean) as string[];
+
 		const body = [indexKeys, ...bodyValues, values];
 
 		toTable(header, body);
@@ -693,6 +750,7 @@ export class Console {
 
 		if (timerMap.has(label)) {
 			this.warn(`Timer '${label}' already exists`);
+
 			return;
 		}
 
@@ -704,10 +762,12 @@ export class Console {
 
 		if (!timerMap.has(label)) {
 			this.warn(`Timer '${label}' does not exists`);
+
 			return;
 		}
 
 		const startTime = timerMap.get(label) as number;
+
 		const duration = Date.now() - startTime;
 
 		this.info(`${label}: ${duration}ms`, ...args);
@@ -718,11 +778,13 @@ export class Console {
 
 		if (!timerMap.has(label)) {
 			this.warn(`Timer '${label}' does not exists`);
+
 			return;
 		}
 
 		const startTime = timerMap.get(label) as number;
 		timerMap.delete(label);
+
 		const duration = Date.now() - startTime;
 
 		this.info(`${label}: ${duration}ms`);
@@ -751,6 +813,7 @@ export class Console {
 
 	trace = (...args: unknown[]): void => {
 		const message = stringifyArgs(args, { indentLevel: 0 });
+
 		const err = {
 			name: "Trace",
 			message,
@@ -776,6 +839,7 @@ export const customInspect = Symbol.for("Deno.customInspect");
  */
 export function inspect(value: unknown, options?: ConsoleOptions): string {
 	const opts = options || {};
+
 	if (typeof value === "string") {
 		return value;
 	} else {

@@ -34,6 +34,7 @@ class RBTree<T> {
 	// returns null if tree is empty
 	min(): T | null {
 		let res = this.root;
+
 		if (res === null) {
 			return null;
 		}
@@ -46,8 +47,10 @@ class RBTree<T> {
 	// returns node data if found, null otherwise
 	find(data: T): T | null {
 		let res = this.root;
+
 		while (res !== null) {
 			const c = this.comparator(data, res.data!);
+
 			if (c === 0) {
 				return res.data;
 			} else {
@@ -69,6 +72,7 @@ class RBTree<T> {
 			const head = new RBNode(null as unknown as T); // fake tree root
 
 			let dir = 0;
+
 			let last = 0;
 
 			// setup
@@ -141,6 +145,7 @@ class RBTree<T> {
 		const head = new RBNode(null as unknown as T); // fake tree root
 		let node = head;
 		node.right = this.root;
+
 		let p = null; // parent
 		let gp = null; // grand parent
 		let found = null; // found item
@@ -171,6 +176,7 @@ class RBTree<T> {
 					p = sr;
 				} else if (!isRed(node.getChild(!dir))) {
 					const sibling = p.getChild(!last);
+
 					if (sibling !== null) {
 						if (
 							!isRed(sibling.getChild(!last)) &&
@@ -209,6 +215,7 @@ class RBTree<T> {
 
 		// update root and make it black
 		this.root = head.right;
+
 		if (this.root !== null) {
 			this.root.red = false;
 		}
@@ -235,6 +242,7 @@ function singleRotate<T>(root: RBNode<T>, dir: boolean | number): RBNode<T> {
 
 function doubleRotate<T>(root: RBNode<T>, dir: boolean | number): RBNode<T> {
 	root.setChild(!dir, singleRotate(root.getChild(!dir)!, !dir));
+
 	return singleRotate(root, dir);
 }
 

@@ -93,6 +93,7 @@ if (window["__DENO_TEST_REGISTRY"]) {
 	window["__DENO_TEST_REGISTRY"] = candidates;
 }
 let filterRegExp: RegExp | null;
+
 let filtered = 0;
 
 // Must be called before any test() that needs to be filtered.
@@ -138,7 +139,9 @@ export function test(
 }
 
 const RED_FAILED = red("FAILED");
+
 const GREEN_OK = green("OK");
+
 const RED_BG_FAIL = bgRed(" FAIL ");
 
 interface TestStats {
@@ -159,6 +162,7 @@ interface TestResult {
 
 interface TestResults {
 	keys: Map<string, number>;
+
 	cases: Map<number, TestResult>;
 }
 
@@ -176,6 +180,7 @@ function createTestResults(tests: TestDefinition[]): TestResults {
 				ok: false,
 				error: undefined,
 			});
+
 			return acc;
 		},
 		{ cases: new Map(), keys: new Map() },
@@ -232,6 +237,7 @@ function printResults(
 		for (const result of results.cases.values()) {
 			if (!result.printed) {
 				report(result);
+
 				if (result.error && exitOnFail) {
 					break;
 				}
@@ -250,6 +256,7 @@ function printResults(
 
 function previousPrinted(name: string, results: TestResults): boolean {
 	const curIndex: number = results.keys.get(name)!;
+
 	if (curIndex === 0) {
 		return true;
 	}
@@ -263,9 +270,11 @@ async function createTestCase(
 	{ fn, name }: TestDefinition,
 ): Promise<void> {
 	const result: TestResult = results.cases.get(results.keys.get(name)!)!;
+
 	try {
 		const start = performance.now();
 		await fn();
+
 		const end = performance.now();
 		stats.passed++;
 		result.ok = true;
@@ -273,6 +282,7 @@ async function createTestCase(
 	} catch (err) {
 		stats.failed++;
 		result.error = err;
+
 		if (exitOnFail) {
 			throw err;
 		}
@@ -320,7 +330,9 @@ async function runTestsSerial(
 		try {
 			const start = performance.now();
 			await fn();
+
 			const end = performance.now();
+
 			if (disableLog) {
 				// Rewriting the current prompt line to erase `running ....`
 				print(CLEAR_LINE, false);
@@ -353,6 +365,7 @@ async function runTestsSerial(
 					v.printed = true;
 				}
 			});
+
 			if (exitOnFail) {
 				break;
 			}
@@ -385,6 +398,7 @@ export async function runTests({
 	const tests: TestDefinition[] = candidates.filter(
 		({ name }): boolean => only.test(name) && !skip.test(name),
 	);
+
 	const stats: TestStats = {
 		measured: 0,
 		ignored: candidates.length - tests.length,
@@ -392,9 +406,12 @@ export async function runTests({
 		passed: 0,
 		failed: 0,
 	};
+
 	const results: TestResults = createTestResults(tests);
 	print(`running ${tests.length} tests`);
+
 	const start = performance.now();
+
 	if (Deno.args.includes("--quiet")) {
 		disableLog = true;
 	}
@@ -407,10 +424,12 @@ export async function runTests({
 		await runTestsSerial(stats, results, tests, exitOnFail, disableLog);
 	}
 	const end = performance.now();
+
 	if (disableLog) {
 		enableConsole();
 	}
 	printResults(stats, results, parallel, exitOnFail, end - start);
+
 	if (stats.failed) {
 		// Use setTimeout to avoid the error being ignored due to unhandled
 		// promise rejections being swallowed.

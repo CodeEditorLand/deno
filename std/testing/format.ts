@@ -42,9 +42,13 @@ export type Printer = (
 ) => string;
 
 const toString = Object.prototype.toString;
+
 const toISOString = Date.prototype.toISOString;
+
 const errorToString = Error.prototype.toString;
+
 const regExpToString = RegExp.prototype.toString;
+
 const symbolToString = Symbol.prototype.toString;
 
 const DEFAULT_OPTIONS: Options = {
@@ -204,6 +208,7 @@ function printer(
 	hasCalledToJSON?: boolean,
 ): string {
 	const basicResult = printBasicValue(val, config);
+
 	if (basicResult !== null) {
 		return basicResult;
 	}
@@ -276,6 +281,7 @@ function printIteratorEntries(
 	separator = ": ",
 ): string {
 	let result = "";
+
 	let current = iterator.next();
 
 	if (!current.done) {
@@ -291,6 +297,7 @@ function printIteratorEntries(
 				depth,
 				refs,
 			);
+
 			const value = printer(
 				current.value[1],
 				config,
@@ -331,6 +338,7 @@ function printIteratorValues(
 	printer: Printer,
 ): string {
 	let result = "";
+
 	let current = iterator.next();
 
 	if (!current.done) {
@@ -386,6 +394,7 @@ function printObjectProperties(
 	printer: Printer,
 ): string {
 	let result = "";
+
 	const keys = getKeysOfEnumerableProperties(val);
 
 	if (keys.length) {
@@ -395,7 +404,9 @@ function printObjectProperties(
 
 		for (let i = 0; i < keys.length; i++) {
 			const key = keys[i];
+
 			const name = printer(key, config, indentationNext, depth, refs);
+
 			const value = printer(
 				val[key as keyof typeof val],
 				config,
@@ -439,6 +450,7 @@ function printComplexValue(
 	refs.push(val);
 
 	const hitMaxDepth = ++depth > config.maxDepth;
+
 	const { min, callToJSON } = config;
 
 	if (
@@ -452,6 +464,7 @@ function printComplexValue(
 	}
 
 	const toStringed = toString.call(val);
+
 	if (toStringed === "[object Arguments]") {
 		return hitMaxDepth
 			? "[Arguments]"
@@ -552,7 +565,9 @@ export function format(val: any, options: Optional<Options> = {}): string {
 		...DEFAULT_OPTIONS,
 		...options,
 	};
+
 	const basicResult = printBasicValue(val, opts);
+
 	if (basicResult !== null) {
 		return basicResult;
 	}

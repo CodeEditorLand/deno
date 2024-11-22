@@ -7,6 +7,7 @@ import { test } from "../testing/mod.ts";
 import { globrex } from "./globrex.ts";
 
 const isWin = Deno.build.os === "win";
+
 const t = { equal: assertEquals, is: assertEquals };
 
 function match(
@@ -20,6 +21,7 @@ function match(
 		strWin = "";
 	}
 	const res = globrex(glob, opts);
+
 	return res.regex.test(isWin && strWin ? strWin : strUnix);
 }
 

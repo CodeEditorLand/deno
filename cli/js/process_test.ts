@@ -20,6 +20,7 @@ const {
 
 test(function runPermissions(): void {
 	let caughtError = false;
+
 	try {
 		Deno.run({ args: ["python", "-c", "print('hello world')"] });
 	} catch (e) {
@@ -34,6 +35,7 @@ testPerm({ run: true }, async function runSuccess(): Promise<void> {
 	const p = run({
 		args: ["python", "-c", "print('hello world')"],
 	});
+
 	const status = await p.status();
 	console.log("status", status);
 	assertEquals(status.success, true);
@@ -48,6 +50,7 @@ testPerm(
 		const p = run({
 			args: ["python", "-c", "import sys;sys.exit(41 + 1)"],
 		});
+
 		const status = await p.status();
 		assertEquals(status.success, false);
 		assertEquals(status.code, 42);
@@ -65,6 +68,7 @@ testPerm(
 		const p = run({
 			args: ["python", "-c", "import os;os.kill(os.getpid(), 9)"],
 		});
+
 		const status = await p.status();
 		assertEquals(status.success, false);
 		assertEquals(status.code, undefined);
@@ -75,6 +79,7 @@ testPerm(
 
 testPerm({ run: true }, function runNotFound(): void {
 	let error;
+
 	try {
 		run({ args: ["this file hopefully doesn't exist"] });
 	} catch (e) {
@@ -89,10 +94,13 @@ testPerm(
 	{ write: true, run: true },
 	async function runWithCwdIsAsync(): Promise<void> {
 		const enc = new TextEncoder();
+
 		const cwd = await makeTempDir({ prefix: "deno_command_test" });
 
 		const exitCodeFile = "deno_was_here";
+
 		const pyProgramFile = "poll_exit.py";
+
 		const pyProgram = `
 from sys import exit
 from time import sleep
@@ -110,6 +118,7 @@ while True:
 `;
 
 		Deno.writeFileSync(`${cwd}/${pyProgramFile}.py`, enc.encode(pyProgram));
+
 		const p = run({
 			cwd,
 			args: ["python", `${pyProgramFile}.py`],
@@ -141,6 +150,7 @@ testPerm({ run: true }, async function runStdinPiped(): Promise<void> {
 	assert(!p.stderr);
 
 	const msg = new TextEncoder().encode("hello");
+
 	const n = await p.stdin.write(msg);
 	assertEquals(n, msg.byteLength);
 
@@ -162,11 +172,14 @@ testPerm({ run: true }, async function runStdoutPiped(): Promise<void> {
 	assert(!p.stderr);
 
 	const data = new Uint8Array(10);
+
 	let r = await p.stdout.read(data);
+
 	if (r === Deno.EOF) {
 		throw new Error("p.stdout.read(...) should not be EOF");
 	}
 	assertEquals(r, 5);
+
 	const s = new TextDecoder().decode(data.subarray(0, r));
 	assertEquals(s, "hello");
 	r = await p.stdout.read(data);
@@ -189,11 +202,14 @@ testPerm({ run: true }, async function runStderrPiped(): Promise<void> {
 	assert(!p.stdout);
 
 	const data = new Uint8Array(10);
+
 	let r = await p.stderr.read(data);
+
 	if (r === Deno.EOF) {
 		throw new Error("p.stderr.read should not return EOF here");
 	}
 	assertEquals(r, 5);
+
 	const s = new TextDecoder().decode(data.subarray(0, r));
 	assertEquals(s, "hello");
 	r = await p.stderr.read(data);
@@ -212,7 +228,9 @@ testPerm({ run: true }, async function runOutput(): Promise<void> {
 		args: ["python", "-c", "import sys; sys.stdout.write('hello')"],
 		stdout: "piped",
 	});
+
 	const output = await p.output();
+
 	const s = new TextDecoder().decode(output);
 	assertEquals(s, "hello");
 	p.close();
@@ -223,7 +241,9 @@ testPerm({ run: true }, async function runStderrOutput(): Promise<void> {
 		args: ["python", "-c", "import sys; sys.stderr.write('error')"],
 		stderr: "piped",
 	});
+
 	const error = await p.stderrOutput();
+
 	const s = new TextDecoder().decode(error);
 	assertEquals(s, "error");
 	p.close();
@@ -233,7 +253,9 @@ testPerm(
 	{ run: true, write: true, read: true },
 	async function runRedirectStdoutStderr(): Promise<void> {
 		const tempDir = await makeTempDir();
+
 		const fileName = tempDir + "/redirected_stdio.txt";
+
 		const file = await open(fileName, "w");
 
 		const p = run({
@@ -251,7 +273,9 @@ testPerm(
 		file.close();
 
 		const fileContents = await readFile(fileName);
+
 		const decoder = new TextDecoder();
+
 		const text = decoder.decode(fileContents);
 
 		assertStrContains(text, "error");
@@ -263,9 +287,12 @@ testPerm(
 	{ run: true, write: true, read: true },
 	async function runRedirectStdin(): Promise<void> {
 		const tempDir = await makeTempDir();
+
 		const fileName = tempDir + "/redirected_stdio.txt";
+
 		const encoder = new TextEncoder();
 		await writeFile(fileName, encoder.encode("hello"));
+
 		const file = await open(fileName, "r");
 
 		const p = run({
@@ -297,7 +324,9 @@ testPerm({ run: true }, async function runEnv(): Promise<void> {
 		},
 		stdout: "piped",
 	});
+
 	const output = await p.output();
+
 	const s = new TextDecoder().decode(output);
 	assertEquals(s, "01234567");
 	p.close();
@@ -318,6 +347,7 @@ testPerm({ run: true }, async function runClose(): Promise<void> {
 	p.close();
 
 	const data = new Uint8Array(10);
+
 	const r = await p.stderr.read(data);
 	assertEquals(r, Deno.EOF);
 });
@@ -334,6 +364,7 @@ test(function signalNumbers(): void {
 if (Deno.build.os !== "win") {
 	test(function killPermissions(): void {
 		let caughtError = false;
+
 		try {
 			// Unlike the other test cases, we don't have permission to spawn a
 			// subprocess we can safely kill. Instead we send SIGCONT to the current
@@ -355,6 +386,7 @@ if (Deno.build.os !== "win") {
 
 		assertEquals(Deno.Signal.SIGINT, 2);
 		kill(p.pid, Deno.Signal.SIGINT);
+
 		const status = await p.status();
 
 		assertEquals(status.success, false);
@@ -373,6 +405,7 @@ if (Deno.build.os !== "win") {
 		assert(!p.stdout);
 
 		let err;
+
 		try {
 			kill(p.pid, 12345);
 		} catch (e) {

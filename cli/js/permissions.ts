@@ -62,6 +62,7 @@ export class Permissions {
 	 */
 	async query(desc: PermissionDescriptor): Promise<PermissionStatus> {
 		const { state } = sendSync(dispatch.OP_QUERY_PERMISSION, desc);
+
 		return new PermissionStatus(state);
 	}
 
@@ -71,6 +72,7 @@ export class Permissions {
 	 */
 	async revoke(desc: PermissionDescriptor): Promise<PermissionStatus> {
 		const { state } = sendSync(dispatch.OP_REVOKE_PERMISSION, desc);
+
 		return new PermissionStatus(state);
 	}
 
@@ -84,6 +86,7 @@ export class Permissions {
 	 */
 	async request(desc: PermissionDescriptor): Promise<PermissionStatus> {
 		const { state } = sendSync(dispatch.OP_REQUEST_PERMISSION, desc);
+
 		return new PermissionStatus(state);
 	}
 }

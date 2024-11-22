@@ -84,7 +84,9 @@ export function asyncMsgFromRust(opId: number, ui8: Uint8Array): void {
 		case OP_WRITE:
 		case OP_READ:
 			minimal.asyncMsgFromRust(opId, ui8);
+
 			break;
+
 		case OP_GET_DIR:
 		case OP_EXIT:
 		case OP_IS_TTY:
@@ -121,9 +123,12 @@ export function asyncMsgFromRust(opId: number, ui8: Uint8Array): void {
 		case OP_DIAL_TLS:
 		case OP_FETCH_SOURCE_FILES:
 			json.asyncMsgFromRust(opId, ui8);
+
 			break;
+
 		default:
 			const handler = PLUGIN_ASYNC_HANDLER_MAP.get(opId);
+
 			if (handler) {
 				handler(ui8);
 			} else {

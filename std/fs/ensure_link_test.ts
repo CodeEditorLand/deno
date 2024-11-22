@@ -13,8 +13,11 @@ const testdataDir = path.resolve("fs", "testdata");
 
 test(async function ensureLinkIfItNotExist(): Promise<void> {
 	const srcDir = path.join(testdataDir, "ensure_link_1");
+
 	const destDir = path.join(testdataDir, "ensure_link_1_2");
+
 	const testFile = path.join(srcDir, "test.txt");
+
 	const linkFile = path.join(destDir, "link.txt");
 
 	await assertThrowsAsync(async (): Promise<void> => {
@@ -26,7 +29,9 @@ test(async function ensureLinkIfItNotExist(): Promise<void> {
 
 test(function ensureLinkSyncIfItNotExist(): void {
 	const testDir = path.join(testdataDir, "ensure_link_2");
+
 	const testFile = path.join(testDir, "test.txt");
+
 	const linkFile = path.join(testDir, "link.txt");
 
 	assertThrows((): void => {
@@ -38,7 +43,9 @@ test(function ensureLinkSyncIfItNotExist(): void {
 
 test(async function ensureLinkIfItExist(): Promise<void> {
 	const testDir = path.join(testdataDir, "ensure_link_3");
+
 	const testFile = path.join(testDir, "test.txt");
+
 	const linkFile = path.join(testDir, "link.txt");
 
 	await Deno.mkdir(testDir, true);
@@ -47,6 +54,7 @@ test(async function ensureLinkIfItExist(): Promise<void> {
 	await ensureLink(testFile, linkFile);
 
 	const srcStat = await Deno.lstat(testFile);
+
 	const linkStat = await Deno.lstat(linkFile);
 
 	assertEquals(srcStat.isFile(), true);
@@ -60,6 +68,7 @@ test(async function ensureLinkIfItExist(): Promise<void> {
 	const testFileContent1 = new TextDecoder().decode(
 		await Deno.readFile(testFile),
 	);
+
 	const linkFileContent1 = new TextDecoder().decode(
 		await Deno.readFile(testFile),
 	);
@@ -73,6 +82,7 @@ test(async function ensureLinkIfItExist(): Promise<void> {
 	const testFileContent2 = new TextDecoder().decode(
 		await Deno.readFile(testFile),
 	);
+
 	const linkFileContent2 = new TextDecoder().decode(
 		await Deno.readFile(testFile),
 	);
@@ -85,7 +95,9 @@ test(async function ensureLinkIfItExist(): Promise<void> {
 
 test(function ensureLinkSyncIfItExist(): void {
 	const testDir = path.join(testdataDir, "ensure_link_4");
+
 	const testFile = path.join(testDir, "test.txt");
+
 	const linkFile = path.join(testDir, "link.txt");
 
 	Deno.mkdirSync(testDir, true);
@@ -108,6 +120,7 @@ test(function ensureLinkSyncIfItExist(): void {
 	const testFileContent1 = new TextDecoder().decode(
 		Deno.readFileSync(testFile),
 	);
+
 	const linkFileContent1 = new TextDecoder().decode(
 		Deno.readFileSync(testFile),
 	);
@@ -121,6 +134,7 @@ test(function ensureLinkSyncIfItExist(): void {
 	const testFileContent2 = new TextDecoder().decode(
 		Deno.readFileSync(testFile),
 	);
+
 	const linkFileContent2 = new TextDecoder().decode(
 		Deno.readFileSync(testFile),
 	);
@@ -133,7 +147,9 @@ test(function ensureLinkSyncIfItExist(): void {
 
 test(async function ensureLinkDirectoryIfItExist(): Promise<void> {
 	const testDir = path.join(testdataDir, "ensure_link_origin_3");
+
 	const linkDir = path.join(testdataDir, "ensure_link_link_3");
+
 	const testFile = path.join(testDir, "test.txt");
 
 	await Deno.mkdir(testDir, true);
@@ -153,7 +169,9 @@ test(async function ensureLinkDirectoryIfItExist(): Promise<void> {
 
 test(function ensureLinkSyncDirectoryIfItExist(): void {
 	const testDir = path.join(testdataDir, "ensure_link_origin_3");
+
 	const linkDir = path.join(testdataDir, "ensure_link_link_3");
+
 	const testFile = path.join(testDir, "test.txt");
 
 	Deno.mkdirSync(testDir, true);

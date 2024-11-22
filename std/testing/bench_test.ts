@@ -6,18 +6,21 @@ import "./bench_example.ts";
 test(async function benching(): Promise<void> {
 	bench(function forIncrementX1e9(b): void {
 		b.start();
+
 		for (let i = 0; i < 1e9; i++);
 		b.stop();
 	});
 
 	bench(function forDecrementX1e9(b): void {
 		b.start();
+
 		for (let i = 1e9; i > 0; i--);
 		b.stop();
 	});
 
 	bench(async function forAwaitFetchDenolandX10(b): Promise<void> {
 		b.start();
+
 		for (let i = 0; i < 10; i++) {
 			const r = await fetch("https://deno.land/");
 			await r.text();
@@ -42,6 +45,7 @@ test(async function benching(): Promise<void> {
 		runs: 100,
 		func(b): void {
 			b.start();
+
 			for (let i = 0; i < 1e6; i++);
 			b.stop();
 		},

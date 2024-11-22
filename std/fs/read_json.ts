@@ -10,6 +10,7 @@ export async function readJson(filePath: string): Promise<unknown> {
 		return JSON.parse(content);
 	} catch (err) {
 		err.message = `${filePath}: ${err.message}`;
+
 		throw err;
 	}
 }
@@ -24,6 +25,7 @@ export function readJsonSync(filePath: string): unknown {
 		return JSON.parse(content);
 	} catch (err) {
 		err.message = `${filePath}: ${err.message}`;
+
 		throw err;
 	}
 }

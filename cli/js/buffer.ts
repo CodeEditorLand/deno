@@ -14,6 +14,7 @@ import { assert } from "./util.ts";
 // what is required to hold the contents of r, readFrom() will not grow the
 // underlying buffer.
 const MIN_READ = 512;
+
 const MAX_SIZE = 2 ** 32 - 2;
 
 // `off` is the offset into `dst` where it will at which to begin writing values
@@ -21,10 +22,12 @@ const MAX_SIZE = 2 ** 32 - 2;
 // Returns the number of bytes copied.
 function copyBytes(dst: Uint8Array, src: Uint8Array, off = 0): number {
 	const r = dst.byteLength - off;
+
 	if (src.byteLength > r) {
 		src = src.subarray(0, r);
 	}
 	dst.set(src, off);
+
 	return src.byteLength;
 }
 
@@ -38,6 +41,7 @@ export class Buffer implements Reader, SyncReader, Writer, SyncWriter {
 	constructor(ab?: ArrayBuffer) {
 		if (ab == null) {
 			this.buf = new Uint8Array(0);
+
 			return;
 		}
 
@@ -62,6 +66,7 @@ export class Buffer implements Reader, SyncReader, Writer, SyncWriter {
 	 */
 	toString(): string {
 		const decoder = new TextDecoder();
+
 		return decoder.decode(this.buf.subarray(this.off));
 	}
 
@@ -91,6 +96,7 @@ export class Buffer implements Reader, SyncReader, Writer, SyncWriter {
 	truncate(n: number): void {
 		if (n === 0) {
 			this.reset();
+
 			return;
 		}
 		if (n < 0 || n > this.length) {
@@ -114,8 +120,10 @@ export class Buffer implements Reader, SyncReader, Writer, SyncWriter {
 	 */
 	private _tryGrowByReslice(n: number): number {
 		const l = this.buf.byteLength;
+
 		if (n <= this.capacity - l) {
 			this._reslice(l + n);
+
 			return l;
 		}
 		return -1;
@@ -134,6 +142,7 @@ export class Buffer implements Reader, SyncReader, Writer, SyncWriter {
 		if (this.empty()) {
 			// Buffer is empty, reset to recover space.
 			this.reset();
+
 			if (p.byteLength === 0) {
 				// this edge case is tested in 'bufferReadEmptyAtEOF' test
 				return 0;
@@ -142,21 +151,25 @@ export class Buffer implements Reader, SyncReader, Writer, SyncWriter {
 		}
 		const nread = copyBytes(p, this.buf.subarray(this.off));
 		this.off += nread;
+
 		return nread;
 	}
 
 	async read(p: Uint8Array): Promise<number | EOF> {
 		const rr = this.readSync(p);
+
 		return Promise.resolve(rr);
 	}
 
 	writeSync(p: Uint8Array): number {
 		const m = this._grow(p.byteLength);
+
 		return copyBytes(this.buf, p, m);
 	}
 
 	async write(p: Uint8Array): Promise<number> {
 		const n = this.writeSync(p);
+
 		return Promise.resolve(n);
 	}
 
@@ -172,10 +185,12 @@ export class Buffer implements Reader, SyncReader, Writer, SyncWriter {
 		}
 		// Fast: Try to grow by means of a reslice.
 		const i = this._tryGrowByReslice(n);
+
 		if (i >= 0) {
 			return i;
 		}
 		const c = this.capacity;
+
 		if (n <= Math.floor(c / 2) - m) {
 			// We can slide things down instead of allocating a new
 			// ArrayBuffer. We only need m+n <= c to slide, but
@@ -196,6 +211,7 @@ export class Buffer implements Reader, SyncReader, Writer, SyncWriter {
 		// Restore this.off and len(this.buf).
 		this.off = 0;
 		this._reslice(m + n);
+
 		return m;
 	}
 
@@ -220,12 +236,16 @@ export class Buffer implements Reader, SyncReader, Writer, SyncWriter {
 	 */
 	async readFrom(r: Reader): Promise<number> {
 		let n = 0;
+
 		while (true) {
 			try {
 				const i = this._grow(MIN_READ);
 				this._reslice(i);
+
 				const fub = new Uint8Array(this.buf.buffer, i);
+
 				const nread = await r.read(fub);
+
 				if (nread === EOF) {
 					return n;
 				}
@@ -241,12 +261,16 @@ export class Buffer implements Reader, SyncReader, Writer, SyncWriter {
 	 */
 	readFromSync(r: SyncReader): number {
 		let n = 0;
+
 		while (true) {
 			try {
 				const i = this._grow(MIN_READ);
 				this._reslice(i);
+
 				const fub = new Uint8Array(this.buf.buffer, i);
+
 				const nread = r.readSync(fub);
+
 				if (nread === EOF) {
 					return n;
 				}
@@ -264,6 +288,7 @@ export class Buffer implements Reader, SyncReader, Writer, SyncWriter {
 export async function readAll(r: Reader): Promise<Uint8Array> {
 	const buf = new Buffer();
 	await buf.readFrom(r);
+
 	return buf.bytes();
 }
 
@@ -272,6 +297,7 @@ export async function readAll(r: Reader): Promise<Uint8Array> {
 export function readAllSync(r: SyncReader): Uint8Array {
 	const buf = new Buffer();
 	buf.readFromSync(r);
+
 	return buf.bytes();
 }
 
@@ -279,6 +305,7 @@ export function readAllSync(r: SyncReader): Uint8Array {
  */
 export async function writeAll(w: Writer, arr: Uint8Array): Promise<void> {
 	let nwritten = 0;
+
 	while (nwritten < arr.length) {
 		nwritten += await w.write(arr.subarray(nwritten));
 	}
@@ -288,6 +315,7 @@ export async function writeAll(w: Writer, arr: Uint8Array): Promise<void> {
  */
 export function writeAllSync(w: SyncWriter, arr: Uint8Array): void {
 	let nwritten = 0;
+
 	while (nwritten < arr.length) {
 		nwritten += w.writeSync(arr.subarray(nwritten));
 	}

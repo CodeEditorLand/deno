@@ -53,11 +53,13 @@ export class ReadableByteStreamController
 			this[rs.pendingPullIntos_].length > 0
 		) {
 			const firstDescriptor = this[rs.pendingPullIntos_][0];
+
 			const view = new Uint8Array(
 				firstDescriptor.buffer,
 				firstDescriptor.byteOffset + firstDescriptor.bytesFilled,
 				firstDescriptor.byteLength - firstDescriptor.bytesFilled,
 			);
+
 			const byobRequest = Object.create(
 				ReadableStreamBYOBRequest.prototype,
 			) as ReadableStreamBYOBRequest;
@@ -121,8 +123,10 @@ export class ReadableByteStreamController
 			firstDescriptor.bytesFilled = 0;
 		}
 		q.resetQueue(this);
+
 		const result = this[rs.cancelAlgorithm_](reason);
 		rs.readableByteStreamControllerClearAlgorithms(this);
+
 		return result;
 	}
 
@@ -136,18 +140,22 @@ export class ReadableByteStreamController
 			const entry = this[q.queue_].shift()!;
 			this[q.queueTotalSize_] -= entry.byteLength;
 			rs.readableByteStreamControllerHandleQueueDrain(this);
+
 			const view = new Uint8Array(
 				entry.buffer,
 				entry.byteOffset,
 				entry.byteLength,
 			);
+
 			return Promise.resolve(
 				rs.readableStreamCreateReadResult(view, false, forAuthorCode),
 			);
 		}
 		const autoAllocateChunkSize = this[rs.autoAllocateChunkSize_];
+
 		if (autoAllocateChunkSize !== undefined) {
 			let buffer: ArrayBuffer;
+
 			try {
 				buffer = new ArrayBuffer(autoAllocateChunkSize);
 			} catch (error) {
@@ -167,6 +175,7 @@ export class ReadableByteStreamController
 
 		const promise = rs.readableStreamAddReadRequest(stream, forAuthorCode);
 		rs.readableByteStreamControllerCallPullIfNeeded(this);
+
 		return promise;
 	}
 }
@@ -184,11 +193,13 @@ export function setUpReadableByteStreamControllerFromUnderlyingSource(
 	const startAlgorithm = (): any => {
 		return shared.invokeOrNoop(underlyingByteSource, "start", [controller]);
 	};
+
 	const pullAlgorithm = shared.createAlgorithmFromUnderlyingMethod(
 		underlyingByteSource,
 		"pull",
 		[controller],
 	);
+
 	const cancelAlgorithm = shared.createAlgorithmFromUnderlyingMethod(
 		underlyingByteSource,
 		"cancel",
@@ -196,8 +207,10 @@ export function setUpReadableByteStreamControllerFromUnderlyingSource(
 	);
 
 	let autoAllocateChunkSize = underlyingByteSource.autoAllocateChunkSize;
+
 	if (autoAllocateChunkSize !== undefined) {
 		autoAllocateChunkSize = Number(autoAllocateChunkSize);
+
 		if (
 			!shared.isInteger(autoAllocateChunkSize) ||
 			autoAllocateChunkSize <= 0

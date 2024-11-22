@@ -43,6 +43,7 @@ export class EventTarget implements domTypes.EventTarget {
 		const this_ = this || window;
 
 		requiredArguments("EventTarget.addEventListener", arguments.length, 2);
+
 		const normalizedOptions: domTypes.AddEventListenerOptions =
 			eventTargetHelpers.normalizeAddEventHandlerOptions(options);
 
@@ -58,6 +59,7 @@ export class EventTarget implements domTypes.EventTarget {
 
 		for (let i = 0; i < listeners[type].length; ++i) {
 			const listener = listeners[type][i];
+
 			if (
 				((typeof listener.options === "boolean" &&
 					listener.options === normalizedOptions.capture) ||
@@ -93,7 +95,9 @@ export class EventTarget implements domTypes.EventTarget {
 			arguments.length,
 			2,
 		);
+
 		const listeners = this_[domTypes.eventTargetListeners];
+
 		if (hasOwnProperty(listeners, type) && callback !== null) {
 			listeners[type] = listeners[type].filter(
 				(listener): boolean => listener.callback !== callback,
@@ -124,6 +128,7 @@ export class EventTarget implements domTypes.EventTarget {
 				listener.callback === callback
 			) {
 				listeners[type].splice(i, 1);
+
 				break;
 			}
 		}
@@ -133,7 +138,9 @@ export class EventTarget implements domTypes.EventTarget {
 		const this_ = this || window;
 
 		requiredArguments("EventTarget.dispatchEvent", arguments.length, 1);
+
 		const listeners = this_[domTypes.eventTargetListeners];
+
 		if (!hasOwnProperty(listeners, event.type)) {
 			return true;
 		}
@@ -168,11 +175,13 @@ const eventTargetHelpers = {
 		targetOverride?: domTypes.EventTarget,
 	): boolean {
 		let clearTargets = false;
+
 		let activationTarget = null;
 
 		eventImpl.dispatched = true;
 
 		targetOverride = targetOverride || targetImpl;
+
 		let relatedTarget = retarget(eventImpl.relatedTarget, targetImpl);
 
 		if (
@@ -200,10 +209,12 @@ const eventTargetHelpers = {
 			}
 
 			let slotInClosedTree = false;
+
 			let slotable =
 				isSlotable(targetImpl) && targetImpl[eventTargetAssignedSlot]
 					? targetImpl
 					: null;
+
 			let parent = getEventTargetParent(targetImpl, eventImpl);
 
 			// Populate event path
@@ -213,6 +224,7 @@ const eventTargetHelpers = {
 					slotable = null;
 
 					const parentRoot = getRoot(parent);
+
 					if (
 						isShadowRoot(parentRoot) &&
 						parentRoot &&
@@ -267,6 +279,7 @@ const eventTargetHelpers = {
 			}
 
 			let clearTargetsTupleIndex = -1;
+
 			for (
 				let i = eventImpl.path.length - 1;
 				i >= 0 && clearTargetsTupleIndex === -1;
@@ -352,10 +365,13 @@ const eventTargetHelpers = {
 		eventImpl: domTypes.Event,
 	): void {
 		const tupleIndex = eventImpl.path.indexOf(tuple);
+
 		for (let i = tupleIndex; i >= 0; i--) {
 			const t = eventImpl.path[i];
+
 			if (t.target) {
 				eventImpl.target = t.target;
+
 				break;
 			}
 		}
@@ -396,6 +412,7 @@ const eventTargetHelpers = {
 			const listener = handlers[i];
 
 			let capture, once, passive;
+
 			if (typeof listener.options === "boolean") {
 				capture = listener.options;
 				once = false;
@@ -490,6 +507,7 @@ const eventTargetHelpers = {
 	): void {
 		const itemInShadowTree =
 			isNode(target) && isShadowRoot(getRoot(target));
+
 		const rootOfClosedTree =
 			isShadowRoot(target) &&
 			target[domTypes.eventTargetMode] === "closed";

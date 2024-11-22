@@ -45,6 +45,7 @@ test(function getRandomValuesUint32Array(): void {
 
 test(function getRandomValuesReturnValue(): void {
 	const arr = new Uint32Array(8);
+
 	const rtn = crypto.getRandomValues(arr);
 	assertNotEquals(arr, new Uint32Array(8));
 	assertStrictEq(rtn, arr);

@@ -7,7 +7,9 @@ import { runIfMain, test } from "../testing/mod.ts";
 import { parse, readAll } from "./csv.ts";
 
 const ErrInvalidDelim = "Invalid Delimiter";
+
 const ErrFieldCount = "wrong number of fields";
+
 const ErrBareQuote = 'bare " in non-quoted-field';
 
 // TODO(zekth): Activate remaining tests
@@ -454,10 +456,15 @@ for (const t of testCases) {
 		name: `[CSV] ${t.Name}`,
 		async fn(): Promise<void> {
 			let comma = ",";
+
 			let comment;
+
 			let fieldsPerRec;
+
 			let trim = false;
+
 			let lazyquote = false;
+
 			if (t.Comma) {
 				comma = t.Comma;
 			}
@@ -474,8 +481,10 @@ for (const t of testCases) {
 				lazyquote = t.LazyQuotes;
 			}
 			let actual;
+
 			if (t.Error) {
 				let err;
+
 				try {
 					actual = await readAll(
 						new BufReader(new StringReader(t.Input!)),
@@ -503,6 +512,7 @@ for (const t of testCases) {
 						lazyQuotes: lazyquote,
 					},
 				);
+
 				const expected = t.Output;
 				assertEquals(actual, expected);
 			}

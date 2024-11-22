@@ -30,6 +30,7 @@ import { BufReader } from "../io/bufio.ts";
 import { MultiReader } from "../io/readers.ts";
 
 const recordSize = 512;
+
 const ustar = "ustar\u000000";
 
 /**
@@ -48,6 +49,7 @@ export class FileReader implements Deno.Reader {
 			this.file = await Deno.open(this.filePath, this.mode);
 		}
 		const res = await Deno.read(this.file.rid, p);
+
 		if (res === Deno.EOF) {
 			await Deno.close(this.file.rid);
 			this.file = undefined;
@@ -87,7 +89,9 @@ export class FileWriter implements Deno.Writer {
  */
 function trim(buffer: Uint8Array): Uint8Array {
 	const index = buffer.findIndex((v): boolean => v === 0);
+
 	if (index < 0) return buffer;
+
 	return buffer.subarray(0, index);
 }
 
@@ -98,11 +102,13 @@ function trim(buffer: Uint8Array): Uint8Array {
 function clean(length: number): Uint8Array {
 	const buffer = new Uint8Array(length);
 	buffer.fill(0, 0, length - 1);
+
 	return buffer;
 }
 
 function pad(num: number, bytes: number, base?: number): string {
 	const numString = num.toString(base || 8);
+
 	return "000000000000".substr(numString.length + 12 - bytes) + numString;
 }
 
@@ -201,12 +207,14 @@ const ustarStructure: Array<{ field: string; length: number }> = [
 function formatHeader(data: TarData): Uint8Array {
 	const encoder = new TextEncoder(),
 		buffer = clean(512);
+
 	let offset = 0;
 	ustarStructure.forEach(function (value): void {
 		const entry = encoder.encode(data[value.field as keyof TarData] || "");
 		buffer.set(entry, offset);
 		offset += value.length; // space it out with nulls
 	});
+
 	return buffer;
 }
 
@@ -216,12 +224,14 @@ function formatHeader(data: TarData): Uint8Array {
  */
 function parseHeader(buffer: Uint8Array): { [key: string]: Uint8Array } {
 	const data: { [key: string]: Uint8Array } = {};
+
 	let offset = 0;
 	ustarStructure.forEach(function (value): void {
 		const arr = buffer.subarray(offset, offset + value.length);
 		data[value.field] = arr;
 		offset += value.length;
 	});
+
 	return data;
 }
 
@@ -309,13 +319,17 @@ export class Tar {
 
 		// separate file name into two parts if needed
 		let fileNamePrefix: string;
+
 		if (fileName.length > 100) {
 			let i = fileName.length;
+
 			while (i >= 0) {
 				i = fileName.lastIndexOf("/", i);
+
 				if (i <= 155) {
 					fileNamePrefix = fileName.substr(0, i);
 					fileName = fileName.substr(i + 1);
+
 					break;
 				}
 				i--;
@@ -348,6 +362,7 @@ export class Tar {
 				Math.floor(new Date().getTime() / 1000),
 			uid = opts.uid || 0,
 			gid = opts.gid || 0;
+
 		if (typeof opts.owner === "string" && opts.owner.length >= 32) {
 			throw new Error(
 				"ustar format does not allow owner name length >= 32 bytes",
@@ -378,6 +393,7 @@ export class Tar {
 
 		// calculate the checksum
 		let checksum = 0;
+
 		const encoder = new TextEncoder();
 		Object.keys(tarData)
 			.filter((key): boolean => ["filePath", "reader"].indexOf(key) < 0)
@@ -398,9 +414,12 @@ export class Tar {
 		const readers: Deno.Reader[] = [];
 		this.data.forEach((tarData): void => {
 			let { reader } = tarData;
+
 			const { filePath } = tarData;
+
 			const headerArr = formatHeader(tarData);
 			readers.push(new Deno.Buffer(headerArr));
+
 			if (!reader) {
 				reader = new FileReader(filePath!);
 			}
@@ -420,6 +439,7 @@ export class Tar {
 
 		// append 2 empty records
 		readers.push(new Deno.Buffer(clean(recordSize * 2)));
+
 		return new MultiReader(...readers);
 	}
 }
@@ -438,10 +458,12 @@ export class Untar {
 
 	async extract(writer: Deno.Writer): Promise<UntarOptions> {
 		await this.reader.readFull(this.block);
+
 		const header = parseHeader(this.block);
 
 		// calculate the checksum
 		let checksum = 0;
+
 		const encoder = new TextEncoder(),
 			decoder = new TextDecoder("ascii");
 		Object.keys(header)
@@ -458,6 +480,7 @@ export class Untar {
 		}
 
 		const magic = decoder.decode(header.ustar);
+
 		if (magic !== ustar) {
 			throw new Error(`unsupported archive format: ${magic}`);
 		}
@@ -466,7 +489,9 @@ export class Untar {
 		const meta: UntarOptions = {
 			fileName: decoder.decode(trim(header.fileName)),
 		};
+
 		const fileNamePrefix = trim(header.fileNamePrefix);
+
 		if (fileNamePrefix.byteLength > 0) {
 			meta.fileName =
 				decoder.decode(fileNamePrefix) + "/" + meta.fileName;
@@ -480,12 +505,14 @@ export class Untar {
 			]
 		).forEach((key): void => {
 			const arr = trim(header[key]);
+
 			if (arr.byteLength > 0) {
 				meta[key] = parseInt(decoder.decode(arr), 8);
 			}
 		});
 		(["owner", "group"] as ["owner", "group"]).forEach((key): void => {
 			const arr = trim(header[key]);
+
 			if (arr.byteLength > 0) {
 				meta[key] = decoder.decode(arr);
 			}
@@ -493,9 +520,12 @@ export class Untar {
 
 		// read the file content
 		const len = parseInt(decoder.decode(header.fileSize), 8);
+
 		let rest = len;
+
 		while (rest > 0) {
 			await this.reader.readFull(this.block);
+
 			const arr =
 				rest < recordSize ? this.block.subarray(0, rest) : this.block;
 			await Deno.copy(writer, new Deno.Buffer(arr));

@@ -42,10 +42,12 @@ test(async function createTarArchive(): Promise<void> {
 
 test(async function deflateTarArchive(): Promise<void> {
 	const fileName = "output.txt";
+
 	const text = "hello tar world!";
 
 	// create a tar archive
 	const tar = new Tar();
+
 	const content = new TextEncoder().encode(text);
 	await tar.append(fileName, {
 		reader: new Deno.Buffer(content),
@@ -54,8 +56,11 @@ test(async function deflateTarArchive(): Promise<void> {
 
 	// read data from a tar archive
 	const untar = new Untar(tar.getReader());
+
 	const buf = new Deno.Buffer();
+
 	const result = await untar.extract(buf);
+
 	const untarText = new TextDecoder("utf-8").decode(buf.bytes());
 
 	// tests
@@ -66,10 +71,12 @@ test(async function deflateTarArchive(): Promise<void> {
 test(async function appendFileWithLongNameToTarArchive(): Promise<void> {
 	// 9 * 15 + 13 = 148 bytes
 	const fileName = new Array(10).join("long-file-name/") + "file-name.txt";
+
 	const text = "hello tar world!";
 
 	// create a tar archive
 	const tar = new Tar();
+
 	const content = new TextEncoder().encode(text);
 	await tar.append(fileName, {
 		reader: new Deno.Buffer(content),
@@ -78,8 +85,11 @@ test(async function appendFileWithLongNameToTarArchive(): Promise<void> {
 
 	// read data from a tar archive
 	const untar = new Untar(tar.getReader());
+
 	const buf = new Deno.Buffer();
+
 	const result = await untar.extract(buf);
+
 	const untarText = new TextDecoder("utf-8").decode(buf.bytes());
 
 	// tests

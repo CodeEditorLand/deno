@@ -32,6 +32,7 @@ export function isInteger(value: number): boolean {
 		return false;
 	}
 	const absValue = Math.abs(value);
+
 	return Math.floor(absValue) === absValue;
 }
 
@@ -52,6 +53,7 @@ export function isAbortSignal(signal: any): signal is AbortSignal {
 		// calling signal.aborted() probably isn't the right way to perform this test
 		// https://github.com/stardazed/sd-streams/blob/master/packages/streams/src/shared-internals.ts#L41
 		signal.aborted();
+
 		return true;
 	} catch (err) {
 		return false;
@@ -130,6 +132,7 @@ function supportsSharedArrayBuffer(): boolean {
  */
 export function cloneValue(value: any): any {
 	const valueType = typeof value;
+
 	switch (valueType) {
 		case "number":
 		case "string":
@@ -138,6 +141,7 @@ export function cloneValue(value: any): any {
 		// @ts-ignore
 		case "bigint":
 			return value;
+
 		case "object": {
 			if (objectCloneMemo.has(value)) {
 				return objectCloneMemo.get(value);
@@ -165,6 +169,7 @@ export function cloneValue(value: any): any {
 					ArrayBuffer,
 				);
 				objectCloneMemo.set(value, cloned);
+
 				return cloned;
 			}
 			if (ArrayBuffer.isView(value)) {
@@ -175,6 +180,7 @@ export function cloneValue(value: any): any {
 				// They use the same constructor signature, only DataView has a length in bytes and TypedArrays
 				// use a length in terms of elements, so we adjust for that.
 				let length: number;
+
 				if (value instanceof DataView) {
 					length = value.byteLength;
 				} else {
@@ -190,19 +196,23 @@ export function cloneValue(value: any): any {
 				const clonedMap = new Map();
 				objectCloneMemo.set(value, clonedMap);
 				value.forEach((v, k) => clonedMap.set(k, cloneValue(v)));
+
 				return clonedMap;
 			}
 			if (value instanceof Set) {
 				const clonedSet = new Map();
 				objectCloneMemo.set(value, clonedSet);
 				value.forEach((v, k) => clonedSet.set(k, cloneValue(v)));
+
 				return clonedSet;
 			}
 
 			// generic object
 			const clonedObj = {} as any;
 			objectCloneMemo.set(value, clonedObj);
+
 			const sourceKeys = Object.getOwnPropertyNames(value);
+
 			for (const key of sourceKeys) {
 				clonedObj[key] = cloneValue(value[key]);
 			}
@@ -228,6 +238,7 @@ export function promiseCall<F extends Function>(
 	// tslint:disable-line:ban-types
 	try {
 		const result = Function.prototype.apply.call(f, v, args);
+
 		return Promise.resolve(result);
 	} catch (err) {
 		return Promise.reject(err);
@@ -239,6 +250,7 @@ export function createAlgorithmFromUnderlyingMethod<
 	K extends keyof O,
 >(obj: O, methodName: K, extraArgs: any[]): any {
 	const method = obj[methodName];
+
 	if (method === undefined) {
 		return (): any => Promise.resolve(undefined);
 	}
@@ -260,6 +272,7 @@ function createIterResultObject<T>(value: T, done: boolean): IteratorResult<T> {
 
 export function validateAndNormalizeHighWaterMark(hwm: unknown): number {
 	const highWaterMark = Number(hwm);
+
 	if (isNaN(highWaterMark) || highWaterMark < 0) {
 		throw new RangeError(
 			"highWaterMark must be a valid, non-negative integer.",
@@ -311,5 +324,6 @@ export function createControlledPromise<V>(): ControlledPromise<V> {
 			reject(e);
 		};
 	});
+
 	return conProm;
 }

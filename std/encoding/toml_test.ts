@@ -13,6 +13,7 @@ function parseFile(filePath: string): object {
 		throw new Error(`File not found: ${filePath}`);
 	}
 	const strFile = readFileStrSync(filePath);
+
 	return parse(strFile);
 }
 
@@ -33,6 +34,7 @@ test({
 					"whitespace\n   is preserved.",
 			},
 		};
+
 		const actual = parseFile(path.join(testFilesDir, "string.toml"));
 		assertEquals(actual, expected);
 	},
@@ -42,6 +44,7 @@ test({
 	name: "[TOML] CRLF",
 	fn(): void {
 		const expected = { boolean: { bool1: true, bool2: false } };
+
 		const actual = parseFile(path.join(testFilesDir, "CRLF.toml"));
 		assertEquals(actual, expected);
 	},
@@ -51,6 +54,7 @@ test({
 	name: "[TOML] Boolean",
 	fn(): void {
 		const expected = { boolean: { bool1: true, bool2: false } };
+
 		const actual = parseFile(path.join(testFilesDir, "boolean.toml"));
 		assertEquals(actual, expected);
 	},
@@ -76,6 +80,7 @@ test({
 				bin1: "0b11010110",
 			},
 		};
+
 		const actual = parseFile(path.join(testFilesDir, "integer.toml"));
 		assertEquals(actual, expected);
 	},
@@ -102,6 +107,7 @@ test({
 				sf6: NaN,
 			},
 		};
+
 		const actual = parseFile(path.join(testFilesDir, "float.toml"));
 		assertEquals(actual, expected);
 	},
@@ -119,6 +125,7 @@ test({
 				hosts: ["alpha", "omega"],
 			},
 		};
+
 		const actual = parseFile(path.join(testFilesDir, "arrays.toml"));
 		assertEquals(actual, expected);
 	},
@@ -152,6 +159,7 @@ test({
 				},
 			},
 		};
+
 		const actual = parseFile(path.join(testFilesDir, "table.toml"));
 		assertEquals(actual, expected);
 	},
@@ -167,6 +175,7 @@ test({
 			NANI: "何?!",
 			comment: "Comment inside # the comment",
 		};
+
 		const actual = parseFile(path.join(testFilesDir, "simple.toml"));
 		assertEquals(actual, expected);
 	},
@@ -186,6 +195,7 @@ test({
 				lt2: "00:32:00.999999",
 			},
 		};
+
 		const actual = parseFile(path.join(testFilesDir, "datetime.toml"));
 		assertEquals(actual, expected);
 	},
@@ -231,6 +241,7 @@ test({
 				},
 			},
 		};
+
 		const actual = parseFile(path.join(testFilesDir, "inlineTable.toml"));
 		assertEquals(actual, expected);
 	},
@@ -246,6 +257,7 @@ test({
 			],
 			nib: [{ name: "node", path: "not_found" }],
 		};
+
 		const actual = parseFile(path.join(testFilesDir, "arrayTable.toml"));
 		assertEquals(actual, expected);
 	},
@@ -353,6 +365,7 @@ test({
 			],
 			hosts: ["alpha", "omega"],
 		};
+
 		const expected = `deno    = "is"
 not     = "[node]"
 regex   = "<ic*s*>"
@@ -408,6 +421,7 @@ stuff   = "in"
 [[arrayObjects]]
 the     = "array"
 `;
+
 		const actual = stringify(src);
 		assertEquals(actual, expected);
 	},

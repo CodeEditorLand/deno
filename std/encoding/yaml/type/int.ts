@@ -24,7 +24,9 @@ function isDecCode(c: number): boolean {
 
 function resolveYamlInteger(data: string): boolean {
 	const max = data.length;
+
 	let index = 0;
+
 	let hasDigits = false;
 
 	if (!max) return false;
@@ -49,7 +51,9 @@ function resolveYamlInteger(data: string): boolean {
 
 			for (; index < max; index++) {
 				ch = data[index];
+
 				if (ch === "_") continue;
+
 				if (ch !== "0" && ch !== "1") return false;
 				hasDigits = true;
 			}
@@ -62,7 +66,9 @@ function resolveYamlInteger(data: string): boolean {
 
 			for (; index < max; index++) {
 				ch = data[index];
+
 				if (ch === "_") continue;
+
 				if (!isHexCode(data.charCodeAt(index))) return false;
 				hasDigits = true;
 			}
@@ -72,7 +78,9 @@ function resolveYamlInteger(data: string): boolean {
 		// base 8
 		for (; index < max; index++) {
 			ch = data[index];
+
 			if (ch === "_") continue;
+
 			if (!isOctCode(data.charCodeAt(index))) return false;
 			hasDigits = true;
 		}
@@ -82,12 +90,16 @@ function resolveYamlInteger(data: string): boolean {
 	// base 10 (except 0) or base 60
 
 	// value should not start with `_`;
+
 	if (ch === "_") return false;
 
 	for (; index < max; index++) {
 		ch = data[index];
+
 		if (ch === "_") continue;
+
 		if (ch === ":") break;
+
 		if (!isDecCode(data.charCodeAt(index))) {
 			return false;
 		}
@@ -98,6 +110,7 @@ function resolveYamlInteger(data: string): boolean {
 	if (!hasDigits || ch === "_") return false;
 
 	// if !base60 - done;
+
 	if (ch !== ":") return true;
 
 	// base60 almost not used, no needs to optimize
@@ -106,6 +119,7 @@ function resolveYamlInteger(data: string): boolean {
 
 function constructYamlInteger(data: string): number {
 	let value = data;
+
 	const digits: number[] = [];
 
 	if (value.indexOf("_") !== -1) {
@@ -113,7 +127,9 @@ function constructYamlInteger(data: string): number {
 	}
 
 	let sign = 1;
+
 	let ch = value[0];
+
 	if (ch === "-" || ch === "+") {
 		if (ch === "-") sign = -1;
 		value = value.slice(1);
@@ -124,7 +140,9 @@ function constructYamlInteger(data: string): number {
 
 	if (ch === "0") {
 		if (value[1] === "b") return sign * parseInt(value.slice(2), 2);
+
 		if (value[1] === "x") return sign * parseInt(value, 16);
+
 		return sign * parseInt(value, 8);
 	}
 
@@ -134,6 +152,7 @@ function constructYamlInteger(data: string): number {
 		});
 
 		let valueInt = 0;
+
 		let base = 1;
 
 		digits.forEach((d): void => {

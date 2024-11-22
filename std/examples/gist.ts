@@ -4,6 +4,7 @@ import { parse } from "https://deno.land/std/flags/mod.ts";
 
 function pathBase(p: string): string {
 	const parts = p.split("/");
+
 	return parts[parts.length - 1];
 }
 
@@ -27,7 +28,9 @@ if (parsedArgs._.length === 0) {
 const files = {};
 for (const filename of parsedArgs._) {
 	const base = pathBase(filename);
+
 	const content = await Deno.readFile(filename);
+
 	const contentStr = new TextDecoder().decode(content);
 	files[base] = { content: contentStr };
 }
@@ -37,6 +40,7 @@ const content = {
 	public: false,
 	files: files,
 };
+
 const body = JSON.stringify(content);
 
 const res = await fetch("https://api.github.com/gists", {

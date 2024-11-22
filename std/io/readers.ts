@@ -14,6 +14,7 @@ export class StringReader implements Reader {
 		const n = Math.min(p.byteLength, this.buf.byteLength - this.offs);
 		p.set(this.buf.slice(this.offs, this.offs + n));
 		this.offs += n;
+
 		if (n === 0) {
 			return Deno.EOF;
 		}
@@ -32,10 +33,14 @@ export class MultiReader implements Reader {
 
 	async read(p: Uint8Array): Promise<number | Deno.EOF> {
 		const r = this.readers[this.currentIndex];
+
 		if (!r) return Deno.EOF;
+
 		const result = await r.read(p);
+
 		if (result === Deno.EOF) {
 			this.currentIndex++;
+
 			return 0;
 		}
 		return result;

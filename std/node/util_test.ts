@@ -84,7 +84,9 @@ test({
 	name: "[util] isError",
 	fn() {
 		const java = new Error();
+
 		const nodejs = new TypeError();
+
 		const deno = "Future";
 		assert(util.isError(java));
 		assert(util.isError(nodejs));

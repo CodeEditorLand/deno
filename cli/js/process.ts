@@ -44,9 +44,11 @@ async function runStatus(rid: number): Promise<ProcessStatus> {
 
 	if (res.gotSignal) {
 		const signal = res.exitSignal;
+
 		return { signal, success: false };
 	} else {
 		const code = res.exitCode;
+
 		return { code, success: code === 0 };
 	}
 }
@@ -141,6 +143,7 @@ function stdioMap(s: string): string {
 		case "piped":
 		case "null":
 			return s;
+
 		default:
 			return unreachable();
 	}
@@ -172,16 +175,23 @@ interface RunResponse {
  */
 export function run(opt: RunOptions): Process {
 	assert(opt.args.length > 0);
+
 	let env: Array<[string, string]> = [];
+
 	if (opt.env) {
 		env = Array.from(Object.entries(opt.env));
 	}
 
 	let stdin = stdioMap("inherit");
+
 	let stdout = stdioMap("inherit");
+
 	let stderr = stdioMap("inherit");
+
 	let stdinRid = 0;
+
 	let stdoutRid = 0;
+
 	let stderrRid = 0;
 
 	if (opt.stdin) {
@@ -221,6 +231,7 @@ export function run(opt: RunOptions): Process {
 	};
 
 	const res = sendSync(dispatch.OP_RUN, req) as RunResponse;
+
 	return new Process(res);
 }
 

@@ -4,9 +4,13 @@ import { test } from "../testing/mod.ts";
 import { detect, EOL, format } from "./eol.ts";
 
 const CRLFinput = "deno\r\nis not\r\nnode";
+
 const Mixedinput = "deno\nis not\r\nnode";
+
 const Mixedinput2 = "deno\r\nis not\nnode";
+
 const LFinput = "deno\nis not\nnode";
+
 const NoNLinput = "deno is not node";
 
 test({

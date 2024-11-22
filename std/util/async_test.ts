@@ -10,13 +10,17 @@ test(async function asyncDeferred(): Promise<void> {
 
 async function* gen123(): AsyncIterableIterator<number> {
 	yield 1;
+
 	yield 2;
+
 	yield 3;
 }
 
 async function* gen456(): AsyncIterableIterator<number> {
 	yield 4;
+
 	yield 5;
+
 	yield 6;
 }
 
@@ -24,7 +28,9 @@ test(async function asyncMuxAsyncIterator(): Promise<void> {
 	const mux = new MuxAsyncIterator<number>();
 	mux.add(gen123());
 	mux.add(gen456());
+
 	const results = new Set();
+
 	for await (const value of mux) {
 		results.add(value);
 	}
@@ -47,6 +53,7 @@ test(async function collectUint8Arrays0(): Promise<void> {
 
 test(async function collectUint8Arrays1(): Promise<void> {
 	const buf = new Uint8Array([1, 2, 3]);
+
 	async function* gen(): AsyncIterableIterator<Uint8Array> {
 		yield buf;
 	}
@@ -58,13 +65,17 @@ test(async function collectUint8Arrays1(): Promise<void> {
 test(async function collectUint8Arrays4(): Promise<void> {
 	async function* gen(): AsyncIterableIterator<Uint8Array> {
 		yield new Uint8Array([1, 2, 3]);
+
 		yield new Uint8Array([]);
+
 		yield new Uint8Array([4, 5]);
+
 		yield new Uint8Array([6]);
 	}
 	const result = await collectUint8Arrays(gen());
 	assert(result instanceof Uint8Array);
 	assertStrictEq(result.length, 6);
+
 	for (let i = 0; i < 6; i++) {
 		assertStrictEq(result[i], i + 1);
 	}

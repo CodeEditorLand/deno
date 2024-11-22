@@ -19,6 +19,7 @@ export class StringWriter implements Writer {
 		this.chunks.push(p);
 		this.byteLength += p.byteLength;
 		this.cache = undefined;
+
 		return p.byteLength;
 	}
 
@@ -27,12 +28,15 @@ export class StringWriter implements Writer {
 			return this.cache;
 		}
 		const buf = new Uint8Array(this.byteLength);
+
 		let offs = 0;
+
 		for (const chunk of this.chunks) {
 			buf.set(chunk, offs);
 			offs += chunk.byteLength;
 		}
 		this.cache = decode(buf);
+
 		return this.cache!;
 	}
 }

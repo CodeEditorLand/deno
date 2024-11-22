@@ -9,9 +9,13 @@ import { append } from "./mod.ts";
 
 test(async function textprotoAppend(): Promise<void> {
 	const enc = new TextEncoder();
+
 	const dec = new TextDecoder();
+
 	const u1 = enc.encode("Hello ");
+
 	const u2 = enc.encode("World");
+
 	const joined = append(u1, u2);
 	assertEquals(dec.decode(joined), "Hello World");
 });

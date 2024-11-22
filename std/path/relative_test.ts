@@ -59,6 +59,7 @@ const relativeTests = {
 test(function relative() {
 	relativeTests.posix.forEach(function (p) {
 		const expected = p[2];
+
 		const actual = path.posix.relative(p[0], p[1]);
 		assertEquals(actual, expected);
 	});
@@ -67,6 +68,7 @@ test(function relative() {
 test(function relativeWin32() {
 	relativeTests.win32.forEach(function (p) {
 		const expected = p[2];
+
 		const actual = path.win32.relative(p[0], p[1]);
 		assertEquals(actual, expected);
 	});

@@ -81,6 +81,7 @@ export async function* walk(
 		return;
 	}
 	const ls: FileInfo[] = await readDir(root);
+
 	for (const info of ls) {
 		if (info.isSymlink()) {
 			if (followSymlinks) {
@@ -134,6 +135,7 @@ export function* walkSync(
 		return;
 	}
 	const ls: FileInfo[] = readDirSync(root);
+
 	for (const info of ls) {
 		if (info.isSymlink()) {
 			if (followSymlinks) {

@@ -5,10 +5,12 @@ import { TextProtoReader } from "../../std/textproto/mod.ts";
 import { assert, assertEquals, test, testPerm } from "./test_util.ts";
 
 const encoder = new TextEncoder();
+
 const decoder = new TextDecoder();
 
 test(async function dialTLSNoPerm(): Promise<void> {
 	let err;
+
 	try {
 		await Deno.dialTLS({ hostname: "github.com", port: 443 });
 	} catch (e) {
@@ -20,6 +22,7 @@ test(async function dialTLSNoPerm(): Promise<void> {
 
 test(async function dialTLSCertFileNoReadPerm(): Promise<void> {
 	let err;
+
 	try {
 		await Deno.dialTLS({
 			hostname: "github.com",
@@ -37,6 +40,7 @@ testPerm(
 	{ read: true, net: true },
 	async function listenTLSNonExistentCertKeyFiles(): Promise<void> {
 		let err;
+
 		const options = {
 			hostname: "localhost",
 			port: 4500,
@@ -70,6 +74,7 @@ testPerm(
 
 testPerm({ net: true }, async function listenTLSNoReadPerm(): Promise<void> {
 	let err;
+
 	try {
 		Deno.listenTLS({
 			hostname: "localhost",
@@ -88,6 +93,7 @@ testPerm(
 	{ read: true, write: true, net: true },
 	async function listenTLSEmptyKeyFile(): Promise<void> {
 		let err;
+
 		const options = {
 			hostname: "localhost",
 			port: 4500,
@@ -96,6 +102,7 @@ testPerm(
 		};
 
 		const testDir = Deno.makeTempDirSync();
+
 		const keyFilename = testDir + "/key.pem";
 		Deno.writeFileSync(keyFilename, new Uint8Array([]), {
 			perm: 0o666,
@@ -118,6 +125,7 @@ testPerm(
 	{ read: true, write: true, net: true },
 	async function listenTLSEmptyCertFile(): Promise<void> {
 		let err;
+
 		const options = {
 			hostname: "localhost",
 			port: 4500,
@@ -126,6 +134,7 @@ testPerm(
 		};
 
 		const testDir = Deno.makeTempDirSync();
+
 		const certFilename = testDir + "/cert.crt";
 		Deno.writeFileSync(certFilename, new Uint8Array([]), {
 			perm: 0o666,
@@ -148,6 +157,7 @@ testPerm(
 	{ read: true, net: true },
 	async function dialAndListenTLS(): Promise<void> {
 		const hostname = "localhost";
+
 		const port = 4500;
 
 		const listener = Deno.listenTLS({
@@ -174,27 +184,38 @@ testPerm(
 			certFile: "cli/tests/tls/RootCA.pem",
 		});
 		assert(conn.rid > 0);
+
 		const w = new BufWriter(conn);
+
 		const r = new BufReader(conn);
+
 		const body = `GET / HTTP/1.1\r\nHost: ${hostname}:${port}\r\n\r\n`;
+
 		const writeResult = await w.write(encoder.encode(body));
 		assertEquals(body.length, writeResult);
 		await w.flush();
+
 		const tpr = new TextProtoReader(r);
+
 		const statusLine = await tpr.readLine();
 		assert(
 			statusLine !== Deno.EOF,
 			`line must be read: ${String(statusLine)}`,
 		);
+
 		const m = statusLine.match(/^(.+?) (.+?) (.+?)$/);
 		assert(m !== null, "must be matched");
+
 		const [_, proto, status, ok] = m;
 		assertEquals(proto, "HTTP/1.1");
 		assertEquals(status, "200");
 		assertEquals(ok, "OK");
+
 		const headers = await tpr.readMIMEHeader();
 		assert(headers !== Deno.EOF);
+
 		const contentLength = parseInt(headers.get("content-length"));
+
 		const bodyBuf = new Uint8Array(contentLength);
 		await r.readFull(bodyBuf);
 		assertEquals(decoder.decode(bodyBuf), "Hello World\n");

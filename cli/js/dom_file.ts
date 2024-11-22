@@ -12,6 +12,7 @@ export class DomFileImpl extends blob.DenoBlob implements domTypes.DomFile {
 		options?: domTypes.FilePropertyBag,
 	) {
 		options = options || {};
+
 		super(fileBits, options);
 
 		// 4.1.2.1 Replace any "/" character (U+002F SOLIDUS)

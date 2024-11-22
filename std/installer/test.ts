@@ -27,6 +27,7 @@ async function startFileServer(): Promise<void> {
 	});
 	// Once fileServer is ready it will write to its stdout.
 	const r = new TextProtoReader(new BufReader(fileServer.stdout!));
+
 	const s = await r.readLine();
 	assert(s !== Deno.EOF && s.includes("server listening"));
 }
@@ -39,10 +40,15 @@ function killFileServer(): void {
 function installerTest(t: TestFunction, useOriginHomeDir = false): void {
 	const fn = async (): Promise<void> => {
 		await startFileServer();
+
 		const tempDir = await makeTempDir();
+
 		const envVars = env();
+
 		const originalHomeDir = envVars["HOME"];
+
 		const originalUserProfile = envVars["USERPROFILE"];
+
 		if (!useOriginHomeDir) {
 			envVars["HOME"] = tempDir;
 			envVars["USERPROFILE"] = tempDir;
@@ -53,6 +59,7 @@ function installerTest(t: TestFunction, useOriginHomeDir = false): void {
 		} finally {
 			killFileServer();
 			await remove(tempDir, { recursive: true });
+
 			if (originalHomeDir) {
 				envVars["HOME"] = originalHomeDir;
 			}
@@ -73,7 +80,9 @@ installerTest(async function installBasic(): Promise<void> {
 	);
 
 	const { HOME } = env();
+
 	const filePath = path.resolve(HOME, ".deno/bin/echo_test");
+
 	const fileInfo = await stat(filePath);
 	assert(fileInfo.isFile());
 
@@ -129,6 +138,7 @@ installerTest(async function installCustomDir(): Promise<void> {
 	);
 
 	const filePath = path.resolve(tempDir, "echo_test");
+
 	const fileInfo = await stat(filePath);
 	assert(fileInfo.isFile());
 
@@ -178,7 +188,9 @@ installerTest(async function installLocalModule(): Promise<void> {
 	await install("echo_test", localModule, []);
 
 	const { HOME } = env();
+
 	const filePath = path.resolve(HOME, ".deno/bin/echo_test");
+
 	const fileInfo = await stat(filePath);
 	assert(fileInfo.isFile());
 
@@ -235,6 +247,7 @@ installerTest(async function installWithFlags(): Promise<void> {
 	);
 
 	const { HOME } = env();
+
 	const filePath = path.resolve(HOME, ".deno/bin/echo_test");
 
 	if (path.isWindows) {
@@ -280,6 +293,7 @@ exit $ret
 
 installerTest(async function installLocalModuleAndRun(): Promise<void> {
 	const tempDir = await makeTempDir();
+
 	const localModule = path.join(
 		Deno.cwd(),
 		"installer",
@@ -289,6 +303,7 @@ installerTest(async function installLocalModuleAndRun(): Promise<void> {
 	await install("echo_test", localModule, ["hello"], tempDir);
 
 	const filePath = path.resolve(tempDir, "echo_test");
+
 	const fileInfo = await stat(filePath);
 	assert(fileInfo.isFile());
 
@@ -299,6 +314,7 @@ installerTest(async function installLocalModuleAndRun(): Promise<void> {
 
 	if (!ps.stdout) {
 		assert(!!ps.stdout, "There should have stdout.");
+
 		return;
 	}
 
@@ -312,6 +328,7 @@ installerTest(async function installLocalModuleAndRun(): Promise<void> {
 		assertEquals(s, "hello, foo");
 	} catch (err) {
 		console.error(err);
+
 		thrown = true;
 	} finally {
 		await remove(tempDir, { recursive: true });
@@ -331,6 +348,7 @@ installerTest(async function installAndMakesureItCanRun(): Promise<void> {
 	);
 
 	const filePath = path.resolve(tempDir, "echo_test");
+
 	const fileInfo = await stat(filePath);
 	assert(fileInfo.isFile());
 
@@ -341,6 +359,7 @@ installerTest(async function installAndMakesureItCanRun(): Promise<void> {
 
 	if (!ps.stdout) {
 		assert(!!ps.stdout, "There should have stdout.");
+
 		return;
 	}
 
@@ -354,6 +373,7 @@ installerTest(async function installAndMakesureItCanRun(): Promise<void> {
 		assertEquals(s, "hello, foo");
 	} catch (err) {
 		console.error(err);
+
 		thrown = true;
 	} finally {
 		await remove(tempDir, { recursive: true });
@@ -373,6 +393,7 @@ installerTest(async function installAndMakesureArgsRight(): Promise<void> {
 	);
 
 	const filePath = path.resolve(tempDir, "args_test");
+
 	const fileInfo = await stat(filePath);
 	assert(fileInfo.isFile());
 
@@ -383,6 +404,7 @@ installerTest(async function installAndMakesureArgsRight(): Promise<void> {
 
 	if (!ps.stdout) {
 		assert(!!ps.stdout, "There should have stdout.");
+
 		return;
 	}
 
@@ -401,6 +423,7 @@ installerTest(async function installAndMakesureArgsRight(): Promise<void> {
 		assertEquals(obj[3], "--flag2");
 	} catch (err) {
 		console.error(err);
+
 		thrown = true;
 	} finally {
 		await remove(tempDir, { recursive: true });
@@ -423,6 +446,7 @@ installerTest(async function installWithoutHOMEVar(): Promise<void> {
 	env()["HOME"] = HOME;
 
 	const filePath = path.resolve(HOME, ".deno/bin/echo_test");
+
 	const fileInfo = await stat(filePath);
 	assert(fileInfo.isFile());
 

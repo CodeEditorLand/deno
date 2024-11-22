@@ -17,6 +17,7 @@ interface HandlerOptions {
 export class BaseHandler {
 	level: number;
 	levelName: string;
+
 	formatter: string | FormatterFunction;
 
 	constructor(levelName: string, options: HandlerOptions = {}) {
@@ -30,6 +31,7 @@ export class BaseHandler {
 		if (this.level > logRecord.level) return;
 
 		const msg = this.format(logRecord);
+
 		return this.log(msg);
 	}
 
@@ -62,16 +64,24 @@ export class ConsoleHandler extends BaseHandler {
 		switch (logRecord.level) {
 			case LogLevel.INFO:
 				msg = blue(msg);
+
 				break;
+
 			case LogLevel.WARNING:
 				msg = yellow(msg);
+
 				break;
+
 			case LogLevel.ERROR:
 				msg = red(msg);
+
 				break;
+
 			case LogLevel.CRITICAL:
 				msg = bold(red(msg));
+
 				break;
+
 			default:
 				break;
 		}

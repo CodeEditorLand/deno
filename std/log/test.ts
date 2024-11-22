@@ -29,6 +29,7 @@ test(async function defaultHandlers(): Promise<void> {
 		}
 
 		const logger = loggers[levelName];
+
 		const handler = new TestHandler(levelName);
 
 		await log.setup({

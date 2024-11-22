@@ -47,6 +47,7 @@ export interface DomIterable<K, V> {
 	values(): IterableIterator<V>;
 	entries(): IterableIterator<[K, V]>;
 	[Symbol.iterator](): IterableIterator<[K, V]>;
+
 	forEach(
 		callback: (value: V, key: K, parent: this) => void,
 		thisArg?: any,
@@ -280,9 +281,12 @@ export interface AbortSignal extends EventTarget {
 export interface FormData extends DomIterable<string, FormDataEntryValue> {
 	append(name: string, value: string | Blob, fileName?: string): void;
 	delete(name: string): void;
+
 	get(name: string): FormDataEntryValue | null;
+
 	getAll(name: string): FormDataEntryValue[];
 	has(name: string): boolean;
+
 	set(name: string, value: string | Blob, fileName?: string): void;
 }
 
@@ -337,6 +341,7 @@ export interface Body {
 export interface ReadableStream {
 	readonly locked: boolean;
 	cancel(reason?: any): Promise<void>;
+
 	getReader(): ReadableStreamReader;
 	tee(): ReadableStream[];
 }
@@ -491,6 +496,7 @@ export interface Headers extends DomIterable<string, string> {
 	 * this Headers object. The values are ByteString objects.
 	 */
 	values(): IterableIterator<string>;
+
 	forEach(
 		callbackfn: (value: string, key: string, parent: this) => void,
 		thisArg?: any,

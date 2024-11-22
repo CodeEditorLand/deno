@@ -25,6 +25,7 @@ class FormDataBase {
 	): void {
 		requiredArguments("FormData.append", arguments.length, 2);
 		name = String(name);
+
 		if (value instanceof blob.DenoBlob) {
 			const dfile = new domFile.DomFileImpl([value], filename || name);
 			this[dataSymbol].push([name, dfile]);
@@ -40,7 +41,9 @@ class FormDataBase {
 	delete(name: string): void {
 		requiredArguments("FormData.delete", arguments.length, 1);
 		name = String(name);
+
 		let i = 0;
+
 		while (i < this[dataSymbol].length) {
 			if (this[dataSymbol][i][0] === name) {
 				this[dataSymbol].splice(i, 1);
@@ -58,7 +61,9 @@ class FormDataBase {
 	getAll(name: string): domTypes.FormDataEntryValue[] {
 		requiredArguments("FormData.getAll", arguments.length, 1);
 		name = String(name);
+
 		const values = [];
+
 		for (const entry of this[dataSymbol]) {
 			if (entry[0] === name) {
 				values.push(entry[1]);
@@ -76,6 +81,7 @@ class FormDataBase {
 	get(name: string): domTypes.FormDataEntryValue | null {
 		requiredArguments("FormData.get", arguments.length, 1);
 		name = String(name);
+
 		for (const entry of this[dataSymbol]) {
 			if (entry[0] === name) {
 				return entry[1];
@@ -93,6 +99,7 @@ class FormDataBase {
 	has(name: string): boolean {
 		requiredArguments("FormData.has", arguments.length, 1);
 		name = String(name);
+
 		return this[dataSymbol].some((entry): boolean => entry[0] === name);
 	}
 
@@ -103,7 +110,9 @@ class FormDataBase {
 	 *       formData.set('name', 'value');
 	 */
 	set(name: string, value: string): void;
+
 	set(name: string, value: blob.DenoBlob, filename?: string): void;
+
 	set(name: string, value: string | blob.DenoBlob, filename?: string): void {
 		requiredArguments("FormData.set", arguments.length, 2);
 		name = String(name);
@@ -111,7 +120,9 @@ class FormDataBase {
 		// If there are any entries in the context object’s entry list whose name
 		// is name, replace the first such entry with entry and remove the others
 		let found = false;
+
 		let i = 0;
+
 		while (i < this[dataSymbol].length) {
 			if (this[dataSymbol][i][0] === name) {
 				if (!found) {
@@ -127,6 +138,7 @@ class FormDataBase {
 					found = true;
 				} else {
 					this[dataSymbol].splice(i, 1);
+
 					continue;
 				}
 			}

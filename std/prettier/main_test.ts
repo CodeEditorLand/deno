@@ -15,6 +15,7 @@ async function run(
 	const p = xrun({ args, stdout: "piped" });
 
 	const stdout = decoder.decode(await readAll(p.stdout!));
+
 	const { code } = await p.status();
 
 	return { stdout, code };
@@ -111,8 +112,11 @@ test(async function testPrettierOptions(): Promise<void> {
 	await copy(testdata, tempDir, { overwrite: true });
 
 	const file0 = join(tempDir, "opts", "0.ts");
+
 	const file1 = join(tempDir, "opts", "1.ts");
+
 	const file2 = join(tempDir, "opts", "2.ts");
+
 	const file3 = join(tempDir, "opts", "3.md");
 
 	const getSourceCode = async (f: string): Promise<string> =>
@@ -219,6 +223,7 @@ test(async function testPrettierPrintToStdout(): Promise<void> {
 	await copy(testdata, tempDir, { overwrite: true });
 
 	const file0 = join(tempDir, "0.ts");
+
 	const file1 = join(tempDir, "formatted.ts");
 
 	const getSourceCode = async (f: string): Promise<string> =>
@@ -275,6 +280,7 @@ test(async function testPrettierReadFromStdin(): Promise<void> {
 		parser?: string,
 	): Promise<void> {
 		const inputCode = stdin;
+
 		const p1 = Deno.run({
 			args: [execPath(), "./prettier/testdata/echox.ts", `${inputCode}`],
 			stdout: "piped",
@@ -300,9 +306,11 @@ test(async function testPrettierReadFromStdin(): Promise<void> {
 		assertEquals(status1.code, 0);
 		assertEquals(status1.success, true);
 		p2.stdin!.close();
+
 		const status2 = await p2.status();
 		assertEquals(status2.code, expectedCode);
 		assertEquals(status2.success, expectedSuccess);
+
 		const decoder = new TextDecoder("utf-8");
 		assertEquals(
 			decoder.decode(await Deno.readAll(p2.stdout!)),
@@ -391,7 +399,9 @@ test(async function testPrettierWithAutoConfig(): Promise<void> {
 
 	for (const configName of configs) {
 		const cwd = join(testdata, configName);
+
 		const prettierFile = join(Deno.cwd(), "prettier", "main.ts");
+
 		const { stdout, stderr } = Deno.run({
 			args: [
 				execPath(),
@@ -409,6 +419,7 @@ test(async function testPrettierWithAutoConfig(): Promise<void> {
 		});
 
 		const output = decoder.decode(await Deno.readAll(stdout));
+
 		const errMsg = decoder.decode(await Deno.readAll(stderr));
 
 		assertEquals(
@@ -457,7 +468,9 @@ test(async function testPrettierWithSpecifiedConfig(): Promise<void> {
 
 	for (const config of configs) {
 		const cwd = join(testdata, config.dir);
+
 		const prettierFile = join(Deno.cwd(), "prettier", "main.ts");
+
 		const { stdout, stderr } = Deno.run({
 			args: [
 				execPath(),
@@ -475,6 +488,7 @@ test(async function testPrettierWithSpecifiedConfig(): Promise<void> {
 		});
 
 		const output = decoder.decode(await Deno.readAll(stdout));
+
 		const errMsg = decoder.decode(await Deno.readAll(stderr));
 
 		assertEquals(
@@ -492,7 +506,9 @@ test(async function testPrettierWithSpecifiedConfig(): Promise<void> {
 test(async function testPrettierWithAutoIgnore(): Promise<void> {
 	// only format typescript file
 	const cwd = join(testdata, "ignore_file");
+
 	const prettierFile = join(Deno.cwd(), "prettier", "main.ts");
+
 	const { stdout, stderr } = Deno.run({
 		args: [
 			execPath(),
@@ -520,7 +536,9 @@ test(async function testPrettierWithAutoIgnore(): Promise<void> {
 test(async function testPrettierWithSpecifiedIgnore(): Promise<void> {
 	// only format javascript file
 	const cwd = join(testdata, "ignore_file");
+
 	const prettierFile = join(Deno.cwd(), "prettier", "main.ts");
+
 	const { stdout, stderr } = Deno.run({
 		args: [
 			execPath(),

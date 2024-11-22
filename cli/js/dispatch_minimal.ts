@@ -32,18 +32,24 @@ export function recordFromBufMinimal(
 	ui8: Uint8Array,
 ): RecordMinimal {
 	const header = ui8.slice(0, 12);
+
 	const buf32 = new Int32Array(
 		header.buffer,
 		header.byteOffset,
 		header.byteLength / 4,
 	);
+
 	const promiseId = buf32[0];
+
 	const arg = buf32[1];
+
 	const result = buf32[2];
+
 	let err;
 
 	if (arg < 0) {
 		const kind = result as ErrorKind;
+
 		const message = decoder.decode(ui8.slice(12));
 		err = { kind, message };
 	} else if (ui8.length != 12) {
@@ -67,6 +73,7 @@ function unwrapResponse(res: RecordMinimal): number {
 }
 
 const scratch32 = new Int32Array(3);
+
 const scratchBytes = new Uint8Array(
 	scratch32.buffer,
 	scratch32.byteOffset,
@@ -76,7 +83,9 @@ util.assert(scratchBytes.byteLength === scratch32.length * 4);
 
 export function asyncMsgFromRust(opId: number, ui8: Uint8Array): void {
 	const record = recordFromBufMinimal(opId, ui8);
+
 	const { promiseId } = record;
+
 	const promise = promiseTableMin.get(promiseId);
 	promiseTableMin.delete(promiseId);
 	util.assert(promise);
@@ -93,7 +102,9 @@ export async function sendAsyncMinimal(
 	scratch32[1] = arg;
 	scratch32[2] = 0; // result
 	const promise = util.createResolvable<RecordMinimal>();
+
 	const buf = core.dispatch(opId, scratchBytes, zeroCopy);
+
 	if (buf) {
 		const record = recordFromBufMinimal(opId, buf);
 		// Sync result.
@@ -104,6 +115,7 @@ export async function sendAsyncMinimal(
 	}
 
 	const res = await promise;
+
 	return unwrapResponse(res);
 }
 
@@ -114,7 +126,10 @@ export function sendSyncMinimal(
 ): number {
 	scratch32[0] = 0; // promiseId 0 indicates sync
 	scratch32[1] = arg;
+
 	const res = core.dispatch(opId, scratchBytes, zeroCopy)!;
+
 	const resRecord = recordFromBufMinimal(opId, res);
+
 	return unwrapResponse(resRecord);
 }

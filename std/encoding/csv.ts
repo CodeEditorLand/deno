@@ -11,6 +11,7 @@ const INVALID_RUNE = ["\r", "\n", '"'];
 export class ParseError extends Error {
 	StartLine: number;
 	Line: number;
+
 	constructor(start: number, line: number, message: string) {
 		super(message);
 		this.StartLine = start;
@@ -38,7 +39,9 @@ export interface ParseOptions {
 
 function chkOptions(opt: ParseOptions): void {
 	if (!opt.comma) opt.comma = ",";
+
 	if (!opt.trimLeadingSpace) opt.trimLeadingSpace = false;
+
 	if (
 		INVALID_RUNE.includes(opt.comma!) ||
 		INVALID_RUNE.includes(opt.comment!) ||
@@ -54,11 +57,15 @@ async function read(
 	opt: ParseOptions = { comma: ",", trimLeadingSpace: false },
 ): Promise<string[] | Deno.EOF> {
 	const tp = new TextProtoReader(reader);
+
 	let line: string;
+
 	let result: string[] = [];
+
 	const lineIndex = Startline;
 
 	const r = await tp.readLine();
+
 	if (r === Deno.EOF) return Deno.EOF;
 	line = r;
 	// Normalize \r\n to \n on all input lines.
@@ -72,6 +79,7 @@ async function read(
 	}
 
 	const trimmedLine = line.trimLeft();
+
 	if (trimmedLine.length === 0) {
 		return [];
 	}
@@ -101,6 +109,7 @@ async function read(
 		}
 		return r;
 	});
+
 	if (quoteError) {
 		throw new ParseError(
 			Startline,
@@ -120,14 +129,19 @@ export async function readAll(
 	},
 ): Promise<string[][]> {
 	const result: string[][] = [];
+
 	let _nbFields: number;
+
 	let lineResult: string[];
+
 	let first = true;
+
 	let lineIndex = 0;
 	chkOptions(opt);
 
 	for (;;) {
 		const r = await read(lineIndex, reader, opt);
+
 		if (r === Deno.EOF) break;
 		lineResult = r;
 		lineIndex++;
@@ -135,6 +149,7 @@ export async function readAll(
 		// the number of fields in the first record
 		if (first) {
 			first = false;
+
 			if (opt.fieldsPerRecord !== undefined) {
 				if (opt.fieldsPerRecord === 0) {
 					_nbFields = lineResult.length;
@@ -201,6 +216,7 @@ export async function parse(
 	},
 ): Promise<unknown[]> {
 	let r: string[][];
+
 	if (input instanceof BufReader) {
 		r = await readAll(input, opt);
 	} else {
@@ -208,7 +224,9 @@ export async function parse(
 	}
 	if (opt.header) {
 		let headers: HeaderOption[] = [];
+
 		let i = 0;
+
 		if (Array.isArray(opt.header)) {
 			if (typeof opt.header[0] !== "string") {
 				headers = opt.header as HeaderOption[];
@@ -233,9 +251,12 @@ export async function parse(
 				throw `Error number of fields line:${i}`;
 			}
 			i++;
+
 			const out: Record<string, unknown> = {};
+
 			for (let j = 0; j < e.length; j++) {
 				const h = headers[j];
+
 				if (h.parse) {
 					out[h.name] = h.parse(e[j]);
 				} else {

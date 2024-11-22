@@ -50,6 +50,7 @@ function denoMain(compilerType?: string): void {
 window["denoMain"] = denoMain;
 
 const ASSETS = "$asset$";
+
 const OUT_DIR = "$deno$";
 
 /** The format of the work message payload coming from the privileged side */
@@ -173,7 +174,9 @@ class SourceFile {
 	 * `containingFile`. */
 	cache(moduleSpecifier: string, containingFile?: string): void {
 		containingFile = containingFile || "";
+
 		let innerCache = SourceFile._specifierCache.get(containingFile);
+
 		if (!innerCache) {
 			innerCache = new Map();
 			SourceFile._specifierCache.set(containingFile, innerCache);
@@ -191,6 +194,7 @@ class SourceFile {
 		// (like bundles)
 		if (this.sourceCode.match(/\/{2}\s+@ts-nocheck/)) {
 			util.log(`Skipping imports for "${this.filename}"`);
+
 			return [];
 		}
 		const preProcessedFileInfo = ts.preProcessFile(
@@ -199,6 +203,7 @@ class SourceFile {
 			true,
 		);
 		this.processed = true;
+
 		const files = (this.importedFiles = [] as Array<[string, string]>);
 
 		function process(references: ts.FileReference[]): void {
@@ -213,7 +218,9 @@ class SourceFile {
 			libReferenceDirectives,
 			typeReferenceDirectives,
 		} = preProcessedFileInfo;
+
 		const typeDirectives = parseTypeDirectives(this.sourceCode);
+
 		if (typeDirectives) {
 			for (const importedFile of importedFiles) {
 				files.push([
@@ -227,6 +234,7 @@ class SourceFile {
 		process(referencedFiles);
 		process(libReferenceDirectives);
 		process(typeReferenceDirectives);
+
 		return files;
 	}
 
@@ -246,8 +254,10 @@ class SourceFile {
 		containingFile: string,
 	): string | undefined {
 		const containingCache = this._specifierCache.get(containingFile);
+
 		if (containingCache) {
 			const sourceFile = containingCache.get(moduleSpecifier);
+
 			return sourceFile && sourceFile.url;
 		}
 		return undefined;
@@ -275,6 +285,7 @@ function fetchSourceFiles(
 	referrer?: string,
 ): Promise<SourceFileJson[]> {
 	util.log("compiler::fetchSourceFiles", { specifiers, referrer });
+
 	return sendAsync(dispatch.OP_FETCH_SOURCE_FILES, {
 		specifiers,
 		referrer,
@@ -295,14 +306,18 @@ async function processImports(
 		return [];
 	}
 	const sources = specifiers.map(([, moduleSpecifier]) => moduleSpecifier);
+
 	const sourceFiles = await fetchSourceFiles(sources, referrer);
 	assert(sourceFiles.length === specifiers.length);
+
 	for (let i = 0; i < sourceFiles.length; i++) {
 		const sourceFileJson = sourceFiles[i];
+
 		const sourceFile =
 			SourceFile.get(sourceFileJson.url) ||
 			new SourceFile(sourceFileJson);
 		sourceFile.cache(specifiers[i][0], referrer);
+
 		if (!sourceFile.processed) {
 			await processImports(sourceFile.imports(), sourceFile.url);
 		}
@@ -321,19 +336,25 @@ function getExtension(fileName: string, mediaType: MediaType): ts.Extension {
 	switch (mediaType) {
 		case MediaType.JavaScript:
 			return ts.Extension.Js;
+
 		case MediaType.JSX:
 			return ts.Extension.Jsx;
+
 		case MediaType.TypeScript:
 			return fileName.endsWith(".d.ts")
 				? ts.Extension.Dts
 				: ts.Extension.Ts;
+
 		case MediaType.TSX:
 			return ts.Extension.Tsx;
+
 		case MediaType.Json:
 			return ts.Extension.Json;
+
 		case MediaType.Wasm:
 			// Custom marker for Wasm type.
 			return ts.Extension.Js;
+
 		case MediaType.Unknown:
 		default:
 			throw TypeError("Cannot resolve extension.");
@@ -359,12 +380,16 @@ class Host implements ts.CompilerHost {
 
 	private _getAsset(filename: string): SourceFile {
 		const sourceFile = SourceFile.get(filename);
+
 		if (sourceFile) {
 			return sourceFile;
 		}
 		const url = filename.split("/").pop()!;
+
 		const assetName = url.includes(".") ? url : `${url}.d.ts`;
+
 		const sourceCode = fetchAsset(assetName);
+
 		return new SourceFile({
 			url,
 			filename,
@@ -405,10 +430,12 @@ class Host implements ts.CompilerHost {
 	 * options which were ignored, or `undefined`. */
 	configure(path: string, configurationText: string): ConfigureResponse {
 		util.log("compiler::host.configure", path);
+
 		const { config, error } = ts.parseConfigFileTextToJson(
 			path,
 			configurationText,
 		);
+
 		if (error) {
 			return { diagnostics: [error] };
 		}
@@ -416,7 +443,9 @@ class Host implements ts.CompilerHost {
 			config.compilerOptions,
 			cwd(),
 		);
+
 		const ignoredOptions: string[] = [];
+
 		for (const key of Object.keys(options)) {
 			if (
 				ignoredCompilerOptions.includes(key) &&
@@ -427,6 +456,7 @@ class Host implements ts.CompilerHost {
 			}
 		}
 		Object.assign(this._options, options);
+
 		return {
 			ignoredOptions: ignoredOptions.length ? ignoredOptions : undefined,
 			diagnostics: errors.length ? errors : undefined,
@@ -445,6 +475,7 @@ class Host implements ts.CompilerHost {
 
 	getCompilationSettings(): ts.CompilerOptions {
 		util.log("compiler::host.getCompilationSettings()");
+
 		return this._options;
 	}
 
@@ -467,12 +498,15 @@ class Host implements ts.CompilerHost {
 		shouldCreateNewSourceFile?: boolean,
 	): ts.SourceFile | undefined {
 		util.log("compiler::host.getSourceFile", fileName);
+
 		try {
 			assert(!shouldCreateNewSourceFile);
+
 			const sourceFile = fileName.startsWith(ASSETS)
 				? this._getAsset(fileName)
 				: SourceFile.get(fileName);
 			assert(sourceFile != null);
+
 			if (!sourceFile.tsSourceFile) {
 				sourceFile.tsSourceFile = ts.createSourceFile(
 					fileName,
@@ -503,13 +537,16 @@ class Host implements ts.CompilerHost {
 			moduleNames,
 			containingFile,
 		});
+
 		return moduleNames.map((specifier) => {
 			const url = SourceFile.getUrl(specifier, containingFile);
+
 			const sourceFile = specifier.startsWith(ASSETS)
 				? this._getAsset(specifier)
 				: url
 					? SourceFile.get(url)
 					: undefined;
+
 			if (!sourceFile) {
 				return undefined;
 			}
@@ -533,13 +570,17 @@ class Host implements ts.CompilerHost {
 		sourceFiles?: readonly ts.SourceFile[],
 	): void {
 		util.log("compiler::host.writeFile", fileName);
+
 		try {
 			assert(sourceFiles != null);
+
 			if (this._requestType === CompilerRequestType.Bundle) {
 				emitBundle(this._rootNames, this._outFile, data, sourceFiles);
 			} else {
 				assert(sourceFiles.length == 1);
+
 				const url = sourceFiles[0].fileName;
+
 				const sourceFile = SourceFile.get(url);
 
 				if (sourceFile) {
@@ -616,14 +657,18 @@ window.compilerMain = function compilerMain(): void {
 				? request.outFile
 				: undefined,
 		);
+
 		let emitSkipped = true;
+
 		let diagnostics: ts.Diagnostic[] | undefined;
 
 		// if there is a configuration supplied, we need to parse that
 		if (config && config.length && configPath) {
 			const configResult = host.configure(configPath, config);
+
 			const ignoredOptions = configResult.ignoredOptions;
 			diagnostics = configResult.diagnostics;
+
 			if (ignoredOptions) {
 				console.warn(
 					yellow(
@@ -641,6 +686,7 @@ window.compilerMain = function compilerMain(): void {
 		// to generate the program and possibly emit it.
 		if (!diagnostics || (diagnostics && diagnostics.length === 0)) {
 			const options = host.getCompilationSettings();
+
 			const program = ts.createProgram(rootNames, options, host);
 
 			diagnostics = ts
@@ -666,6 +712,7 @@ window.compilerMain = function compilerMain(): void {
 					// Microsoft/TypeScript#26825 but that doesn't seem to be working here,
 					// so we will ignore complaints about this compiler setting.
 					if (code === 5070) return false;
+
 					return true;
 				});
 
@@ -709,8 +756,11 @@ window.compilerMain = function compilerMain(): void {
 
 function base64ToUint8Array(data: string): Uint8Array {
 	const binString = window.atob(data);
+
 	const size = binString.length;
+
 	const bytes = new Uint8Array(size);
+
 	for (let i = 0; i < size; i++) {
 		bytes[i] = binString.charCodeAt(i);
 	}
@@ -738,6 +788,7 @@ window.wasmCompilerMain = function wasmCompilerMain(): void {
 				),
 			),
 		);
+
 		const exportList = Array.from(
 			// @ts-ignore
 			new Set(

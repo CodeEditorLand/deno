@@ -28,6 +28,7 @@ export function writeFileSync(
 ): void {
 	if (options.create !== undefined) {
 		const create = !!options.create;
+
 		if (!create) {
 			// verify that file exists
 			statSync(filename);
@@ -35,6 +36,7 @@ export function writeFileSync(
 	}
 
 	const openMode = !!options.append ? "a" : "w";
+
 	const file = openSync(filename, openMode);
 
 	if (options.perm !== undefined && options.perm !== null) {
@@ -58,6 +60,7 @@ export async function writeFile(
 ): Promise<void> {
 	if (options.create !== undefined) {
 		const create = !!options.create;
+
 		if (!create) {
 			// verify that file exists
 			await stat(filename);
@@ -65,6 +68,7 @@ export async function writeFile(
 	}
 
 	const openMode = !!options.append ? "a" : "w";
+
 	const file = await open(filename, openMode);
 
 	if (options.perm !== undefined && options.perm !== null) {

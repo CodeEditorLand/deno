@@ -30,9 +30,12 @@ console.log(green("ws connected! (type 'close' to quit)"));
 const tpr = new TextProtoReader(new BufReader(Deno.stdin));
 while (true) {
 	await Deno.stdout.write(encode("> "));
+
 	const [line, err] = await tpr.readLine();
+
 	if (err) {
 		console.error(red(`failed to read line from stdin: ${err}`));
+
 		break;
 	}
 	if (line === "close") {

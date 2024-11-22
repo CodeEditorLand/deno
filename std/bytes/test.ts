@@ -53,6 +53,7 @@ test(function bytesrepeat(): void {
 		["-", "----------", 10],
 		["abc ", "abc abc abc ", 3],
 	];
+
 	for (const [input, output, count, errMsg] of repeatTestCase) {
 		if (errMsg) {
 			assertThrows(

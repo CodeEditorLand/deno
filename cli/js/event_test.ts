@@ -3,6 +3,7 @@ import { assertEquals, assertNotEquals, test } from "./test_util.ts";
 
 test(function eventInitializedWithType(): void {
 	const type = "click";
+
 	const event = new Event(type);
 
 	assertEquals(event.isTrusted, false);
@@ -15,7 +16,9 @@ test(function eventInitializedWithType(): void {
 
 test(function eventInitializedWithTypeAndDict(): void {
 	const init = "submit";
+
 	const eventInit = { bubbles: true, cancelable: true } as EventInit;
+
 	const event = new Event(init, eventInit);
 
 	assertEquals(event.isTrusted, false);
@@ -28,7 +31,9 @@ test(function eventInitializedWithTypeAndDict(): void {
 
 test(function eventComposedPathSuccess(): void {
 	const type = "click";
+
 	const event = new Event(type);
+
 	const composedPath = event.composedPath();
 
 	assertEquals(composedPath, []);
@@ -36,6 +41,7 @@ test(function eventComposedPathSuccess(): void {
 
 test(function eventStopPropagationSuccess(): void {
 	const type = "click";
+
 	const event = new Event(type);
 
 	assertEquals(event.cancelBubble, false);
@@ -45,6 +51,7 @@ test(function eventStopPropagationSuccess(): void {
 
 test(function eventStopImmediatePropagationSuccess(): void {
 	const type = "click";
+
 	const event = new Event(type);
 
 	assertEquals(event.cancelBubble, false);
@@ -56,6 +63,7 @@ test(function eventStopImmediatePropagationSuccess(): void {
 
 test(function eventPreventDefaultSuccess(): void {
 	const type = "click";
+
 	const event = new Event(type);
 
 	assertEquals(event.defaultPrevented, false);
@@ -63,6 +71,7 @@ test(function eventPreventDefaultSuccess(): void {
 	assertEquals(event.defaultPrevented, false);
 
 	const eventInit = { bubbles: true, cancelable: true } as EventInit;
+
 	const cancelableEvent = new Event(type, eventInit);
 	assertEquals(cancelableEvent.defaultPrevented, false);
 	cancelableEvent.preventDefault();
@@ -71,6 +80,7 @@ test(function eventPreventDefaultSuccess(): void {
 
 test(function eventInitializedWithNonStringType(): void {
 	const type = undefined;
+
 	const event = new Event(type);
 
 	assertEquals(event.isTrusted, false);

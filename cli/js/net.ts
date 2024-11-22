@@ -88,6 +88,7 @@ export class ListenerImpl implements Listener {
 
 	async accept(): Promise<Conn> {
 		const res = await sendAsync(dispatch.OP_ACCEPT, { rid: this.rid });
+
 		return new ConnImpl(res.rid, res.remoteAddr, res.localAddr);
 	}
 
@@ -167,12 +168,15 @@ export interface ListenOptions {
  */
 export function listen(options: ListenOptions): Listener {
 	const hostname = options.hostname || "0.0.0.0";
+
 	const transport = options.transport || "tcp";
+
 	const res = sendSync(dispatch.OP_LISTEN, {
 		hostname,
 		port: options.port,
 		transport,
 	});
+
 	return new ListenerImpl(res.rid, transport, res.localAddr);
 }
 
@@ -205,6 +209,7 @@ export async function dial(options: DialOptions): Promise<Conn> {
 		port: options.port,
 		transport: options.transport || "tcp",
 	});
+
 	return new ConnImpl(res.rid, res.remoteAddr!, res.localAddr!);
 }
 

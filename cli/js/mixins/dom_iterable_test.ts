@@ -4,6 +4,7 @@ import { assert, assertEquals, test } from "../test_util.ts";
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function setup() {
 	const dataSymbol = Symbol("data symbol");
+
 	class Base {
 		private [dataSymbol] = new Map<string, number>();
 
@@ -40,6 +41,7 @@ test(function testDomIterable(): void {
 	assertEquals(Array.from(domIterable.keys()), ["foo", "bar"]);
 
 	let result: Array<[string, number]> = [];
+
 	for (const [key, value] of domIterable) {
 		assert(key != null);
 		assert(value != null);
@@ -48,7 +50,9 @@ test(function testDomIterable(): void {
 	assertEquals(fixture, result);
 
 	result = [];
+
 	const scope = {};
+
 	function callback(value, key, parent): void {
 		assertEquals(parent, domIterable);
 		assert(key != null);

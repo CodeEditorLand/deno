@@ -18,18 +18,26 @@ type ArrayObject<T = Any> = common.ArrayObject<T>;
 const _hasOwnProperty = Object.prototype.hasOwnProperty;
 
 const CONTEXT_FLOW_IN = 1;
+
 const CONTEXT_FLOW_OUT = 2;
+
 const CONTEXT_BLOCK_IN = 3;
+
 const CONTEXT_BLOCK_OUT = 4;
 
 const CHOMPING_CLIP = 1;
+
 const CHOMPING_STRIP = 2;
+
 const CHOMPING_KEEP = 3;
 
 const PATTERN_NON_PRINTABLE =
 	/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x84\x86-\x9F\uFFFE\uFFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]/;
+
 const PATTERN_NON_ASCII_LINE_BREAKS = /[\x85\u2028\u2029]/;
+
 const PATTERN_FLOW_INDICATORS = /[,\[\]\{\}]/;
+
 const PATTERN_TAG_HANDLE = /^(?:!|!!|![a-z\-]+!)$/i;
 /* eslint-disable-next-line max-len */
 const PATTERN_TAG_URI =
@@ -210,6 +218,7 @@ const directiveHandlers: DirectiveHandlers = {
 		}
 
 		const match = /^([0-9]+)\.([0-9]+)$/.exec(args[0]);
+
 		if (match === null) {
 			return throwError(
 				state,
@@ -218,7 +227,9 @@ const directiveHandlers: DirectiveHandlers = {
 		}
 
 		const major = parseInt(match[1], 10);
+
 		const minor = parseInt(match[2], 10);
+
 		if (major !== 1) {
 			return throwError(
 				state,
@@ -228,6 +239,7 @@ const directiveHandlers: DirectiveHandlers = {
 
 		state.version = args[0];
 		state.checkLineBreaks = minor < 2;
+
 		if (minor !== 1 && minor !== 2) {
 			return throwWarning(
 				state,
@@ -245,6 +257,7 @@ const directiveHandlers: DirectiveHandlers = {
 		}
 
 		const handle = args[0];
+
 		const prefix = args[1];
 
 		if (!PATTERN_TAG_HANDLE.test(handle)) {
@@ -282,6 +295,7 @@ function captureSegment(
 	checkJson: boolean,
 ): void {
 	let result: string;
+
 	if (start < end) {
 		result = state.input.slice(start, end);
 
@@ -292,6 +306,7 @@ function captureSegment(
 				position++
 			) {
 				const character = result.charCodeAt(position);
+
 				if (
 					!(
 						character === 0x09 ||
@@ -326,8 +341,10 @@ function mergeMappings(
 	}
 
 	const keys = Object.keys(source);
+
 	for (let i = 0, len = keys.length; i < len; i++) {
 		const key = keys[i];
+
 		if (!_hasOwnProperty.call(destination, key)) {
 			destination[key] = (source as ArrayObject)[key];
 			overridableKeys[key] = true;
@@ -405,6 +422,7 @@ function storeMappingPair(
 		) {
 			state.line = startLine || state.line;
 			state.position = startPos || state.position;
+
 			return throwError(state, "duplicated mapping key");
 		}
 		result[keyNode] = valueNode;
@@ -421,6 +439,7 @@ function readLineBreak(state: LoaderState): void {
 		state.position++;
 	} else if (ch === 0x0d /* CR */) {
 		state.position++;
+
 		if (state.input.charCodeAt(state.position) === 0x0a /* LF */) {
 			state.position++;
 		}
@@ -480,6 +499,7 @@ function skipSeparationSpace(
 
 function testDocumentSeparator(state: LoaderState): boolean {
 	let _position = state.position;
+
 	let ch = state.input.charCodeAt(_position);
 
 	// Condition state.position === state.lineStart is tested
@@ -515,7 +535,9 @@ function readPlainScalar(
 	withinFlowCollection: boolean,
 ): boolean {
 	const kind = state.kind;
+
 	const result = state.result;
+
 	let ch = state.input.charCodeAt(state.position);
 
 	if (
@@ -537,6 +559,7 @@ function readPlainScalar(
 	}
 
 	let following: number;
+
 	if (ch === 0x3f /* ? */ || ch === 0x2d /* - */) {
 		following = state.input.charCodeAt(state.position + 1);
 
@@ -550,10 +573,14 @@ function readPlainScalar(
 
 	state.kind = "scalar";
 	state.result = "";
+
 	let captureEnd: number,
 		captureStart = (captureEnd = state.position);
+
 	let hasPendingContent = false;
+
 	let line = 0;
+
 	while (ch !== 0) {
 		if (ch === 0x3a /* : */) {
 			following = state.input.charCodeAt(state.position + 1);
@@ -578,19 +605,23 @@ function readPlainScalar(
 			break;
 		} else if (isEOL(ch)) {
 			line = state.line;
+
 			const lineStart = state.lineStart;
+
 			const lineIndent = state.lineIndent;
 			skipSeparationSpace(state, false, -1);
 
 			if (state.lineIndent >= nodeIndent) {
 				hasPendingContent = true;
 				ch = state.input.charCodeAt(state.position);
+
 				continue;
 			} else {
 				state.position = captureEnd;
 				state.line = line;
 				state.lineStart = lineStart;
 				state.lineIndent = lineIndent;
+
 				break;
 			}
 		}
@@ -617,6 +648,7 @@ function readPlainScalar(
 
 	state.kind = kind;
 	state.result = result;
+
 	return false;
 }
 
@@ -689,13 +721,17 @@ function readDoubleQuotedScalar(
 	state.kind = "scalar";
 	state.result = "";
 	state.position++;
+
 	let captureEnd: number,
 		captureStart = (captureEnd = state.position);
+
 	let tmp: number;
+
 	while ((ch = state.input.charCodeAt(state.position)) !== 0) {
 		if (ch === 0x22 /* " */) {
 			captureSegment(state, captureStart, state.position, true);
 			state.position++;
+
 			return true;
 		}
 		if (ch === 0x5c /* \ */) {
@@ -711,6 +747,7 @@ function readDoubleQuotedScalar(
 				state.position++;
 			} else if ((tmp = escapedHexLen(ch)) > 0) {
 				let hexLength = tmp;
+
 				let hexResult = 0;
 
 				for (; hexLength > 0; hexLength--) {
@@ -763,9 +800,13 @@ function readDoubleQuotedScalar(
 
 function readFlowCollection(state: LoaderState, nodeIndent: number): boolean {
 	let ch = state.input.charCodeAt(state.position);
+
 	let terminator: number;
+
 	let isMapping = true;
+
 	let result: ResultType = {};
+
 	if (ch === 0x5b /* [ */) {
 		terminator = 0x5d; /* ] */
 		isMapping = false;
@@ -788,15 +829,20 @@ function readFlowCollection(state: LoaderState, nodeIndent: number): boolean {
 
 	const tag = state.tag,
 		anchor = state.anchor;
+
 	let readNext = true;
+
 	let valueNode,
 		keyNode,
 		keyTag: string | null = (keyNode = valueNode = null),
 		isExplicitPair: boolean,
 		isPair = (isExplicitPair = false);
+
 	let following = 0,
 		line = 0;
+
 	const overridableKeys: ArrayObject<boolean> = {};
+
 	while (ch !== 0) {
 		skipSeparationSpace(state, true, nodeIndent);
 
@@ -808,6 +854,7 @@ function readFlowCollection(state: LoaderState, nodeIndent: number): boolean {
 			state.anchor = anchor;
 			state.kind = isMapping ? "mapping" : "sequence";
 			state.result = result;
+
 			return true;
 		}
 		if (!readNext) {
@@ -901,6 +948,7 @@ function readBlockScalar(state: LoaderState, nodeIndent: number): boolean {
 	let ch = state.input.charCodeAt(state.position);
 
 	let folding = false;
+
 	if (ch === 0x7c /* | */) {
 		folding = false;
 	} else if (ch === 0x3e /* > */) {
@@ -913,6 +961,7 @@ function readBlockScalar(state: LoaderState, nodeIndent: number): boolean {
 	state.result = "";
 
 	let tmp = 0;
+
 	while (ch !== 0) {
 		ch = state.input.charCodeAt(++state.position);
 
@@ -977,6 +1026,7 @@ function readBlockScalar(state: LoaderState, nodeIndent: number): boolean {
 
 		if (isEOL(ch)) {
 			emptyLines++;
+
 			continue;
 		}
 
@@ -1039,6 +1089,7 @@ function readBlockScalar(state: LoaderState, nodeIndent: number): boolean {
 		didReadContent = true;
 		detectedIndent = true;
 		emptyLines = 0;
+
 		const captureStart = state.position;
 
 		while (!isEOL(ch) && ch !== 0) {
@@ -1056,6 +1107,7 @@ function readBlockSequence(state: LoaderState, nodeIndent: number): boolean {
 		following: number,
 		detected = false,
 		ch: number;
+
 	const tag = state.tag,
 		anchor = state.anchor,
 		result: unknown[] = [];
@@ -1088,6 +1140,7 @@ function readBlockSequence(state: LoaderState, nodeIndent: number): boolean {
 			if (state.lineIndent <= nodeIndent) {
 				result.push(null);
 				ch = state.input.charCodeAt(state.position);
+
 				continue;
 			}
 		}
@@ -1115,6 +1168,7 @@ function readBlockSequence(state: LoaderState, nodeIndent: number): boolean {
 		state.anchor = anchor;
 		state.kind = "sequence";
 		state.result = result;
+
 		return true;
 	}
 	return false;
@@ -1129,6 +1183,7 @@ function readBlockMapping(
 		anchor = state.anchor,
 		result = {},
 		overridableKeys = {};
+
 	let following: number,
 		allowCompact = false,
 		line: number,
@@ -1242,6 +1297,7 @@ function readBlockMapping(
 				} else {
 					state.tag = tag;
 					state.anchor = anchor;
+
 					return true; // Keep the result of `composeNode`.
 				}
 			} else if (detected) {
@@ -1252,6 +1308,7 @@ function readBlockMapping(
 			} else {
 				state.tag = tag;
 				state.anchor = anchor;
+
 				return true; // Keep the result of `composeNode`.
 			}
 		} else {
@@ -1442,6 +1499,7 @@ function readTagProperty(state: LoaderState): boolean {
 
 function readAnchorProperty(state: LoaderState): boolean {
 	let ch = state.input.charCodeAt(state.position);
+
 	if (ch !== 0x26 /* & */) return false;
 
 	if (state.anchor !== null) {
@@ -1450,6 +1508,7 @@ function readAnchorProperty(state: LoaderState): boolean {
 	ch = state.input.charCodeAt(++state.position);
 
 	const position = state.position;
+
 	while (ch !== 0 && !isWsOrEol(ch) && !isFlowIndicator(ch)) {
 		ch = state.input.charCodeAt(++state.position);
 	}
@@ -1462,6 +1521,7 @@ function readAnchorProperty(state: LoaderState): boolean {
 	}
 
 	state.anchor = state.input.slice(position, state.position);
+
 	return true;
 }
 
@@ -1471,6 +1531,7 @@ function readAlias(state: LoaderState): boolean {
 	if (ch !== 0x2a /* * */) return false;
 
 	ch = state.input.charCodeAt(++state.position);
+
 	const _position = state.position;
 
 	while (ch !== 0 && !isWsOrEol(ch) && !isFlowIndicator(ch)) {
@@ -1485,6 +1546,7 @@ function readAlias(state: LoaderState): boolean {
 	}
 
 	const alias = state.input.slice(_position, state.position);
+
 	if (
 		typeof state.anchorMap !== "undefined" &&
 		!state.anchorMap.hasOwnProperty(alias)
@@ -1496,6 +1558,7 @@ function readAlias(state: LoaderState): boolean {
 		state.result = state.anchorMap[alias];
 	}
 	skipSeparationSpace(state, true, -1);
+
 	return true;
 }
 
@@ -1644,6 +1707,7 @@ function composeNode(
 					// `state.result` updated in resolver if matched
 					state.result = type.construct(state.result);
 					state.tag = type.tag;
+
 					if (
 						state.anchor !== null &&
 						typeof state.anchorMap !== "undefined"
@@ -1676,6 +1740,7 @@ function composeNode(
 				);
 			} else {
 				state.result = type.construct(state.result);
+
 				if (
 					state.anchor !== null &&
 					typeof state.anchorMap !== "undefined"
@@ -1696,6 +1761,7 @@ function composeNode(
 
 function readDocument(state: LoaderState): void {
 	const documentStart = state.position;
+
 	let position: number,
 		directiveName: string,
 		directiveArgs: unknown[],
@@ -1743,6 +1809,7 @@ function readDocument(state: LoaderState): void {
 				do {
 					ch = state.input.charCodeAt(++state.position);
 				} while (ch !== 0 && !isEOL(ch));
+
 				break;
 			}
 
@@ -1873,7 +1940,9 @@ export function loadAll<T extends CbFunction | LoaderStateOptions>(
 	}
 
 	const documents = loadDocuments(input, options);
+
 	const iterator = iteratorOrOption;
+
 	for (let index = 0, length = documents.length; index < length; index++) {
 		iterator(documents[index]);
 	}

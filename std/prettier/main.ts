@@ -140,10 +140,12 @@ interface PrettierOptions extends PrettierBuildInOptions {
 }
 
 const encoder = new TextEncoder();
+
 const decoder = new TextDecoder();
 
 async function readFileIfExists(filename: string): Promise<string | null> {
 	let data;
+
 	try {
 		data = await readFile(filename);
 	} catch (e) {
@@ -205,6 +207,7 @@ async function formatFile(
 	});
 
 	const fileUnit8 = encoder.encode(formatted);
+
 	if (prettierOpts.write) {
 		if (text !== formatted) {
 			console.log(`Formatting ${filename}`);
@@ -244,6 +247,7 @@ async function checkSourceFiles(
 
 	for await (const { filename } of files) {
 		const parser = selectParser(filename);
+
 		if (parser) {
 			checks.push(checkFile(filename, parser, prettierOpts));
 		}
@@ -272,6 +276,7 @@ async function formatSourceFiles(
 
 	for await (const { filename } of files) {
 		const parser = selectParser(filename);
+
 		if (parser) {
 			formats.push(formatFile(filename, parser, prettierOpts));
 		}
@@ -306,6 +311,7 @@ async function formatFromStdin(
 	prettierOpts: PrettierOptions,
 ): Promise<void> {
 	const byte = await readAll(stdin);
+
 	const formattedCode = format(
 		new TextDecoder().decode(byte),
 		parser,
@@ -381,6 +387,7 @@ async function autoResolveConfig(): Promise<PrettierBuildInOptions> {
 	for (const f of files) {
 		if (f.isFile() && configFileNamesMap[f.name]) {
 			const c = await resolveConfig(f.name);
+
 			if (c) {
 				return c;
 			}
@@ -414,6 +421,7 @@ async function resolveConfig(
 				throw generateError(err.message);
 			}
 			break;
+
 		case ".yml":
 		case ".yaml":
 			try {
@@ -422,6 +430,7 @@ async function resolveConfig(
 				throw generateError(err.message);
 			}
 			break;
+
 		case ".toml":
 			try {
 				config = toml.parse(raw) as PrettierBuildInOptions;
@@ -429,6 +438,7 @@ async function resolveConfig(
 				throw generateError(err.message);
 			}
 			break;
+
 		case ".js":
 		case ".ts":
 			const absPath = path.isAbsolute(filepath)
@@ -454,6 +464,7 @@ async function resolveConfig(
 			}
 
 			break;
+
 		default:
 			break;
 	}
@@ -482,6 +493,7 @@ async function autoResolveIgnoreFile(): Promise<Set<string>> {
  */
 async function resolveIgnoreFile(filepath: string): Promise<Set<string>> {
 	const raw = new TextDecoder().decode(await Deno.readFile(filepath));
+
 	return ignore.parse(raw);
 }
 

@@ -10,6 +10,7 @@ import {
 
 testPerm({ net: true }, async function fetchConnectionError(): Promise<void> {
 	let err;
+
 	try {
 		await fetch("http://localhost:4000");
 	} catch (err_) {
@@ -24,12 +25,14 @@ testPerm({ net: true }, async function fetchJsonSuccess(): Promise<void> {
 	const response = await fetch(
 		"http://localhost:4545/cli/tests/fixture.json",
 	);
+
 	const json = await response.json();
 	assertEquals(json.name, "deno");
 });
 
 test(async function fetchPerm(): Promise<void> {
 	let err;
+
 	try {
 		await fetch("http://localhost:4545/cli/tests/fixture.json");
 	} catch (err_) {
@@ -57,6 +60,7 @@ testPerm({ net: true }, async function fetchHeaders(): Promise<void> {
 	const response = await fetch(
 		"http://localhost:4545/cli/tests/fixture.json",
 	);
+
 	const headers = response.headers;
 	assertEquals(headers.get("Content-Type"), "application/json");
 	assert(headers.get("Server").startsWith("SimpleHTTP"));
@@ -66,7 +70,9 @@ testPerm({ net: true }, async function fetchBlob(): Promise<void> {
 	const response = await fetch(
 		"http://localhost:4545/cli/tests/fixture.json",
 	);
+
 	const headers = response.headers;
+
 	const blob = await response.blob();
 	assertEquals(blob.type, headers.get("Content-Type"));
 	assertEquals(blob.size, Number(headers.get("Content-Length")));
@@ -89,8 +95,11 @@ testPerm({ net: true }, async function fetchAsyncIterator(): Promise<void> {
 	const response = await fetch(
 		"http://localhost:4545/cli/tests/fixture.json",
 	);
+
 	const headers = response.headers;
+
 	let total = 0;
+
 	for await (const chunk of response.body) {
 		total += chunk.length;
 	}
@@ -102,12 +111,16 @@ testPerm({ net: true }, async function responseClone(): Promise<void> {
 	const response = await fetch(
 		"http://localhost:4545/cli/tests/fixture.json",
 	);
+
 	const response1 = response.clone();
 	assert(response !== response1);
 	assertEquals(response.status, response1.status);
 	assertEquals(response.statusText, response1.statusText);
+
 	const ab = await response.arrayBuffer();
+
 	const ab1 = await response1.arrayBuffer();
+
 	for (let i = 0; i < ab.byteLength; i++) {
 		assertEquals(ab[i], ab1[i]);
 	}
@@ -115,6 +128,7 @@ testPerm({ net: true }, async function responseClone(): Promise<void> {
 
 testPerm({ net: true }, async function fetchEmptyInvalid(): Promise<void> {
 	let err;
+
 	try {
 		await fetch("");
 	} catch (err_) {
@@ -130,6 +144,7 @@ testPerm(
 		const response = await fetch(
 			"http://localhost:4545/tests/subdir/multipart_form_data.txt",
 		);
+
 		const formData = await response.formData();
 		assert(formData.has("field_1"));
 		assertEquals(formData.get("field_1").toString(), "value_1 \r\n");
@@ -148,6 +163,7 @@ testPerm(
 		const response = await fetch(
 			"http://localhost:4545/tests/subdir/form_urlencoded.txt",
 		);
+
 		const formData = await response.formData();
 		assert(formData.has("field_1"));
 		assertEquals(formData.get("field_1").toString(), "Hi");
@@ -161,6 +177,7 @@ testPerm({ net: true }, async function fetchWithRedirection(): Promise<void> {
 	assertEquals(response.status, 200);
 	assertEquals(response.statusText, "OK");
 	assertEquals(response.url, "http://localhost:4545/");
+
 	const body = await response.text();
 	assert(body.includes("<title>Directory listing for /</title>"));
 });
@@ -171,6 +188,7 @@ testPerm(
 		const response = await fetch("http://localhost:4545/tests"); // will redirect to /tests/
 		assertEquals(response.status, 200);
 		assertEquals(response.statusText, "OK");
+
 		const body = await response.text();
 		assert(body.includes("<title>Directory listing for /tests/</title>"));
 	},
@@ -188,10 +206,12 @@ testPerm({ net: true }, async function fetchWithInfRedirection(): Promise<
 
 testPerm({ net: true }, async function fetchInitStringBody(): Promise<void> {
 	const data = "Hello World";
+
 	const response = await fetch("http://localhost:4545/echo_server", {
 		method: "POST",
 		body: data,
 	});
+
 	const text = await response.text();
 	assertEquals(text, data);
 	assert(response.headers.get("content-type").startsWith("text/plain"));
@@ -201,11 +221,14 @@ testPerm(
 	{ net: true },
 	async function fetchRequestInitStringBody(): Promise<void> {
 		const data = "Hello World";
+
 		const req = new Request("http://localhost:4545/echo_server", {
 			method: "POST",
 			body: data,
 		});
+
 		const response = await fetch(req);
+
 		const text = await response.text();
 		assertEquals(text, data);
 	},
@@ -215,10 +238,12 @@ testPerm(
 	{ net: true },
 	async function fetchInitTypedArrayBody(): Promise<void> {
 		const data = "Hello World";
+
 		const response = await fetch("http://localhost:4545/echo_server", {
 			method: "POST",
 			body: new TextEncoder().encode(data),
 		});
+
 		const text = await response.text();
 		assertEquals(text, data);
 	},
@@ -228,11 +253,14 @@ testPerm(
 	{ net: true },
 	async function fetchInitURLSearchParamsBody(): Promise<void> {
 		const data = "param1=value1&param2=value2";
+
 		const params = new URLSearchParams(data);
+
 		const response = await fetch("http://localhost:4545/echo_server", {
 			method: "POST",
 			body: params,
 		});
+
 		const text = await response.text();
 		assertEquals(text, data);
 		assert(
@@ -245,13 +273,16 @@ testPerm(
 
 testPerm({ net: true }, async function fetchInitBlobBody(): Promise<void> {
 	const data = "const a = 1";
+
 	const blob = new Blob([data], {
 		type: "text/javascript",
 	});
+
 	const response = await fetch("http://localhost:4545/echo_server", {
 		method: "POST",
 		body: blob,
 	});
+
 	const text = await response.text();
 	assertEquals(text, data);
 	assert(response.headers.get("content-type").startsWith("text/javascript"));
@@ -259,6 +290,7 @@ testPerm({ net: true }, async function fetchInitBlobBody(): Promise<void> {
 
 testPerm({ net: true }, async function fetchUserAgent(): Promise<void> {
 	const data = "Hello World";
+
 	const response = await fetch("http://localhost:4545/echo_server", {
 		method: "POST",
 		body: new TextEncoder().encode(data),
@@ -295,6 +327,7 @@ function bufferServer(addr: string): Deno.Buffer {
   const buf = new Deno.Buffer();
   listener.accept().then(async conn => {
     const p1 = buf.readFrom(conn);
+
     const p2 = conn.write(
       new TextEncoder().encode(
         "HTTP/1.0 404 Not Found\r\nContent-Length: 2\r\n\r\nNF"

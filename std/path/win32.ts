@@ -23,11 +23,14 @@ export const delimiter = ";";
 
 export function resolve(...pathSegments: string[]): string {
 	let resolvedDevice = "";
+
 	let resolvedTail = "";
+
 	let resolvedAbsolute = false;
 
 	for (let i = pathSegments.length - 1; i >= -1; i--) {
 		let path: string;
+
 		if (i >= 0) {
 			path = pathSegments[i];
 		} else if (!resolvedDevice) {
@@ -59,8 +62,11 @@ export function resolve(...pathSegments: string[]): string {
 		if (len === 0) continue;
 
 		let rootEnd = 0;
+
 		let device = "";
+
 		let isAbsolute = false;
+
 		const code = path.charCodeAt(0);
 
 		// Try to match a root
@@ -75,6 +81,7 @@ export function resolve(...pathSegments: string[]): string {
 				if (isPathSeparator(path.charCodeAt(1))) {
 					// Matched double path separator at beginning
 					let j = 2;
+
 					let last = j;
 					// Match 1 or more non-path separators
 					for (; j < len; ++j) {
@@ -116,6 +123,7 @@ export function resolve(...pathSegments: string[]): string {
 				if (path.charCodeAt(1) === CHAR_COLON) {
 					device = path.slice(0, 2);
 					rootEnd = 2;
+
 					if (len > 2) {
 						if (isPathSeparator(path.charCodeAt(2))) {
 							// Treat separator following drive name as an absolute path
@@ -171,11 +179,17 @@ export function resolve(...pathSegments: string[]): string {
 
 export function normalize(path: string): string {
 	assertPath(path);
+
 	const len = path.length;
+
 	if (len === 0) return ".";
+
 	let rootEnd = 0;
+
 	let device: string | undefined;
+
 	let isAbsolute = false;
+
 	const code = path.charCodeAt(0);
 
 	// Try to match a root
@@ -190,6 +204,7 @@ export function normalize(path: string): string {
 			if (isPathSeparator(path.charCodeAt(1))) {
 				// Matched double path separator at beginning
 				let j = 2;
+
 				let last = j;
 				// Match 1 or more non-path separators
 				for (; j < len; ++j) {
@@ -233,6 +248,7 @@ export function normalize(path: string): string {
 			if (path.charCodeAt(1) === CHAR_COLON) {
 				device = path.slice(0, 2);
 				rootEnd = 2;
+
 				if (len > 2) {
 					if (isPathSeparator(path.charCodeAt(2))) {
 						// Treat separator following drive name as an absolute path
@@ -250,6 +266,7 @@ export function normalize(path: string): string {
 	}
 
 	let tail: string;
+
 	if (rootEnd < len) {
 		tail = normalizeString(
 			path.slice(rootEnd),
@@ -261,11 +278,14 @@ export function normalize(path: string): string {
 		tail = "";
 	}
 	if (tail.length === 0 && !isAbsolute) tail = ".";
+
 	if (tail.length > 0 && isPathSeparator(path.charCodeAt(len - 1)))
 		tail += "\\";
+
 	if (device === undefined) {
 		if (isAbsolute) {
 			if (tail.length > 0) return `\\${tail}`;
+
 			else return "\\";
 		} else if (tail.length > 0) {
 			return tail;
@@ -274,6 +294,7 @@ export function normalize(path: string): string {
 		}
 	} else if (isAbsolute) {
 		if (tail.length > 0) return `${device}\\${tail}`;
+
 		else return `${device}\\`;
 	} else if (tail.length > 0) {
 		return device + tail;
@@ -284,10 +305,13 @@ export function normalize(path: string): string {
 
 export function isAbsolute(path: string): boolean {
 	assertPath(path);
+
 	const len = path.length;
+
 	if (len === 0) return false;
 
 	const code = path.charCodeAt(0);
+
 	if (isPathSeparator(code)) {
 		return true;
 	} else if (isWindowsDeviceRoot(code)) {
@@ -302,15 +326,20 @@ export function isAbsolute(path: string): boolean {
 
 export function join(...paths: string[]): string {
 	const pathsCount = paths.length;
+
 	if (pathsCount === 0) return ".";
 
 	let joined: string | undefined;
+
 	let firstPart: string;
+
 	for (let i = 0; i < pathsCount; ++i) {
 		const path = paths[i];
 		assertPath(path);
+
 		if (path.length > 0) {
 			if (joined === undefined) joined = firstPart = path;
+
 			else joined += `\\${path}`;
 		}
 	}
@@ -331,16 +360,22 @@ export function join(...paths: string[]): string {
 	// a server name and a share name; for example:
 	//   path.join('//server', 'share') -> '\\\\server\\share\\')
 	let needsReplace = true;
+
 	let slashCount = 0;
 	firstPart = firstPart!;
+
 	if (isPathSeparator(firstPart.charCodeAt(0))) {
 		++slashCount;
+
 		const firstLen = firstPart.length;
+
 		if (firstLen > 1) {
 			if (isPathSeparator(firstPart.charCodeAt(1))) {
 				++slashCount;
+
 				if (firstLen > 2) {
 					if (isPathSeparator(firstPart.charCodeAt(2))) ++slashCount;
+
 					else {
 						// We matched a UNC path in the first part
 						needsReplace = false;
@@ -373,6 +408,7 @@ export function relative(from: string, to: string): string {
 	if (from === to) return "";
 
 	const fromOrig = resolve(from);
+
 	const toOrig = resolve(to);
 
 	if (fromOrig === toOrig) return "";
@@ -384,7 +420,9 @@ export function relative(from: string, to: string): string {
 
 	// Trim any leading backslashes
 	let fromStart = 0;
+
 	let fromEnd = from.length;
+
 	for (; fromStart < fromEnd; ++fromStart) {
 		if (from.charCodeAt(fromStart) !== CHAR_BACKWARD_SLASH) break;
 	}
@@ -396,7 +434,9 @@ export function relative(from: string, to: string): string {
 
 	// Trim any leading backslashes
 	let toStart = 0;
+
 	let toEnd = to.length;
+
 	for (; toStart < toEnd; ++toStart) {
 		if (to.charCodeAt(toStart) !== CHAR_BACKWARD_SLASH) break;
 	}
@@ -408,8 +448,11 @@ export function relative(from: string, to: string): string {
 
 	// Compare paths to find the longest common path from root
 	const length = fromLen < toLen ? fromLen : toLen;
+
 	let lastCommonSep = -1;
+
 	let i = 0;
+
 	for (; i <= length; ++i) {
 		if (i === length) {
 			if (toLen > length) {
@@ -437,8 +480,11 @@ export function relative(from: string, to: string): string {
 			break;
 		}
 		const fromCode = from.charCodeAt(fromStart + i);
+
 		const toCode = to.charCodeAt(toStart + i);
+
 		if (fromCode !== toCode) break;
+
 		else if (fromCode === CHAR_BACKWARD_SLASH) lastCommonSep = i;
 	}
 
@@ -449,12 +495,14 @@ export function relative(from: string, to: string): string {
 	}
 
 	let out = "";
+
 	if (lastCommonSep === -1) lastCommonSep = 0;
 	// Generate the relative path based on the path difference between `to` and
 	// `from`
 	for (i = fromStart + lastCommonSep + 1; i <= fromEnd; ++i) {
 		if (i === fromEnd || from.charCodeAt(i) === CHAR_BACKWARD_SLASH) {
 			if (out.length === 0) out += "..";
+
 			else out += "\\..";
 		}
 	}
@@ -463,9 +511,12 @@ export function relative(from: string, to: string): string {
 	// the common path parts
 	if (out.length > 0)
 		return out + toOrig.slice(toStart + lastCommonSep, toEnd);
+
 	else {
 		toStart += lastCommonSep;
+
 		if (toOrig.charCodeAt(toStart) === CHAR_BACKWARD_SLASH) ++toStart;
+
 		return toOrig.slice(toStart, toEnd);
 	}
 }
@@ -473,6 +524,7 @@ export function relative(from: string, to: string): string {
 export function toNamespacedPath(path: string): string {
 	// Note: this will *probably* throw somewhere.
 	if (typeof path !== "string") return path;
+
 	if (path.length === 0) return "";
 
 	const resolvedPath = resolve(path);
@@ -483,6 +535,7 @@ export function toNamespacedPath(path: string): string {
 
 			if (resolvedPath.charCodeAt(1) === CHAR_BACKWARD_SLASH) {
 				const code = resolvedPath.charCodeAt(2);
+
 				if (code !== CHAR_QUESTION_MARK && code !== CHAR_DOT) {
 					// Matched non-long UNC root, convert the path to a long UNC path
 					return `\\\\?\\UNC\\${resolvedPath.slice(2)}`;
@@ -506,12 +559,19 @@ export function toNamespacedPath(path: string): string {
 
 export function dirname(path: string): string {
 	assertPath(path);
+
 	const len = path.length;
+
 	if (len === 0) return ".";
+
 	let rootEnd = -1;
+
 	let end = -1;
+
 	let matchedSlash = true;
+
 	let offset = 0;
+
 	const code = path.charCodeAt(0);
 
 	// Try to match a root
@@ -524,6 +584,7 @@ export function dirname(path: string): string {
 			if (isPathSeparator(path.charCodeAt(1))) {
 				// Matched double path separator at beginning
 				let j = 2;
+
 				let last = j;
 				// Match 1 or more non-path separators
 				for (; j < len; ++j) {
@@ -562,6 +623,7 @@ export function dirname(path: string): string {
 
 			if (path.charCodeAt(1) === CHAR_COLON) {
 				rootEnd = offset = 2;
+
 				if (len > 2) {
 					if (isPathSeparator(path.charCodeAt(2)))
 						rootEnd = offset = 3;
@@ -578,6 +640,7 @@ export function dirname(path: string): string {
 		if (isPathSeparator(path.charCodeAt(i))) {
 			if (!matchedSlash) {
 				end = i;
+
 				break;
 			}
 		} else {
@@ -588,6 +651,7 @@ export function dirname(path: string): string {
 
 	if (end === -1) {
 		if (rootEnd === -1) return ".";
+
 		else end = rootEnd;
 	}
 	return path.slice(0, end);
@@ -600,8 +664,11 @@ export function basename(path: string, ext = ""): string {
 	assertPath(path);
 
 	let start = 0;
+
 	let end = -1;
+
 	let matchedSlash = true;
+
 	let i: number;
 
 	// Check for a drive letter prefix so as not to mistake the following
@@ -609,6 +676,7 @@ export function basename(path: string, ext = ""): string {
 	// disregarded
 	if (path.length >= 2) {
 		const drive = path.charCodeAt(0);
+
 		if (isWindowsDeviceRoot(drive)) {
 			if (path.charCodeAt(1) === CHAR_COLON) start = 2;
 		}
@@ -616,15 +684,20 @@ export function basename(path: string, ext = ""): string {
 
 	if (ext !== undefined && ext.length > 0 && ext.length <= path.length) {
 		if (ext.length === path.length && ext === path) return "";
+
 		let extIdx = ext.length - 1;
+
 		let firstNonSlashEnd = -1;
+
 		for (i = path.length - 1; i >= start; --i) {
 			const code = path.charCodeAt(i);
+
 			if (isPathSeparator(code)) {
 				// If we reached a path separator that was not part of a set of path
 				// separators at the end of the string, stop now
 				if (!matchedSlash) {
 					start = i + 1;
+
 					break;
 				}
 			} else {
@@ -653,7 +726,9 @@ export function basename(path: string, ext = ""): string {
 		}
 
 		if (start === end) end = firstNonSlashEnd;
+
 		else if (end === -1) end = path.length;
+
 		return path.slice(start, end);
 	} else {
 		for (i = path.length - 1; i >= start; --i) {
@@ -662,6 +737,7 @@ export function basename(path: string, ext = ""): string {
 				// separators at the end of the string, stop now
 				if (!matchedSlash) {
 					start = i + 1;
+
 					break;
 				}
 			} else if (end === -1) {
@@ -673,16 +749,22 @@ export function basename(path: string, ext = ""): string {
 		}
 
 		if (end === -1) return "";
+
 		return path.slice(start, end);
 	}
 }
 
 export function extname(path: string): string {
 	assertPath(path);
+
 	let start = 0;
+
 	let startDot = -1;
+
 	let startPart = 0;
+
 	let end = -1;
+
 	let matchedSlash = true;
 	// Track the state of characters (if any) we see before our first dot and
 	// after any path separator we find
@@ -702,11 +784,13 @@ export function extname(path: string): string {
 
 	for (let i = path.length - 1; i >= start; --i) {
 		const code = path.charCodeAt(i);
+
 		if (isPathSeparator(code)) {
 			// If we reached a path separator that was not part of a set of path
 			// separators at the end of the string, stop now
 			if (!matchedSlash) {
 				startPart = i + 1;
+
 				break;
 			}
 			continue;
@@ -720,6 +804,7 @@ export function extname(path: string): string {
 		if (code === CHAR_DOT) {
 			// If this is our first dot, mark it as the start of our extension
 			if (startDot === -1) startDot = i;
+
 			else if (preDotState !== 1) preDotState = 1;
 		} else if (startDot !== -1) {
 			// We saw a non-dot and non-path separator before our dot, so we should
@@ -759,9 +844,11 @@ export function parse(path: string): ParsedPath {
 	const ret: ParsedPath = { root: "", dir: "", base: "", ext: "", name: "" };
 
 	const len = path.length;
+
 	if (len === 0) return ret;
 
 	let rootEnd = 0;
+
 	let code = path.charCodeAt(0);
 
 	// Try to match a root
@@ -770,9 +857,11 @@ export function parse(path: string): ParsedPath {
 			// Possible UNC root
 
 			rootEnd = 1;
+
 			if (isPathSeparator(path.charCodeAt(1))) {
 				// Matched double path separator at beginning
 				let j = 2;
+
 				let last = j;
 				// Match 1 or more non-path separators
 				for (; j < len; ++j) {
@@ -809,12 +898,14 @@ export function parse(path: string): ParsedPath {
 
 			if (path.charCodeAt(1) === CHAR_COLON) {
 				rootEnd = 2;
+
 				if (len > 2) {
 					if (isPathSeparator(path.charCodeAt(2))) {
 						if (len === 3) {
 							// `path` contains just a drive root, exit early to avoid
 							// unnecessary work
 							ret.root = ret.dir = path;
+
 							return ret;
 						}
 						rootEnd = 3;
@@ -823,6 +914,7 @@ export function parse(path: string): ParsedPath {
 					// `path` contains just a drive root, exit early to avoid
 					// unnecessary work
 					ret.root = ret.dir = path;
+
 					return ret;
 				}
 			}
@@ -831,15 +923,20 @@ export function parse(path: string): ParsedPath {
 		// `path` contains just a path separator, exit early to avoid
 		// unnecessary work
 		ret.root = ret.dir = path;
+
 		return ret;
 	}
 
 	if (rootEnd > 0) ret.root = path.slice(0, rootEnd);
 
 	let startDot = -1;
+
 	let startPart = rootEnd;
+
 	let end = -1;
+
 	let matchedSlash = true;
+
 	let i = path.length - 1;
 
 	// Track the state of characters (if any) we see before our first dot and
@@ -849,11 +946,13 @@ export function parse(path: string): ParsedPath {
 	// Get non-dir info
 	for (; i >= rootEnd; --i) {
 		code = path.charCodeAt(i);
+
 		if (isPathSeparator(code)) {
 			// If we reached a path separator that was not part of a set of path
 			// separators at the end of the string, stop now
 			if (!matchedSlash) {
 				startPart = i + 1;
+
 				break;
 			}
 			continue;
@@ -867,6 +966,7 @@ export function parse(path: string): ParsedPath {
 		if (code === CHAR_DOT) {
 			// If this is our first dot, mark it as the start of our extension
 			if (startDot === -1) startDot = i;
+
 			else if (preDotState !== 1) preDotState = 1;
 		} else if (startDot !== -1) {
 			// We saw a non-dot and non-path separator before our dot, so we should

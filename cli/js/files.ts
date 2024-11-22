@@ -24,6 +24,7 @@ import {
  */
 export function openSync(filename: string, mode: OpenMode = "r"): File {
 	const rid = sendSyncJson(dispatch.OP_OPEN, { filename, mode });
+
 	return new File(rid);
 }
 
@@ -36,6 +37,7 @@ export async function open(
 	mode: OpenMode = "r",
 ): Promise<File> {
 	const rid = await sendAsyncJson(dispatch.OP_OPEN, { filename, mode });
+
 	return new File(rid);
 }
 
@@ -51,6 +53,7 @@ export async function open(
  */
 export function readSync(rid: number, p: Uint8Array): number | EOF {
 	const nread = sendSyncMinimal(dispatch.OP_READ, rid, p);
+
 	if (nread < 0) {
 		throw new Error("read error");
 	} else if (nread == 0) {
@@ -71,6 +74,7 @@ export function readSync(rid: number, p: Uint8Array): number | EOF {
  */
 export async function read(rid: number, p: Uint8Array): Promise<number | EOF> {
 	const nread = await sendAsyncMinimal(dispatch.OP_READ, rid, p);
+
 	if (nread < 0) {
 		throw new Error("read error");
 	} else if (nread == 0) {
@@ -91,6 +95,7 @@ export async function read(rid: number, p: Uint8Array): Promise<number | EOF> {
  */
 export function writeSync(rid: number, p: Uint8Array): number {
 	const result = sendSyncMinimal(dispatch.OP_WRITE, rid, p);
+
 	if (result < 0) {
 		throw new Error("write error");
 	} else {
@@ -110,6 +115,7 @@ export function writeSync(rid: number, p: Uint8Array): number {
  */
 export async function write(rid: number, p: Uint8Array): Promise<number> {
 	const result = await sendAsyncMinimal(dispatch.OP_WRITE, rid, p);
+
 	if (result < 0) {
 		throw new Error("write error");
 	} else {

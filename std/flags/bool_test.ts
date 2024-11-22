@@ -38,15 +38,19 @@ test(function booleanGroups(): void {
 
 test(function booleanAndAliasWithChainableApi(): void {
 	const aliased = ["-h", "derp"];
+
 	const regular = ["--herp", "derp"];
+
 	const aliasedArgv = parse(aliased, {
 		boolean: "herp",
 		alias: { h: "herp" },
 	});
+
 	const propertyArgv = parse(regular, {
 		boolean: "herp",
 		alias: { h: "herp" },
 	});
+
 	const expected = {
 		herp: true,
 		h: true,
@@ -59,13 +63,18 @@ test(function booleanAndAliasWithChainableApi(): void {
 
 test(function booleanAndAliasWithOptionsHash(): void {
 	const aliased = ["-h", "derp"];
+
 	const regular = ["--herp", "derp"];
+
 	const opts = {
 		alias: { h: "herp" },
 		boolean: "herp",
 	};
+
 	const aliasedArgv = parse(aliased, opts);
+
 	const propertyArgv = parse(regular, opts);
+
 	const expected = {
 		herp: true,
 		h: true,
@@ -77,15 +86,22 @@ test(function booleanAndAliasWithOptionsHash(): void {
 
 test(function booleanAndAliasArrayWithOptionsHash(): void {
 	const aliased = ["-h", "derp"];
+
 	const regular = ["--herp", "derp"];
+
 	const alt = ["--harp", "derp"];
+
 	const opts = {
 		alias: { h: ["herp", "harp"] },
 		boolean: "h",
 	};
+
 	const aliasedArgv = parse(aliased, opts);
+
 	const propertyArgv = parse(regular, opts);
+
 	const altPropertyArgv = parse(alt, opts);
+
 	const expected = {
 		harp: true,
 		herp: true,
@@ -99,13 +115,18 @@ test(function booleanAndAliasArrayWithOptionsHash(): void {
 
 test(function booleanAndAliasUsingExplicitTrue(): void {
 	const aliased = ["-h", "true"];
+
 	const regular = ["--herp", "true"];
+
 	const opts = {
 		alias: { h: "herp" },
 		boolean: "h",
 	};
+
 	const aliasedArgv = parse(aliased, opts);
+
 	const propertyArgv = parse(regular, opts);
+
 	const expected = {
 		herp: true,
 		h: true,

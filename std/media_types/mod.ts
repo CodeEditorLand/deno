@@ -30,6 +30,7 @@
 import { db, extname } from "./deps.ts";
 
 const EXTRACT_TYPE_REGEXP = /^\s*([^;\s]*)(?:;|\s|$)/;
+
 const TEXT_TYPE_REGEXP = /^text\//i;
 
 /** A map of extensions for a given media type */
@@ -47,6 +48,7 @@ function populateMaps(
 
 	for (const type of Object.keys(db)) {
 		const mime = db[type];
+
 		const exts = mime.extensions;
 
 		if (!exts || !exts.length) {
@@ -58,7 +60,9 @@ function populateMaps(
 		for (const ext of exts) {
 			if (types.has(ext)) {
 				const current = types.get(ext)!;
+
 				const from = preference.indexOf(db[current].source);
+
 				const to = preference.indexOf(mime.source);
 
 				if (
@@ -84,10 +88,12 @@ populateMaps(extensions, types);
  */
 export function charset(type: string): string | undefined {
 	const m = EXTRACT_TYPE_REGEXP.exec(type);
+
 	if (!m) {
 		return;
 	}
 	const [match] = m;
+
 	const mime = db[match.toLowerCase()];
 
 	if (mime && mime.charset) {
@@ -122,6 +128,7 @@ export function contentType(str: string): string | undefined {
 
 	if (!mime.includes("charset")) {
 		const cs = charset(mime);
+
 		if (cs) {
 			mime += `; charset=${cs.toLowerCase()}`;
 		}

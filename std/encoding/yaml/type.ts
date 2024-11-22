@@ -10,15 +10,18 @@ export type StyleVariant = "lowercase" | "uppercase" | "camelcase" | "decimal";
 export type RepresentFn = (data: Any, style?: StyleVariant) => Any;
 
 const DEFAULT_RESOLVE = (): boolean => true;
+
 const DEFAULT_CONSTRUCT = (data: Any): Any => data;
 
 interface TypeOptions {
 	kind: KindType;
 	resolve?: (data: Any) => boolean;
+
 	construct?: (data: string) => Any;
 	instanceOf?: Any;
 	predicate?: (data: object) => boolean;
 	represent?: RepresentFn | ArrayObject<RepresentFn>;
+
 	defaultStyle?: StyleVariant;
 	styleAliases?: ArrayObject;
 }
@@ -39,6 +42,7 @@ export class Type {
 
 	constructor(tag: string, options?: TypeOptions) {
 		this.tag = checkTagFormat(tag);
+
 		if (options) {
 			this.kind = options.kind;
 			this.resolve = options.resolve || DEFAULT_RESOLVE;

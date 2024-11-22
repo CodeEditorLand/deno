@@ -3,6 +3,7 @@ import { assert, assertEquals, testPerm } from "./test_util.ts";
 
 testPerm({ net: true }, function netListenClose(): void {
 	const listener = Deno.listen({ hostname: "127.0.0.1", port: 4500 });
+
 	const addr = listener.addr();
 	assertEquals(addr.transport, "tcp");
 	// TODO(ry) Replace 'address' with 'hostname' and 'port', similar to
@@ -13,9 +14,12 @@ testPerm({ net: true }, function netListenClose(): void {
 
 testPerm({ net: true }, async function netCloseWhileAccept(): Promise<void> {
 	const listener = Deno.listen({ port: 4501 });
+
 	const p = listener.accept();
 	listener.close();
+
 	let err;
+
 	try {
 		await p;
 	} catch (e) {
@@ -28,9 +32,12 @@ testPerm({ net: true }, async function netCloseWhileAccept(): Promise<void> {
 
 testPerm({ net: true }, async function netConcurrentAccept(): Promise<void> {
 	const listener = Deno.listen({ port: 4502 });
+
 	let acceptErrCount = 0;
+
 	const checkErr = (e): void => {
 		assertEquals(e.kind, Deno.ErrorKind.Other);
+
 		if (e.message === "Listener has been closed") {
 			assertEquals(acceptErrCount, 1);
 		} else if (e.message === "Another accept task is ongoing") {
@@ -39,7 +46,9 @@ testPerm({ net: true }, async function netConcurrentAccept(): Promise<void> {
 			throw new Error("Unexpected error message");
 		}
 	};
+
 	const p = listener.accept().catch(checkErr);
+
 	const p1 = listener.accept().catch(checkErr);
 	await Promise.race([p, p1]);
 	listener.close();
@@ -55,10 +64,13 @@ testPerm({ net: true }, async function netDialListen(): Promise<void> {
 		await conn.write(new Uint8Array([1, 2, 3]));
 		conn.close();
 	});
+
 	const conn = await Deno.dial({ hostname: "127.0.0.1", port: 4500 });
 	assertEquals(conn.remoteAddr, "127.0.0.1:4500");
 	assert(conn.localAddr != null);
+
 	const buf = new Uint8Array(1024);
+
 	const readResult = await conn.read(buf);
 	assertEquals(3, readResult);
 	assertEquals(1, buf[0]);
@@ -79,6 +91,7 @@ testPerm(
 	{ net: true },
 	async function netListenCloseWhileIterating(): Promise<void> {
 		const listener = Deno.listen({ port: 8000 });
+
 		const nextWhileClosing = listener[Symbol.asyncIterator]().next();
 		listener.close();
 		assertEquals(await nextWhileClosing, { value: undefined, done: true });
@@ -126,7 +139,9 @@ testPerm({ net: true }, async function netCloseReadSuccess() {
   listener.accept().then(async conn => {
     await closeReadDeferred.promise;
     await conn.write(new Uint8Array([1, 2, 3]));
+
     const buf = new Uint8Array(1024);
+
     const readResult = await conn.read(buf);
     assertEquals(3, readResult);
     assertEquals(4, buf[0]);

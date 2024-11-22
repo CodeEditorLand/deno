@@ -60,9 +60,13 @@ export class FileInfoImpl implements FileInfo {
 	/* @internal */
 	constructor(private _res: StatResponse) {
 		const modified = this._res.modified;
+
 		const accessed = this._res.accessed;
+
 		const created = this._res.created;
+
 		const hasMode = this._res.hasMode;
+
 		const mode = this._res.mode; // negative for invalid mode (Windows)
 		const name = this._res.name;
 

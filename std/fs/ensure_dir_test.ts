@@ -9,6 +9,7 @@ const testdataDir = path.resolve("fs", "testdata");
 
 test(async function ensureDirIfItNotExist(): Promise<void> {
 	const baseDir = path.join(testdataDir, "ensure_dir_not_exist");
+
 	const testDir = path.join(baseDir, "test");
 
 	await ensureDir(testDir);
@@ -24,6 +25,7 @@ test(async function ensureDirIfItNotExist(): Promise<void> {
 
 test(function ensureDirSyncIfItNotExist(): void {
 	const baseDir = path.join(testdataDir, "ensure_dir_sync_not_exist");
+
 	const testDir = path.join(baseDir, "test");
 
 	ensureDirSync(testDir);
@@ -35,6 +37,7 @@ test(function ensureDirSyncIfItNotExist(): void {
 
 test(async function ensureDirIfItExist(): Promise<void> {
 	const baseDir = path.join(testdataDir, "ensure_dir_exist");
+
 	const testDir = path.join(baseDir, "test");
 
 	// create test directory
@@ -53,6 +56,7 @@ test(async function ensureDirIfItExist(): Promise<void> {
 
 test(function ensureDirSyncIfItExist(): void {
 	const baseDir = path.join(testdataDir, "ensure_dir_sync_exist");
+
 	const testDir = path.join(baseDir, "test");
 
 	// create test directory
@@ -62,6 +66,7 @@ test(function ensureDirSyncIfItExist(): void {
 
 	assertThrows((): void => {
 		Deno.statSync(testDir);
+
 		throw new Error("test dir should still exists.");
 	});
 
@@ -70,6 +75,7 @@ test(function ensureDirSyncIfItExist(): void {
 
 test(async function ensureDirIfItAsFile(): Promise<void> {
 	const baseDir = path.join(testdataDir, "ensure_dir_exist_file");
+
 	const testFile = path.join(baseDir, "test");
 
 	await ensureFile(testFile);
@@ -87,6 +93,7 @@ test(async function ensureDirIfItAsFile(): Promise<void> {
 
 test(function ensureDirSyncIfItAsFile(): void {
 	const baseDir = path.join(testdataDir, "ensure_dir_exist_file_async");
+
 	const testFile = path.join(baseDir, "test");
 
 	ensureFileSync(testFile);

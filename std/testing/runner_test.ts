@@ -17,6 +17,7 @@ async function findTestModulesArray(
 	root: string = cwd(),
 ): Promise<string[]> {
 	const result = [];
+
 	for await (const testModule of findTestModules(include, exclude, root)) {
 		result.push(testModule);
 	}
@@ -24,6 +25,7 @@ async function findTestModulesArray(
 }
 
 const TEST_DATA_URL = new URL("testdata", import.meta.url);
+
 const TEST_DATA_PATH = urlToFilePath(TEST_DATA_URL);
 
 test(async function findTestModulesDir1(): Promise<void> {
@@ -91,6 +93,7 @@ test(async function findTestModulesRemote(): Promise<void> {
 		"https://example.com/colors_test.ts",
 		"http://example.com/printf_test.ts",
 	];
+
 	const matches = await findTestModulesArray(urls, []);
 	assertEquals(matches, urls);
 });

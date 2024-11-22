@@ -26,6 +26,7 @@ export async function lstat(filename: string): Promise<FileInfo> {
 		filename,
 		lstat: true,
 	})) as StatResponse;
+
 	return new FileInfoImpl(res);
 }
 
@@ -41,6 +42,7 @@ export function lstatSync(filename: string): FileInfo {
 		filename,
 		lstat: true,
 	}) as StatResponse;
+
 	return new FileInfoImpl(res);
 }
 
@@ -55,6 +57,7 @@ export async function stat(filename: string): Promise<FileInfo> {
 		filename,
 		lstat: false,
 	})) as StatResponse;
+
 	return new FileInfoImpl(res);
 }
 
@@ -69,5 +72,6 @@ export function statSync(filename: string): FileInfo {
 		filename,
 		lstat: false,
 	}) as StatResponse;
+
 	return new FileInfoImpl(res);
 }

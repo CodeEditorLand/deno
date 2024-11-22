@@ -10,8 +10,10 @@ import { open, openSync } from "./files.ts";
  */
 export function readFileSync(filename: string): Uint8Array {
 	const file = openSync(filename);
+
 	const contents = readAllSync(file);
 	file.close();
+
 	return contents;
 }
 
@@ -23,7 +25,9 @@ export function readFileSync(filename: string): Uint8Array {
  */
 export async function readFile(filename: string): Promise<Uint8Array> {
 	const file = await open(filename);
+
 	const contents = await readAll(file);
 	file.close();
+
 	return contents;
 }

@@ -4,6 +4,7 @@ export interface ArgParsingOptions {
 	boolean?: boolean | string | string[];
 	alias?: { [key: string]: string | string[] };
 	string?: string | string[];
+
 	default?: { [key: string]: unknown };
 	"--"?: boolean;
 	stopEarly?: boolean;
@@ -38,7 +39,9 @@ function get<T>(obj: { [s: string]: T }, key: string): T | undefined {
 
 function isNumber(x: unknown): boolean {
 	if (typeof x === "number") return true;
+
 	if (/^0x[0-9a-f]+$/i.test(String(x))) return true;
+
 	return /^[-+]?(?:\d+(?:\.\d*)?|\.\d+)(e[-+]?\d+)?$/.test(String(x));
 }
 
@@ -49,6 +52,7 @@ function hasKey(obj: NestedMapping, keys: string[]): boolean {
 	});
 
 	const key = keys[keys.length - 1];
+
 	return key in o;
 }
 
@@ -86,6 +90,7 @@ export function parse(
 	}
 
 	const aliases: { [key: string]: string[] } = {};
+
 	if (options.alias !== undefined) {
 		for (const key in options.alias) {
 			const val = get(options.alias, key)!;
@@ -112,7 +117,9 @@ export function parse(
 
 		stringArgs.filter(Boolean).forEach(function (key): void {
 			flags.strings[key] = true;
+
 			const alias = get(aliases, key);
+
 			if (alias) {
 				alias.forEach((alias: string): void => {
 					flags.strings[alias] = true;
@@ -144,6 +151,7 @@ export function parse(
 		});
 
 		const key = keys[keys.length - 1];
+
 		if (
 			get(o, key) === undefined ||
 			get(flags.bools, key) ||
@@ -168,6 +176,7 @@ export function parse(
 
 		const value =
 			!get(flags.strings, key) && isNumber(val) ? Number(val) : val;
+
 		setKey(argv, key.split("."), value);
 
 		(get(aliases, key) || []).forEach(function (x): void {
@@ -201,21 +210,27 @@ export function parse(
 			// 'dotall' regex modifier. See:
 			// http://stackoverflow.com/a/1068308/13216
 			const m = arg.match(/^--([^=]+)=([\s\S]*)$/)!;
+
 			const key = m[1];
+
 			const value = m[2];
 
 			if (flags.bools[key]) {
 				const booleanValue = value !== "false";
+
 				setArg(key, booleanValue, arg);
 			} else {
 				setArg(key, value, arg);
 			}
 		} else if (/^--no-.+/.test(arg)) {
 			const key = arg.match(/^--no-(.+)/)![1];
+
 			setArg(key, false, arg);
 		} else if (/^--.+/.test(arg)) {
 			const key = arg.match(/^--(.+)/)![1];
+
 			const next = args[i + 1];
+
 			if (
 				next !== undefined &&
 				!/^-/.test(next) &&
@@ -235,17 +250,20 @@ export function parse(
 			const letters = arg.slice(1, -1).split("");
 
 			let broken = false;
+
 			for (let j = 0; j < letters.length; j++) {
 				const next = arg.slice(j + 2);
 
 				if (next === "-") {
 					setArg(letters[j], next, arg);
+
 					continue;
 				}
 
 				if (/[A-Za-z]/.test(letters[j]) && /=/.test(next)) {
 					setArg(letters[j], next.split("=")[1], arg);
 					broken = true;
+
 					break;
 				}
 
@@ -255,12 +273,14 @@ export function parse(
 				) {
 					setArg(letters[j], next, arg);
 					broken = true;
+
 					break;
 				}
 
 				if (letters[j + 1] && letters[j + 1].match(/\W/)) {
 					setArg(letters[j], arg.slice(j + 2), arg);
 					broken = true;
+
 					break;
 				} else {
 					setArg(
@@ -272,6 +292,7 @@ export function parse(
 			}
 
 			const key = arg.slice(-1)[0];
+
 			if (!broken && key !== "-") {
 				if (
 					args[i + 1] &&
@@ -296,6 +317,7 @@ export function parse(
 			}
 			if (options.stopEarly) {
 				argv._.push(...args.slice(i + 1));
+
 				break;
 			}
 		}

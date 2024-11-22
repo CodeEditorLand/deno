@@ -48,6 +48,7 @@ export function applySourceMap(location: Location): Location {
 		line: line - 1,
 		column: column - 1,
 	});
+
 	return {
 		filename: res.filename,
 		line: res.line + 1,
@@ -119,12 +120,15 @@ function getMethodCall(callSite: CallSite): string {
 	let result = "";
 
 	const typeName = callSite.getTypeName();
+
 	const methodName = callSite.getMethodName();
+
 	const functionName = callSite.getFunctionName();
 
 	if (functionName) {
 		if (typeName) {
 			const startsWithTypeName = functionName.startsWith(typeName);
+
 			if (!startsWithTypeName) {
 				result += `${typeName}.`;
 			}
@@ -162,6 +166,7 @@ function getFileLocation(callSite: CallSite): string {
 	let result = "";
 
 	const fileName = callSite.getFileName();
+
 	if (!fileName && callSite.isEval()) {
 		const evalOrigin = callSite.getEvalOrigin();
 		assert(evalOrigin != null);
@@ -175,10 +180,12 @@ function getFileLocation(callSite: CallSite): string {
 	}
 
 	const lineNumber = callSite.getLineNumber();
+
 	if (lineNumber != null) {
 		result += `:${lineNumber}`;
 
 		const columnNumber = callSite.getColumnNumber();
+
 		if (columnNumber != null) {
 			result += `:${columnNumber}`;
 		}
@@ -193,12 +200,17 @@ function getFileLocation(callSite: CallSite): string {
  */
 function callSiteToString(callSite: CallSite): string {
 	let result = "";
+
 	const functionName = callSite.getFunctionName();
 
 	const isTopLevel = callSite.isToplevel();
+
 	const isAsync = callSite.isAsync();
+
 	const isPromiseAll = callSite.isPromiseAll();
+
 	const isConstructor = callSite.isConstructor();
+
 	const isMethodCall = !(isTopLevel || isConstructor);
 
 	if (isAsync) {
@@ -206,12 +218,14 @@ function callSiteToString(callSite: CallSite): string {
 	}
 	if (isPromiseAll) {
 		result += `Promise.all (index ${callSite.getPromiseIndex})`;
+
 		return result;
 	}
 	if (isMethodCall) {
 		result += getMethodCall(callSite);
 	} else if (isConstructor) {
 		result += "new ";
+
 		if (functionName) {
 			result += functionName;
 		} else {
@@ -221,10 +235,12 @@ function callSiteToString(callSite: CallSite): string {
 		result += functionName;
 	} else {
 		result += getFileLocation(callSite);
+
 		return result;
 	}
 
 	result += ` (${getFileLocation(callSite)})`;
+
 	return result;
 }
 
@@ -240,8 +256,11 @@ function prepareStackTrace(
 		structuredStackTrace
 			.map((callSite): CallSite => {
 				const filename = callSite.getFileName();
+
 				const line = callSite.getLineNumber();
+
 				const column = callSite.getColumnNumber();
+
 				if (filename && line != null && column != null) {
 					return patchCallSite(
 						callSite,

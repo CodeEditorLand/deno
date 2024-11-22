@@ -16,12 +16,16 @@ export interface DiffResult<T> {
 }
 
 const REMOVED = 1;
+
 const COMMON = 2;
+
 const ADDED = 3;
 
 function createCommon<T>(A: T[], B: T[], reverse?: boolean): T[] {
 	const common = [];
+
 	if (A.length === 0 || B.length === 0) return [];
+
 	for (let i = 0; i < Math.min(A.length, B.length); i += 1) {
 		if (
 			A[reverse ? A.length - i - 1 : i] ===
@@ -37,6 +41,7 @@ function createCommon<T>(A: T[], B: T[], reverse?: boolean): T[] {
 
 export default function diff<T>(A: T[], B: T[]): Array<DiffResult<T>> {
 	const prefixCommon = createCommon(A, B);
+
 	const suffixCommon = createCommon(
 		A.slice(prefixCommon.length),
 		B.slice(prefixCommon.length),
@@ -48,11 +53,16 @@ export default function diff<T>(A: T[], B: T[]): Array<DiffResult<T>> {
 	B = suffixCommon.length
 		? B.slice(prefixCommon.length, -suffixCommon.length)
 		: B.slice(prefixCommon.length);
+
 	const swapped = B.length > A.length;
 	[A, B] = swapped ? [B, A] : [A, B];
+
 	const M = A.length;
+
 	const N = B.length;
+
 	if (!M && !N && !suffixCommon.length && !prefixCommon.length) return [];
+
 	if (!N) {
 		return [
 			...prefixCommon.map(
@@ -76,8 +86,11 @@ export default function diff<T>(A: T[], B: T[]): Array<DiffResult<T>> {
 		];
 	}
 	const offset = N;
+
 	const delta = M - N;
+
 	const size = M + N + 1;
+
 	const fp = new Array(size).fill({ y: -1 });
 	/**
 	 * INFO:
@@ -88,8 +101,11 @@ export default function diff<T>(A: T[], B: T[]): Array<DiffResult<T>> {
 	 * worsened.
 	 */
 	const routes = new Uint32Array((M * N + size + 1) * 2);
+
 	const diffTypesPtrOffset = routes.length / 2;
+
 	let ptr = 0;
+
 	let p = -1;
 
 	function backTrace<T>(
@@ -102,15 +118,24 @@ export default function diff<T>(A: T[], B: T[]): Array<DiffResult<T>> {
 		value: T;
 	}> {
 		const M = A.length;
+
 		const N = B.length;
+
 		const result = [];
+
 		let a = M - 1;
+
 		let b = N - 1;
+
 		let j = routes[current.id];
+
 		let type = routes[current.id + diffTypesPtrOffset];
+
 		while (true) {
 			if (!j && !type) break;
+
 			const prev = j;
+
 			if (type === REMOVED) {
 				result.unshift({
 					type: swapped ? DiffType.removed : DiffType.added,
@@ -142,6 +167,7 @@ export default function diff<T>(A: T[], B: T[]): Array<DiffResult<T>> {
 	): FarthestPoint {
 		if (slide && slide.y === -1 && down && down.y === -1)
 			return { y: 0, id: 0 };
+
 		if (
 			(down && down.y === -1) ||
 			k === M ||
@@ -151,12 +177,14 @@ export default function diff<T>(A: T[], B: T[]): Array<DiffResult<T>> {
 			ptr++;
 			routes[ptr] = prev;
 			routes[ptr + diffTypesPtrOffset] = ADDED;
+
 			return { y: slide.y, id: ptr };
 		} else {
 			const prev = down.id;
 			ptr++;
 			routes[ptr] = prev;
 			routes[ptr + diffTypesPtrOffset] = REMOVED;
+
 			return { y: down.y + 1, id: ptr };
 		}
 	}
@@ -170,9 +198,13 @@ export default function diff<T>(A: T[], B: T[]): Array<DiffResult<T>> {
 		B: T[],
 	): FarthestPoint {
 		const M = A.length;
+
 		const N = B.length;
+
 		if (k < -N || M < k) return { y: -1, id: -1 };
+
 		const fp = createFP(slide, down, k, M);
+
 		while (fp.y + k < M && fp.y < N && A[fp.y + k] === B[fp.y]) {
 			const prev = fp.id;
 			ptr++;
@@ -186,6 +218,7 @@ export default function diff<T>(A: T[], B: T[]): Array<DiffResult<T>> {
 
 	while (fp[delta + offset].y < N) {
 		p = p + 1;
+
 		for (let k = -p; k < delta; ++k) {
 			fp[k + offset] = snake(
 				k,

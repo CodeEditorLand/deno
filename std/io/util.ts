@@ -11,11 +11,14 @@ type Reader = Deno.Reader;
 // Returns the number of bytes copied.
 export function copyBytes(dst: Uint8Array, src: Uint8Array, off = 0): number {
 	off = Math.max(0, Math.min(off, dst.byteLength));
+
 	const r = dst.byteLength - off;
+
 	if (src.byteLength > r) {
 		src = src.subarray(0, r);
 	}
 	dst.set(src, off);
+
 	return src.byteLength;
 }
 
@@ -38,10 +41,13 @@ export async function tempFile(
 	} = { prefix: "", postfix: "" },
 ): Promise<{ file: File; filepath: string }> {
 	const r = Math.floor(Math.random() * 1000000);
+
 	const filepath = path.resolve(
 		`${dir}/${opts.prefix || ""}${r}${opts.postfix || ""}`,
 	);
 	await mkdir(path.dirname(filepath), true);
+
 	const file = await open(filepath, "a");
+
 	return { file, filepath };
 }

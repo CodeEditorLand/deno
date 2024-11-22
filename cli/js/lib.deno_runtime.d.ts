@@ -228,7 +228,9 @@ declare namespace Deno {
 	// @url js/io.d.ts
 
 	export const EOF: unique symbol;
+
 	export type EOF = typeof EOF;
+
 	export enum SeekMode {
 		SEEK_START = 0,
 		SEEK_CURRENT = 1,
@@ -411,6 +413,7 @@ declare namespace Deno {
 			Closer
 	{
 		readonly rid: number;
+
 		constructor(rid: number);
 		write(p: Uint8Array): Promise<number>;
 		writeSync(p: Uint8Array): number;
@@ -426,6 +429,7 @@ declare namespace Deno {
 	export const stdout: File;
 	/** An instance of `File` for stderr. */
 	export const stderr: File;
+
 	export type OpenMode =
 		| "r"
 		/** Read-write. Start at beginning of file. */
@@ -459,6 +463,7 @@ declare namespace Deno {
 	export class Buffer implements Reader, SyncReader, Writer, SyncWriter {
 		private buf;
 		private off;
+
 		constructor(ab?: ArrayBuffer);
 		/** bytes() returns a slice holding the unread portion of the buffer.
 		 * The slice is valid for use only until the next buffer modification (that
@@ -996,6 +1001,7 @@ declare namespace Deno {
 	 */
 	export class DenoError<T extends ErrorKind> extends Error {
 		readonly kind: T;
+
 		constructor(kind: T, msg: string);
 	}
 	export enum ErrorKind {
@@ -1123,6 +1129,7 @@ declare namespace Deno {
 	/** https://w3c.github.io/permissions/#permissionstatus */
 	export class PermissionStatus {
 		state: PermissionState;
+
 		constructor(state: PermissionState);
 	}
 
@@ -1153,6 +1160,7 @@ declare namespace Deno {
 			control: Uint8Array,
 			zeroCopy?: ArrayBufferView | null,
 		): Uint8Array | null;
+
 		setAsyncHandler(handler: AsyncHandler): void;
 	}
 
@@ -1340,6 +1348,7 @@ declare namespace Deno {
 	 * stream to /dev/null.
 	 */
 	type ProcessStdio = "inherit" | "piped" | "null";
+
 	export interface RunOptions {
 		args: string[];
 		cwd?: string;
@@ -1356,6 +1365,7 @@ declare namespace Deno {
 	 * Requires the `--allow-run` flag.
 	 */
 	export function kill(pid: number, signo: number): void;
+
 	export class Process {
 		readonly rid: number;
 		readonly pid: number;
@@ -1464,6 +1474,7 @@ declare namespace Deno {
 	/** Signals numbers. This is platform dependent.
 	 */
 	export const Signal: typeof MacOSSignal | typeof LinuxSignal;
+
 	export {};
 
 	// @url js/console.d.ts
@@ -1487,6 +1498,7 @@ declare namespace Deno {
 	// @url js/build.d.ts
 
 	export type OperatingSystem = "mac" | "win" | "linux";
+
 	export type Arch = "x64" | "arm64";
 	/** Build related information */
 	interface BuildInfo {
@@ -1505,6 +1517,7 @@ declare namespace Deno {
 		typescript: string;
 	}
 	export const version: Version;
+
 	export {};
 
 	// @url js/deno.d.ts
@@ -1522,7 +1535,9 @@ declare interface Window {
 	clearTimeout: typeof __timers.clearTimeout;
 	clearInterval: typeof __timers.clearInterval;
 	console: __console.Console;
+
 	setTimeout: typeof __timers.setTimeout;
+
 	setInterval: typeof __timers.setInterval;
 	location: __domTypes.Location;
 	onload: Function | undefined;
@@ -1635,6 +1650,7 @@ declare interface ImportMeta {
 
 declare interface Crypto {
 	readonly subtle: null;
+
 	getRandomValues: <
 		T extends
 			| Int8Array
@@ -1653,10 +1669,12 @@ declare namespace __domTypes {
 	// @url js/dom_types.d.ts
 
 	export type BufferSource = ArrayBufferView | ArrayBuffer;
+
 	export type HeadersInit =
 		| Headers
 		| Array<[string, string]>
 		| Record<string, string>;
+
 	export type URLSearchParamsInit =
 		| string
 		| string[][]
@@ -1668,6 +1686,7 @@ declare namespace __domTypes {
 		| URLSearchParams
 		| ReadableStream
 		| string;
+
 	export type RequestInfo = Request | string;
 	type ReferrerPolicy =
 		| ""
@@ -1676,19 +1695,24 @@ declare namespace __domTypes {
 		| "origin-only"
 		| "origin-when-cross-origin"
 		| "unsafe-url";
+
 	export type BlobPart = BufferSource | Blob | string;
+
 	export type FormDataEntryValue = DomFile | string;
+
 	export interface DomIterable<K, V> {
 		keys(): IterableIterator<K>;
 		values(): IterableIterator<V>;
 		entries(): IterableIterator<[K, V]>;
 		[Symbol.iterator](): IterableIterator<[K, V]>;
+
 		forEach(
 			callback: (value: V, key: K, parent: this) => void,
 			thisArg?: any,
 		): void;
 	}
 	type EndingType = "transparent" | "native";
+
 	export interface BlobPropertyBag {
 		type?: string;
 		ending?: EndingType;
@@ -1702,9 +1726,13 @@ declare namespace __domTypes {
 		DOCUMENT_FRAGMENT_NODE = 11,
 	}
 	export const eventTargetHost: unique symbol;
+
 	export const eventTargetListeners: unique symbol;
+
 	export const eventTargetMode: unique symbol;
+
 	export const eventTargetNodeType: unique symbol;
+
 	export interface EventTarget {
 		[eventTargetHost]: EventTarget | null;
 		[eventTargetListeners]: { [type in string]: EventListener[] };
@@ -1887,6 +1915,7 @@ declare namespace __domTypes {
 	export interface ReadableStream {
 		readonly locked: boolean;
 		cancel(): Promise<void>;
+
 		getReader(): ReadableStreamReader;
 		tee(): [ReadableStream, ReadableStream];
 	}
@@ -1898,9 +1927,12 @@ declare namespace __domTypes {
 	export interface FormData extends DomIterable<string, FormDataEntryValue> {
 		append(name: string, value: string | Blob, fileName?: string): void;
 		delete(name: string): void;
+
 		get(name: string): FormDataEntryValue | null;
+
 		getAll(name: string): FormDataEntryValue[];
 		has(name: string): boolean;
+
 		set(name: string, value: string | Blob, fileName?: string): void;
 	}
 	export interface FormDataConstructor {
@@ -1980,6 +2012,7 @@ declare namespace __domTypes {
 		 * this Headers object. The values are ByteString objects.
 		 */
 		values(): IterableIterator<string>;
+
 		forEach(
 			callbackfn: (value: string, key: string, parent: this) => void,
 			thisArg?: any,
@@ -2029,6 +2062,7 @@ declare namespace __domTypes {
 		| "error"
 		| "opaque"
 		| "opaqueredirect";
+
 	export interface RequestInit {
 		body?: BodyInit | null;
 		cache?: RequestCache;
@@ -2226,7 +2260,9 @@ declare namespace __blob {
 	// @url js/blob.d.ts
 
 	export const bytesSymbol: unique symbol;
+
 	export const blobBytesWeakMap: WeakMap<__domTypes.Blob, Uint8Array>;
+
 	export class DenoBlob implements __domTypes.Blob {
 		private readonly [bytesSymbol];
 		readonly size: number;
@@ -2249,11 +2285,13 @@ declare namespace __console {
 		colors: boolean;
 		indentLevel: number;
 	}>;
+
 	export class CSI {
 		static kClear: string;
 		static kClearScreenDown: string;
 	}
 	const isConsoleInstance: unique symbol;
+
 	export class Console {
 		private printFunc;
 		indentLevel: number;
@@ -2333,10 +2371,12 @@ declare namespace __event {
 	// @url js/event.d.ts
 
 	export const eventAttributes: WeakMap<object, any>;
+
 	export class EventInit implements __domTypes.EventInit {
 		bubbles: boolean;
 		cancelable: boolean;
 		composed: boolean;
+
 		constructor({
 			bubbles,
 			cancelable,
@@ -2356,6 +2396,7 @@ declare namespace __event {
 		private _stopImmediatePropagationFlag;
 		private _stopPropagationFlag;
 		private _path;
+
 		constructor(type: string, eventInitDict?: __domTypes.EventInit);
 		readonly bubbles: boolean;
 		cancelBubble: boolean;
@@ -2406,11 +2447,13 @@ declare namespace __customEvent {
 	// @url js/custom_event.d.ts
 
 	export const customEventAttributes: WeakMap<object, any>;
+
 	export class CustomEventInit
 		extends __event.EventInit
 		implements __domTypes.CustomEventInit
 	{
 		detail: any;
+
 		constructor({
 			bubbles,
 			cancelable,
@@ -2444,6 +2487,7 @@ declare namespace __eventTarget {
 		implements __domTypes.EventListenerOptions
 	{
 		_capture: boolean;
+
 		constructor({ capture }?: { capture?: boolean | undefined });
 		readonly capture: boolean;
 	}
@@ -2453,6 +2497,7 @@ declare namespace __eventTarget {
 	{
 		_passive: boolean;
 		_once: boolean;
+
 		constructor({
 			capture,
 			passive,
@@ -2472,6 +2517,7 @@ declare namespace __eventTarget {
 		capturedEvents: __domTypes.Event[];
 		private _callback;
 		private _options;
+
 		constructor(
 			callback: (event: __domTypes.Event) => void | null,
 			options: boolean | __domTypes.AddEventListenerOptions,
@@ -2481,7 +2527,9 @@ declare namespace __eventTarget {
 		readonly options: __domTypes.AddEventListenerOptions | boolean;
 	}
 	export const eventTargetAssignedSlot: unique symbol;
+
 	export const eventTargetHasActivationBehavior: unique symbol;
+
 	export class EventTarget implements __domTypes.EventTarget {
 		[__domTypes.eventTargetHost]: __domTypes.EventTarget | null;
 		[__domTypes.eventTargetListeners]: {
@@ -2608,16 +2656,19 @@ declare namespace __fetch {
 		private _data;
 		readonly locked: boolean;
 		readonly body: null | Body;
+
 		constructor(rid: number, contentType: string);
 		private _bodyBuffer;
 		arrayBuffer(): Promise<ArrayBuffer>;
 		blob(): Promise<__domTypes.Blob>;
+
 		formData(): Promise<__domTypes.FormData>;
 		json(): Promise<any>;
 		text(): Promise<string>;
 		read(p: Uint8Array): Promise<number | Deno.EOF>;
 		close(): void;
 		cancel(): Promise<void>;
+
 		getReader(): __domTypes.ReadableStreamReader;
 		tee(): [__domTypes.ReadableStream, __domTypes.ReadableStream];
 		[Symbol.asyncIterator](): AsyncIterableIterator<Uint8Array>;
@@ -2632,6 +2683,7 @@ declare namespace __fetch {
 		readonly trailer: Promise<__domTypes.Headers>;
 		bodyUsed: boolean;
 		readonly body: Body;
+
 		constructor(
 			url: string,
 			status: number,
@@ -2642,6 +2694,7 @@ declare namespace __fetch {
 		);
 		arrayBuffer(): Promise<ArrayBuffer>;
 		blob(): Promise<__domTypes.Blob>;
+
 		formData(): Promise<__domTypes.FormData>;
 		json(): Promise<any>;
 		text(): Promise<string>;
@@ -2661,6 +2714,7 @@ declare namespace __textEncoding {
 	export function atob(s: string): string;
 	/** Creates a base-64 ASCII string from the input string. */
 	export function btoa(s: string): string;
+
 	export interface TextDecodeOptions {
 		stream?: false;
 	}
@@ -2676,6 +2730,7 @@ declare namespace __textEncoding {
 		readonly fatal: boolean;
 		/** Returns `true` if ignore BOM flag is set, and `false` otherwise. */
 		readonly ignoreBOM = false;
+
 		constructor(label?: string, options?: TextDecoderOptions);
 		/** Returns the result of running encoding's decoder. */
 		decode(
@@ -2717,7 +2772,9 @@ declare namespace __timers {
 		delay?: number,
 		...args: Args
 	): number;
+
 	export function clearTimeout(id?: number): void;
+
 	export function clearInterval(id?: number): void;
 }
 
@@ -2727,6 +2784,7 @@ declare namespace __urlSearchParams {
 	export class URLSearchParams {
 		private params;
 		private url;
+
 		constructor(init?: string | string[][] | Record<string, string>);
 		private updateSteps;
 		/** Appends a specified key/value pair as a new search parameter.
@@ -2859,13 +2917,21 @@ declare namespace __workers {
 	// @url js/workers.d.ts
 
 	export function encodeMessage(data: any): Uint8Array;
+
 	export function decodeMessage(dataIntArray: Uint8Array): any;
+
 	export let onmessage: (e: { data: any }) => void;
+
 	export function postMessage(data: any): void;
+
 	export function getMessage(): Promise<any>;
+
 	export let isClosing: boolean;
+
 	export function workerClose(): void;
+
 	export function workerMain(): Promise<void>;
+
 	export interface Worker {
 		onerror?: () => void;
 		onmessage?: (e: { data: any }) => void;
@@ -2888,6 +2954,7 @@ declare namespace __workers {
 		onerror?: () => void;
 		onmessage?: (data: any) => void;
 		onmessageerror?: () => void;
+
 		constructor(specifier: string, options?: DenoWorkerOptions);
 		readonly closed: Promise<void>;
 		postMessage(data: any): void;

@@ -23,8 +23,10 @@ function fromHexChar(byte: number): [number, boolean] {
 	switch (true) {
 		case 48 <= byte && byte <= 57: // '0' <= byte && byte <= '9'
 			return [byte - 48, true];
+
 		case 97 <= byte && byte <= 102: // 'a' <= byte && byte <= 'f'
 			return [byte - 97 + 10, true];
+
 		case 65 <= byte && byte <= 70: // 'A' <= byte && byte <= 'F'
 			return [byte - 65 + 10, true];
 	}
@@ -50,6 +52,7 @@ export function encodedLen(n: number): number {
  */
 export function encode(dst: Uint8Array, src: Uint8Array): number {
 	const srcLength = encodedLen(src.length);
+
 	if (dst.length !== srcLength) {
 		throw new Error("Out of index.");
 	}
@@ -68,6 +71,7 @@ export function encode(dst: Uint8Array, src: Uint8Array): number {
 export function encodeToString(src: Uint8Array): string {
 	const dest = new Uint8Array(encodedLen(src.length));
 	encode(dest, src);
+
 	return new TextDecoder().decode(dest);
 }
 
@@ -86,12 +90,15 @@ export function decode(
 	src: Uint8Array,
 ): [number, Error | void] {
 	let i = 0;
+
 	for (; i < Math.floor(src.length / 2); i++) {
 		const [a, aOK] = fromHexChar(src[i * 2]);
+
 		if (!aOK) {
 			return [i, errInvalidByte(src[i * 2])];
 		}
 		const [b, bOK] = fromHexChar(src[i * 2 + 1]);
+
 		if (!bOK) {
 			return [i, errInvalidByte(src[i * 2 + 1])];
 		}
@@ -103,6 +110,7 @@ export function decode(
 		// Check for invalid char before reporting bad length,
 		// since the invalid char (if present) is an earlier problem.
 		const [, ok] = fromHexChar(src[i * 2]);
+
 		if (!ok) {
 			return [i, errInvalidByte(src[i * 2])];
 		}

@@ -7,6 +7,7 @@ import { requiredArguments } from "./util.ts";
 // From node-fetch
 // Copyright (c) 2016 David Frank. MIT License.
 const invalidTokenRegex = /[^\^_`a-zA-Z\-0-9!#$%&'*+.|~]/;
+
 const invalidHeaderCharRegex = /[^\t\x20-\x7e\x80-\xff]/;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -26,6 +27,7 @@ class HeadersBase {
 	private _normalizeParams(name: string, value?: string): string[] {
 		name = String(name).toLowerCase();
 		value = String(value).trim();
+
 		return [name, value];
 	}
 
@@ -53,6 +55,7 @@ class HeadersBase {
 			this[headerMap] = new Map(init);
 		} else {
 			this[headerMap] = new Map();
+
 			if (Array.isArray(init)) {
 				for (const tuple of init) {
 					// If header does not contain exactly two items,
@@ -70,6 +73,7 @@ class HeadersBase {
 					);
 					this._validateName(name);
 					this._validateValue(value);
+
 					const existingValue = this[headerMap].get(name);
 					this[headerMap].set(
 						name,
@@ -78,8 +82,10 @@ class HeadersBase {
 				}
 			} else if (init) {
 				const names = Object.keys(init);
+
 				for (const rawName of names) {
 					const rawValue = init[rawName];
+
 					const [name, value] = this._normalizeParams(
 						rawName,
 						rawValue,
@@ -94,29 +100,36 @@ class HeadersBase {
 
 	[customInspect](): string {
 		let headerSize = this[headerMap].size;
+
 		let output = "";
 		this[headerMap].forEach((value, key) => {
 			const prefix = headerSize === this[headerMap].size ? " " : "";
+
 			const postfix = headerSize === 1 ? " " : ", ";
 			output = output + `${prefix}${key}: ${value}${postfix}`;
 			headerSize--;
 		});
+
 		return `Headers {${output}}`;
 	}
 
 	// ref: https://fetch.spec.whatwg.org/#concept-headers-append
 	append(name: string, value: string): void {
 		requiredArguments("Headers.append", arguments.length, 2);
+
 		const [newname, newvalue] = this._normalizeParams(name, value);
 		this._validateName(newname);
 		this._validateValue(newvalue);
+
 		const v = this[headerMap].get(newname);
+
 		const str = v ? `${v}, ${newvalue}` : newvalue;
 		this[headerMap].set(newname, str);
 	}
 
 	delete(name: string): void {
 		requiredArguments("Headers.delete", arguments.length, 1);
+
 		const [newname] = this._normalizeParams(name);
 		this._validateName(newname);
 		this[headerMap].delete(newname);
@@ -124,21 +137,27 @@ class HeadersBase {
 
 	get(name: string): string | null {
 		requiredArguments("Headers.get", arguments.length, 1);
+
 		const [newname] = this._normalizeParams(name);
 		this._validateName(newname);
+
 		const value = this[headerMap].get(newname);
+
 		return value || null;
 	}
 
 	has(name: string): boolean {
 		requiredArguments("Headers.has", arguments.length, 1);
+
 		const [newname] = this._normalizeParams(name);
 		this._validateName(newname);
+
 		return this[headerMap].has(newname);
 	}
 
 	set(name: string, value: string): void {
 		requiredArguments("Headers.set", arguments.length, 2);
+
 		const [newname, newvalue] = this._normalizeParams(name, value);
 		this._validateName(newname);
 		this._validateValue(newvalue);

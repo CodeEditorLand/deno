@@ -17,6 +17,7 @@ export class Performance {
 	 */
 	now(): number {
 		const res = sendSync(dispatch.OP_NOW) as NowResponse;
+
 		return res.seconds * 1e3 + res.subsecNanos / 1e6;
 	}
 }

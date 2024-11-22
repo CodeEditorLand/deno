@@ -7,15 +7,19 @@ test(function formDataHasCorrectNameProp(): void {
 
 test(function formDataParamsAppendSuccess(): void {
 	const formData = new FormData();
+
 	formData.append("a", "true");
 	assertEquals(formData.get("a"), "true");
 });
 
 test(function formDataParamsDeleteSuccess(): void {
 	const formData = new FormData();
+
 	formData.append("a", "true");
+
 	formData.append("b", "false");
 	assertEquals(formData.get("b"), "false");
+
 	formData.delete("b");
 	assertEquals(formData.get("a"), "true");
 	assertEquals(formData.get("b"), null);
@@ -23,8 +27,11 @@ test(function formDataParamsDeleteSuccess(): void {
 
 test(function formDataParamsGetAllSuccess(): void {
 	const formData = new FormData();
+
 	formData.append("a", "true");
+
 	formData.append("b", "false");
+
 	formData.append("a", "null");
 	assertEquals(formData.getAll("a"), ["true", "null"]);
 	assertEquals(formData.getAll("b"), ["false"]);
@@ -33,10 +40,15 @@ test(function formDataParamsGetAllSuccess(): void {
 
 test(function formDataParamsGetSuccess(): void {
 	const formData = new FormData();
+
 	formData.append("a", "true");
+
 	formData.append("b", "false");
+
 	formData.append("a", "null");
+
 	formData.append("d", undefined);
+
 	formData.append("e", null);
 	assertEquals(formData.get("a"), "true");
 	assertEquals(formData.get("b"), "false");
@@ -47,7 +59,9 @@ test(function formDataParamsGetSuccess(): void {
 
 test(function formDataParamsHasSuccess(): void {
 	const formData = new FormData();
+
 	formData.append("a", "true");
+
 	formData.append("b", "false");
 	assert(formData.has("a"));
 	assert(formData.has("b"));
@@ -56,22 +70,30 @@ test(function formDataParamsHasSuccess(): void {
 
 test(function formDataParamsSetSuccess(): void {
 	const formData = new FormData();
+
 	formData.append("a", "true");
+
 	formData.append("b", "false");
+
 	formData.append("a", "null");
 	assertEquals(formData.getAll("a"), ["true", "null"]);
 	assertEquals(formData.getAll("b"), ["false"]);
+
 	formData.set("a", "false");
 	assertEquals(formData.getAll("a"), ["false"]);
+
 	formData.set("d", undefined);
 	assertEquals(formData.get("d"), "undefined");
+
 	formData.set("e", null);
 	assertEquals(formData.get("e"), "null");
 });
 
 test(function formDataSetEmptyBlobSuccess(): void {
 	const formData = new FormData();
+
 	formData.set("a", new Blob([]), "blank.txt");
+
 	formData.get("a");
 	/* TODO Fix this test.
   assert(file instanceof File);
@@ -86,11 +108,14 @@ test(function formDataParamsForEachSuccess(): void {
 		["a", "54"],
 		["b", "true"],
 	];
+
 	const formData = new FormData();
+
 	for (const [name, value] of init) {
 		formData.append(name, value);
 	}
 	let callNum = 0;
+
 	formData.forEach((value, key, parent): void => {
 		assertEquals(formData, parent);
 		assertEquals(value, init[callNum][1]);
@@ -107,13 +132,17 @@ test(function formDataParamsArgumentsCheck(): void {
 
 	methodRequireOneParam.forEach((method): void => {
 		const formData = new FormData();
+
 		let hasThrown = 0;
+
 		let errMsg = "";
+
 		try {
 			formData[method]();
 			hasThrown = 1;
 		} catch (err) {
 			errMsg = err.message;
+
 			if (err instanceof TypeError) {
 				hasThrown = 2;
 			} else {
@@ -129,7 +158,9 @@ test(function formDataParamsArgumentsCheck(): void {
 
 	methodRequireTwoParams.forEach((method: string): void => {
 		const formData = new FormData();
+
 		let hasThrown = 0;
+
 		let errMsg = "";
 
 		try {
@@ -137,6 +168,7 @@ test(function formDataParamsArgumentsCheck(): void {
 			hasThrown = 1;
 		} catch (err) {
 			errMsg = err.message;
+
 			if (err instanceof TypeError) {
 				hasThrown = 2;
 			} else {
@@ -151,11 +183,13 @@ test(function formDataParamsArgumentsCheck(): void {
 
 		hasThrown = 0;
 		errMsg = "";
+
 		try {
 			formData[method]("foo");
 			hasThrown = 1;
 		} catch (err) {
 			errMsg = err.message;
+
 			if (err instanceof TypeError) {
 				hasThrown = 2;
 			} else {

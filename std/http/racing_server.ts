@@ -3,9 +3,11 @@ import { delay } from "../util/async.ts";
 import { serve, ServerRequest } from "./server.ts";
 
 const addr = Deno.args[1] || "127.0.0.1:4501";
+
 const server = serve(addr);
 
 const body = new TextEncoder().encode("Hello 1\n");
+
 const body4 = new TextEncoder().encode("World 4\n");
 
 async function delayedRespond(request: ServerRequest): Promise<void> {
@@ -29,17 +31,24 @@ for await (const request of server) {
 			// For pipelining, this should cause all the following response
 			// to block.
 			delayedRespond(request);
+
 			break;
+
 		case 2:
 			// HUGE body.
 			largeRespond(request, "a");
+
 			break;
+
 		case 3:
 			// HUGE body.
 			largeRespond(request, "b");
+
 			break;
+
 		default:
 			request.respond({ status: 200, body: body4 });
+
 			break;
 	}
 	step++;

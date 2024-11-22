@@ -38,6 +38,7 @@ function printValue(value: unknown, path: string): void {
 function printObject(obj: object, path: string): void {
 	for (const key of Object.keys(obj)) {
 		const value = obj[key];
+
 		let nodePath = path + colors.cyan(".") + key;
 
 		if (!isValidIdentifier(key)) {
@@ -57,6 +58,7 @@ function printObject(obj: object, path: string): void {
 function printArray(array: unknown[], path: string): void {
 	for (const index in array) {
 		const value = array[index];
+
 		const nodePath =
 			(path ? path : colors.cyan(".")) + "[" + colors.cyan(index) + "]";
 
@@ -95,11 +97,13 @@ if (parsedArgs.h || parsedArgs.help || parsedArgs._.length === 0) {
 
 if (parsedArgs._[0] === "-") {
 	const contents = await Deno.readAll(Deno.stdin);
+
 	const json = JSON.parse(decoder.decode(contents));
 	print(json);
 } else {
 	for (const fileName of parsedArgs._) {
 		const fileContents = await Deno.readFile(fileName);
+
 		const json = JSON.parse(decoder.decode(fileContents));
 		print(json);
 	}

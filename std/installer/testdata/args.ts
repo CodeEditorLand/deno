@@ -1,5 +1,6 @@
 function args(args: string[]) {
 	const map = {};
+
 	for (let i = 0; i < args.length; i++) {
 		map[i] = args[i];
 	}

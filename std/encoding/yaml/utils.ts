@@ -60,6 +60,7 @@ export function isRegExp(value: unknown): value is RegExp {
 
 export function toArray<T>(sequence: T): T | [] | [T] {
 	if (isArray(sequence)) return sequence;
+
 	if (isNothing(sequence)) return [];
 
 	return [sequence];

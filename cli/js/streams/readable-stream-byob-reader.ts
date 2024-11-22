@@ -50,6 +50,7 @@ export class SDReadableStreamBYOBReader
 			return Promise.reject(new TypeError());
 		}
 		const stream = this[rs.ownerReadableStream_];
+
 		if (stream === undefined) {
 			return Promise.reject(
 				new TypeError("Reader is not associated with a stream"),

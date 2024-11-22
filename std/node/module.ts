@@ -28,7 +28,9 @@ import * as nodePath from "./path.ts";
 import * as nodeUtil from "./util.ts";
 
 const CHAR_FORWARD_SLASH = "/".charCodeAt(0);
+
 const CHAR_BACKWARD_SLASH = "\\".charCodeAt(0);
+
 const CHAR_COLON = ":".charCodeAt(0);
 
 const isWindows = path.isWindows;
@@ -36,6 +38,7 @@ const isWindows = path.isWindows;
 const relativeResolveCache = Object.create(null);
 
 let requireDepth = 0;
+
 let statCache = null;
 
 type StatResult = -1 | 0 | 1;
@@ -43,14 +46,19 @@ type StatResult = -1 | 0 | 1;
 // a file, 1 when it's a directory or < 0 on error.
 function stat(filename: string): StatResult {
 	filename = path.toNamespacedPath(filename);
+
 	if (statCache !== null) {
 		const result = statCache.get(filename);
+
 		if (result !== undefined) return result;
 	}
 	try {
 		const info = Deno.statSync(filename);
+
 		const result = info.isFile() ? 0 : 1;
+
 		if (statCache !== null) statCache.set(filename, result);
+
 		return result;
 	} catch (e) {
 		if (e.kind === Deno.ErrorKind.PermissionDenied) {
@@ -62,6 +70,7 @@ function stat(filename: string): StatResult {
 
 function updateChildren(parent: Module, child: Module, scan: boolean): void {
 	const children = parent && parent.children;
+
 	if (children && !(scan && children.includes(child))) {
 		children.push(child);
 	}
@@ -77,6 +86,7 @@ class Module {
 	children: Module[];
 	paths: string[];
 	path: string;
+
 	constructor(id = "", parent?: Module) {
 		this.id = id;
 		this.exports = {};
@@ -110,6 +120,7 @@ class Module {
 			throw new Error(`id '${id}' must be a non-empty string`);
 		}
 		requireDepth++;
+
 		try {
 			return Module._load(id, this, /* isMain */ false);
 		} finally {
@@ -140,9 +151,13 @@ class Module {
 		const compiledWrapper = wrapSafe(filename, content);
 		// inspector code remove
 		const dirname = path.dirname(filename);
+
 		const require = makeRequireFunction(this);
+
 		const exports = this.exports;
+
 		const thisValue = exports;
+
 		if (requireDepth === 0) {
 			statCache = new Map();
 		}
@@ -154,6 +169,7 @@ class Module {
 			filename,
 			dirname,
 		);
+
 		if (requireDepth === 0) {
 			statCache = null;
 		}
@@ -173,6 +189,7 @@ class Module {
 				(!isWindows || request.charAt(1) !== "\\"))
 		) {
 			let paths = modulePaths;
+
 			if (parent !== null && parent.paths && parent.paths.length) {
 				paths = parent.paths.concat(paths);
 			}
@@ -188,10 +205,12 @@ class Module {
 				Module._nodeModulePaths("."),
 				modulePaths,
 			);
+
 			return mainPaths;
 		}
 
 		const parentDir = [path.dirname(parent.filename)];
+
 		return parentDir;
 	}
 
@@ -226,6 +245,7 @@ class Module {
 					for (let i = 0; i < options.paths.length; i++) {
 						const path = options.paths[i];
 						fakeParent.paths = Module._nodeModulePaths(path);
+
 						const lookupPaths = Module._resolveLookupPaths(
 							request,
 							fakeParent,
@@ -248,12 +268,15 @@ class Module {
 
 		// Look up the filename first, since that's the cache key.
 		const filename = Module._findPath(request, paths, isMain);
+
 		if (!filename) {
 			const requireStack = [];
+
 			for (let cursor = parent; cursor; cursor = cursor.parent) {
 				requireStack.push(cursor.filename || cursor.id);
 			}
 			let message = `Cannot find module '${request}'`;
+
 			if (requireStack.length > 0) {
 				message =
 					message +
@@ -265,6 +288,7 @@ class Module {
 			err.code = "MODULE_NOT_FOUND";
 			// @ts-ignore
 			err.requireStack = requireStack;
+
 			throw err;
 		}
 		return filename as string;
@@ -276,6 +300,7 @@ class Module {
 		isMain: boolean,
 	): string | boolean {
 		const absoluteRequest = path.isAbsolute(request);
+
 		if (absoluteRequest) {
 			paths = [""];
 		} else if (!paths || paths.length === 0) {
@@ -286,15 +311,19 @@ class Module {
 			request +
 			"\x00" +
 			(paths.length === 1 ? paths[0] : paths.join("\x00"));
+
 		const entry = Module._pathCache[cacheKey];
+
 		if (entry) {
 			return entry;
 		}
 
 		let exts;
+
 		let trailingSlash =
 			request.length > 0 &&
 			request.charCodeAt(request.length - 1) === CHAR_FORWARD_SLASH;
+
 		if (!trailingSlash) {
 			trailingSlash = /(?:^|\/)\.?\.$/.test(request);
 		}
@@ -305,10 +334,13 @@ class Module {
 			const curPath = paths[i];
 
 			if (curPath && stat(curPath) < 1) continue;
+
 			const basePath = resolveExports(curPath, request, absoluteRequest);
+
 			let filename;
 
 			const rc = stat(basePath);
+
 			if (!trailingSlash) {
 				if (rc === 0) {
 					// File.
@@ -333,6 +365,7 @@ class Module {
 
 			if (filename) {
 				Module._pathCache[cacheKey] = filename;
+
 				return filename;
 			}
 		}
@@ -351,18 +384,24 @@ class Module {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	static _load(request: string, parent: Module, isMain: boolean): any {
 		let relResolveCacheIdentifier;
+
 		if (parent) {
 			// Fast path for (lazy loaded) modules in the same directory. The indirect
 			// caching is required to allow cache invalidation without changing the old
 			// cache key names.
 			relResolveCacheIdentifier = `${parent.path}\x00${request}`;
+
 			const filename = relativeResolveCache[relResolveCacheIdentifier];
+
 			if (filename !== undefined) {
 				const cachedModule = Module._cache[filename];
+
 				if (cachedModule !== undefined) {
 					updateChildren(parent, cachedModule, true);
+
 					if (!cachedModule.loaded)
 						return getExportsForCircularRequire(cachedModule);
+
 					return cachedModule.exports;
 				}
 				delete relativeResolveCache[relResolveCacheIdentifier];
@@ -372,15 +411,19 @@ class Module {
 		const filename = Module._resolveFilename(request, parent, isMain);
 
 		const cachedModule = Module._cache[filename];
+
 		if (cachedModule !== undefined) {
 			updateChildren(parent, cachedModule, true);
+
 			if (!cachedModule.loaded)
 				return getExportsForCircularRequire(cachedModule);
+
 			return cachedModule.exports;
 		}
 
 		// Native module polyfills
 		const mod = loadNativeModule(filename, request);
+
 		if (mod) return mod.exports;
 
 		// Don't call updateChildren(), Module constructor already does.
@@ -393,11 +436,13 @@ class Module {
 		}
 
 		Module._cache[filename] = module;
+
 		if (parent !== undefined) {
 			relativeResolveCache[relResolveCacheIdentifier] = filename;
 		}
 
 		let threw = true;
+
 		try {
 			// Source map code removed
 			module.load(filename);
@@ -405,6 +450,7 @@ class Module {
 		} finally {
 			if (threw) {
 				delete Module._cache[filename];
+
 				if (parent !== undefined) {
 					delete relativeResolveCache[relResolveCacheIdentifier];
 				}
@@ -442,6 +488,7 @@ class Module {
 				return [from + "node_modules"];
 
 			const paths = [];
+
 			for (
 				let i = from.length - 1, p = 0, last = from.length;
 				i >= 0;
@@ -484,12 +531,14 @@ class Module {
 			// to be absolute.  Doing a fully-edge-case-correct path.split
 			// that works on both Windows and Posix is non-trivial.
 			const paths = [];
+
 			for (
 				let i = from.length - 1, p = 0, last = from.length;
 				i >= 0;
 				--i
 			) {
 				const code = from.charCodeAt(i);
+
 				if (code === CHAR_FORWARD_SLASH) {
 					if (p !== nmLen)
 						paths.push(from.slice(0, last) + "/node_modules");
@@ -527,6 +576,7 @@ class Module {
 	 */
 	static createRequire(filename: string | URL): RequireFunction {
 		let filepath: string;
+
 		if (
 			filename instanceof URL ||
 			(typeof filename === "string" && !path.isAbsolute(filename))
@@ -542,6 +592,7 @@ class Module {
 
 	static _initPaths(): void {
 		const homeDir = Deno.env("HOME");
+
 		const nodePath = Deno.env("NODE_PATH");
 
 		// Removed $PREFIX/bin/node case
@@ -577,6 +628,7 @@ class Module {
 		// in the current working directory. This seeds the search path for
 		// preloaded modules.
 		const parent = new Module("internal/preload", null);
+
 		try {
 			parent.paths = Module._nodeModulePaths(Deno.cwd());
 		} catch (e) {
@@ -597,6 +649,7 @@ function createNativeModule(id: string, exports: any): Module {
 	const mod = new Module(id);
 	mod.exports = exports;
 	mod.loaded = true;
+
 	return mod;
 }
 nativeModulePolyfill.set("fs", createNativeModule("fs", nodeFS));
@@ -644,11 +697,13 @@ function readPackage(requestPath: string): PackageInfo | null {
 	const jsonPath = path.resolve(requestPath, "package.json");
 
 	const existing = packageJsonCache.get(jsonPath);
+
 	if (existing !== undefined) {
 		return existing;
 	}
 
 	let json: string | undefined;
+
 	try {
 		json = new TextDecoder().decode(
 			Deno.readFileSync(path.toNamespacedPath(jsonPath)),
@@ -657,11 +712,13 @@ function readPackage(requestPath: string): PackageInfo | null {
 
 	if (json === undefined) {
 		packageJsonCache.set(jsonPath, null);
+
 		return null;
 	}
 
 	try {
 		const parsed = JSON.parse(json);
+
 		const filtered = {
 			name: parsed.name,
 			main: parsed.main,
@@ -669,10 +726,12 @@ function readPackage(requestPath: string): PackageInfo | null {
 			type: parsed.type,
 		};
 		packageJsonCache.set(jsonPath, filtered);
+
 		return filtered;
 	} catch (e) {
 		e.path = jsonPath;
 		e.message = "Error parsing " + jsonPath + ": " + e.message;
+
 		throw e;
 	}
 }
@@ -681,13 +740,18 @@ function readPackageScope(
 	checkPath,
 ): { path: string; data: PackageInfo } | false {
 	const rootSeparatorIndex = checkPath.indexOf(path.sep);
+
 	let separatorIndex;
+
 	while (
 		(separatorIndex = checkPath.lastIndexOf(path.sep)) > rootSeparatorIndex
 	) {
 		checkPath = checkPath.slice(0, separatorIndex);
+
 		if (checkPath.endsWith(path.sep + "node_modules")) return false;
+
 		const pjson = readPackage(checkPath);
+
 		if (pjson)
 			return {
 				path: checkPath,
@@ -699,12 +763,14 @@ function readPackageScope(
 
 function readPackageMain(requestPath: string): string | undefined {
 	const pkg = readPackage(requestPath);
+
 	return pkg ? pkg.main : undefined;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function readPackageExports(requestPath: string): any | undefined {
 	const pkg = readPackage(requestPath);
+
 	return pkg ? pkg.exports : undefined;
 }
 
@@ -721,16 +787,19 @@ function tryPackage(
 	}
 
 	const filename = path.resolve(requestPath, pkg);
+
 	let actual =
 		tryFile(filename, isMain) ||
 		tryExtensions(filename, exts, isMain) ||
 		tryExtensions(path.resolve(filename, "index"), exts, isMain);
+
 	if (actual === false) {
 		actual = tryExtensions(
 			path.resolve(requestPath, "index"),
 			exts,
 			isMain,
 		);
+
 		if (!actual) {
 			// eslint-disable-next-line no-restricted-syntax
 			const err = new Error(
@@ -739,6 +808,7 @@ function tryPackage(
 			);
 			// @ts-ignore
 			err.code = "MODULE_NOT_FOUND";
+
 			throw err;
 		}
 	}
@@ -751,12 +821,14 @@ function tryPackage(
 // absolute realpath.
 function tryFile(requestPath: string, _isMain: boolean): string | false {
 	const rc = stat(requestPath);
+
 	return rc === 0 && toRealPath(requestPath);
 }
 
 function toRealPath(requestPath: string): string {
 	// Deno does not have realpath implemented yet.
 	let fullPath = requestPath;
+
 	while (true) {
 		try {
 			fullPath = Deno.readlinkSync(fullPath);
@@ -787,13 +859,19 @@ function tryExtensions(
 // Module._extensions
 function findLongestRegisteredExtension(filename: string): string {
 	const name = path.basename(filename);
+
 	let currentExtension;
+
 	let index;
+
 	let startIndex = 0;
+
 	while ((index = name.indexOf(".", startIndex)) !== -1) {
 		startIndex = index + 1;
+
 		if (index === 0) continue; // Skip dotfiles like .gitignore
 		currentExtension = name.slice(index);
+
 		if (Module._extensions[currentExtension]) return currentExtension;
 	}
 	return ".js";
@@ -804,12 +882,18 @@ function findLongestRegisteredExtension(filename: string): string {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function isConditionalDotExportSugar(exports: any, _basePath: string): boolean {
 	if (typeof exports === "string") return true;
+
 	if (Array.isArray(exports)) return true;
+
 	if (typeof exports !== "object") return false;
+
 	let isConditional = false;
+
 	let firstCheck = true;
+
 	for (const key of Object.keys(exports)) {
 		const curIsConditional = key[0] !== ".";
+
 		if (firstCheck) {
 			firstCheck = false;
 			isConditional = curIsConditional;
@@ -829,6 +913,7 @@ function applyExports(basePath: string, expansion: string): string {
 	const mappingKey = `.${expansion}`;
 
 	let pkgExports = readPackageExports(basePath);
+
 	if (pkgExports === undefined || pkgExports === null)
 		return path.resolve(basePath, mappingKey);
 
@@ -838,6 +923,7 @@ function applyExports(basePath: string, expansion: string): string {
 	if (typeof pkgExports === "object") {
 		if (pkgExports.hasOwnProperty(mappingKey)) {
 			const mapping = pkgExports[mappingKey];
+
 			return resolveExportsTarget(
 				pathToFileURL(basePath + "/"),
 				mapping,
@@ -851,8 +937,10 @@ function applyExports(basePath: string, expansion: string): string {
 		if (mappingKey === ".") return basePath;
 
 		let dirMatch = "";
+
 		for (const candidateKey of Object.keys(pkgExports)) {
 			if (candidateKey[candidateKey.length - 1] !== "/") continue;
+
 			if (
 				candidateKey.length > dirMatch.length &&
 				mappingKey.startsWith(candidateKey)
@@ -863,7 +951,9 @@ function applyExports(basePath: string, expansion: string): string {
 
 		if (dirMatch !== "") {
 			const mapping = pkgExports[dirMatch];
+
 			const subpath = mappingKey.slice(dirMatch.length);
+
 			return resolveExportsTarget(
 				pathToFileURL(basePath + "/"),
 				mapping,
@@ -882,6 +972,7 @@ function applyExports(basePath: string, expansion: string): string {
 	);
 	// @ts-ignore
 	e.code = "MODULE_NOT_FOUND";
+
 	throw e;
 }
 
@@ -897,11 +988,13 @@ function resolveExports(
 	// The implementation's behavior is meant to mirror resolution in ESM.
 	if (!absoluteRequest) {
 		const [, name, expansion = ""] = request.match(EXPORTS_PATTERN) || [];
+
 		if (!name) {
 			return path.resolve(nmPath, request);
 		}
 
 		const basePath = path.resolve(nmPath, name);
+
 		return applyExports(basePath, expansion);
 	}
 
@@ -923,8 +1016,11 @@ function resolveExportsTarget(
 			(subpath.length === 0 || target.endsWith("/"))
 		) {
 			const resolvedTarget = new URL(target, pkgPath);
+
 			const pkgPathPath = pkgPath.pathname;
+
 			const resolvedTargetPath = resolvedTarget.pathname;
+
 			if (
 				resolvedTargetPath.startsWith(pkgPathPath) &&
 				resolvedTargetPath.indexOf(
@@ -933,7 +1029,9 @@ function resolveExportsTarget(
 				) === -1
 			) {
 				const resolved = new URL(subpath, resolvedTarget);
+
 				const resolvedPath = resolved.pathname;
+
 				if (
 					resolvedPath.startsWith(resolvedTargetPath) &&
 					resolvedPath.indexOf(
@@ -948,6 +1046,7 @@ function resolveExportsTarget(
 	} else if (Array.isArray(target)) {
 		for (const targetValue of target) {
 			if (Array.isArray(targetValue)) continue;
+
 			try {
 				return resolveExportsTarget(
 					pkgPath,
@@ -977,6 +1076,7 @@ function resolveExportsTarget(
 		}
 	}
 	let e: Error;
+
 	if (mappingKey !== ".") {
 		e = new Error(
 			`Package exports for '${basePath}' do not define a ` +
@@ -987,11 +1087,13 @@ function resolveExportsTarget(
 	}
 	// @ts-ignore
 	e.code = "MODULE_NOT_FOUND";
+
 	throw e;
 }
 
 // 'node_modules' character codes reversed
 const nmChars = [115, 101, 108, 117, 100, 111, 109, 95, 101, 100, 111, 110];
+
 const nmLen = nmChars.length;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1012,6 +1114,7 @@ const CircularRequirePrototypeWarningProxy = new Proxy(
 		get(target, prop): any {
 			if (prop in target) return target[prop];
 			emitCircularRequireWarning(prop);
+
 			return undefined;
 		},
 
@@ -1019,6 +1122,7 @@ const CircularRequirePrototypeWarningProxy = new Proxy(
 			if (target.hasOwnProperty(prop))
 				return Object.getOwnPropertyDescriptor(target, prop);
 			emitCircularRequireWarning(prop);
+
 			return undefined;
 		},
 	},
@@ -1064,6 +1168,7 @@ function wrapSafe(filename_: string, content: string): RequireWrapper {
 	const wrapper = Module.wrap(content);
 	// @ts-ignore
 	const [f, err] = Deno.core.evalContext(wrapper);
+
 	if (err) {
 		throw err;
 	}
@@ -1075,6 +1180,7 @@ function wrapSafe(filename_: string, content: string): RequireWrapper {
 Module._extensions[".js"] = (module: Module, filename: string): void => {
 	if (filename.endsWith(".js")) {
 		const pkg = readPackageScope(filename);
+
 		if (pkg !== false && pkg.data && pkg.data.type === "module") {
 			throw new Error("Importing ESM module");
 		}
@@ -1091,6 +1197,7 @@ Module._extensions[".json"] = (module: Module, filename: string): void => {
 		module.exports = JSON.parse(stripBOM(content));
 	} catch (err) {
 		err.message = filename + ": " + err.message;
+
 		throw err;
 	}
 };
@@ -1108,6 +1215,7 @@ function createRequireFromPath(filename: string): RequireFunction {
 	m.filename = proxyPath;
 
 	m.paths = Module._nodeModulePaths(m.path);
+
 	return makeRequireFunction(m);
 }
 
@@ -1168,15 +1276,20 @@ function stripBOM(content: string): string {
 }
 
 const forwardSlashRegEx = /\//g;
+
 const CHAR_LOWERCASE_A = "a".charCodeAt(0);
+
 const CHAR_LOWERCASE_Z = "z".charCodeAt(0);
 
 function getPathFromURLWin32(url: URL): string {
 	// const hostname = url.hostname;
+
 	let pathname = url.pathname;
+
 	for (let n = 0; n < pathname.length; n++) {
 		if (pathname[n] === "%") {
 			const third = pathname.codePointAt(n + 2) | 0x20;
+
 			if (
 				(pathname[n + 1] === "2" && third === 102) || // 2f 2F /
 				(pathname[n + 1] === "5" && third === 99)
@@ -1192,7 +1305,9 @@ function getPathFromURLWin32(url: URL): string {
 	pathname = decodeURIComponent(pathname);
 	// TODO: handle windows hostname case (needs bindings)
 	const letter = pathname.codePointAt(1) | 0x20;
+
 	const sep = pathname[2];
+
 	if (
 		letter < CHAR_LOWERCASE_A ||
 		letter > CHAR_LOWERCASE_Z || // a..z A..Z
@@ -1208,9 +1323,11 @@ function getPathFromURLPosix(url: URL): string {
 		throw new Error("Invalid file URL host");
 	}
 	const pathname = url.pathname;
+
 	for (let n = 0; n < pathname.length; n++) {
 		if (pathname[n] === "%") {
 			const third = pathname.codePointAt(n + 2) | 0x20;
+
 			if (pathname[n + 1] === "2" && third === 102) {
 				throw new Error(
 					"Invalid file URL path: must not include encoded / characters",
@@ -1232,32 +1349,43 @@ function fileURLToPath(path: string | URL): string {
 }
 
 const percentRegEx = /%/g;
+
 const backslashRegEx = /\\/g;
+
 const newlineRegEx = /\n/g;
+
 const carriageReturnRegEx = /\r/g;
+
 const tabRegEx = /\t/g;
 function pathToFileURL(filepath: string): URL {
 	let resolved = path.resolve(filepath);
 	// path.resolve strips trailing slashes so we must add them back
 	const filePathLast = filepath.charCodeAt(filepath.length - 1);
+
 	if (
 		(filePathLast === CHAR_FORWARD_SLASH ||
 			(isWindows && filePathLast === CHAR_BACKWARD_SLASH)) &&
 		resolved[resolved.length - 1] !== path.sep
 	)
 		resolved += "/";
+
 	const outURL = new URL("file://");
+
 	if (resolved.includes("%"))
 		resolved = resolved.replace(percentRegEx, "%25");
 	// In posix, "/" is a valid character in paths
 	if (!isWindows && resolved.includes("\\"))
 		resolved = resolved.replace(backslashRegEx, "%5C");
+
 	if (resolved.includes("\n"))
 		resolved = resolved.replace(newlineRegEx, "%0A");
+
 	if (resolved.includes("\r"))
 		resolved = resolved.replace(carriageReturnRegEx, "%0D");
+
 	if (resolved.includes("\t")) resolved = resolved.replace(tabRegEx, "%09");
 	outURL.pathname = resolved;
+
 	return outURL;
 }
 

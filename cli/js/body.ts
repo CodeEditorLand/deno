@@ -9,8 +9,11 @@ const { Headers } = headers;
 
 // only namespace imports work for now, plucking out what we need
 const { FormData } = formData;
+
 const { TextEncoder, TextDecoder } = encoding;
+
 const Blob = blob.DenoBlob;
+
 const DenoBlob = blob.DenoBlob;
 
 type ReadableStreamReader = domTypes.ReadableStreamReader;
@@ -59,11 +62,14 @@ function validateBodyType(owner: Body, bodySource: BodySource): boolean {
 
 function concatenate(...arrays: Uint8Array[]): ArrayBuffer {
 	let totalLength = 0;
+
 	for (const arr of arrays) {
 		totalLength += arr.length;
 	}
 	const result = new Uint8Array(totalLength);
+
 	let offset = 0;
+
 	for (const arr of arrays) {
 		result.set(arr, offset);
 		offset += arr.length;
@@ -74,6 +80,7 @@ function concatenate(...arrays: Uint8Array[]): ArrayBuffer {
 function bufferFromStream(stream: ReadableStreamReader): Promise<ArrayBuffer> {
 	return new Promise((resolve, reject): void => {
 		const parts: Uint8Array[] = [];
+
 		const encoder = new TextEncoder();
 		// recurse
 		(function pump(): void {
@@ -113,6 +120,7 @@ function getHeaderValueParams(value: string): Map<string, string> {
 		.filter((arr): boolean => arr.length > 1)
 		.map(([k, v]): [string, string] => [k, v.replace(/^"([^"]*)"$/, "$1")])
 		.forEach(([k, v]): Map<string, string> => params.set(k, v));
+
 	return params;
 }
 
@@ -171,9 +179,12 @@ export class Body implements domTypes.Body {
 	// ref: https://fetch.spec.whatwg.org/#body-mixin
 	public async formData(): Promise<domTypes.FormData> {
 		const formData = new FormData();
+
 		const enc = new TextEncoder();
+
 		if (hasHeaderValueOf(this.contentType, "multipart/form-data")) {
 			const params = getHeaderValueParams(this.contentType);
+
 			if (!params.has("boundary")) {
 				// TypeError is required by spec
 				throw new TypeError(
@@ -182,13 +193,19 @@ export class Body implements domTypes.Body {
 			}
 			// ref: https://tools.ietf.org/html/rfc2046#section-5.1
 			const boundary = params.get("boundary")!;
+
 			const dashBoundary = `--${boundary}`;
+
 			const delimiter = `\r\n${dashBoundary}`;
+
 			const closeDelimiter = `${delimiter}--`;
 
 			const body = await this.text();
+
 			let bodyParts: string[];
+
 			const bodyEpilogueSplit = body.split(closeDelimiter);
+
 			if (bodyEpilogueSplit.length < 2) {
 				bodyParts = [];
 			} else {
@@ -197,6 +214,7 @@ export class Body implements domTypes.Body {
 				// first boundary treated special due to optional prefixed \r\n
 				const firstBoundaryIndex =
 					bodyEpilogueTrimmed.indexOf(dashBoundary);
+
 				if (firstBoundaryIndex < 0) {
 					throw new TypeError("Invalid boundary");
 				}
@@ -215,21 +233,27 @@ export class Body implements domTypes.Body {
 			}
 			for (const bodyPart of bodyParts) {
 				const headers = new Headers();
+
 				const headerOctetSeperatorIndex = bodyPart.indexOf("\r\n\r\n");
+
 				if (headerOctetSeperatorIndex < 0) {
 					continue; // Skip unknown part
 				}
 				const headerText = bodyPart.slice(0, headerOctetSeperatorIndex);
+
 				const octets = bodyPart.slice(headerOctetSeperatorIndex + 4);
 
 				// TODO: use textproto.readMIMEHeader from deno_std
 				const rawHeaders = headerText.split("\r\n");
+
 				for (const rawHeader of rawHeaders) {
 					const sepIndex = rawHeader.indexOf(":");
+
 					if (sepIndex < 0) {
 						continue; // Skip this header
 					}
 					const key = rawHeader.slice(0, sepIndex);
+
 					const value = rawHeader.slice(sepIndex + 1);
 					headers.set(key, value);
 				}
@@ -238,22 +262,27 @@ export class Body implements domTypes.Body {
 				}
 				// Content-Transfer-Encoding Deprecated
 				const contentDisposition = headers.get("content-disposition")!;
+
 				const partContentType =
 					headers.get("content-type") || "text/plain";
 				// TODO: custom charset encoding (needs TextEncoder support)
 				// const contentTypeCharset =
 				//   getHeaderValueParams(partContentType).get("charset") || "";
+
 				if (!hasHeaderValueOf(contentDisposition, "form-data")) {
 					continue; // Skip, might not be form-data
 				}
 				const dispositionParams =
 					getHeaderValueParams(contentDisposition);
+
 				if (!dispositionParams.has("name")) {
 					continue; // Skip, unknown name
 				}
 				const dispositionName = dispositionParams.get("name")!;
+
 				if (dispositionParams.has("filename")) {
 					const filename = dispositionParams.get("filename")!;
+
 					const blob = new DenoBlob([enc.encode(octets)], {
 						type: partContentType,
 					});
@@ -277,14 +306,18 @@ export class Body implements domTypes.Body {
 			// From https://github.com/github/fetch/blob/master/fetch.js
 			// Copyright (c) 2014-2016 GitHub, Inc. MIT License
 			const body = await this.text();
+
 			try {
 				body.trim()
 					.split("&")
 					.forEach((bytes): void => {
 						if (bytes) {
 							const split = bytes.split("=");
+
 							const name = split.shift()!.replace(/\+/g, " ");
+
 							const value = split.join("=").replace(/\+/g, " ");
+
 							formData.append(
 								decodeURIComponent(name),
 								decodeURIComponent(value),
@@ -306,13 +339,16 @@ export class Body implements domTypes.Body {
 		}
 
 		const ab = await this.arrayBuffer();
+
 		const decoder = new TextDecoder("utf-8");
+
 		return decoder.decode(ab);
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public async json(): Promise<any> {
 		const raw = await this.text();
+
 		return JSON.parse(raw);
 	}
 
@@ -333,12 +369,14 @@ export class Body implements domTypes.Body {
 			return this._bodySource;
 		} else if (typeof this._bodySource === "string") {
 			const enc = new TextEncoder();
+
 			return enc.encode(this._bodySource).buffer as ArrayBuffer;
 		} else if (this._bodySource instanceof ReadableStream) {
 			// @ts-ignore
 			return bufferFromStream(this._bodySource.getReader());
 		} else if (this._bodySource instanceof FormData) {
 			const enc = new TextEncoder();
+
 			return enc.encode(this._bodySource.toString())
 				.buffer as ArrayBuffer;
 		} else if (!this._bodySource) {

@@ -35,27 +35,32 @@ test(function webAssemblyExists(): void {
 
 test(function DenoNamespaceImmutable(): void {
 	const denoCopy = window.Deno;
+
 	try {
 		// @ts-ignore
 		Deno = 1;
 	} catch {}
 	assert(denoCopy === Deno);
+
 	try {
 		// @ts-ignore
 		window.Deno = 1;
 	} catch {}
 	assert(denoCopy === Deno);
+
 	try {
 		delete window.Deno;
 	} catch {}
 	assert(denoCopy === Deno);
 
 	const { readFile } = Deno;
+
 	try {
 		// @ts-ignore
 		Deno.readFile = 1;
 	} catch {}
 	assert(readFile === Deno.readFile);
+
 	try {
 		delete window.Deno.readFile;
 	} catch {}
@@ -63,12 +68,14 @@ test(function DenoNamespaceImmutable(): void {
 
 	// @ts-ignore
 	const { print } = Deno.core;
+
 	try {
 		// @ts-ignore
 		Deno.core.print = 1;
 	} catch {}
 	// @ts-ignore
 	assert(print === Deno.core.print);
+
 	try {
 		// @ts-ignore
 		delete Deno.core.print;
@@ -79,14 +86,18 @@ test(function DenoNamespaceImmutable(): void {
 
 test(async function windowQueueMicrotask(): Promise<void> {
 	let resolve1: () => void | undefined;
+
 	let resolve2: () => void | undefined;
+
 	let microtaskDone = false;
+
 	const p1 = new Promise((res): void => {
 		resolve1 = (): void => {
 			microtaskDone = true;
 			res();
 		};
 	});
+
 	const p2 = new Promise((res): void => {
 		resolve2 = (): void => {
 			assert(microtaskDone);
@@ -94,6 +105,7 @@ test(async function windowQueueMicrotask(): Promise<void> {
 		};
 	});
 	window.queueMicrotask(resolve1!);
+
 	setTimeout(resolve2!, 0);
 	await p1;
 	await p2;

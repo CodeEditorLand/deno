@@ -13,7 +13,9 @@ export class CustomEvent extends event.Event implements domTypes.CustomEvent {
 		customEventInitDict: domTypes.CustomEventInit = {},
 	) {
 		requiredArguments("CustomEvent", arguments.length, 1);
+
 		super(type, customEventInitDict);
+
 		const { detail = null } = customEventInitDict;
 		customEventAttributes.set(this, { detail });
 	}

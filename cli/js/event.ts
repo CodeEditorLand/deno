@@ -211,6 +211,7 @@ export class Event implements domTypes.Event {
 		];
 
 		let currentTargetIndex = 0;
+
 		let currentTargetHiddenSubtreeLevel = 0;
 
 		for (let index = this._path.length - 1; index >= 0; index--) {
@@ -223,6 +224,7 @@ export class Event implements domTypes.Event {
 
 			if (item === this.currentTarget) {
 				currentTargetIndex = index;
+
 				break;
 			}
 
@@ -232,6 +234,7 @@ export class Event implements domTypes.Event {
 		}
 
 		let currentHiddenLevel = currentTargetHiddenSubtreeLevel;
+
 		let maxHiddenLevel = currentTargetHiddenSubtreeLevel;
 
 		for (let i = currentTargetIndex - 1; i >= 0; i--) {

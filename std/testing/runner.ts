@@ -52,6 +52,7 @@ function partition(
 			el: string,
 		): [string[], string[]] => {
 			paritioned[callback(el) ? 1 : 0].push(el);
+
 			return paritioned;
 		},
 		[[], []],
@@ -73,6 +74,7 @@ export async function* findTestModules(
 	root: string = cwd(),
 ): AsyncIterableIterator<string> {
 	const [includePaths, includeUrls] = partition(includeModules, isRemoteUrl);
+
 	const [excludePaths, excludeUrls] = partition(excludeModules, isRemoteUrl);
 
 	const expandGlobOpts: ExpandGlobOptions = {
@@ -108,6 +110,7 @@ export async function* findTestModules(
 	const excludeUrlPatterns = excludeUrls.map(
 		(url: string): RegExp => RegExp(url),
 	);
+
 	const shouldIncludeUrl = (url: string): boolean =>
 		!excludeUrlPatterns.some((p: RegExp): boolean => !!url.match(p));
 
@@ -179,7 +182,9 @@ export async function runTestModules({
 	disableLog = false,
 }: RunTestModulesOptions = {}): Promise<void> {
 	let moduleCount = 0;
+
 	const testModules = [];
+
 	for await (const testModule of findTestModules(include, exclude)) {
 		testModules.push(testModule);
 		moduleCount++;
@@ -187,6 +192,7 @@ export async function runTestModules({
 
 	if (moduleCount == 0) {
 		const noneFoundMessage = "No matching test modules found.";
+
 		if (!allowNone) {
 			throw new DenoError(ErrorKind.NotFound, noneFoundMessage);
 		} else if (!disableLog) {
@@ -205,7 +211,9 @@ export async function runTestModules({
 	// user is probably working on project in this directory or even
 	// cd'ed into current directory to quickly run test from this directory.
 	const root = Deno.env("DENO_DIR") || Deno.cwd();
+
 	const testFilePath = join(root, ".deno.test.ts");
+
 	const data = new TextEncoder().encode(testFile);
 	await Deno.writeFile(testFilePath, data);
 
@@ -221,6 +229,7 @@ export async function runTestModules({
 	//   4. Deno starts loading imports one by one.
 	//   5. If imported file is outdated, Deno will recompile this single file.
 	let err;
+
 	try {
 		await import(`file://${testFilePath}`);
 	} catch (e) {
@@ -263,6 +272,7 @@ async function main(): Promise<void> {
 			quiet: false,
 		},
 	});
+
 	if (parsedArgs.help) {
 		return showHelp();
 	}
@@ -273,12 +283,16 @@ async function main(): Promise<void> {
 					fileGlob.split(","),
 				)
 			: ["."];
+
 	const exclude =
 		parsedArgs.exclude != null
 			? (parsedArgs.exclude as string).split(",")
 			: [];
+
 	const allowNone = parsedArgs["allow-none"];
+
 	const exitOnFail = parsedArgs.failfast;
+
 	const disableLog = parsedArgs.quiet;
 
 	try {

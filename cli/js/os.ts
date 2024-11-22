@@ -27,6 +27,7 @@ export function hostname(): string {
 /** Exit the Deno process with optional exit code. */
 export function exit(code = 0): never {
 	sendSync(dispatch.OP_EXIT, { code });
+
 	return util.unreachable();
 }
 
@@ -59,9 +60,11 @@ export function env(
 		return getEnv(key);
 	}
 	const env = sendSync(dispatch.OP_ENV);
+
 	return new Proxy(env, {
 		set(obj, prop: string, value: string): boolean {
 			setEnv(prop, value);
+
 			return Reflect.set(obj, prop, value);
 		},
 	});
@@ -89,6 +92,7 @@ interface Start {
 // @internal
 export function start(preserveDenoNamespace = true, source?: string): Start {
 	core.setAsyncHandler(dispatch.asyncMsgFromRust);
+
 	const ops = core.ops();
 	// TODO(bartlomieju): this is a prototype, we should come up with
 	// something a bit more sophisticated
@@ -102,6 +106,7 @@ export function start(preserveDenoNamespace = true, source?: string): Start {
 	// are ready. The response should be a `StartRes` message containing the CLI
 	// args and other info.
 	const startResponse = sendSync(dispatch.OP_START);
+
 	const { pid, noColor, debugFlag } = startResponse;
 
 	util.setLogDebug(debugFlag, source);

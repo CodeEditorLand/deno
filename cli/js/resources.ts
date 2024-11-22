@@ -11,7 +11,9 @@ export interface ResourceMap {
  */
 export function resources(): ResourceMap {
 	const res = sendSync(dispatch.OP_RESOURCES) as Array<[number, string]>;
+
 	const resources: ResourceMap = {};
+
 	for (const resourceTuple of res) {
 		resources[resourceTuple[0]] = resourceTuple[1];
 	}

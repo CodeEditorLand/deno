@@ -14,6 +14,7 @@ export interface Cookie {
 	value: string;
 	expires?: Date;
 	maxAge?: number;
+
 	domain?: string;
 	path?: string;
 	secure?: boolean;
@@ -75,9 +76,12 @@ function toString(cookie: Cookie): string {
 export function getCookies(req: ServerRequest): Cookies {
 	if (req.headers.has("Cookie")) {
 		const out: Cookies = {};
+
 		const c = req.headers.get("Cookie")!.split(";");
+
 		for (const kv of c) {
 			const cookieVal = kv.split("=");
+
 			const key = cookieVal.shift()!.trim();
 			out[key] = cookieVal.join("=");
 		}

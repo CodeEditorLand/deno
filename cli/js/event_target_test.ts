@@ -11,7 +11,9 @@ test(function addEventListenerTest(): void {
 
 test(function constructedEventTargetCanBeUsedAsExpected(): void {
 	const target = new EventTarget();
+
 	const event = new Event("foo", { bubbles: true, cancelable: false });
+
 	let callCount = 0;
 
 	const listener = (e): void => {
@@ -45,6 +47,7 @@ test(function anEventTargetCanBeSubclassed(): void {
 
 	const target = new NicerEventTarget();
 	new Event("foo", { bubbles: true, cancelable: false });
+
 	let callCount = 0;
 
 	const listener = (): void => {
@@ -67,7 +70,9 @@ test(function removingNullEventListenerShouldSucceed(): void {
 
 test(function constructedEventTargetUseObjectPrototype(): void {
 	const target = new EventTarget();
+
 	const event = new Event("toString", { bubbles: true, cancelable: false });
+
 	let callCount = 0;
 
 	const listener = (e): void => {
@@ -98,10 +103,12 @@ test(function dispatchEventShouldNotThrowError(): void {
 
 	try {
 		const target = new EventTarget();
+
 		const event = new Event("hasOwnProperty", {
 			bubbles: true,
 			cancelable: false,
 		});
+
 		const listener = (): void => {};
 		target.addEventListener("hasOwnProperty", listener);
 		target.dispatchEvent(event);
@@ -115,8 +122,11 @@ test(function dispatchEventShouldNotThrowError(): void {
 test(function eventTargetThisShouldDefaultToWindow(): void {
 	const { addEventListener, dispatchEvent, removeEventListener } =
 		EventTarget.prototype;
+
 	let n = 1;
+
 	const event = new Event("hello");
+
 	const listener = (): void => {
 		n = 2;
 	};

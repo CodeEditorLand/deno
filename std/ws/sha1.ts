@@ -9,7 +9,9 @@
 /*jslint bitwise: true */
 
 const HEX_CHARS = "0123456789abcdef".split("");
+
 const EXTRA = Uint32Array.of(-2147483648, 8388608, 32768, 128);
+
 const SHIFT = Uint32Array.of(24, 16, 8, 0);
 
 const blocks = new Uint32Array(80);
@@ -52,7 +54,9 @@ export class Sha1 {
 			return;
 		}
 		let notString = true;
+
 		let message;
+
 		if (data instanceof ArrayBuffer) {
 			message = new Uint8Array(data);
 		} else if (ArrayBuffer.isView(data)) {
@@ -62,10 +66,15 @@ export class Sha1 {
 			message = String(data);
 		}
 		let code;
+
 		let index = 0;
+
 		let i;
+
 		const start = this._start;
+
 		const length = message.length || 0;
+
 		const blocks = this._blocks;
 
 		while (index < length) {
@@ -83,6 +92,7 @@ export class Sha1 {
 			} else {
 				for (i = start; index < length && i < 64; ++index) {
 					code = (message as string).charCodeAt(index);
+
 					if (code < 0x80) {
 						blocks[i >> 2] |= code << SHIFT[i++ & 3];
 					} else if (code < 0x800) {
@@ -117,6 +127,7 @@ export class Sha1 {
 
 			this._lastByteIndex = i;
 			this._bytes += i - start;
+
 			if (i >= 64) {
 				this._block = blocks[16];
 				this._start = i - 64;
@@ -137,11 +148,14 @@ export class Sha1 {
 			return;
 		}
 		this._finalized = true;
+
 		const blocks = this._blocks;
+
 		const i = this._lastByteIndex;
 		blocks[16] = this._block;
 		blocks[i >> 2] |= EXTRA[i & 3];
 		this._block = blocks[16];
+
 		if (i >= 56) {
 			if (!this._hashed) {
 				this.hash();
@@ -156,11 +170,17 @@ export class Sha1 {
 
 	hash(): void {
 		let a = this._h0;
+
 		let b = this._h1;
+
 		let c = this._h2;
+
 		let d = this._h3;
+
 		let e = this._h4;
+
 		let f, j, t;
+
 		const blocks = this._blocks;
 
 		for (j = 16; j < 80; ++j) {
@@ -287,9 +307,13 @@ export class Sha1 {
 		this.finalize();
 
 		const h0 = this._h0;
+
 		const h1 = this._h1;
+
 		const h2 = this._h2;
+
 		const h3 = this._h3;
+
 		const h4 = this._h4;
 
 		return (
@@ -344,9 +368,13 @@ export class Sha1 {
 		this.finalize();
 
 		const h0 = this._h0;
+
 		const h1 = this._h1;
+
 		const h2 = this._h2;
+
 		const h3 = this._h3;
+
 		const h4 = this._h4;
 
 		return [
@@ -379,6 +407,7 @@ export class Sha1 {
 
 	arrayBuffer(): ArrayBuffer {
 		this.finalize();
+
 		return Uint32Array.of(this._h0, this._h1, this._h2, this._h3, this._h4)
 			.buffer;
 	}

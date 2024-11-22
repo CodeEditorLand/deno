@@ -20,12 +20,16 @@ import {
 const { Buffer, copy, open, remove } = Deno;
 
 const e = new TextEncoder();
+
 const boundary = "--abcde";
+
 const dashBoundary = e.encode("--" + boundary);
+
 const nlDashBoundary = e.encode("\r\n--" + boundary);
 
 test(function multipartScanUntilBoundary1(): void {
 	const data = `--${boundary}`;
+
 	const n = scanUntilBoundary(
 		e.encode(data),
 		dashBoundary,
@@ -38,6 +42,7 @@ test(function multipartScanUntilBoundary1(): void {
 
 test(function multipartScanUntilBoundary2(): void {
 	const data = `foo\r\n--${boundary}`;
+
 	const n = scanUntilBoundary(
 		e.encode(data),
 		dashBoundary,
@@ -50,6 +55,7 @@ test(function multipartScanUntilBoundary2(): void {
 
 test(function multipartScanUntilBoundary3(): void {
 	const data = `foobar`;
+
 	const n = scanUntilBoundary(
 		e.encode(data),
 		dashBoundary,
@@ -62,6 +68,7 @@ test(function multipartScanUntilBoundary3(): void {
 
 test(function multipartScanUntilBoundary4(): void {
 	const data = `foo\r\n--`;
+
 	const n = scanUntilBoundary(
 		e.encode(data),
 		dashBoundary,
@@ -74,27 +81,32 @@ test(function multipartScanUntilBoundary4(): void {
 
 test(function multipartMatchAfterPrefix1(): void {
 	const data = `${boundary}\r`;
+
 	const v = matchAfterPrefix(e.encode(data), e.encode(boundary), false);
 	assertEquals(v, 1);
 });
 
 test(function multipartMatchAfterPrefix2(): void {
 	const data = `${boundary}hoge`;
+
 	const v = matchAfterPrefix(e.encode(data), e.encode(boundary), false);
 	assertEquals(v, -1);
 });
 
 test(function multipartMatchAfterPrefix3(): void {
 	const data = `${boundary}`;
+
 	const v = matchAfterPrefix(e.encode(data), e.encode(boundary), false);
 	assertEquals(v, 0);
 });
 
 test(async function multipartMultipartWriter(): Promise<void> {
 	const buf = new Buffer();
+
 	const mw = new MultipartWriter(buf);
 	await mw.writeField("foo", "foo");
 	await mw.writeField("bar", "bar");
+
 	const f = await open(path.resolve("./multipart/fixtures/sample.txt"), "r");
 	await mw.writeFile("file", "sample.txt", f);
 	await mw.close();
@@ -131,6 +143,7 @@ test(function multipartMultipartWriter2(): void {
 
 test(async function multipartMultipartWriter3(): Promise<void> {
 	const w = new StringWriter();
+
 	const mw = new MultipartWriter(w);
 	await mw.writeField("foo", "foo");
 	await mw.close();
@@ -175,13 +188,16 @@ test(async function multipartMultipartWriter3(): Promise<void> {
 test(async function multipartMultipartReader(): Promise<void> {
 	// FIXME: path resolution
 	const o = await open(path.resolve("./multipart/fixtures/sample.txt"));
+
 	const mr = new MultipartReader(
 		o,
 		"--------------------------434049563556637648550474",
 	);
+
 	const form = await mr.readForm(10 << 20);
 	assertEquals(form["foo"], "foo");
 	assertEquals(form["bar"], "bar");
+
 	const file = form["file"] as FormFile;
 	assertEquals(isFormFile(file), true);
 	assert(file.content !== void 0);
@@ -189,19 +205,25 @@ test(async function multipartMultipartReader(): Promise<void> {
 
 test(async function multipartMultipartReader2(): Promise<void> {
 	const o = await open(path.resolve("./multipart/fixtures/sample.txt"));
+
 	const mr = new MultipartReader(
 		o,
 		"--------------------------434049563556637648550474",
 	);
+
 	const form = await mr.readForm(20); //
 	try {
 		assertEquals(form["foo"], "foo");
 		assertEquals(form["bar"], "bar");
+
 		const file = form["file"] as FormFile;
 		assertEquals(file.type, "application/octet-stream");
+
 		const f = await open(file.tempfile!);
+
 		const w = new StringWriter();
 		await copy(w, f);
+
 		const json = JSON.parse(w.toString());
 		assertEquals(json["compilerOptions"]["target"], "es2018");
 		f.close();

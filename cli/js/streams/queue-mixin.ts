@@ -40,6 +40,7 @@ export function dequeueValue<V>(container: QueueContainer<V>): V {
 	// Assert: container has[[queue]] and[[queueTotalSize]] internal slots.
 	// Assert: container.[[queue]] is not empty.
 	const pair = container[queue_].shift()!;
+
 	const newTotalSize = container[queueTotalSize_] - pair.size;
 	container[queueTotalSize_] = Math.max(0, newTotalSize); // < 0 can occur due to rounding errors.
 	return pair.value;

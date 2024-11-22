@@ -61,8 +61,11 @@ test({
 	fn(): void {
 		{
 			const srcStr = "abc";
+
 			const src = new TextEncoder().encode(srcStr);
+
 			const dest = new Uint8Array(encodedLen(src.length));
+
 			const int = encode(dest, src);
 			assertEquals(src, new Uint8Array([97, 98, 99]));
 			assertEquals(int, 6);
@@ -70,7 +73,9 @@ test({
 
 		{
 			const srcStr = "abc";
+
 			const src = new TextEncoder().encode(srcStr);
+
 			const dest = new Uint8Array(2); // out of index
 			assertThrows(
 				(): void => {
@@ -83,7 +88,9 @@ test({
 
 		for (const [enc, dec] of testCases) {
 			const dest = new Uint8Array(encodedLen(dec.length));
+
 			const src = new Uint8Array(dec as number[]);
+
 			const n = encode(dest, src);
 			assertEquals(dest.length, n);
 			assertEquals(new TextDecoder().decode(dest), enc);
@@ -127,7 +134,9 @@ test({
 
 		for (const [enc, dec] of cases) {
 			const dest = new Uint8Array(decodedLen(enc.length));
+
 			const src = new TextEncoder().encode(enc as string);
+
 			const [, err] = decode(dest, src);
 			assertEquals(err, undefined);
 			assertEquals(Array.from(dest), Array.from(dec as number[]));
@@ -151,6 +160,7 @@ test({
 	fn(): void {
 		for (const [input, output, expectedErr] of errCases) {
 			const out = new Uint8Array((input as string).length + 10);
+
 			const [n, err] = decode(
 				out,
 				new TextEncoder().encode(input as string),

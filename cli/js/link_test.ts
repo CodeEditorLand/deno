@@ -3,8 +3,11 @@ import { assert, assertEquals, testPerm } from "./test_util.ts";
 
 testPerm({ read: true, write: true }, function linkSyncSuccess(): void {
 	const testDir = Deno.makeTempDirSync();
+
 	const oldData = "Hardlink";
+
 	const oldName = testDir + "/oldname";
+
 	const newName = testDir + "/newname";
 	Deno.writeFileSync(oldName, new TextEncoder().encode(oldData));
 	// Create the hard link.
@@ -28,6 +31,7 @@ testPerm({ read: true, write: true }, function linkSyncSuccess(): void {
 	);
 	// Remove oldname. File still accessible through newname.
 	Deno.removeSync(oldName);
+
 	const newNameStat = Deno.statSync(newName);
 	assert(newNameStat.isFile());
 	assert(!newNameStat.isSymlink()); // Not a symlink.
@@ -39,13 +43,16 @@ testPerm({ read: true, write: true }, function linkSyncSuccess(): void {
 
 testPerm({ read: true, write: true }, function linkSyncExists(): void {
 	const testDir = Deno.makeTempDirSync();
+
 	const oldName = testDir + "/oldname";
+
 	const newName = testDir + "/newname";
 	Deno.writeFileSync(oldName, new TextEncoder().encode("oldName"));
 	// newname is already created.
 	Deno.writeFileSync(newName, new TextEncoder().encode("newName"));
 
 	let err;
+
 	try {
 		Deno.linkSync(oldName, newName);
 	} catch (e) {
@@ -58,10 +65,13 @@ testPerm({ read: true, write: true }, function linkSyncExists(): void {
 
 testPerm({ read: true, write: true }, function linkSyncNotFound(): void {
 	const testDir = Deno.makeTempDirSync();
+
 	const oldName = testDir + "/oldname";
+
 	const newName = testDir + "/newname";
 
 	let err;
+
 	try {
 		Deno.linkSync(oldName, newName);
 	} catch (e) {
@@ -74,6 +84,7 @@ testPerm({ read: true, write: true }, function linkSyncNotFound(): void {
 
 testPerm({ read: false, write: true }, function linkSyncReadPerm(): void {
 	let err;
+
 	try {
 		Deno.linkSync("oldbaddir", "newbaddir");
 	} catch (e) {
@@ -85,6 +96,7 @@ testPerm({ read: false, write: true }, function linkSyncReadPerm(): void {
 
 testPerm({ read: true, write: false }, function linkSyncWritePerm(): void {
 	let err;
+
 	try {
 		Deno.linkSync("oldbaddir", "newbaddir");
 	} catch (e) {
@@ -98,8 +110,11 @@ testPerm(
 	{ read: true, write: true },
 	async function linkSuccess(): Promise<void> {
 		const testDir = Deno.makeTempDirSync();
+
 		const oldData = "Hardlink";
+
 		const oldName = testDir + "/oldname";
+
 		const newName = testDir + "/newname";
 		Deno.writeFileSync(oldName, new TextEncoder().encode(oldData));
 		// Create the hard link.
@@ -123,6 +138,7 @@ testPerm(
 		);
 		// Remove oldname. File still accessible through newname.
 		Deno.removeSync(oldName);
+
 		const newNameStat = Deno.statSync(newName);
 		assert(newNameStat.isFile());
 		assert(!newNameStat.isSymlink()); // Not a symlink.

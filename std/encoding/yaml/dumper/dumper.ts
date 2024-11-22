@@ -14,6 +14,7 @@ type Any = common.Any;
 type ArrayObject<T = Any> = common.ArrayObject<T>;
 
 const _toString = Object.prototype.toString;
+
 const _hasOwnProperty = Object.prototype.hasOwnProperty;
 
 const CHAR_TAB = 0x09; /* Tab */
@@ -80,7 +81,9 @@ function encodeHex(character: number): string {
 	const string = character.toString(16).toUpperCase();
 
 	let handle: string;
+
 	let length: number;
+
 	if (character <= 0xff) {
 		handle = "x";
 		length = 2;
@@ -103,6 +106,7 @@ function encodeHex(character: number): string {
 function indentString(string: string, spaces: number): string {
 	const ind = common.repeat(" ", spaces),
 		length = string.length;
+
 	let position = 0,
 		next = -1,
 		result = "",
@@ -110,6 +114,7 @@ function indentString(string: string, spaces: number): string {
 
 	while (position < length) {
 		next = string.indexOf("\n", position);
+
 		if (next === -1) {
 			line = string.slice(position);
 			position = length;
@@ -132,6 +137,7 @@ function generateNextLine(state: DumperState, level: number): string {
 
 function testImplicitResolving(state: DumperState, str: string): boolean {
 	let type: Type;
+
 	for (
 		let index = 0, length = state.implicitTypes.length;
 		index < length;
@@ -221,6 +227,7 @@ function isPlainSafeFirst(c: number): boolean {
 // Determines whether block indentation indicator is required.
 function needIndentIndicator(string: string): boolean {
 	const leadingSpaceRe = /^\n* /;
+
 	return leadingSpaceRe.test(string);
 }
 
@@ -245,6 +252,7 @@ function chooseScalarStyle(
 	testAmbiguousType: (...args: Any[]) => Any,
 ): number {
 	const shouldTrackWidth = lineWidth !== -1;
+
 	let hasLineBreak = false,
 		hasFoldableLine = false, // only checked if shouldTrackWidth
 		previousLineBreak = -1, // count the first line correctly
@@ -253,11 +261,13 @@ function chooseScalarStyle(
 			!isWhitespace(string.charCodeAt(string.length - 1));
 
 	let char: number, i: number;
+
 	if (singleLineOnly) {
 		// Case: no block styles.
 		// Check for disallowed characters to rule out plain and single.
 		for (i = 0; i < string.length; i++) {
 			char = string.charCodeAt(i);
+
 			if (!isPrintable(char)) {
 				return STYLE_DOUBLE;
 			}
@@ -267,6 +277,7 @@ function chooseScalarStyle(
 		// Case: block styles permitted.
 		for (i = 0; i < string.length; i++) {
 			char = string.charCodeAt(i);
+
 			if (char === CHAR_LINE_FEED) {
 				hasLineBreak = true;
 				// Check if any line can be folded.
@@ -322,6 +333,7 @@ function foldLine(line: string, width: number): string {
 		end,
 		curr = 0,
 		next = 0;
+
 	let result = "";
 
 	// Invariants: 0 <= start <= length-1.
@@ -378,6 +390,7 @@ function foldString(string: string, width: number): string {
 	})();
 	// If we haven't reached the first content line yet, don't add an extra \n.
 	let prevMoreIndented = string[0] === "\n" || string[0] === " ";
+
 	let moreIndented;
 
 	// rest of the lines
@@ -401,7 +414,9 @@ function foldString(string: string, width: number): string {
 // Escapes a double-quoted string.
 function escapeString(string: string): string {
 	let result = "";
+
 	let char, nextChar;
+
 	let escapeSeq;
 
 	for (let i = 0; i < string.length; i++) {
@@ -409,6 +424,7 @@ function escapeString(string: string): string {
 		// Check for surrogate pairs (reference Unicode 3.0 section "3.7 Surrogates").
 		if (char >= 0xd800 && char <= 0xdbff /* high surrogate */) {
 			nextChar = string.charCodeAt(i + 1);
+
 			if (nextChar >= 0xdc00 && nextChar <= 0xdfff /* low surrogate */) {
 				// Combine the surrogate pair and store it escaped.
 				result += encodeHex(
@@ -416,6 +432,7 @@ function escapeString(string: string): string {
 				);
 				// Advance index one extra since we already used that char here.
 				i++;
+
 				continue;
 			}
 		}
@@ -437,8 +454,10 @@ function blockHeader(string: string, indentPerLevel: number): string {
 
 	// note the special case: the string '\n' counts as a "trailing" empty line.
 	const clip = string[string.length - 1] === "\n";
+
 	const keep =
 		clip && (string[string.length - 2] === "\n" || string === "\n");
+
 	const chomp = keep ? "+" : clip ? "" : "-";
 
 	return `${indentIndicator}${chomp}\n`;
@@ -491,6 +510,7 @@ function writeScalar(
 			iskey ||
 			// No block styles in flow mode.
 			(state.flowLevel > -1 && level >= state.flowLevel);
+
 		function testAmbiguity(str: string): boolean {
 			return testImplicitResolving(state, str);
 		}
@@ -506,18 +526,23 @@ function writeScalar(
 		) {
 			case STYLE_PLAIN:
 				return string;
+
 			case STYLE_SINGLE:
 				return `'${string.replace(/'/g, "''")}'`;
+
 			case STYLE_LITERAL:
 				return `|${blockHeader(string, state.indent)}${dropEndingNewline(
 					indentString(string, indent),
 				)}`;
+
 			case STYLE_FOLDED:
 				return `>${blockHeader(string, state.indent)}${dropEndingNewline(
 					indentString(foldString(string, lineWidth), indent),
 				)}`;
+
 			case STYLE_DOUBLE:
 				return `"${escapeString(string)}"`;
+
 			default:
 				throw new YAMLError("impossible error: invalid scalar style");
 		}
@@ -530,6 +555,7 @@ function writeFlowSequence(
 	object: Any,
 ): void {
 	let _result = "";
+
 	const _tag = state.tag;
 
 	for (let index = 0, length = object.length; index < length; index += 1) {
@@ -552,6 +578,7 @@ function writeBlockSequence(
 	compact = false,
 ): void {
 	let _result = "";
+
 	const _tag = state.tag;
 
 	for (let index = 0, length = object.length; index < length; index += 1) {
@@ -582,10 +609,12 @@ function writeFlowMapping(
 	object: Any,
 ): void {
 	let _result = "";
+
 	const _tag = state.tag,
 		objectKeyList = Object.keys(object);
 
 	let pairBuffer: string, objectKey: string, objectValue: Any;
+
 	for (
 		let index = 0, length = objectKeyList.length;
 		index < length;
@@ -632,6 +661,7 @@ function writeBlockMapping(
 ): void {
 	const _tag = state.tag,
 		objectKeyList = Object.keys(object);
+
 	let _result = "";
 
 	// Allow sorting keys so that the output file is deterministic
@@ -650,6 +680,7 @@ function writeBlockMapping(
 		objectKey: string,
 		objectValue: Any,
 		explicitPair: boolean;
+
 	for (
 		let index = 0, length = objectKeyList.length;
 		index < length;
@@ -716,8 +747,11 @@ function detectType(
 	const typeList = explicit ? state.explicitTypes : state.implicitTypes;
 
 	let type: Type;
+
 	let style: StyleVariant;
+
 	let _result: string;
+
 	for (let index = 0, length = typeList.length; index < length; index += 1) {
 		type = typeList[index];
 
@@ -783,7 +817,9 @@ function writeNode(
 		type === "[object Object]" || type === "[object Array]";
 
 	let duplicateIndex = -1;
+
 	let duplicate = false;
+
 	if (objectOrArray) {
 		duplicateIndex = state.duplicates.indexOf(object);
 		duplicate = duplicateIndex !== -1;
@@ -810,11 +846,13 @@ function writeNode(
 		if (type === "[object Object]") {
 			if (block && Object.keys(state.dump).length !== 0) {
 				writeBlockMapping(state, level, state.dump, compact);
+
 				if (duplicate) {
 					state.dump = `&ref_${duplicateIndex}${state.dump}`;
 				}
 			} else {
 				writeFlowMapping(state, level, state.dump);
+
 				if (duplicate) {
 					state.dump = `&ref_${duplicateIndex} ${state.dump}`;
 				}
@@ -822,13 +860,16 @@ function writeNode(
 		} else if (type === "[object Array]") {
 			const arrayLevel =
 				state.noArrayIndent && level > 0 ? level - 1 : level;
+
 			if (block && state.dump.length !== 0) {
 				writeBlockSequence(state, arrayLevel, state.dump, compact);
+
 				if (duplicate) {
 					state.dump = `&ref_${duplicateIndex}${state.dump}`;
 				}
 			} else {
 				writeFlowSequence(state, arrayLevel, state.dump);
+
 				if (duplicate) {
 					state.dump = `&ref_${duplicateIndex} ${state.dump}`;
 				}
@@ -839,6 +880,7 @@ function writeNode(
 			}
 		} else {
 			if (state.skipInvalid) return false;
+
 			throw new YAMLError(
 				`unacceptable kind of an object to dump ${type}`,
 			);
@@ -859,6 +901,7 @@ function inspectNode(
 ): void {
 	if (object !== null && typeof object === "object") {
 		const index = objects.indexOf(object);
+
 		if (index !== -1) {
 			if (duplicatesIndexes.indexOf(index) === -1) {
 				duplicatesIndexes.push(index);
@@ -900,6 +943,7 @@ function getDuplicateReferences(object: object, state: DumperState): void {
 	inspectNode(object, objects, duplicatesIndexes);
 
 	const length = duplicatesIndexes.length;
+
 	for (let index = 0; index < length; index += 1) {
 		state.duplicates.push(objects[duplicatesIndexes[index]]);
 	}

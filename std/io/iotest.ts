@@ -32,6 +32,7 @@ export class HalfReader implements Reader {
 			throw Error("expected Uint8Array");
 		}
 		const half = Math.floor((p.byteLength + 1) / 2);
+
 		return this.r.read(p.subarray(0, half));
 	}
 }
@@ -48,10 +49,12 @@ export class ErrTimeout extends Error {
  */
 export class TimeoutReader implements Reader {
 	count = 0;
+
 	constructor(readonly r: Reader) {}
 
 	async read(p: Uint8Array): Promise<number | Deno.EOF> {
 		this.count++;
+
 		if (this.count === 2) {
 			throw new ErrTimeout();
 		}

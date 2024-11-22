@@ -26,6 +26,7 @@ testPerm({ read: true }, async function sendAsyncStackTrace(): Promise<void> {
 test(async function malformedJsonControlBuffer(): Promise<void> {
 	// @ts-ignore
 	const res = Deno.core.send(10, new Uint8Array([1, 2, 3, 4, 5]));
+
 	const resText = new TextDecoder().decode(res);
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const resJson = JSON.parse(resText) as any;

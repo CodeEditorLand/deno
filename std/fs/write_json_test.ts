@@ -16,6 +16,7 @@ test(async function writeJsonIfNotExists(): Promise<void> {
 	await assertThrowsAsync(
 		async (): Promise<void> => {
 			await writeJson(notExistsJsonFile, { a: "1" });
+
 			throw new Error("should write success");
 		},
 		Error,
@@ -37,6 +38,7 @@ test(async function writeJsonIfExists(): Promise<void> {
 	await assertThrowsAsync(
 		async (): Promise<void> => {
 			await writeJson(existsJsonFile, { a: "1" });
+
 			throw new Error("should write success");
 		},
 		Error,
@@ -62,6 +64,7 @@ test(async function writeJsonIfExistsAnInvalidJson(): Promise<void> {
 	await assertThrowsAsync(
 		async (): Promise<void> => {
 			await writeJson(existsInvalidJsonFile, { a: "1" });
+
 			throw new Error("should write success");
 		},
 		Error,
@@ -84,6 +87,7 @@ test(async function writeJsonWithSpaces(): Promise<void> {
 	await assertThrowsAsync(
 		async (): Promise<void> => {
 			await writeJson(existsJsonFile, { a: "1" }, { spaces: 2 });
+
 			throw new Error("should write success");
 		},
 		Error,
@@ -112,6 +116,7 @@ test(async function writeJsonWithReplacer(): Promise<void> {
 					replacer: ["a"],
 				},
 			);
+
 			throw new Error("should write success");
 		},
 		Error,
@@ -134,6 +139,7 @@ test(function writeJsonSyncIfNotExists(): void {
 	assertThrows(
 		(): void => {
 			writeJsonSync(notExistsJsonFile, { a: "1" });
+
 			throw new Error("should write success");
 		},
 		Error,
@@ -158,6 +164,7 @@ test(function writeJsonSyncIfExists(): void {
 	assertThrows(
 		(): void => {
 			writeJsonSync(existsJsonFile, { a: "1" });
+
 			throw new Error("should write success");
 		},
 		Error,
@@ -183,6 +190,7 @@ test(function writeJsonSyncIfExistsAnInvalidJson(): void {
 	assertThrows(
 		(): void => {
 			writeJsonSync(existsInvalidJsonFile, { a: "1" });
+
 			throw new Error("should write success");
 		},
 		Error,
@@ -208,6 +216,7 @@ test(function writeJsonWithSpaces(): void {
 	assertThrows(
 		(): void => {
 			writeJsonSync(existsJsonFile, { a: "1" }, { spaces: 2 });
+
 			throw new Error("should write success");
 		},
 		Error,
@@ -239,6 +248,7 @@ test(function writeJsonWithReplacer(): void {
 					replacer: ["a"],
 				},
 			);
+
 			throw new Error("should write success");
 		},
 		Error,

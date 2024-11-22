@@ -112,10 +112,14 @@ export interface ReadWriteSeeker extends Reader, Writer, Seeker {}
 // https://golang.org/pkg/io/#Copy
 export async function copy(dst: Writer, src: Reader): Promise<number> {
 	let n = 0;
+
 	const b = new Uint8Array(32 * 1024);
+
 	let gotEOF = false;
+
 	while (gotEOF === false) {
 		const result = await src.read(b);
+
 		if (result === EOF) {
 			gotEOF = true;
 		} else {
@@ -153,8 +157,10 @@ export function toAsyncIterator(r: Reader): AsyncIterableIterator<Uint8Array> {
 			}
 
 			const result = await r.read(b);
+
 			if (result === EOF) {
 				sawEof = true;
+
 				return { value: new Uint8Array(), done: true };
 			}
 

@@ -15,6 +15,7 @@ export function isSubdir(
 		return false;
 	}
 	const srcArray = src.split(sep);
+
 	const destArray = dest.split(sep);
 	// see: https://github.com/Microsoft/TypeScript/issues/30821
 	return srcArray.reduce(

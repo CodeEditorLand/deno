@@ -5,6 +5,7 @@ export function deepAssign(
 ): object | undefined {
 	for (let i = 0; i < sources.length; i++) {
 		const source = sources[i];
+
 		if (!source || typeof source !== `object`) {
 			return;
 		}
@@ -12,10 +13,12 @@ export function deepAssign(
 			([key, value]: [string, unknown]): void => {
 				if (value instanceof Date) {
 					target[key] = new Date(value);
+
 					return;
 				}
 				if (!value || typeof value !== `object`) {
 					target[key] = value;
+
 					return;
 				}
 				if (Array.isArray(value)) {

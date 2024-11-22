@@ -4,6 +4,7 @@ import { assert, assertEquals, testPerm } from "./test_util.ts";
 testPerm({ read: true, write: true }, function mkdirSyncSuccess(): void {
 	const path = Deno.makeTempDirSync() + "/dir";
 	Deno.mkdirSync(path);
+
 	const pathInfo = Deno.statSync(path);
 	assert(pathInfo.isDirectory());
 });
@@ -12,6 +13,7 @@ testPerm({ read: true, write: true }, function mkdirSyncMode(): void {
 	const path = Deno.makeTempDirSync() + "/dir";
 	Deno.mkdirSync(path, false, 0o755); // no perm for x
 	const pathInfo = Deno.statSync(path);
+
 	if (pathInfo.mode !== null) {
 		// Skip windows
 		assertEquals(pathInfo.mode & 0o777, 0o755);
@@ -20,6 +22,7 @@ testPerm({ read: true, write: true }, function mkdirSyncMode(): void {
 
 testPerm({ write: false }, function mkdirSyncPerm(): void {
 	let err;
+
 	try {
 		Deno.mkdirSync("/baddir");
 	} catch (e) {
@@ -34,6 +37,7 @@ testPerm(
 	async function mkdirSuccess(): Promise<void> {
 		const path = Deno.makeTempDirSync() + "/dir";
 		await Deno.mkdir(path);
+
 		const pathInfo = Deno.statSync(path);
 		assert(pathInfo.isDirectory());
 	},
@@ -41,6 +45,7 @@ testPerm(
 
 testPerm({ write: true }, function mkdirErrIfExists(): void {
 	let err;
+
 	try {
 		Deno.mkdirSync(".");
 	} catch (e) {
@@ -53,6 +58,7 @@ testPerm({ write: true }, function mkdirErrIfExists(): void {
 testPerm({ read: true, write: true }, function mkdirSyncRecursive(): void {
 	const path = Deno.makeTempDirSync() + "/nested/directory";
 	Deno.mkdirSync(path, true);
+
 	const pathInfo = Deno.statSync(path);
 	assert(pathInfo.isDirectory());
 });
@@ -62,6 +68,7 @@ testPerm(
 	async function mkdirRecursive(): Promise<void> {
 		const path = Deno.makeTempDirSync() + "/nested/directory";
 		await Deno.mkdir(path, true);
+
 		const pathInfo = Deno.statSync(path);
 		assert(pathInfo.isDirectory());
 	},

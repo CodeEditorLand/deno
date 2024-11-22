@@ -67,6 +67,7 @@ export function append(a: Uint8Array, b: Uint8Array): Uint8Array {
 	const output = new Uint8Array(a.length + b.length);
 	output.set(a, 0);
 	output.set(b, a.length);
+
 	return output;
 }
 
@@ -107,8 +108,11 @@ export async function writeFrame(
 	writer: Writer,
 ): Promise<void> {
 	const payloadLength = frame.payload.byteLength;
+
 	let header: Uint8Array;
+
 	const hasMask = frame.mask ? 0x80 : 0;
+
 	if (frame.mask && frame.mask.byteLength !== 4) {
 		throw new Error(
 			"invalid mask. mask must be 4 bytes: length=" +
@@ -136,6 +140,7 @@ export async function writeFrame(
 	}
 	unmask(frame.payload, frame.mask);
 	header = append(header, frame.payload);
+
 	const w = BufWriter.create(writer);
 	await w.write(header);
 	await w.flush();
@@ -144,35 +149,49 @@ export async function writeFrame(
 /** Read websocket frame from given BufReader */
 export async function readFrame(buf: BufReader): Promise<WebSocketFrame> {
 	let b = await buf.readByte();
+
 	if (b === Deno.EOF) throw new UnexpectedEOFError();
+
 	let isLastFrame = false;
+
 	switch (b >>> 4) {
 		case 0b1000:
 			isLastFrame = true;
+
 			break;
+
 		case 0b0000:
 			isLastFrame = false;
+
 			break;
+
 		default:
 			throw new Error("invalid signature");
 	}
 	const opcode = b & 0x0f;
 	// has_mask & payload
 	b = await buf.readByte();
+
 	if (b === Deno.EOF) throw new UnexpectedEOFError();
+
 	const hasMask = b >>> 7;
+
 	let payloadLength = b & 0b01111111;
+
 	if (payloadLength === 126) {
 		const l = await readShort(buf);
+
 		if (l === Deno.EOF) throw new UnexpectedEOFError();
 		payloadLength = l;
 	} else if (payloadLength === 127) {
 		const l = await readLong(buf);
+
 		if (l === Deno.EOF) throw new UnexpectedEOFError();
 		payloadLength = Number(l);
 	}
 	// mask
 	let mask;
+
 	if (hasMask) {
 		mask = new Uint8Array(4);
 		await buf.readFull(mask);
@@ -180,6 +199,7 @@ export async function readFrame(buf: BufReader): Promise<WebSocketFrame> {
 	// payload
 	const payload = new Uint8Array(payloadLength);
 	await buf.readFull(payload);
+
 	return {
 		isLastFrame,
 		opcode,
@@ -213,19 +233,25 @@ class WebSocketImpl implements WebSocket {
 
 	async *receive(): AsyncIterableIterator<WebSocketEvent> {
 		let frames: WebSocketFrame[] = [];
+
 		let payloadsLength = 0;
+
 		while (true) {
 			const frame = await readFrame(this.bufReader);
 			unmask(frame.payload, frame.mask);
+
 			switch (frame.opcode) {
 				case OpCode.TextFrame:
 				case OpCode.BinaryFrame:
 				case OpCode.Continue:
 					frames.push(frame);
 					payloadsLength += frame.payload.length;
+
 					if (frame.isLastFrame) {
 						const concat = new Uint8Array(payloadsLength);
+
 						let offs = 0;
+
 						for (const frame of frames) {
 							concat.set(frame.payload, offs);
 							offs += frame.payload.length;
@@ -241,15 +267,20 @@ class WebSocketImpl implements WebSocket {
 						payloadsLength = 0;
 					}
 					break;
+
 				case OpCode.Close:
 					// [0x12, 0x34] -> 0x1234
 					const code = (frame.payload[0] << 8) | frame.payload[1];
+
 					const reason = decode(
 						frame.payload.subarray(2, frame.payload.length),
 					);
 					await this.close(code, reason);
+
 					yield { code, reason };
+
 					return;
+
 				case OpCode.Ping:
 					await writeFrame(
 						{
@@ -259,11 +290,16 @@ class WebSocketImpl implements WebSocket {
 						},
 						this.bufWriter,
 					);
+
 					yield ["ping", frame.payload] as WebSocketPingEvent;
+
 					break;
+
 				case OpCode.Pong:
 					yield ["pong", frame.payload] as WebSocketPongEvent;
+
 					break;
+
 				default:
 			}
 		}
@@ -275,7 +311,9 @@ class WebSocketImpl implements WebSocket {
 		}
 		const opcode =
 			typeof data === "string" ? OpCode.TextFrame : OpCode.BinaryFrame;
+
 		const payload = typeof data === "string" ? encode(data) : data;
+
 		const isLastFrame = true;
 		await writeFrame(
 			{
@@ -302,6 +340,7 @@ class WebSocketImpl implements WebSocket {
 	}
 
 	private _isClosed = false;
+
 	get isClosed(): boolean {
 		return this._isClosed;
 	}
@@ -309,7 +348,9 @@ class WebSocketImpl implements WebSocket {
 	async close(code: number, reason?: string): Promise<void> {
 		try {
 			const header = [code >>> 8, code & 0x00ff];
+
 			let payload: Uint8Array;
+
 			if (reason) {
 				const reasonBytes = encode(reason);
 				payload = new Uint8Array(2 + reasonBytes.byteLength);
@@ -351,10 +392,12 @@ class WebSocketImpl implements WebSocket {
 /** Return whether given headers is acceptable for websocket  */
 export function acceptable(req: { headers: Headers }): boolean {
 	const upgrade = req.headers.get("upgrade");
+
 	if (!upgrade || upgrade.toLowerCase() !== "websocket") {
 		return false;
 	}
 	const secKey = req.headers.get("sec-websocket-key");
+
 	return (
 		req.headers.has("sec-websocket-key") &&
 		typeof secKey === "string" &&
@@ -368,7 +411,9 @@ const kGUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 export function createSecAccept(nonce: string): string {
 	const sha1 = new Sha1();
 	sha1.update(nonce + kGUID);
+
 	const bytes = sha1.digest();
+
 	return btoa(String.fromCharCode(...bytes));
 }
 
@@ -380,9 +425,12 @@ export async function acceptWebSocket(req: {
 	headers: Headers;
 }): Promise<WebSocket> {
 	const { conn, headers, bufReader, bufWriter } = req;
+
 	if (acceptable(req)) {
 		const sock = new WebSocketImpl(conn, { bufReader, bufWriter });
+
 		const secKey = headers.get("sec-websocket-key");
+
 		if (typeof secKey !== "string") {
 			throw new Error("sec-websocket-key is not provided");
 		}
@@ -395,6 +443,7 @@ export async function acceptWebSocket(req: {
 				"Sec-WebSocket-Accept": secAccept,
 			}),
 		});
+
 		return sock;
 	}
 	throw new Error("request is not acceptable");
@@ -405,6 +454,7 @@ const kSecChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-.~_";
 /** Create WebSocket-Sec-Key. Base64 encoded 16 bytes string */
 export function createSecKey(): string {
 	let key = "";
+
 	for (let i = 0; i < 16; i++) {
 		const j = Math.round(Math.random() * kSecChars.length);
 		key += kSecChars[j];
@@ -419,6 +469,7 @@ async function handshake(
 	bufWriter: BufWriter,
 ): Promise<void> {
 	const { hostname, pathname, searchParams } = url;
+
 	const key = createSecKey();
 
 	if (!headers.has("host")) {
@@ -430,6 +481,7 @@ async function handshake(
 	headers.set("sec-websocket-version", "13");
 
 	let headerStr = `GET ${pathname}?${searchParams || ""} HTTP/1.1\r\n`;
+
 	for (const [key, value] of headers) {
 		headerStr += `${key}: ${value}\r\n`;
 	}
@@ -439,17 +491,21 @@ async function handshake(
 	await bufWriter.flush();
 
 	const tpReader = new TextProtoReader(bufReader);
+
 	const statusLine = await tpReader.readLine();
+
 	if (statusLine === Deno.EOF) {
 		throw new UnexpectedEOFError();
 	}
 	const m = statusLine.match(/^(?<version>\S+) (?<statusCode>\S+) /);
+
 	if (!m) {
 		throw new Error("ws: invalid status line: " + statusLine);
 	}
 
 	// @ts-ignore
 	const { version, statusCode } = m.groups;
+
 	if (version !== "HTTP/1.1" || statusCode !== "101") {
 		throw new Error(
 			`ws: server didn't accept handshake: ` +
@@ -458,12 +514,15 @@ async function handshake(
 	}
 
 	const responseHeaders = await tpReader.readMIMEHeader();
+
 	if (responseHeaders === Deno.EOF) {
 		throw new UnexpectedEOFError();
 	}
 
 	const expectedSecAccept = createSecAccept(key);
+
 	const secAccept = responseHeaders.get("sec-websocket-accept");
+
 	if (secAccept !== expectedSecAccept) {
 		throw new Error(
 			`ws: unexpected sec-websocket-accept header: ` +
@@ -481,8 +540,11 @@ export async function connectWebSocket(
 	headers: Headers = new Headers(),
 ): Promise<WebSocket> {
 	const url = new URL(endpoint);
+
 	const { hostname } = url;
+
 	let conn: Conn;
+
 	if (url.protocol === "http:" || url.protocol === "ws:") {
 		const port = parseInt(url.port || "80");
 		conn = await Deno.dial({ hostname, port });
@@ -493,11 +555,14 @@ export async function connectWebSocket(
 		throw new Error("ws: unsupported protocol: " + url.protocol);
 	}
 	const bufWriter = new BufWriter(conn);
+
 	const bufReader = new BufReader(conn);
+
 	try {
 		await handshake(url, headers, bufReader, bufWriter);
 	} catch (err) {
 		conn.close();
+
 		throw err;
 	}
 	return new WebSocketImpl(conn, {

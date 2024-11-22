@@ -21,16 +21,20 @@ async function expandGlobArray(
 	options: ExpandGlobOptions,
 ): Promise<string[]> {
 	const paths: string[] = [];
+
 	for await (const { filename } of expandGlob(globString, options)) {
 		paths.push(filename);
 	}
 	paths.sort();
+
 	const pathsSync = [...expandGlobSync(globString, options)].map(
 		({ filename }): string => filename,
 	);
 	pathsSync.sort();
 	assertEquals(paths, pathsSync);
+
 	const root = normalize(options.root || cwd());
+
 	for (const path of paths) {
 		assert(path.startsWith(root));
 	}
@@ -38,6 +42,7 @@ async function expandGlobArray(
 		(path: string): string => relative(root, path) || ".",
 	);
 	relativePaths.sort();
+
 	return relativePaths;
 }
 
@@ -124,6 +129,7 @@ test(async function expandGlobIncludeDirs(): Promise<void> {
 
 test(async function expandGlobPermError(): Promise<void> {
 	const exampleUrl = new URL("testdata/expand_wildcard.js", import.meta.url);
+
 	const p = run({
 		args: [execPath(), exampleUrl.toString()],
 		stdin: "null",

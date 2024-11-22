@@ -20,14 +20,18 @@ for await (const req of serve(`:${port}`)) {
 	})
 		.then(async (sock: WebSocket): Promise<void> => {
 			console.log("socket connected!");
+
 			const it = sock.receive();
+
 			while (true) {
 				try {
 					const { done, value } = await it.next();
+
 					if (done) {
 						break;
 					}
 					const ev = value;
+
 					if (typeof ev === "string") {
 						// text message
 						console.log("ws:Text", ev);

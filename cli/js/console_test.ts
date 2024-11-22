@@ -21,6 +21,7 @@ function stringify(...args: unknown[]): string {
 // via https://github.com/web-platform-tests/wpt/blob/master/console/console-is-a-namespace.any.js
 test(function consoleShouldBeANamespace(): void {
 	const prototype1 = Object.getPrototypeOf(console);
+
 	const prototype2 = Object.getPrototypeOf(prototype1);
 
 	assertEquals(Object.getOwnPropertyNames(prototype1).length, 0);
@@ -36,6 +37,7 @@ test(function consoleTestAssertShouldNotThrowError(): void {
 	console.assert(true);
 
 	let hasThrown = undefined;
+
 	try {
 		console.assert(false);
 		hasThrown = false;
@@ -104,6 +106,7 @@ test(function consoleTestStringifyCircular(): void {
 	};
 
 	nestedObj.o = circularObj;
+
 	const nestedObjExpected = `{ num, bool, str, method, asyncMethod, generatorMethod, un, nu, arrowFunc, extendedClass, nFunc, extendedCstr, o }`;
 
 	assertEquals(stringify(1), "1");
@@ -208,6 +211,7 @@ test(function consoleTestWithCustomInspectorError(): void {
 	class A {
 		[customInspect](): string {
 			throw new Error("BOOM");
+
 			return "b";
 		}
 	}
@@ -335,7 +339,9 @@ test(function consoleTestError(): void {
 
 test(function consoleTestClear(): void {
 	const stdoutWrite = stdout.write;
+
 	const uint8 = new TextEncoder().encode("\x1b[1;1H" + "\x1b[0J");
+
 	let buffer = new Uint8Array(0);
 
 	stdout.write = async (u8: Uint8Array): Promise<number> => {
@@ -354,21 +360,37 @@ test(function consoleTestClear(): void {
 // Test bound this issue
 test(function consoleDetachedLog(): void {
 	const log = console.log;
+
 	const dir = console.dir;
+
 	const dirxml = console.dirxml;
+
 	const debug = console.debug;
+
 	const info = console.info;
+
 	const warn = console.warn;
+
 	const error = console.error;
+
 	const consoleAssert = console.assert;
+
 	const consoleCount = console.count;
+
 	const consoleCountReset = console.countReset;
+
 	const consoleTable = console.table;
+
 	const consoleTime = console.time;
+
 	const consoleTimeLog = console.timeLog;
+
 	const consoleTimeEnd = console.timeEnd;
+
 	const consoleGroup = console.group;
+
 	const consoleGroupEnd = console.groupEnd;
+
 	const consoleClear = console.clear;
 	log("Hello world");
 	dir("Hello world");
@@ -409,11 +431,15 @@ type ConsoleExamineFunc = (
 
 function mockConsole(f: ConsoleExamineFunc): void {
 	const out = new StringBuffer();
+
 	const err = new StringBuffer();
+
 	const both = new StringBuffer();
+
 	const csl = new Console(
 		(x: string, isErr: boolean, printsNewLine: boolean): void => {
 			const content = x + (printsNewLine ? "\n" : "");
+
 			const buf = isErr ? err : out;
 			buf.add(content);
 			both.add(content);
@@ -650,6 +676,7 @@ test(function consoleTable(): void {
 // console.log(Error) test
 test(function consoleLogShouldNotThrowError(): void {
 	let result = 0;
+
 	try {
 		console.log(new Error("foo"));
 		result = 1;

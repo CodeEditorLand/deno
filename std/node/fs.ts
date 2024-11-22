@@ -52,6 +52,7 @@ export function readFile(
 	callback?: ReadFileCallback,
 ): void {
 	let cb: ReadFileCallback | undefined;
+
 	if (typeof optOrCallback === "function") {
 		cb = optOrCallback;
 	} else {

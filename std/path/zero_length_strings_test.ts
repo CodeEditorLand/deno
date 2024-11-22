@@ -14,7 +14,9 @@ test(function joinZeroLength() {
 	// '.' if the joined string is a zero-length string.
 	assertEquals(path.posix.join(""), ".");
 	assertEquals(path.posix.join("", ""), ".");
+
 	if (path.win32) assertEquals(path.win32.join(""), ".");
+
 	if (path.win32) assertEquals(path.win32.join("", ""), ".");
 	assertEquals(path.join(pwd), pwd);
 	assertEquals(path.join(pwd, ""), pwd);
@@ -23,6 +25,7 @@ test(function joinZeroLength() {
 test(function normalizeZeroLength() {
 	// normalize will return '.' if the input is a zero-length string
 	assertEquals(path.posix.normalize(""), ".");
+
 	if (path.win32) assertEquals(path.win32.normalize(""), ".");
 	assertEquals(path.normalize(pwd), pwd);
 });
@@ -31,6 +34,7 @@ test(function isAbsoluteZeroLength() {
 	// Since '' is not a valid path in any of the common environments,
 	// return false
 	assertEquals(path.posix.isAbsolute(""), false);
+
 	if (path.win32) assertEquals(path.win32.isAbsolute(""), false);
 });
 

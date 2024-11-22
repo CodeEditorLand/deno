@@ -10,13 +10,18 @@ type Reader = Deno.Reader;
 type Writer = Deno.Writer;
 
 const DEFAULT_BUF_SIZE = 4096;
+
 const MIN_BUF_SIZE = 16;
+
 const MAX_CONSECUTIVE_EMPTY_READS = 100;
+
 const CR = charCode("\r");
+
 const LF = charCode("\n");
 
 export class BufferFullError extends Error {
 	name = "BufferFullError";
+
 	constructor(public partial: Uint8Array) {
 		super("Buffer full");
 	}
@@ -25,6 +30,7 @@ export class BufferFullError extends Error {
 export class UnexpectedEOFError extends Error {
 	name = "UnexpectedEOFError";
 	partial?: Uint8Array;
+
 	constructor() {
 		super("Unexpected EOF");
 	}
@@ -83,12 +89,15 @@ export class BufReader implements Reader {
 		// Read new data: try a limited number of times.
 		for (let i = MAX_CONSECUTIVE_EMPTY_READS; i > 0; i--) {
 			const rr = await this.rd.read(this.buf.subarray(this.w));
+
 			if (rr === Deno.EOF) {
 				this.eof = true;
+
 				return;
 			}
 			assert(rr >= 0, "negative read");
 			this.w += rr;
+
 			if (rr > 0) {
 				return;
 			}
@@ -122,6 +131,7 @@ export class BufReader implements Reader {
 	 */
 	async read(p: Uint8Array): Promise<number | Deno.EOF> {
 		let rr: number | Deno.EOF = p.byteLength;
+
 		if (p.byteLength === 0) return rr;
 
 		if (this.r === this.w) {
@@ -129,6 +139,7 @@ export class BufReader implements Reader {
 				// Large read, empty buffer.
 				// Read directly into p to avoid copy.
 				const rr = await this.rd.read(p);
+
 				const nread = rr === Deno.EOF ? 0 : rr;
 				assert(nread >= 0, "negative read");
 				// if (rr.nread > 0) {
@@ -143,6 +154,7 @@ export class BufReader implements Reader {
 			this.r = 0;
 			this.w = 0;
 			rr = await this.rd.read(this.buf);
+
 			if (rr === 0 || rr === Deno.EOF) return rr;
 			assert(rr >= 0, "negative read");
 			this.w += rr;
@@ -153,6 +165,7 @@ export class BufReader implements Reader {
 		this.r += copied;
 		// this.lastByte = this.buf[this.r - 1];
 		// this.lastCharSize = -1;
+
 		return copied;
 	}
 
@@ -172,9 +185,11 @@ export class BufReader implements Reader {
 	 */
 	async readFull(p: Uint8Array): Promise<Uint8Array | Deno.EOF> {
 		let bytesRead = 0;
+
 		while (bytesRead < p.length) {
 			try {
 				const rr = await this.read(p.subarray(bytesRead));
+
 				if (rr === Deno.EOF) {
 					if (bytesRead === 0) {
 						return Deno.EOF;
@@ -185,6 +200,7 @@ export class BufReader implements Reader {
 				bytesRead += rr;
 			} catch (err) {
 				err.partial = p.subarray(0, bytesRead);
+
 				throw err;
 			}
 		}
@@ -200,6 +216,7 @@ export class BufReader implements Reader {
 		const c = this.buf[this.r];
 		this.r++;
 		// this.lastByte = c;
+
 		return c;
 	}
 
@@ -215,8 +232,11 @@ export class BufReader implements Reader {
 	async readString(delim: string): Promise<string | Deno.EOF> {
 		if (delim.length !== 1)
 			throw new Error("Delimiter should be a single character");
+
 		const buffer = await this.readSlice(delim.charCodeAt(0));
+
 		if (buffer == Deno.EOF) return Deno.EOF;
+
 		return new TextDecoder().decode(buffer);
 	}
 
@@ -289,6 +309,7 @@ export class BufReader implements Reader {
 
 		if (line[line.byteLength - 1] == LF) {
 			let drop = 1;
+
 			if (line.byteLength > 1 && line[line.byteLength - 2] === CR) {
 				drop = 2;
 			}
@@ -320,10 +341,12 @@ export class BufReader implements Reader {
 		while (true) {
 			// Search buffer.
 			let i = this.buf.subarray(this.r + s, this.w).indexOf(delim);
+
 			if (i >= 0) {
 				i += s;
 				slice = this.buf.subarray(this.r, this.r + i + 1);
 				this.r += i + 1;
+
 				break;
 			}
 
@@ -334,12 +357,14 @@ export class BufReader implements Reader {
 				}
 				slice = this.buf.subarray(this.r, this.w);
 				this.r = this.w;
+
 				break;
 			}
 
 			// Buffer full?
 			if (this.buffered() >= this.buf.byteLength) {
 				this.r = this.w;
+
 				throw new BufferFullError(this.buf);
 			}
 
@@ -350,6 +375,7 @@ export class BufReader implements Reader {
 				await this._fill();
 			} catch (err) {
 				err.partial = slice!;
+
 				throw err;
 			}
 		}
@@ -381,11 +407,13 @@ export class BufReader implements Reader {
 		}
 
 		let avail = this.w - this.r;
+
 		while (avail < n && avail < this.buf.byteLength && !this.eof) {
 			try {
 				await this._fill();
 			} catch (err) {
 				err.partial = this.buf.subarray(this.r, this.w);
+
 				throw err;
 			}
 			avail = this.w - this.r;
@@ -447,13 +475,16 @@ export class BufWriter implements Writer {
 	/** Flush writes any buffered data to the underlying io.Writer. */
 	async flush(): Promise<void> {
 		if (this.err !== null) throw this.err;
+
 		if (this.n === 0) return;
 
 		let n = 0;
+
 		try {
 			n = await this.wr.write(this.buf.subarray(0, this.n));
 		} catch (e) {
 			this.err = e;
+
 			throw e;
 		}
 
@@ -463,6 +494,7 @@ export class BufWriter implements Writer {
 				this.n -= n;
 			}
 			this.err = new Error("Short write");
+
 			throw this.err;
 		}
 
@@ -486,10 +518,13 @@ export class BufWriter implements Writer {
 	 */
 	async write(p: Uint8Array): Promise<number> {
 		if (this.err !== null) throw this.err;
+
 		if (p.length === 0) return 0;
 
 		let nn = 0;
+
 		let n = 0;
+
 		while (p.byteLength > this.available()) {
 			if (this.buffered() === 0) {
 				// Large write, empty buffer.
@@ -498,6 +533,7 @@ export class BufWriter implements Writer {
 					n = await this.wr.write(p);
 				} catch (e) {
 					this.err = e;
+
 					throw e;
 				}
 			} else {
@@ -512,6 +548,7 @@ export class BufWriter implements Writer {
 		n = copyBytes(this.buf, p, this.n);
 		this.n += n;
 		nn += n;
+
 		return nn;
 	}
 }

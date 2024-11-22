@@ -12,10 +12,12 @@ import { getFileInfoType } from "./utils.ts";
  */
 export async function ensureFile(filePath: string): Promise<void> {
 	let pathExists = false;
+
 	try {
 		// if file exists
 		const stat = await Deno.lstat(filePath);
 		pathExists = true;
+
 		if (!stat.isFile()) {
 			throw new Error(
 				`Ensure path exists, expected 'file', got '${getFileInfoType(stat)}'`,
@@ -42,10 +44,12 @@ export async function ensureFile(filePath: string): Promise<void> {
  */
 export function ensureFileSync(filePath: string): void {
 	let pathExists = false;
+
 	try {
 		// if file exists
 		const stat = Deno.statSync(filePath);
 		pathExists = true;
+
 		if (!stat.isFile()) {
 			throw new Error(
 				`Ensure path exists, expected 'file', got '${getFileInfoType(stat)}'`,

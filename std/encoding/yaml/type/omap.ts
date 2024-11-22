@@ -7,11 +7,14 @@ import { Type } from "../type.ts";
 import { Any } from "../utils.ts";
 
 const _hasOwnProperty = Object.prototype.hasOwnProperty;
+
 const _toString = Object.prototype.toString;
 
 function resolveYamlOmap(data: Any): boolean {
 	const objectKeys: string[] = [];
+
 	let pairKey = "";
+
 	let pairHasKey = false;
 
 	for (const pair of data) {
@@ -22,6 +25,7 @@ function resolveYamlOmap(data: Any): boolean {
 		for (pairKey in pair) {
 			if (_hasOwnProperty.call(pair, pairKey)) {
 				if (!pairHasKey) pairHasKey = true;
+
 				else return false;
 			}
 		}
@@ -29,6 +33,7 @@ function resolveYamlOmap(data: Any): boolean {
 		if (!pairHasKey) return false;
 
 		if (objectKeys.indexOf(pairKey) === -1) objectKeys.push(pairKey);
+
 		else return false;
 	}
 

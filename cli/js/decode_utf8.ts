@@ -45,11 +45,15 @@ export function decodeUtf8(
 	// Prepare a buffer so that we don't have to do a lot of string concats, which
 	// are very slow.
 	const outBufferLength: number = Math.min(1024, input.length);
+
 	const outBuffer = new Uint16Array(outBufferLength);
+
 	let outIndex = 0;
 
 	let state = 0;
+
 	let codepoint = 0;
+
 	let type: number;
 
 	let i =
@@ -102,17 +106,20 @@ export function decodeUtf8(
 		// string if needed.
 		if (codepoint > 0xffff) {
 			outBuffer[outIndex++] = 0xd7c0 + (codepoint >> 10);
+
 			if (outIndex === outBufferLength) {
 				outString += String.fromCharCode.apply(null, outBuffer);
 				outIndex = 0;
 			}
 			outBuffer[outIndex++] = 0xdc00 | (codepoint & 0x3ff);
+
 			if (outIndex === outBufferLength) {
 				outString += String.fromCharCode.apply(null, outBuffer);
 				outIndex = 0;
 			}
 		} else {
 			outBuffer[outIndex++] = codepoint;
+
 			if (outIndex === outBufferLength) {
 				outString += String.fromCharCode.apply(null, outBuffer);
 				outIndex = 0;

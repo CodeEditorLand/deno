@@ -3,14 +3,18 @@ import { assert, assertEquals, testPerm } from "./test_util.ts";
 
 testPerm({ read: true, write: true }, function renameSyncSuccess(): void {
 	const testDir = Deno.makeTempDirSync();
+
 	const oldpath = testDir + "/oldpath";
+
 	const newpath = testDir + "/newpath";
 	Deno.mkdirSync(oldpath);
 	Deno.renameSync(oldpath, newpath);
+
 	const newPathInfo = Deno.statSync(newpath);
 	assert(newPathInfo.isDirectory());
 
 	let caughtErr = false;
+
 	let oldPathInfo;
 
 	try {
@@ -25,8 +29,10 @@ testPerm({ read: true, write: true }, function renameSyncSuccess(): void {
 
 testPerm({ read: false, write: true }, function renameSyncReadPerm(): void {
 	let err;
+
 	try {
 		const oldpath = "/oldbaddir";
+
 		const newpath = "/newbaddir";
 		Deno.renameSync(oldpath, newpath);
 	} catch (e) {
@@ -38,8 +44,10 @@ testPerm({ read: false, write: true }, function renameSyncReadPerm(): void {
 
 testPerm({ read: true, write: false }, function renameSyncWritePerm(): void {
 	let err;
+
 	try {
 		const oldpath = "/oldbaddir";
+
 		const newpath = "/newbaddir";
 		Deno.renameSync(oldpath, newpath);
 	} catch (e) {
@@ -53,14 +61,18 @@ testPerm(
 	{ read: true, write: true },
 	async function renameSuccess(): Promise<void> {
 		const testDir = Deno.makeTempDirSync();
+
 		const oldpath = testDir + "/oldpath";
+
 		const newpath = testDir + "/newpath";
 		Deno.mkdirSync(oldpath);
 		await Deno.rename(oldpath, newpath);
+
 		const newPathInfo = Deno.statSync(newpath);
 		assert(newPathInfo.isDirectory());
 
 		let caughtErr = false;
+
 		let oldPathInfo;
 
 		try {

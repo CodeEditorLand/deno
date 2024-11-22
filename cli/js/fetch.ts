@@ -28,6 +28,7 @@ function getHeaderValueParams(value: string): Map<string, string> {
 		.filter((arr): boolean => arr.length > 1)
 		.map(([k, v]): [string, string] => [k, v.replace(/^"([^"]*)"$/, "$1")])
 		.forEach(([k, v]): Map<string, string> => params.set(k, v));
+
 	return params;
 }
 
@@ -49,9 +50,12 @@ class Body implements domTypes.Body, domTypes.ReadableStream, io.ReadCloser {
 
 	private async _bodyBuffer(): Promise<ArrayBuffer> {
 		assert(this._bodyPromise == null);
+
 		const buf = new Buffer();
+
 		try {
 			const nread = await buf.readFrom(this);
+
 			const ui8 = buf.bytes();
 			assert(ui8.byteLength === nread);
 			this._data = ui8.buffer.slice(
@@ -82,6 +86,7 @@ class Body implements domTypes.Body, domTypes.ReadableStream, io.ReadCloser {
 
 	async blob(): Promise<domTypes.Blob> {
 		const arrayBuffer = await this.arrayBuffer();
+
 		return new DenoBlob([arrayBuffer], {
 			type: this.contentType,
 		});
@@ -90,9 +95,12 @@ class Body implements domTypes.Body, domTypes.ReadableStream, io.ReadCloser {
 	// ref: https://fetch.spec.whatwg.org/#body-mixin
 	async formData(): Promise<domTypes.FormData> {
 		const formData = new FormData();
+
 		const enc = new TextEncoder();
+
 		if (hasHeaderValueOf(this.contentType, "multipart/form-data")) {
 			const params = getHeaderValueParams(this.contentType);
+
 			if (!params.has("boundary")) {
 				// TypeError is required by spec
 				throw new TypeError(
@@ -101,13 +109,19 @@ class Body implements domTypes.Body, domTypes.ReadableStream, io.ReadCloser {
 			}
 			// ref: https://tools.ietf.org/html/rfc2046#section-5.1
 			const boundary = params.get("boundary")!;
+
 			const dashBoundary = `--${boundary}`;
+
 			const delimiter = `\r\n${dashBoundary}`;
+
 			const closeDelimiter = `${delimiter}--`;
 
 			const body = await this.text();
+
 			let bodyParts: string[];
+
 			const bodyEpilogueSplit = body.split(closeDelimiter);
+
 			if (bodyEpilogueSplit.length < 2) {
 				bodyParts = [];
 			} else {
@@ -116,6 +130,7 @@ class Body implements domTypes.Body, domTypes.ReadableStream, io.ReadCloser {
 				// first boundary treated special due to optional prefixed \r\n
 				const firstBoundaryIndex =
 					bodyEpilogueTrimmed.indexOf(dashBoundary);
+
 				if (firstBoundaryIndex < 0) {
 					throw new TypeError("Invalid boundary");
 				}
@@ -134,21 +149,27 @@ class Body implements domTypes.Body, domTypes.ReadableStream, io.ReadCloser {
 			}
 			for (const bodyPart of bodyParts) {
 				const headers = new Headers();
+
 				const headerOctetSeperatorIndex = bodyPart.indexOf("\r\n\r\n");
+
 				if (headerOctetSeperatorIndex < 0) {
 					continue; // Skip unknown part
 				}
 				const headerText = bodyPart.slice(0, headerOctetSeperatorIndex);
+
 				const octets = bodyPart.slice(headerOctetSeperatorIndex + 4);
 
 				// TODO: use textproto.readMIMEHeader from deno_std
 				const rawHeaders = headerText.split("\r\n");
+
 				for (const rawHeader of rawHeaders) {
 					const sepIndex = rawHeader.indexOf(":");
+
 					if (sepIndex < 0) {
 						continue; // Skip this header
 					}
 					const key = rawHeader.slice(0, sepIndex);
+
 					const value = rawHeader.slice(sepIndex + 1);
 					headers.set(key, value);
 				}
@@ -157,22 +178,27 @@ class Body implements domTypes.Body, domTypes.ReadableStream, io.ReadCloser {
 				}
 				// Content-Transfer-Encoding Deprecated
 				const contentDisposition = headers.get("content-disposition")!;
+
 				const partContentType =
 					headers.get("content-type") || "text/plain";
 				// TODO: custom charset encoding (needs TextEncoder support)
 				// const contentTypeCharset =
 				//   getHeaderValueParams(partContentType).get("charset") || "";
+
 				if (!hasHeaderValueOf(contentDisposition, "form-data")) {
 					continue; // Skip, might not be form-data
 				}
 				const dispositionParams =
 					getHeaderValueParams(contentDisposition);
+
 				if (!dispositionParams.has("name")) {
 					continue; // Skip, unknown name
 				}
 				const dispositionName = dispositionParams.get("name")!;
+
 				if (dispositionParams.has("filename")) {
 					const filename = dispositionParams.get("filename")!;
+
 					const blob = new DenoBlob([enc.encode(octets)], {
 						type: partContentType,
 					});
@@ -196,14 +222,18 @@ class Body implements domTypes.Body, domTypes.ReadableStream, io.ReadCloser {
 			// From https://github.com/github/fetch/blob/master/fetch.js
 			// Copyright (c) 2014-2016 GitHub, Inc. MIT License
 			const body = await this.text();
+
 			try {
 				body.trim()
 					.split("&")
 					.forEach((bytes): void => {
 						if (bytes) {
 							const split = bytes.split("=");
+
 							const name = split.shift()!.replace(/\+/g, " ");
+
 							const value = split.join("=").replace(/\+/g, " ");
+
 							formData.append(
 								decodeURIComponent(name),
 								decodeURIComponent(value),
@@ -222,17 +252,21 @@ class Body implements domTypes.Body, domTypes.ReadableStream, io.ReadCloser {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	async json(): Promise<any> {
 		const text = await this.text();
+
 		return JSON.parse(text);
 	}
 
 	async text(): Promise<string> {
 		const ab = await this.arrayBuffer();
+
 		const decoder = new TextDecoder("utf-8");
+
 		return decoder.decode(ab);
 	}
 
 	read(p: Uint8Array): Promise<number | io.EOF> {
 		this._bodyUsed = true;
+
 		return read(this.rid, p);
 	}
 
@@ -279,6 +313,7 @@ export class Response implements domTypes.Response {
 	) {
 		this.trailer = createResolvable();
 		this.headers = new Headers(headersList);
+
 		const contentType = this.headers.get("content-type") || "";
 
 		if (body_ == null) {
@@ -327,7 +362,9 @@ export class Response implements domTypes.Response {
 		}
 
 		const iterators = this.headers.entries();
+
 		const headersList: Array<[string, string]> = [];
+
 		for (const header of iterators) {
 			headersList.push(header);
 		}
@@ -358,11 +395,13 @@ async function sendFetchReq(
 	body: ArrayBufferView | undefined,
 ): Promise<FetchResponse> {
 	let headerArray: Array<[string, string]> = [];
+
 	if (headers) {
 		headerArray = Array.from(headers.entries());
 	}
 
 	let zeroCopy = undefined;
+
 	if (body) {
 		zeroCopy = new Uint8Array(
 			body.buffer,
@@ -390,17 +429,24 @@ export async function fetch(
 	init?: domTypes.RequestInit,
 ): Promise<Response> {
 	let url: string;
+
 	let method: string | null = null;
+
 	let headers: domTypes.Headers | null = null;
+
 	let body: ArrayBufferView | undefined;
+
 	let redirected = false;
+
 	let remRedirectCount = 20; // TODO: use a better way to handle
 
 	if (typeof input === "string" || input instanceof URL) {
 		url =
 			typeof input === "string" ? (input as string) : (input as URL).href;
+
 		if (init != null) {
 			method = init.method || null;
+
 			if (init.headers) {
 				headers =
 					init.headers instanceof Headers
@@ -418,6 +464,7 @@ export async function fetch(
 					headers = new Headers();
 				}
 				let contentType = "";
+
 				if (typeof init.body === "string") {
 					body = new TextEncoder().encode(init.body);
 					contentType = "text/plain;charset=UTF-8";
@@ -461,16 +508,20 @@ export async function fetch(
 			fetchResponse.bodyRid,
 			redirected,
 		);
+
 		if ([301, 302, 303, 307, 308].includes(response.status)) {
 			// We're in a redirect status
 			switch ((init && init.redirect) || "follow") {
 				case "error":
 					throw notImplemented();
+
 				case "manual":
 					throw notImplemented();
+
 				case "follow":
 				default:
 					let redirectUrl = response.headers.get("Location");
+
 					if (redirectUrl == null) {
 						return response; // Unspecified
 					}

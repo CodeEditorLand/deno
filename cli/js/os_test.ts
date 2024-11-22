@@ -13,6 +13,7 @@ testPerm({ env: true }, function envSuccess(): void {
 	assert(env !== null);
 	// eslint-disable-next-line @typescript-eslint/camelcase
 	env.test_var = "Hello World";
+
 	const newEnv = Deno.env();
 	assertEquals(env.test_var, newEnv.test_var);
 	assertEquals(Deno.env("test_var"), env.test_var);
@@ -25,6 +26,7 @@ testPerm({ env: true }, function envNotFound(): void {
 
 test(function envPermissionDenied1(): void {
 	let err;
+
 	try {
 		Deno.env();
 	} catch (e) {
@@ -37,6 +39,7 @@ test(function envPermissionDenied1(): void {
 
 test(function envPermissionDenied2(): void {
 	let err;
+
 	try {
 		Deno.env("PATH");
 	} catch (e) {
@@ -61,14 +64,18 @@ if (Deno.build.os === "win") {
         console.log(
           ${JSON.stringify(Object.keys(expectedEnv))}.map(k => Deno.env(k))
         )`;
+
 			const proc = Deno.run({
 				args: [Deno.execPath(), "eval", src],
 				env: inputEnv,
 				stdout: "piped",
 			});
+
 			const status = await proc.status();
 			assertEquals(status.success, true);
+
 			const expectedValues = Object.values(expectedEnv);
+
 			const actualValues = JSON.parse(
 				new TextDecoder().decode(await proc.output()),
 			);
@@ -83,6 +90,7 @@ if (Deno.build.os === "win") {
 
 		// Check that 'µ' and 'Μ' are not case folded.
 		const lc1 = "µ";
+
 		const uc1 = lc1.toUpperCase();
 		assertNotEquals(lc1, uc1);
 		await checkChildEnv(
@@ -92,7 +100,9 @@ if (Deno.build.os === "win") {
 
 		// Check that 'ǆ' and 'Ǆ' are folded, but 'ǅ' is preserved.
 		const c2 = "ǅ";
+
 		const lc2 = c2.toLowerCase();
+
 		const uc2 = c2.toUpperCase();
 		assertNotEquals(c2, lc2);
 		assertNotEquals(c2, uc2);
@@ -122,6 +132,7 @@ testPerm({ env: true }, function homeDir(): void {
 
 testPerm({ env: false }, function homeDirPerm(): void {
 	let caughtError = false;
+
 	try {
 		Deno.homeDir();
 	} catch (err) {
@@ -268,10 +279,12 @@ testPerm({ env: true }, function getUserDir(): void {
 
 	for (const s of scenes) {
 		console.log(`test Deno.${s.fn}()`);
+
 		const fn = Deno[s.fn];
 
 		for (const r of s.runtime) {
 			if (Deno.build.os !== r.os) continue;
+
 			if (r.shouldHaveValue) {
 				assertNotEquals(fn(), "");
 			} else {
@@ -305,6 +318,7 @@ testPerm({}, function getUserDirWithoutPermission(): void {
 
 	for (const fnName of funcs) {
 		console.log(`test Deno.${fnName}()`);
+
 		const fn = Deno[fnName];
 
 		assertThrows(
@@ -321,6 +335,7 @@ testPerm({ env: true }, function execPath(): void {
 
 testPerm({ env: false }, function execPathPerm(): void {
 	let caughtError = false;
+
 	try {
 		Deno.execPath();
 	} catch (err) {
@@ -337,6 +352,7 @@ testPerm({ env: true }, function hostnameDir(): void {
 
 testPerm({ env: false }, function hostnamePerm(): void {
 	let caughtError = false;
+
 	try {
 		Deno.hostname();
 	} catch (err) {

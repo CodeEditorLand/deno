@@ -74,8 +74,10 @@ export class ReadableStreamDefaultController<OutputType>
 
 	[rs.cancelSteps_](reason: shared.ErrorResult): Promise<void> {
 		q.resetQueue(this);
+
 		const result = this[rs.cancelAlgorithm_](reason);
 		rs.readableStreamDefaultControllerClearAlgorithms(this);
+
 		return result;
 	}
 
@@ -83,8 +85,10 @@ export class ReadableStreamDefaultController<OutputType>
 		forAuthorCode: boolean,
 	): Promise<IteratorResult<OutputType, any>> {
 		const stream = this[rs.controlledReadableStream_];
+
 		if (this[q.queue_].length > 0) {
 			const chunk = q.dequeueValue(this);
+
 			if (this[rs.closeRequested_] && this[q.queue_].length === 0) {
 				rs.readableStreamDefaultControllerClearAlgorithms(this);
 				rs.readableStreamClose(stream);
@@ -101,6 +105,7 @@ export class ReadableStreamDefaultController<OutputType>
 			forAuthorCode,
 		);
 		rs.readableStreamDefaultControllerCallPullIfNeeded(this);
+
 		return pendingPromise;
 	}
 }
@@ -115,14 +120,17 @@ export function setUpReadableStreamDefaultControllerFromUnderlyingSource<
 ): void {
 	// Assert: underlyingSource is not undefined.
 	const controller = Object.create(ReadableStreamDefaultController.prototype);
+
 	const startAlgorithm = (): any => {
 		return shared.invokeOrNoop(underlyingSource, "start", [controller]);
 	};
+
 	const pullAlgorithm = shared.createAlgorithmFromUnderlyingMethod(
 		underlyingSource,
 		"pull",
 		[controller],
 	);
+
 	const cancelAlgorithm = shared.createAlgorithmFromUnderlyingMethod(
 		underlyingSource,
 		"cancel",

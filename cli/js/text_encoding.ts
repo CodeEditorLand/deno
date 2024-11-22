@@ -29,7 +29,9 @@ import * as domTypes from "./dom_types.ts";
 import { DenoError, ErrorKind } from "./errors.ts";
 
 const CONTINUE = null;
+
 const END_OF_STREAM = -1;
+
 const FINISHED = -1;
 
 function decoderError(fatal: boolean): number | never {
@@ -49,6 +51,7 @@ function isASCIIByte(a: number): boolean {
 
 function stringToCodePoints(input: string): number[] {
 	const u: number[] = [];
+
 	for (const c of input) {
 		u.push(c.codePointAt(0)!);
 	}
@@ -66,7 +69,9 @@ class UTF8Encoder implements Encoder {
 		}
 
 		let count: number;
+
 		let offset: number;
+
 		if (inRange(codePoint, 0x0080, 0x07ff)) {
 			count = 1;
 			offset = 0xc0;
@@ -104,6 +109,7 @@ export function atob(s: string): string {
 	}
 
 	const rem = s.length % 4;
+
 	if (rem === 1 || /[^+/0-9A-Za-z]/.test(s)) {
 		// TODO: throw `DOMException`
 		throw new DenoError(
@@ -118,7 +124,9 @@ export function atob(s: string): string {
 	}
 
 	const byteArray: Uint8Array = base64.toByteArray(s);
+
 	let result = "";
+
 	for (let i = 0; i < byteArray.length; i++) {
 		result += String.fromCharCode(byteArray[i]);
 	}
@@ -128,8 +136,10 @@ export function atob(s: string): string {
 /** Creates a base-64 ASCII string from the input string. */
 export function btoa(s: string): string {
 	const byteArray = [];
+
 	for (let i = 0; i < s.length; i++) {
 		const charCode = s[i].charCodeAt(0);
+
 		if (charCode > 0xff) {
 			throw new DenoError(
 				ErrorKind.InvalidInput,
@@ -140,6 +150,7 @@ export function btoa(s: string): string {
 		byteArray.push(charCode);
 	}
 	const result = base64.fromByteArray(Uint8Array.from(byteArray));
+
 	return result;
 }
 
@@ -215,6 +226,7 @@ const encodingMap: { [key: string]: string[] } = {
 const encodings = new Map<string, string>();
 for (const key of Object.keys(encodingMap)) {
 	const labels = encodingMap[key];
+
 	for (const label of labels) {
 		encodings.set(label, key);
 	}
@@ -244,6 +256,7 @@ for (const [key, index] of encodingIndexes) {
 
 function codePointsToString(codePoints: number[]): string {
 	let s = "";
+
 	for (const cp of codePoints) {
 		s += String.fromCodePoint(cp);
 	}
@@ -252,6 +265,7 @@ function codePointsToString(codePoints: number[]): string {
 
 class Stream {
 	private _tokens: number[];
+
 	constructor(tokens: number[] | Uint8Array) {
 		this._tokens = [].slice.call(tokens);
 		this._tokens.reverse();
@@ -325,7 +339,9 @@ export class TextDecoder {
 			this.fatal = true;
 		}
 		label = String(label).trim().toLowerCase();
+
 		const encoding = encodings.get(label);
+
 		if (!encoding) {
 			throw new RangeError(
 				`The encoding label provided ('${label}') is invalid.`,
@@ -347,6 +363,7 @@ export class TextDecoder {
 		}
 
 		let bytes: Uint8Array;
+
 		if (input instanceof Uint8Array) {
 			bytes = input;
 		} else if (isEitherArrayBuffer(input)) {
@@ -375,11 +392,14 @@ export class TextDecoder {
 			fatal: this.fatal,
 			ignoreBOM: this.ignoreBOM,
 		});
+
 		const inputStream = new Stream(bytes);
+
 		const output: number[] = [];
 
 		while (true) {
 			const result = decoder.handler(inputStream, inputStream.read());
+
 			if (result === FINISHED) {
 				break;
 			}
@@ -412,11 +432,14 @@ export class TextEncoder {
 	/** Returns the result of running UTF-8's encoder. */
 	encode(input = ""): Uint8Array {
 		const encoder = new UTF8Encoder();
+
 		const inputStream = new Stream(stringToCodePoints(input));
+
 		const output: number[] = [];
 
 		while (true) {
 			const result = encoder.handler(inputStream.read());
+
 			if (result === FINISHED) {
 				break;
 			}
@@ -431,19 +454,25 @@ export class TextEncoder {
 	}
 	encodeInto(input: string, dest: Uint8Array): TextEncoderEncodeIntoResult {
 		const encoder = new UTF8Encoder();
+
 		const inputStream = new Stream(stringToCodePoints(input));
 
 		let written = 0;
+
 		let read = 0;
+
 		while (true) {
 			const result = encoder.handler(inputStream.read());
+
 			if (result === FINISHED) {
 				break;
 			}
 			read++;
+
 			if (Array.isArray(result)) {
 				dest.set(result, written);
 				written += result.length;
+
 				if (result.length > 3) {
 					// increment read a second time if greater than U+FFFF
 					read++;

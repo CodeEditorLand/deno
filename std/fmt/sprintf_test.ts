@@ -589,6 +589,7 @@ test(function testThorough(): void {
 	tests.forEach((t, i): void => {
 		//            p(t)
 		const is = S(t[0], t[1]);
+
 		const should = t[2];
 		assertEquals(
 			is,
@@ -624,11 +625,13 @@ test(function formatJ(): void {
 
 test(function flagLessThan(): void {
 	const a = { a: { a: { a: { a: { a: { a: { a: {} } } } } } } };
+
 	const aArray = [a, a, a];
 	assertEquals(
 		S("%<#.1v", aArray),
 		"[ { a: [Object] }, { a: [Object] }, { a: [Object] } ]",
 	);
+
 	const fArray = [1.2345, 0.98765, 123456789.5678];
 	assertEquals(S("%<.2f", fArray), "[ 1.23, 0.99, 123456789.57 ]");
 });

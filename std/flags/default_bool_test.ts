@@ -25,6 +25,7 @@ test(function booleanDefaultNull(): void {
 		default: { maybe: null },
 	});
 	assertEquals(argv.maybe, null);
+
 	const argv2 = parse(["--maybe"], {
 		boolean: "maybe",
 		default: { maybe: null },

@@ -4,13 +4,18 @@ import { copyBytes } from "../io/util.ts";
 /** Find first index of binary pattern from a. If not found, then return -1 **/
 export function findIndex(a: Uint8Array, pat: Uint8Array): number {
 	const s = pat[0];
+
 	for (let i = 0; i < a.length; i++) {
 		if (a[i] !== s) continue;
+
 		const pin = i;
+
 		let matched = 1,
 			j = i;
+
 		while (matched < pat.length) {
 			j++;
+
 			if (a[j] !== pat[j - pin]) {
 				break;
 			}
@@ -26,13 +31,18 @@ export function findIndex(a: Uint8Array, pat: Uint8Array): number {
 /** Find last index of binary pattern from a. If not found, then return -1 **/
 export function findLastIndex(a: Uint8Array, pat: Uint8Array): number {
 	const e = pat[pat.length - 1];
+
 	for (let i = a.length - 1; i >= 0; i--) {
 		if (a[i] !== e) continue;
+
 		const pin = i;
+
 		let matched = 1,
 			j = i;
+
 		while (matched < pat.length) {
 			j--;
+
 			if (a[j] !== pat[pat.length - 1 - (pin - j)]) {
 				break;
 			}
@@ -48,6 +58,7 @@ export function findLastIndex(a: Uint8Array, pat: Uint8Array): number {
 /** Check whether binary arrays are equal to each other **/
 export function equal(a: Uint8Array, match: Uint8Array): boolean {
 	if (a.length !== match.length) return false;
+
 	for (let i = 0; i < match.length; i++) {
 		if (a[i] !== match[i]) return false;
 	}

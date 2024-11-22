@@ -36,6 +36,7 @@ export function emitBundle(
 		rootNames.length === 1,
 		"Only single root modules supported for bundling.",
 	);
+
 	if (!bundleLoader) {
 		bundleLoader = sendSync(dispatch.OP_FETCH_ASSET, {
 			name: BUNDLE_LOADER,
@@ -46,13 +47,18 @@ export function emitBundle(
 	// specifiers which are used to define the modules, and doesn't expose them
 	// publicly, so we have to try to replicate
 	const sources = sourceFiles.map((sf) => sf.fileName);
+
 	const sharedPath = commonPath(sources);
+
 	const rootName = rootNames[0]
 		.replace(sharedPath, "")
 		.replace(/\.\w+$/i, "");
+
 	let instantiate: string;
+
 	if (rootExports && rootExports.length) {
 		instantiate = `const __rootExports = instantiate("${rootName}");\n`;
+
 		for (const rootExport of rootExports) {
 			if (rootExport === "default") {
 				instantiate += `export default __rootExports["${rootExport}"];\n`;
@@ -64,6 +70,7 @@ export function emitBundle(
 		instantiate = `instantiate("${rootName}");\n`;
 	}
 	const bundle = `${bundleLoader}\n${data}\n${instantiate}`;
+
 	if (fileName) {
 		const encodedData = encoder.encode(bundle);
 		console.warn(`Emitting bundle to "${fileName}"`);
@@ -88,6 +95,7 @@ export function setRootExports(
 	assert(mainSourceFile);
 	// retrieve the internal TypeScript symbol for this AST node
 	const mainSymbol = checker.getSymbolAtLocation(mainSourceFile);
+
 	if (!mainSymbol) {
 		return;
 	}

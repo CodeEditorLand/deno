@@ -3,11 +3,13 @@ import { TypedArray } from "./types.ts";
 import { window } from "./window.ts";
 
 let logDebug = false;
+
 let logSource = "JS";
 
 // @internal
 export function setLogDebug(debug: boolean, source?: string): void {
 	logDebug = debug;
+
 	if (source) {
 		logSource = source;
 	}
@@ -35,6 +37,7 @@ export function assert(cond: unknown, msg = "assert"): asserts cond {
 // @internal
 export function typedArrayToArrayBuffer(ta: TypedArray): ArrayBuffer {
 	const ab = ta.buffer.slice(ta.byteOffset, ta.byteOffset + ta.byteLength);
+
 	return ab as ArrayBuffer;
 }
 
@@ -74,6 +77,7 @@ export type Resolvable<T> = Promise<T> & ResolvableMethods<T>;
 // @internal
 export function createResolvable<T>(): Resolvable<T> {
 	let methods: ResolvableMethods<T>;
+
 	const promise = new Promise<T>((resolve, reject): void => {
 		methods = { resolve, reject };
 	});
@@ -144,6 +148,7 @@ export function requiredArguments(
 		const errMsg = `${name} requires at least ${required} argument${
 			required === 1 ? "" : "s"
 		}, but only ${length} present`;
+
 		throw new TypeError(errMsg);
 	}
 }
@@ -217,6 +222,7 @@ export function splitNumberToParts(n: number): number[] {
 	const lower = n | 0;
 	// This is also faster than Math.floor(n / 0x100000000) in V8.
 	const higher = (n - lower) / 0x100000000;
+
 	return [lower, higher];
 }
 
@@ -228,14 +234,17 @@ export function splitNumberToParts(n: number): number[] {
  */
 export function commonPath(paths: string[], sep = "/"): string {
 	const [first = "", ...remaining] = paths;
+
 	if (first === "" || remaining.length === 0) {
 		return "";
 	}
 	const parts = first.split(sep);
 
 	let endOfPrefix = parts.length;
+
 	for (const path of remaining) {
 		const compare = path.split(sep);
+
 		for (let i = 0; i < endOfPrefix; i++) {
 			if (compare[i] !== parts[i]) {
 				endOfPrefix = i;
@@ -247,6 +256,7 @@ export function commonPath(paths: string[], sep = "/"): string {
 		}
 	}
 	const prefix = parts.slice(0, endOfPrefix).join(sep);
+
 	return prefix.endsWith(sep) ? prefix : `${prefix}${sep}`;
 }
 
@@ -254,14 +264,18 @@ export function commonPath(paths: string[], sep = "/"): string {
  * unit */
 export function humanFileSize(bytes: number): string {
 	const thresh = 1000;
+
 	if (Math.abs(bytes) < thresh) {
 		return bytes + " B";
 	}
 	const units = ["kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+
 	let u = -1;
+
 	do {
 		bytes /= thresh;
 		++u;
 	} while (Math.abs(bytes) >= thresh && u < units.length - 1);
+
 	return `${bytes.toFixed(1)} ${units[u]}`;
 }

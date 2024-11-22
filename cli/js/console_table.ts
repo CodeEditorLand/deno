@@ -36,24 +36,31 @@ function countBytes(str: string): number {
 
 function renderRow(row: string[], columnWidths: number[]): string {
 	let out = tableChars.left;
+
 	for (let i = 0; i < row.length; i++) {
 		const cell = row[i];
+
 		const len = countBytes(cell);
+
 		const needed = (columnWidths[i] - len) / 2;
 		// round(needed) + ceil(needed) will always add up to the amount
 		// of spaces we need while also left justifying the output.
 		out += `${" ".repeat(needed)}${cell}${" ".repeat(Math.ceil(needed))}`;
+
 		if (i !== row.length - 1) {
 			out += tableChars.middle;
 		}
 	}
 	out += tableChars.right;
+
 	return out;
 }
 
 export function cliTable(head: string[], columns: string[][]): string {
 	const rows: string[][] = [];
+
 	const columnWidths = head.map((h: string): number => countBytes(h));
+
 	const longestColumn = columns.reduce(
 		(n: number, a: string[]): number => Math.max(n, a.length),
 		0,
@@ -61,6 +68,7 @@ export function cliTable(head: string[], columns: string[][]): string {
 
 	for (let i = 0; i < head.length; i++) {
 		const column = columns[i];
+
 		for (let j = 0; j < longestColumn; j++) {
 			if (rows[j] === undefined) {
 				rows[j] = [];
@@ -68,7 +76,9 @@ export function cliTable(head: string[], columns: string[][]): string {
 			const value = (rows[j][i] = hasOwnProperty(column, j)
 				? column[j]
 				: "");
+
 			const width = columnWidths[i] || 0;
+
 			const counted = countBytes(value);
 			columnWidths[i] = Math.max(width, counted);
 		}

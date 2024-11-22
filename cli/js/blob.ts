@@ -20,9 +20,11 @@ function convertLineEndingsToNative(s: string): string {
 
 	while (position < s.length) {
 		const c = s.charAt(position);
+
 		if (c == "\r") {
 			result += nativeLineEnd;
 			position++;
+
 			if (position < s.length && s.charAt(position) == "\n") {
 				position++;
 			}
@@ -47,11 +49,13 @@ function collectSequenceNotCRLF(
 	position: number,
 ): { collected: string; newPosition: number } {
 	const start = position;
+
 	for (
 		let c = s.charAt(position);
 		position < s.length && !(c == "\r" || c == "\n");
 		c = s.charAt(++position)
 	);
+
 	return { collected: s.slice(start, position), newPosition: position };
 }
 
@@ -60,10 +64,13 @@ function toUint8Arrays(
 	doNormalizeLineEndingsToNative: boolean,
 ): Uint8Array[] {
 	const ret: Uint8Array[] = [];
+
 	const enc = new TextEncoder();
+
 	for (const element of blobParts) {
 		if (typeof element === "string") {
 			let str = element;
+
 			if (doNormalizeLineEndingsToNative) {
 				str = convertLineEndingsToNative(element);
 			}
@@ -103,13 +110,17 @@ function processBlobParts(
 	// pre compute size of the array buffer and do some sort of static allocation
 	// instead of dynamic allocation.
 	const uint8Arrays = toUint8Arrays(blobParts, normalizeLineEndingsToNative);
+
 	const byteLength = uint8Arrays
 		.map((u8): number => u8.byteLength)
 		.reduce((a, b): number => a + b, 0);
+
 	const ab = new ArrayBuffer(byteLength);
+
 	const bytes = new Uint8Array(ab);
 
 	let courser = 0;
+
 	for (const u8 of uint8Arrays) {
 		bytes.set(u8, courser);
 		courser += u8.byteLength;
@@ -134,6 +145,7 @@ export class DenoBlob implements domTypes.Blob {
 	) {
 		if (arguments.length === 0) {
 			this[bytesSymbol] = new Uint8Array();
+
 			return;
 		}
 
@@ -146,17 +158,21 @@ export class DenoBlob implements domTypes.Blob {
 		if (options.type && !containsOnlyASCII(options.type)) {
 			const errMsg =
 				"The 'type' property must consist of ASCII characters.";
+
 			throw new SyntaxError(errMsg);
 		}
 
 		const bytes = processBlobParts(blobParts!, options);
 		// Normalize options.type.
 		let type = options.type ? options.type : "";
+
 		if (type.length) {
 			for (let i = 0; i < type.length; ++i) {
 				const char = type[i];
+
 				if (char < "\u0020" || char > "\u007E") {
 					type = "";
+
 					break;
 				}
 			}

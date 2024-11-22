@@ -12,6 +12,7 @@ import { TextProtoReader } from "../textproto/mod.ts";
 // Copyright 2018-2019 the Deno authors. All rights reserved. MIT license.
 
 const { Buffer, copy, remove } = Deno;
+
 const { min, max } = Math;
 type Closer = Deno.Closer;
 type Reader = Deno.Reader;
@@ -19,6 +20,7 @@ type Writer = Deno.Writer;
 
 function randomBoundary(): string {
 	let boundary = "--------------------------";
+
 	for (let i = 0; i < 24; i++) {
 		boundary += Math.floor(Math.random() * 10).toString(16);
 	}
@@ -50,6 +52,7 @@ export function matchAfterPrefix(
 		return eof ? 1 : 0;
 	}
 	const c = buf[prefix.length];
+
 	if (
 		c === " ".charCodeAt(0) ||
 		c === "\t".charCodeAt(0) ||
@@ -91,8 +94,10 @@ export function scanUntilBoundary(
 			switch (matchAfterPrefix(buf, dashBoundary, eof)) {
 				case -1:
 					return dashBoundary.length;
+
 				case 0:
 					return 0;
+
 				case 1:
 					return Deno.EOF;
 			}
@@ -104,12 +109,15 @@ export function scanUntilBoundary(
 
 	// Search for "\n--boundary".
 	const i = findIndex(buf, newLineDashBoundary);
+
 	if (i >= 0) {
 		switch (matchAfterPrefix(buf.slice(i), newLineDashBoundary, eof)) {
 			case -1:
 				return i + newLineDashBoundary.length;
+
 			case 0:
 				return i;
+
 			case 1:
 				return i > 0 ? i : Deno.EOF;
 		}
@@ -122,6 +130,7 @@ export function scanUntilBoundary(
 	// must be part of the body. Also, if the section from the final \n onward is
 	// not a prefix of the boundary, it too must be part of the body.
 	const j = findLastIndex(buf, newLineDashBoundary.slice(0, 1));
+
 	if (j >= 0 && hasPrefix(newLineDashBoundary, buf.slice(j))) {
 		return j;
 	}
@@ -144,9 +153,12 @@ class PartReader implements Reader, Closer {
 		// Read into buffer until we identify some data to return,
 		// or we find a reason to stop (boundary or EOF).
 		let peekLength = 1;
+
 		while (this.n === 0) {
 			peekLength = max(peekLength, br.buffered());
+
 			const peekBuf = await br.peek(peekLength);
+
 			if (peekBuf === Deno.EOF) {
 				throw new UnexpectedEOFError();
 			}
@@ -158,6 +170,7 @@ class PartReader implements Reader, Closer {
 				this.total,
 				eof,
 			);
+
 			if (this.n === 0) {
 				// Force buffered I/O to read more into buffer.
 				assertStrictEq(eof, false);
@@ -170,11 +183,14 @@ class PartReader implements Reader, Closer {
 		}
 
 		const nread = min(p.length, this.n);
+
 		const buf = p.subarray(0, nread);
+
 		const r = await br.readFull(buf);
 		assertStrictEq(r, buf);
 		this.n -= nread;
 		this.total += nread;
+
 		return nread;
 	}
 
@@ -185,8 +201,11 @@ class PartReader implements Reader, Closer {
 
 	private getContentDispositionParams(): { [key: string]: string } {
 		if (this.contentDispositionParams) return this.contentDispositionParams;
+
 		const cd = this.headers.get("content-disposition");
+
 		const params: { [key: string]: string } = {};
+
 		const comps = cd!.split(";");
 		this.contentDisposition = comps[0];
 		comps
@@ -194,9 +213,12 @@ class PartReader implements Reader, Closer {
 			.map((v: string): string => v.trim())
 			.map((kv: string): void => {
 				const [k, v] = kv.split("=");
+
 				if (v) {
 					const s = v.charAt(0);
+
 					const e = v.charAt(v.length - 1);
+
 					if ((s === e && s === '"') || s === "'") {
 						params[k] = v.substr(1, v.length - 2);
 					} else {
@@ -204,6 +226,7 @@ class PartReader implements Reader, Closer {
 					}
 				}
 			});
+
 		return (this.contentDispositionParams = params);
 	}
 
@@ -213,6 +236,7 @@ class PartReader implements Reader, Closer {
 
 	get formName(): string {
 		const p = this.getContentDispositionParams();
+
 		if (this.contentDisposition === "form-data") {
 			return p["name"];
 		}
@@ -222,9 +246,13 @@ class PartReader implements Reader, Closer {
 
 function skipLWSPChar(u: Uint8Array): Uint8Array {
 	const ret = new Uint8Array(u.length);
+
 	const sp = " ".charCodeAt(0);
+
 	const ht = "\t".charCodeAt(0);
+
 	let j = 0;
+
 	for (let i = 0; i < u.length; i++) {
 		if (u[i] === sp || u[i] === ht) continue;
 		ret[j++] = u[i];
@@ -255,10 +283,14 @@ export class MultipartReader {
 		maxMemory: number,
 	): Promise<{ [key: string]: string | FormFile }> {
 		const result = Object.create(null);
+
 		let maxValueBytes = maxMemory + (10 << 20);
+
 		const buf = new Buffer(new Uint8Array(maxValueBytes));
+
 		for (;;) {
 			const p = await this.nextPart();
+
 			if (p === Deno.EOF) {
 				break;
 			}
@@ -266,27 +298,34 @@ export class MultipartReader {
 				continue;
 			}
 			buf.reset();
+
 			if (!p.fileName) {
 				// value
 				const n = await copyN(buf, p, maxValueBytes);
 				maxValueBytes -= n;
+
 				if (maxValueBytes < 0) {
 					throw new RangeError("message too large");
 				}
 				const value = buf.toString();
 				result[p.formName] = value;
+
 				continue;
 			}
 			// file
 			let formFile: FormFile;
+
 			const n = await copy(buf, p);
+
 			if (n > maxMemory) {
 				// too big, write to disk and flush buffer
 				const ext = extname(p.fileName);
+
 				const { file, filepath } = await tempFile(".", {
 					prefix: "multipart-",
 					postfix: ext,
 				});
+
 				try {
 					const size = await copyN(
 						file,
@@ -294,6 +333,7 @@ export class MultipartReader {
 						maxValueBytes,
 					);
 					file.close();
+
 					formFile = {
 						filename: p.fileName,
 						type: p.headers.get("content-type")!,
@@ -329,20 +369,26 @@ export class MultipartReader {
 			throw new Error("boundary is empty");
 		}
 		let expectNewPart = false;
+
 		for (;;) {
 			const line = await this.bufReader.readSlice("\n".charCodeAt(0));
+
 			if (line === Deno.EOF) {
 				throw new UnexpectedEOFError();
 			}
 			if (this.isBoundaryDelimiterLine(line)) {
 				this.partsRead++;
+
 				const r = new TextProtoReader(this.bufReader);
+
 				const headers = await r.readMIMEHeader();
+
 				if (headers === Deno.EOF) {
 					throw new UnexpectedEOFError();
 				}
 				const np = new PartReader(this, headers);
 				this.currentPart = np;
+
 				return np;
 			}
 			if (this.isFinalBoundary(line)) {
@@ -356,6 +402,7 @@ export class MultipartReader {
 			}
 			if (equal(line, this.newLine)) {
 				expectNewPart = true;
+
 				continue;
 			}
 			throw new Error(`unexpected line in nextPart(): ${line}`);
@@ -367,6 +414,7 @@ export class MultipartReader {
 			return false;
 		}
 		const rest = line.slice(this.dashBoundaryDash.length, line.length);
+
 		return rest.length === 0 || equal(skipLWSPChar(rest), this.newLine);
 	}
 
@@ -375,6 +423,7 @@ export class MultipartReader {
 			return false;
 		}
 		const rest = line.slice(this.dashBoundary.length);
+
 		return equal(skipLWSPChar(rest), this.newLine);
 	}
 }
@@ -391,6 +440,7 @@ class PartWriter implements Writer {
 		isFirstBoundary: boolean,
 	) {
 		let buf = "";
+
 		if (isFirstBoundary) {
 			buf += `--${boundary}\r\n`;
 		} else {
@@ -424,8 +474,10 @@ function checkBoundary(b: string): string {
 		throw new Error(`invalid boundary length: ${b.length}`);
 	}
 	const end = b.length - 1;
+
 	for (let i = 0; i < end; i++) {
 		const c = b.charAt(i);
+
 		if (!c.match(/[a-zA-Z0-9'()+_,\-./:=?]/) || (c === " " && i !== end)) {
 			throw new Error("invalid boundary character: " + c);
 		}
@@ -475,6 +527,7 @@ export class MultipartWriter {
 			!this.lastPart,
 		);
 		this.lastPart = part;
+
 		return part;
 	}
 
@@ -485,6 +538,7 @@ export class MultipartWriter {
 			`form-data; name="${field}"; filename="${filename}"`,
 		);
 		h.set("Content-Type", "application/octet-stream");
+
 		return this.createPart(h);
 	}
 
@@ -492,6 +546,7 @@ export class MultipartWriter {
 		const h = new Headers();
 		h.set("Content-Disposition", `form-data; name="${field}"`);
 		h.set("Content-Type", "application/octet-stream");
+
 		return this.createPart(h);
 	}
 

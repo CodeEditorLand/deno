@@ -13,6 +13,7 @@ test(function newHeaderTest(): void {
 	new Headers();
 	new Headers(undefined);
 	new Headers({});
+
 	try {
 		new Headers(null);
 	} catch (e) {
@@ -30,6 +31,7 @@ const headerDict = {
 	name4: undefined,
 	"Content-Type": "value4",
 };
+
 const headerSeq = [];
 for (const name in headerDict) {
 	headerSeq.push([name, headerDict[name]]);
@@ -37,6 +39,7 @@ for (const name in headerDict) {
 
 test(function newHeaderWithSequence(): void {
 	const headers = new Headers(headerSeq);
+
 	for (const name in headerDict) {
 		assertEquals(headers.get(name), String(headerDict[name]));
 	}
@@ -45,6 +48,7 @@ test(function newHeaderWithSequence(): void {
 
 test(function newHeaderWithRecord(): void {
 	const headers = new Headers(headerDict);
+
 	for (const name in headerDict) {
 		assertEquals(headers.get(name), String(headerDict[name]));
 	}
@@ -52,7 +56,9 @@ test(function newHeaderWithRecord(): void {
 
 test(function newHeaderWithHeadersInstance(): void {
 	const headers = new Headers(headerDict);
+
 	const headers2 = new Headers(headers);
+
 	for (const name in headerDict) {
 		assertEquals(headers2.get(name), String(headerDict[name]));
 	}
@@ -60,6 +66,7 @@ test(function newHeaderWithHeadersInstance(): void {
 
 test(function headerAppendSuccess(): void {
 	const headers = new Headers();
+
 	for (const name in headerDict) {
 		headers.append(name, headerDict[name]);
 		assertEquals(headers.get(name), String(headerDict[name]));
@@ -68,6 +75,7 @@ test(function headerAppendSuccess(): void {
 
 test(function headerSetSuccess(): void {
 	const headers = new Headers();
+
 	for (const name in headerDict) {
 		headers.set(name, headerDict[name]);
 		assertEquals(headers.get(name), String(headerDict[name]));
@@ -76,6 +84,7 @@ test(function headerSetSuccess(): void {
 
 test(function headerHasSuccess(): void {
 	const headers = new Headers(headerDict);
+
 	for (const name in headerDict) {
 		assert(headers.has(name), "headers has name " + name);
 		assert(
@@ -87,6 +96,7 @@ test(function headerHasSuccess(): void {
 
 test(function headerDeleteSuccess(): void {
 	const headers = new Headers(headerDict);
+
 	for (const name in headerDict) {
 		assert(headers.has(name), "headers have a header: " + name);
 		headers.delete(name);
@@ -99,6 +109,7 @@ test(function headerDeleteSuccess(): void {
 
 test(function headerGetSuccess(): void {
 	const headers = new Headers(headerDict);
+
 	for (const name in headerDict) {
 		assertEquals(headers.get(name), String(headerDict[name]));
 		assertEquals(headers.get("nameNotInHeaders"), null);
@@ -107,9 +118,12 @@ test(function headerGetSuccess(): void {
 
 test(function headerEntriesSuccess(): void {
 	const headers = new Headers(headerDict);
+
 	const iterators = headers.entries();
+
 	for (const it of iterators) {
 		const key = it[0];
+
 		const value = it[1];
 		assert(headers.has(key));
 		assertEquals(value, headers.get(key));
@@ -118,7 +132,9 @@ test(function headerEntriesSuccess(): void {
 
 test(function headerKeysSuccess(): void {
 	const headers = new Headers(headerDict);
+
 	const iterators = headers.keys();
+
 	for (const it of iterators) {
 		assert(headers.has(it));
 	}
@@ -126,9 +142,13 @@ test(function headerKeysSuccess(): void {
 
 test(function headerValuesSuccess(): void {
 	const headers = new Headers(headerDict);
+
 	const iterators = headers.values();
+
 	const entries = headers.entries();
+
 	const values = [];
+
 	for (const pair of entries) {
 		values.push(pair[1]);
 	}
@@ -148,12 +168,15 @@ const headerEntriesDict = {
 
 test(function headerForEachSuccess(): void {
 	const headers = new Headers(headerEntriesDict);
+
 	const keys = Object.keys(headerEntriesDict);
 	keys.forEach((key): void => {
 		const value = headerEntriesDict[key];
+
 		const newkey = key.toLowerCase();
 		headerEntriesDict[newkey] = value;
 	});
+
 	let callNum = 0;
 	headers.forEach((value, key, container): void => {
 		assertEquals(headers, container);
@@ -165,9 +188,12 @@ test(function headerForEachSuccess(): void {
 
 test(function headerSymbolIteratorSuccess(): void {
 	assert(Symbol.iterator in Headers.prototype);
+
 	const headers = new Headers(headerEntriesDict);
+
 	for (const header of headers) {
 		const key = header[0];
+
 		const value = header[1];
 		assert(headers.has(key));
 		assertEquals(value, headers.get(key));
@@ -186,6 +212,7 @@ test(function headerTypesAvailable(): void {
 // Copyright (c) 2016 David Frank. MIT License.
 test(function headerIllegalReject(): void {
 	let errorCount = 0;
+
 	try {
 		new Headers({ "He y": "ok" });
 	} catch (e) {
@@ -202,6 +229,7 @@ test(function headerIllegalReject(): void {
 		errorCount++;
 	}
 	const headers = new Headers();
+
 	try {
 		headers.append("Hé-y", "ok");
 	} catch (e) {
@@ -262,13 +290,17 @@ test(function headerParamsArgumentsCheck(): void {
 
 	methodRequireOneParam.forEach((method): void => {
 		const headers = new Headers();
+
 		let hasThrown = 0;
+
 		let errMsg = "";
+
 		try {
 			headers[method]();
 			hasThrown = 1;
 		} catch (err) {
 			errMsg = err.message;
+
 			if (err instanceof TypeError) {
 				hasThrown = 2;
 			} else {
@@ -284,7 +316,9 @@ test(function headerParamsArgumentsCheck(): void {
 
 	methodRequireTwoParams.forEach((method): void => {
 		const headers = new Headers();
+
 		let hasThrown = 0;
+
 		let errMsg = "";
 
 		try {
@@ -292,6 +326,7 @@ test(function headerParamsArgumentsCheck(): void {
 			hasThrown = 1;
 		} catch (err) {
 			errMsg = err.message;
+
 			if (err instanceof TypeError) {
 				hasThrown = 2;
 			} else {
@@ -306,11 +341,13 @@ test(function headerParamsArgumentsCheck(): void {
 
 		hasThrown = 0;
 		errMsg = "";
+
 		try {
 			headers[method]("foo");
 			hasThrown = 1;
 		} catch (err) {
 			errMsg = err.message;
+
 			if (err instanceof TypeError) {
 				hasThrown = 2;
 			} else {
@@ -337,11 +374,13 @@ function stringify(...args: unknown[]): string {
 test(function customInspectReturnsCorrectHeadersFormat(): void {
 	const blankHeaders = new Headers();
 	assertEquals(stringify(blankHeaders), "Headers {}");
+
 	const singleHeader = new Headers([["Content-Type", "application/json"]]);
 	assertEquals(
 		stringify(singleHeader),
 		"Headers { content-type: application/json }",
 	);
+
 	const multiParamHeader = new Headers([
 		["Content-Type", "application/json"],
 		["Content-Length", "1337"],

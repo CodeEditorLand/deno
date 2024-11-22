@@ -21,6 +21,7 @@ test(function requireSuccess() {
 
 test(function requireCycle() {
 	const resultA = require_("./tests/cjs/cjs_cycle_a");
+
 	const resultB = require_("./tests/cjs/cjs_cycle_b");
 	assert(resultA);
 	assert(resultB);
@@ -29,6 +30,7 @@ test(function requireCycle() {
 test(function requireBuiltin() {
 	const fs = require_("fs");
 	assert("readFileSync" in fs);
+
 	const { readFileSync, isNull, extname } = require_(
 		"./tests/cjs/cjs_builtin",
 	);

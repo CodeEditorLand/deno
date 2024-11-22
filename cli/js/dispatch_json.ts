@@ -19,6 +19,7 @@ interface JsonResponse {
 }
 
 const promiseTable = new Map<number, util.Resolvable<JsonResponse>>();
+
 let _nextPromiseId = 1;
 
 function nextPromiseId(): number {
@@ -27,11 +28,13 @@ function nextPromiseId(): number {
 
 function decode(ui8: Uint8Array): JsonResponse {
 	const s = new TextDecoder().decode(ui8);
+
 	return JSON.parse(s) as JsonResponse;
 }
 
 function encode(args: object): Uint8Array {
 	const s = JSON.stringify(args);
+
 	return new TextEncoder().encode(s);
 }
 
@@ -40,6 +43,7 @@ function unwrapResponse(res: JsonResponse): Ok {
 		throw new DenoError(res.err!.kind, res.err!.message);
 	}
 	util.assert(res.ok != null);
+
 	return res.ok;
 }
 
@@ -59,11 +63,13 @@ export function sendSync(
 	zeroCopy?: Uint8Array,
 ): Ok {
 	const argsUi8 = encode(args);
+
 	const resUi8 = core.dispatch(opId, argsUi8, zeroCopy);
 	util.assert(resUi8 != null);
 
 	const res = decode(resUi8!);
 	util.assert(res.promiseId == null);
+
 	return unwrapResponse(res);
 }
 
@@ -74,10 +80,13 @@ export async function sendAsync(
 ): Promise<Ok> {
 	const promiseId = nextPromiseId();
 	args = Object.assign(args, { promiseId });
+
 	const promise = util.createResolvable<Ok>();
 
 	const argsUi8 = encode(args);
+
 	const buf = core.dispatch(opId, argsUi8, zeroCopy);
+
 	if (buf) {
 		// Sync result.
 		const res = decode(buf);
@@ -88,5 +97,6 @@ export async function sendAsync(
 	}
 
 	const res = await promise;
+
 	return unwrapResponse(res);
 }

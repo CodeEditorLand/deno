@@ -25,6 +25,7 @@ function compileList(
 			previousIndex++
 		) {
 			const previousType = result[previousIndex];
+
 			if (
 				previousType.tag === currentType.tag &&
 				previousType.kind === currentType.kind

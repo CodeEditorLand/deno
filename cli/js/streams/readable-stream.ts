@@ -43,10 +43,12 @@ export class SDReadableStream<OutputType>
 		underlyingSource: UnderlyingByteSource,
 		strategy?: { highWaterMark?: number; size?: undefined },
 	);
+
 	constructor(
 		underlyingSource?: UnderlyingSource<OutputType>,
 		strategy?: QueuingStrategy<OutputType>,
 	);
+
 	constructor(
 		underlyingSource:
 			| UnderlyingSource<OutputType>
@@ -58,15 +60,19 @@ export class SDReadableStream<OutputType>
 		rs.initializeReadableStream(this);
 
 		const sizeFunc = strategy.size;
+
 		const stratHWM = strategy.highWaterMark;
+
 		const sourceType = underlyingSource.type;
 
 		if (sourceType === undefined) {
 			const sizeAlgorithm =
 				shared.makeSizeAlgorithmFromSizeFunction(sizeFunc);
+
 			const highWaterMark = shared.validateAndNormalizeHighWaterMark(
 				stratHWM === undefined ? 1 : stratHWM,
 			);
+
 			setUpReadableStreamDefaultControllerFromUnderlyingSource(
 				this,
 				underlyingSource as UnderlyingSource<OutputType>,
@@ -82,6 +88,7 @@ export class SDReadableStream<OutputType>
 			const highWaterMark = shared.validateAndNormalizeHighWaterMark(
 				stratHWM === undefined ? 0 : stratHWM,
 			);
+
 			setUpReadableByteStreamControllerFromUnderlyingSource(
 				this as unknown as rs.SDReadableStream<ArrayBufferView>,
 				underlyingSource as UnderlyingByteSource,
@@ -99,7 +106,9 @@ export class SDReadableStream<OutputType>
 	}
 
 	getReader(): rs.SDReadableStreamDefaultReader<OutputType>;
+
 	getReader(options: { mode?: "byob" }): rs.SDReadableStreamBYOBReader;
+
 	getReader(options?: {
 		mode?: "byob";
 	}):
@@ -112,6 +121,7 @@ export class SDReadableStream<OutputType>
 			options = {};
 		}
 		const { mode } = options;
+
 		if (mode === undefined) {
 			return new ReadableStreamDefaultReader(this);
 		} else if (String(mode) === "byob") {
@@ -144,6 +154,7 @@ export class SDReadableStream<OutputType>
     options: PipeOptions = {}
   ): rs.SDReadableStream<ResultType> {
     const { readable, writable } = transform;
+
     if (!rs.isReadableStream(this)) {
       throw new TypeError();
     }
@@ -217,6 +228,7 @@ export function createReadableStream<OutputType>(
 		SDReadableStream.prototype,
 	) as SDReadableStream<OutputType>;
 	rs.initializeReadableStream(stream);
+
 	const controller = Object.create(
 		ReadableStreamDefaultController.prototype,
 	) as ReadableStreamDefaultController<OutputType>;
@@ -229,6 +241,7 @@ export function createReadableStream<OutputType>(
 		highWaterMark,
 		sizeAlgorithm,
 	);
+
 	return stream;
 }
 
@@ -258,6 +271,7 @@ export function createReadableByteStream<OutputType>(
 		SDReadableStream.prototype,
 	) as SDReadableStream<OutputType>;
 	rs.initializeReadableStream(stream);
+
 	const controller = Object.create(
 		ReadableByteStreamController.prototype,
 	) as ReadableByteStreamController;
@@ -270,6 +284,7 @@ export function createReadableByteStream<OutputType>(
 		highWaterMark,
 		autoAllocateChunkSize,
 	);
+
 	return stream;
 }
 
@@ -282,15 +297,23 @@ export function readableStreamTee<OutputType>(
 	}
 
 	const reader = new ReadableStreamDefaultReader(stream);
+
 	let closedOrErrored = false;
+
 	let canceled1 = false;
+
 	let canceled2 = false;
+
 	let reason1: shared.ErrorResult;
+
 	let reason2: shared.ErrorResult;
+
 	let branch1: SDReadableStream<OutputType>;
+
 	let branch2: SDReadableStream<OutputType>;
 
 	let cancelResolve: (reason: shared.ErrorResult) => void;
+
 	const cancelPromise = new Promise<void>(
 		(resolve) => (cancelResolve = resolve),
 	);
@@ -320,7 +343,9 @@ export function readableStreamTee<OutputType>(
 					return;
 				}
 				const value1 = value;
+
 				let value2 = value;
+
 				if (!canceled1) {
 					rs.readableStreamDefaultControllerEnqueue(
 						branch1![
@@ -346,6 +371,7 @@ export function readableStreamTee<OutputType>(
 	const cancel1Algorithm = (reason: shared.ErrorResult): Promise<void> => {
 		canceled1 = true;
 		reason1 = reason;
+
 		if (canceled2) {
 			const cancelResult = rs.readableStreamCancel(stream, [
 				reason1,
@@ -359,6 +385,7 @@ export function readableStreamTee<OutputType>(
 	const cancel2Algorithm = (reason: shared.ErrorResult): Promise<void> => {
 		canceled2 = true;
 		reason2 = reason;
+
 		if (canceled1) {
 			const cancelResult = rs.readableStreamCancel(stream, [
 				reason1,

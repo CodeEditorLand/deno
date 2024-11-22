@@ -17,13 +17,16 @@ const dialTLSDefaults = { hostname: "127.0.0.1", transport: "tcp" };
  */
 export async function dialTLS(options: DialTLSOptions): Promise<Conn> {
 	options = Object.assign(dialTLSDefaults, options);
+
 	const res = await sendAsync(dispatch.OP_DIAL_TLS, options);
+
 	return new ConnImpl(res.rid, res.remoteAddr!, res.localAddr!);
 }
 
 class TLSListenerImpl extends ListenerImpl {
 	async accept(): Promise<Conn> {
 		const res = await sendAsync(dispatch.OP_ACCEPT_TLS, { rid: this.rid });
+
 		return new ConnImpl(res.rid, res.remoteAddr, res.localAddr);
 	}
 }
@@ -51,7 +54,9 @@ export interface ListenTLSOptions {
  */
 export function listenTLS(options: ListenTLSOptions): Listener {
 	const hostname = options.hostname || "0.0.0.0";
+
 	const transport = options.transport || "tcp";
+
 	const res = sendSync(dispatch.OP_LISTEN_TLS, {
 		hostname,
 		port: options.port,
@@ -59,5 +64,6 @@ export function listenTLS(options: ListenTLSOptions): Listener {
 		certFile: options.certFile,
 		keyFile: options.keyFile,
 	});
+
 	return new TLSListenerImpl(res.rid, transport, res.localAddr);
 }

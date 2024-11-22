@@ -77,6 +77,7 @@ async function copyFile(
 ): Promise<void> {
 	await ensureValidCopy(src, dest, options);
 	await Deno.copyFile(src, dest);
+
 	if (options.preserveTimestamps) {
 		const statInfo = await Deno.stat(src);
 		await Deno.utime(dest, statInfo.accessed!, statInfo.modified!);
@@ -86,6 +87,7 @@ async function copyFile(
 function copyFileSync(src: string, dest: string, options: CopyOptions): void {
 	ensureValidCopySync(src, dest, options);
 	Deno.copyFileSync(src, dest);
+
 	if (options.preserveTimestamps) {
 		const statInfo = Deno.statSync(src);
 		Deno.utimeSync(dest, statInfo.accessed!, statInfo.modified!);
@@ -99,9 +101,12 @@ async function copySymLink(
 	options: CopyOptions,
 ): Promise<void> {
 	await ensureValidCopy(src, dest, options);
+
 	const originSrcFilePath = await Deno.readlink(src);
+
 	const type = getFileInfoType(await Deno.lstat(src));
 	await Deno.symlink(originSrcFilePath, dest, type);
+
 	if (options.preserveTimestamps) {
 		const statInfo = await Deno.lstat(src);
 		await Deno.utime(dest, statInfo.accessed!, statInfo.modified!);
@@ -115,9 +120,12 @@ function copySymlinkSync(
 	options: CopyOptions,
 ): void {
 	ensureValidCopySync(src, dest, options);
+
 	const originSrcFilePath = Deno.readlinkSync(src);
+
 	const type = getFileInfoType(Deno.lstatSync(src));
 	Deno.symlinkSync(originSrcFilePath, dest, type);
+
 	if (options.preserveTimestamps) {
 		const statInfo = Deno.lstatSync(src);
 		Deno.utimeSync(dest, statInfo.accessed!, statInfo.modified!);
@@ -145,7 +153,9 @@ async function copyDir(
 
 	for (const file of files) {
 		const srcPath = path.join(src, file.name!);
+
 		const destPath = path.join(dest, path.basename(srcPath as string));
+
 		if (file.isDirectory()) {
 			await copyDir(srcPath, destPath, options);
 		} else if (file.isFile()) {
@@ -178,7 +188,9 @@ function copyDirSync(src: string, dest: string, options: CopyOptions): void {
 
 	for (const file of files) {
 		const srcPath = path.join(src, file.name!);
+
 		const destPath = path.join(dest, path.basename(srcPath as string));
+
 		if (file.isDirectory()) {
 			copyDirSync(srcPath, destPath, options);
 		} else if (file.isFile()) {

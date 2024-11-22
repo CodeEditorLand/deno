@@ -7,6 +7,7 @@ function buildBody(body: any): Body {
 	const stub = new Request("", {
 		body: body,
 	});
+
 	return stub as Body;
 }
 
@@ -26,6 +27,7 @@ test(async function arrayBufferFromByteArrays(): Promise<void> {
 
 	for (const type of intArrays) {
 		const body = buildBody(new type(buffer));
+
 		const text = new TextDecoder("utf-8").decode(await body.arrayBuffer());
 		assertEquals(text, "ahoyhoy8");
 	}
@@ -36,6 +38,7 @@ testPerm({ net: true }, async function bodyMultipartFormData(): Promise<void> {
 	const response = await fetch(
 		"http://localhost:4545/tests/subdir/multipart_form_data.txt",
 	);
+
 	const text = await response.text();
 
 	const body = buildBody(text);
@@ -53,6 +56,7 @@ testPerm({ net: true }, async function bodyURLEncodedFormData(): Promise<void> {
 	const response = await fetch(
 		"http://localhost:4545/tests/subdir/form_urlencoded.txt",
 	);
+
 	const text = await response.text();
 
 	const body = buildBody(text);

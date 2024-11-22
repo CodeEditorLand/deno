@@ -52,7 +52,9 @@ export function pad(
 	},
 ): string {
 	let out = input;
+
 	const outL = out.length;
+
 	if (outL < strLen) {
 		if (!opts.side || opts.side === "left") {
 			out = out.padStart(strLen, opts.char);
@@ -61,8 +63,10 @@ export function pad(
 		}
 	} else if (opts.strict && outL > strLen) {
 		const addChar = opts.strictChar ? opts.strictChar : "";
+
 		if (opts.strictSide === "left") {
 			let toDrop = outL - strLen;
+
 			if (opts.strictChar) {
 				toDrop += opts.strictChar.length;
 			}

@@ -109,6 +109,7 @@ const windowsJoinTests = [
 test(function join() {
 	joinTests.forEach(function (p) {
 		const _p = p[0] as string[];
+
 		const actual = path.posix.join.apply(null, _p);
 		assertEquals(actual, p[1]);
 	});
@@ -117,6 +118,7 @@ test(function join() {
 test(function joinWin32() {
 	joinTests.forEach(function (p) {
 		const _p = p[0] as string[];
+
 		const actual = path.win32.join
 			.apply(null, _p)
 			.replace(backslashRE, "/");
@@ -124,6 +126,7 @@ test(function joinWin32() {
 	});
 	windowsJoinTests.forEach(function (p) {
 		const _p = p[0] as string[];
+
 		const actual = path.win32.join.apply(null, _p);
 		assertEquals(actual, p[1]);
 	});

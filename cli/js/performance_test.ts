@@ -3,6 +3,7 @@ import { assert, testPerm } from "./test_util.ts";
 
 testPerm({ hrtime: false }, function now(): void {
 	const start = performance.now();
+
 	setTimeout((): void => {
 		const end = performance.now();
 		assert(end - start >= 10);

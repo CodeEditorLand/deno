@@ -3,9 +3,11 @@ import { assert, assertEquals, test, testPerm } from "./test_util.ts";
 
 testPerm({ write: true }, function makeTempDirSyncSuccess(): void {
 	const dir1 = Deno.makeTempDirSync({ prefix: "hello", suffix: "world" });
+
 	const dir2 = Deno.makeTempDirSync({ prefix: "hello", suffix: "world" });
 	// Check that both dirs are different.
 	assert(dir1 !== dir2);
+
 	for (const dir of [dir1, dir2]) {
 		// Check that the prefix and suffix are applied.
 		const lastPart = dir.replace(/^.*[\\\/]/, "");
@@ -18,6 +20,7 @@ testPerm({ write: true }, function makeTempDirSyncSuccess(): void {
 	assert(/^[\\\/]/.test(dir3.slice(dir1.length)));
 	// Check that creating a temp dir inside a nonexisting directory fails.
 	let err;
+
 	try {
 		Deno.makeTempDirSync({ dir: "/baddir" });
 	} catch (err_) {
@@ -30,6 +33,7 @@ testPerm({ write: true }, function makeTempDirSyncSuccess(): void {
 test(function makeTempDirSyncPerm(): void {
 	// makeTempDirSync should require write permissions (for now).
 	let err;
+
 	try {
 		Deno.makeTempDirSync({ dir: "/baddir" });
 	} catch (err_) {
@@ -41,9 +45,11 @@ test(function makeTempDirSyncPerm(): void {
 
 testPerm({ write: true }, async function makeTempDirSuccess(): Promise<void> {
 	const dir1 = await Deno.makeTempDir({ prefix: "hello", suffix: "world" });
+
 	const dir2 = await Deno.makeTempDir({ prefix: "hello", suffix: "world" });
 	// Check that both dirs are different.
 	assert(dir1 !== dir2);
+
 	for (const dir of [dir1, dir2]) {
 		// Check that the prefix and suffix are applied.
 		const lastPart = dir.replace(/^.*[\\\/]/, "");
@@ -56,6 +62,7 @@ testPerm({ write: true }, async function makeTempDirSuccess(): Promise<void> {
 	assert(/^[\\\/]/.test(dir3.slice(dir1.length)));
 	// Check that creating a temp dir inside a nonexisting directory fails.
 	let err;
+
 	try {
 		await Deno.makeTempDir({ dir: "/baddir" });
 	} catch (err_) {

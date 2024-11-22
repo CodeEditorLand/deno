@@ -47,6 +47,7 @@ test(function simpleHandler(): void {
 
 	for (const [testCase, messages] of cases.entries()) {
 		const testLevel = getLevelName(testCase);
+
 		const handler = new TestHandler(testLevel);
 
 		for (const levelName in LogLevel) {

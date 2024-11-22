@@ -29,6 +29,7 @@ const { Buffer } = Deno;
 
 function assertNotEOF<T extends {}>(val: T | Deno.EOF): T {
 	assertNotEquals(val, Deno.EOF);
+
 	return val as T;
 }
 
@@ -38,6 +39,7 @@ interface ResponseTest {
 }
 
 const enc = new TextEncoder();
+
 const dec = new TextDecoder();
 
 type Handler = () => void;
@@ -72,7 +74,9 @@ const responseTests: ResponseTest[] = [
 test(async function responseWrite(): Promise<void> {
 	for (const testCase of responseTests) {
 		const buf = new Buffer();
+
 		const bufw = new BufWriter(buf);
+
 		const request = new ServerRequest();
 		request.w = bufw;
 
@@ -102,8 +106,10 @@ test(async function requestBodyWithContentLength(): Promise<void> {
 		const req = new ServerRequest();
 		req.headers = new Headers();
 		req.headers.set("content-length", "5");
+
 		const buf = new Buffer(enc.encode("Hello"));
 		req.r = new BufReader(buf);
+
 		const body = dec.decode(await req.body());
 		assertEquals(body, "Hello");
 	}
@@ -111,11 +117,14 @@ test(async function requestBodyWithContentLength(): Promise<void> {
 	// Larger than internal buf
 	{
 		const longText = "1234\n".repeat(1000);
+
 		const req = new ServerRequest();
 		req.headers = new Headers();
 		req.headers.set("Content-Length", "5000");
+
 		const buf = new Buffer(enc.encode(longText));
 		req.r = new BufReader(buf);
+
 		const body = dec.decode(await req.body());
 		assertEquals(body, longText);
 	}
@@ -124,12 +133,17 @@ test(async function requestBodyWithContentLength(): Promise<void> {
 test(async function requestBodyWithTransferEncoding(): Promise<void> {
 	{
 		const shortText = "Hello";
+
 		const req = new ServerRequest();
 		req.headers = new Headers();
 		req.headers.set("transfer-encoding", "chunked");
+
 		let chunksData = "";
+
 		let chunkOffset = 0;
+
 		const maxChunkSize = 70;
+
 		while (chunkOffset < shortText.length) {
 			const chunkSize = Math.min(
 				maxChunkSize,
@@ -142,8 +156,10 @@ test(async function requestBodyWithTransferEncoding(): Promise<void> {
 			chunkOffset += chunkSize;
 		}
 		chunksData += "0\r\n\r\n";
+
 		const buf = new Buffer(enc.encode(chunksData));
 		req.r = new BufReader(buf);
+
 		const body = dec.decode(await req.body());
 		assertEquals(body, shortText);
 	}
@@ -151,12 +167,17 @@ test(async function requestBodyWithTransferEncoding(): Promise<void> {
 	// Larger than internal buf
 	{
 		const longText = "1234\n".repeat(1000);
+
 		const req = new ServerRequest();
 		req.headers = new Headers();
 		req.headers.set("transfer-encoding", "chunked");
+
 		let chunksData = "";
+
 		let chunkOffset = 0;
+
 		const maxChunkSize = 70;
+
 		while (chunkOffset < longText.length) {
 			const chunkSize = Math.min(
 				maxChunkSize,
@@ -169,8 +190,10 @@ test(async function requestBodyWithTransferEncoding(): Promise<void> {
 			chunkOffset += chunkSize;
 		}
 		chunksData += "0\r\n\r\n";
+
 		const buf = new Buffer(enc.encode(chunksData));
 		req.r = new BufReader(buf);
+
 		const body = dec.decode(await req.body());
 		assertEquals(body, longText);
 	}
@@ -179,13 +202,18 @@ test(async function requestBodyWithTransferEncoding(): Promise<void> {
 test(async function requestBodyStreamWithContentLength(): Promise<void> {
 	{
 		const shortText = "Hello";
+
 		const req = new ServerRequest();
 		req.headers = new Headers();
 		req.headers.set("content-length", "" + shortText.length);
+
 		const buf = new Buffer(enc.encode(shortText));
 		req.r = new BufReader(buf);
+
 		const it = await req.bodyStream();
+
 		let offset = 0;
+
 		for await (const chunk of it) {
 			const s = dec.decode(chunk);
 			assertEquals(shortText.substr(offset, s.length), s);
@@ -196,13 +224,18 @@ test(async function requestBodyStreamWithContentLength(): Promise<void> {
 	// Larger than internal buf
 	{
 		const longText = "1234\n".repeat(1000);
+
 		const req = new ServerRequest();
 		req.headers = new Headers();
 		req.headers.set("Content-Length", "5000");
+
 		const buf = new Buffer(enc.encode(longText));
 		req.r = new BufReader(buf);
+
 		const it = await req.bodyStream();
+
 		let offset = 0;
+
 		for await (const chunk of it) {
 			const s = dec.decode(chunk);
 			assertEquals(longText.substr(offset, s.length), s);
@@ -214,12 +247,17 @@ test(async function requestBodyStreamWithContentLength(): Promise<void> {
 test(async function requestBodyStreamWithTransferEncoding(): Promise<void> {
 	{
 		const shortText = "Hello";
+
 		const req = new ServerRequest();
 		req.headers = new Headers();
 		req.headers.set("transfer-encoding", "chunked");
+
 		let chunksData = "";
+
 		let chunkOffset = 0;
+
 		const maxChunkSize = 70;
+
 		while (chunkOffset < shortText.length) {
 			const chunkSize = Math.min(
 				maxChunkSize,
@@ -232,10 +270,14 @@ test(async function requestBodyStreamWithTransferEncoding(): Promise<void> {
 			chunkOffset += chunkSize;
 		}
 		chunksData += "0\r\n\r\n";
+
 		const buf = new Buffer(enc.encode(chunksData));
 		req.r = new BufReader(buf);
+
 		const it = await req.bodyStream();
+
 		let offset = 0;
+
 		for await (const chunk of it) {
 			const s = dec.decode(chunk);
 			assertEquals(shortText.substr(offset, s.length), s);
@@ -246,12 +288,17 @@ test(async function requestBodyStreamWithTransferEncoding(): Promise<void> {
 	// Larger than internal buf
 	{
 		const longText = "1234\n".repeat(1000);
+
 		const req = new ServerRequest();
 		req.headers = new Headers();
 		req.headers.set("transfer-encoding", "chunked");
+
 		let chunksData = "";
+
 		let chunkOffset = 0;
+
 		const maxChunkSize = 70;
+
 		while (chunkOffset < longText.length) {
 			const chunkSize = Math.min(
 				maxChunkSize,
@@ -264,10 +311,14 @@ test(async function requestBodyStreamWithTransferEncoding(): Promise<void> {
 			chunkOffset += chunkSize;
 		}
 		chunksData += "0\r\n\r\n";
+
 		const buf = new Buffer(enc.encode(chunksData));
 		req.r = new BufReader(buf);
+
 		const it = await req.bodyStream();
+
 		let offset = 0;
+
 		for await (const chunk of it) {
 			const s = dec.decode(chunk);
 			assertEquals(longText.substr(offset, s.length), s);
@@ -280,12 +331,14 @@ test(async function writeUint8ArrayResponse(): Promise<void> {
 	const shortText = "Hello";
 
 	const body = new TextEncoder().encode(shortText);
+
 	const res: Response = { body };
 
 	const buf = new Deno.Buffer();
 	await writeResponse(buf, res);
 
 	const decoder = new TextDecoder("utf-8");
+
 	const reader = new BufReader(buf);
 
 	let r: ReadLineResult;
@@ -313,12 +366,14 @@ test(async function writeStringReaderResponse(): Promise<void> {
 	const shortText = "Hello";
 
 	const body = new StringReader(shortText);
+
 	const res: Response = { body };
 
 	const buf = new Deno.Buffer();
 	await writeResponse(buf, res);
 
 	const decoder = new TextDecoder("utf-8");
+
 	const reader = new BufReader(buf);
 
 	let r: ReadLineResult;
@@ -366,8 +421,11 @@ test(async function readRequestError(): Promise<void> {
 	const input = `GET / HTTP/1.1
 malformedHeader
 `;
+
 	const reader = new BufReader(new StringReader(input));
+
 	let err;
+
 	try {
 		await readRequest(mockConn, reader);
 	} catch (e) {
@@ -442,11 +500,14 @@ test(async function testReadRequestError(): Promise<void> {
 			err: "http: Transfer-Encoding and Content-Length cannot be send together",
 		},
 	];
+
 	for (const test of testCases) {
 		const reader = new BufReader(new StringReader(test.in));
+
 		let err;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		let req: any;
+
 		try {
 			req = await readRequest(mockConn, reader);
 		} catch (e) {
@@ -461,6 +522,7 @@ test(async function testReadRequestError(): Promise<void> {
 		} else {
 			assertEquals(err, undefined);
 			assertNotEquals(req, Deno.EOF);
+
 			for (const h of test.headers!) {
 				assertEquals(
 					(req! as ServerRequest).headers.get(h.key),
@@ -488,8 +550,10 @@ test({
 			{ in: "HTTP/", err: true },
 			{ in: "HTTP/1,0", err: true },
 		];
+
 		for (const t of testCases) {
 			let r, err;
+
 			try {
 				r = parseHTTPVersion(t.in);
 			} catch (e) {
@@ -520,6 +584,7 @@ test({
 
 		try {
 			const r = new TextProtoReader(new BufReader(p.stdout!));
+
 			const s = await r.readLine();
 			assert(s !== Deno.EOF && s.includes("server listening"));
 
@@ -564,6 +629,7 @@ test({
 
 		try {
 			const r = new TextProtoReader(new BufReader(p.stdout!));
+
 			const s = await r.readLine();
 			assert(s !== Deno.EOF && s.includes("server listening"));
 
@@ -584,9 +650,12 @@ test({
 				conn,
 				new TextEncoder().encode("GET / HTTP/1.0\r\n\r\n"),
 			);
+
 			const res = new Uint8Array(100);
+
 			const nread = assertNotEOF(await conn.read(res));
 			conn.close();
+
 			const resStr = new TextDecoder().decode(res.subarray(0, nread));
 			assert(resStr.includes("Hello HTTPS"));
 			assert(serverIsRunning);
@@ -601,6 +670,7 @@ test({
 	name: "[http] close server while iterating",
 	async fn(): Promise<void> {
 		const server = serve(":8123");
+
 		const nextWhileClosing = server[Symbol.asyncIterator]().next();
 		server.close();
 		assertEquals(await nextWhileClosing, { value: undefined, done: true });
@@ -622,16 +692,22 @@ if (Deno.build.os !== "win") {
 		name: "[http] respond error handling",
 		async fn(): Promise<void> {
 			const connClosedPromise = deferred();
+
 			const serverRoutine = async (): Promise<void> => {
 				let reqCount = 0;
+
 				const server = serve(":8124");
+
 				const serverRid = server.listener["rid"];
+
 				let connRid = -1;
+
 				for await (const req of server) {
 					connRid = req.conn.rid;
 					reqCount++;
 					await req.body();
 					await connClosedPromise;
+
 					try {
 						await req.respond({
 							body: new TextEncoder().encode("Hello World"),
@@ -651,6 +727,7 @@ if (Deno.build.os !== "win") {
 					}
 				}
 				server.close();
+
 				const resources = Deno.resources();
 				assert(reqCount === 1);
 				// Server should be gone
@@ -658,7 +735,9 @@ if (Deno.build.os !== "win") {
 				// The connection should be destroyed
 				assert(!(connRid in resources));
 			};
+
 			const p = serverRoutine();
+
 			const conn = await Deno.dial({
 				hostname: "127.0.0.1",
 				port: 8124,

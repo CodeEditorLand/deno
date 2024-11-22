@@ -9,15 +9,18 @@ import { log } from "./util.ts";
 import { window } from "./window.ts";
 
 const encoder = new TextEncoder();
+
 const decoder = new TextDecoder();
 
 export function encodeMessage(data: any): Uint8Array {
 	const dataJson = JSON.stringify(data);
+
 	return encoder.encode(dataJson);
 }
 
 export function decodeMessage(dataIntArray: Uint8Array): any {
 	const dataJson = decoder.decode(dataIntArray);
+
 	return JSON.parse(dataJson);
 }
 
@@ -64,7 +67,9 @@ export function postMessage(data: any): void {
 
 export async function getMessage(): Promise<any> {
 	log("getMessage");
+
 	const res = await sendAsync(dispatch.OP_WORKER_GET_MESSAGE);
+
 	if (res.data != null) {
 		return decodeMessage(new Uint8Array(res.data));
 	} else {
@@ -83,14 +88,18 @@ export async function workerMain(): Promise<void> {
 
 	while (!isClosing) {
 		const data = await getMessage();
+
 		if (data == null) {
 			log("workerMain got null message. quitting.");
+
 			break;
 		}
 
 		if (window["onmessage"]) {
 			const event = { data };
+
 			const result: void | Promise<void> = window.onmessage(event);
+
 			if (result && "then" in result) {
 				await result;
 			}
@@ -132,22 +141,27 @@ export class WorkerImpl implements Worker {
 
 	constructor(specifier: string, options?: DenoWorkerOptions) {
 		let hasSourceCode = false;
+
 		let sourceCode = new Uint8Array();
 
 		let includeDenoNamespace = true;
+
 		if (options && options.noDenoNamespace) {
 			includeDenoNamespace = false;
 		}
 		// Handle blob URL.
 		if (specifier.startsWith("blob:")) {
 			hasSourceCode = true;
+
 			const b = blobURLMap.get(specifier);
+
 			if (!b) {
 				throw new Error(
 					"No Blob associated with the given URL is found",
 				);
 			}
 			const blobBytes = blobBytesWeakMap.get(b!);
+
 			if (!blobBytes) {
 				throw new Error("Invalid Blob");
 			}
@@ -178,8 +192,10 @@ export class WorkerImpl implements Worker {
 	private async run(): Promise<void> {
 		while (!this.isClosing) {
 			const data = await hostGetMessage(this.id);
+
 			if (data == null) {
 				log("worker got null message. quitting.");
+
 				break;
 			}
 			// TODO(afinch7) stop this from eating messages before onmessage has been assigned

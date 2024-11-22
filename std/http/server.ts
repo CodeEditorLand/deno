@@ -43,11 +43,14 @@ export function setContentLength(r: Response): void {
 
 async function writeChunkedBody(w: Writer, r: Reader): Promise<void> {
 	const writer = bufWriter(w);
+
 	const encoder = new TextEncoder();
 
 	for await (const chunk of toAsyncIterator(r)) {
 		if (chunk.byteLength <= 0) continue;
+
 		const start = encoder.encode(`${chunk.byteLength.toString(16)}\r\n`);
+
 		const end = encoder.encode("\r\n");
 		await writer.write(start);
 		await writer.write(chunk);
@@ -60,10 +63,15 @@ async function writeChunkedBody(w: Writer, r: Reader): Promise<void> {
 
 export async function writeResponse(w: Writer, r: Response): Promise<void> {
 	const protoMajor = 1;
+
 	const protoMinor = 1;
+
 	const statusCode = r.status || 200;
+
 	const statusText = STATUS_TEXT.get(statusCode);
+
 	const writer = bufWriter(w);
+
 	if (!statusText) {
 		throw Error("bad status code");
 	}
@@ -74,6 +82,7 @@ export async function writeResponse(w: Writer, r: Response): Promise<void> {
 	let out = `HTTP/${protoMajor}.${protoMinor} ${statusCode} ${statusText}\r\n`;
 
 	setContentLength(r);
+
 	const headers = r.headers!;
 
 	for (const [key, value] of headers!) {
@@ -82,6 +91,7 @@ export async function writeResponse(w: Writer, r: Response): Promise<void> {
 	out += "\r\n";
 
 	const header = new TextEncoder().encode(out);
+
 	const n = await writer.write(header);
 	assert(n === header.byteLength);
 
@@ -90,6 +100,7 @@ export async function writeResponse(w: Writer, r: Response): Promise<void> {
 		assert(n === r.body.byteLength);
 	} else if (headers.has("content-length")) {
 		const bodyLength = parseInt(headers.get("content-length")!);
+
 		const n = await copy(writer, r.body);
 		assert(n === bodyLength);
 	} else {
@@ -108,18 +119,24 @@ export class ServerRequest {
 	conn!: Conn;
 	r!: BufReader;
 	w!: BufWriter;
+
 	done: Deferred<Error | undefined> = deferred();
 
 	public async *bodyStream(): AsyncIterableIterator<Uint8Array> {
 		if (this.headers.has("content-length")) {
 			const len = +this.headers.get("content-length")!;
+
 			if (Number.isNaN(len)) {
 				return new Uint8Array(0);
 			}
 			let buf = new Uint8Array(1024);
+
 			let rr = await this.r.read(buf);
+
 			let nread = rr === Deno.EOF ? 0 : rr;
+
 			let nreadTotal = nread;
+
 			while (rr !== Deno.EOF && nreadTotal < len) {
 				yield buf.subarray(0, nread);
 				buf = new Uint8Array(1024);
@@ -134,29 +151,37 @@ export class ServerRequest {
 					.get("transfer-encoding")!
 					.split(",")
 					.map((e): string => e.trim().toLowerCase());
+
 				if (transferEncodings.includes("chunked")) {
 					// Based on https://tools.ietf.org/html/rfc2616#section-19.4.6
 					const tp = new TextProtoReader(this.r);
+
 					let line = await tp.readLine();
+
 					if (line === Deno.EOF) throw new UnexpectedEOFError();
 					// TODO: handle chunk extension
 					const [chunkSizeString] = line.split(";");
+
 					let chunkSize = parseInt(chunkSizeString, 16);
+
 					if (Number.isNaN(chunkSize) || chunkSize < 0) {
 						throw new Error("Invalid chunk size");
 					}
 					while (chunkSize > 0) {
 						const data = new Uint8Array(chunkSize);
+
 						if ((await this.r.readFull(data)) === Deno.EOF) {
 							throw new UnexpectedEOFError();
 						}
 						yield data;
 						await this.r.readLine(); // Consume \r\n
 						line = await tp.readLine();
+
 						if (line === Deno.EOF) throw new UnexpectedEOFError();
 						chunkSize = parseInt(line, 16);
 					}
 					const entityHeaders = await tp.readMIMEHeader();
+
 					if (entityHeaders !== Deno.EOF) {
 						for (const [k, v] of entityHeaders) {
 							this.headers.set(k, v);
@@ -195,6 +220,7 @@ export class ServerRequest {
 
 	async respond(r: Response): Promise<void> {
 		let err: Error | undefined;
+
 		try {
 			// Write our response!
 			await writeResponse(this.w, r);
@@ -208,6 +234,7 @@ export class ServerRequest {
 		// Signal that this request has been processed and the next pipelined
 		// request on the same connection can be accepted.
 		this.done.resolve(err);
+
 		if (err) {
 			// Error during responding, rethrow.
 			throw err;
@@ -217,10 +244,13 @@ export class ServerRequest {
 
 function fixLength(req: ServerRequest): void {
 	const contentLength = req.headers.get("Content-Length");
+
 	if (contentLength) {
 		const arrClen = contentLength.split(",");
+
 		if (arrClen.length > 1) {
 			const distinct = [...new Set(arrClen.map((e): string => e.trim()))];
+
 			if (distinct.length > 1) {
 				throw Error("cannot contain multiple Content-Length headers");
 			} else {
@@ -228,6 +258,7 @@ function fixLength(req: ServerRequest): void {
 			}
 		}
 		const c = req.headers.get("Content-Length");
+
 		if (req.method === "HEAD" && c && c !== "0") {
 			throw Error("http: method cannot contain a Content-Length");
 		}
@@ -264,12 +295,15 @@ export function parseHTTPVersion(vers: string): [number, number] {
 			}
 
 			const dot = vers.indexOf(".");
+
 			if (dot < 0) {
 				break;
 			}
 
 			const majorStr = vers.substring(vers.indexOf("/") + 1, dot);
+
 			const major = parseInt(majorStr);
+
 			if (
 				!digitReg.test(majorStr) ||
 				isNaN(major) ||
@@ -280,7 +314,9 @@ export function parseHTTPVersion(vers: string): [number, number] {
 			}
 
 			const minorStr = vers.substring(dot + 1);
+
 			const minor = parseInt(minorStr);
+
 			if (
 				!digitReg.test(minorStr) ||
 				isNaN(minor) ||
@@ -302,9 +338,12 @@ export async function readRequest(
 	bufr: BufReader,
 ): Promise<ServerRequest | Deno.EOF> {
 	const tp = new TextProtoReader(bufr);
+
 	const firstLine = await tp.readLine(); // e.g. GET /index.html HTTP/1.0
 	if (firstLine === Deno.EOF) return Deno.EOF;
+
 	const headers = await tp.readMIMEHeader();
+
 	if (headers === Deno.EOF) throw new UnexpectedEOFError();
 
 	const req = new ServerRequest();
@@ -314,6 +353,7 @@ export async function readRequest(
 	[req.protoMinor, req.protoMajor] = parseHTTPVersion(req.proto);
 	req.headers = headers;
 	fixLength(req);
+
 	return req;
 }
 
@@ -332,8 +372,11 @@ export class Server implements AsyncIterable<ServerRequest> {
 		conn: Conn,
 	): AsyncIterableIterator<ServerRequest> {
 		const bufr = new BufReader(conn);
+
 		const w = new BufWriter(conn);
+
 		let req: ServerRequest | Deno.EOF;
+
 		let err: Error | undefined;
 
 		while (!this.closing) {
@@ -341,6 +384,7 @@ export class Server implements AsyncIterable<ServerRequest> {
 				req = await readRequest(conn, bufr);
 			} catch (e) {
 				err = e;
+
 				break;
 			}
 			if (req === Deno.EOF) {
@@ -348,11 +392,13 @@ export class Server implements AsyncIterable<ServerRequest> {
 			}
 
 			req.w = w;
+
 			yield req;
 
 			// Wait for the request to be processed before we accept a new request on
 			// this connection.
 			const procError = await req!.done;
+
 			if (procError) {
 				// Something bad happened during response.
 				// (likely other side closed during pipelined req)
@@ -392,7 +438,9 @@ export class Server implements AsyncIterable<ServerRequest> {
 		if (this.closing) return;
 		// Wait for a new connection.
 		const { value, done } = await this.listener.next();
+
 		if (done) return;
+
 		const conn = value as Conn;
 		// Try to accept another connection and add it to the multiplexer.
 		mux.add(this.acceptConnAndIterateHttpRequests(mux));
@@ -403,6 +451,7 @@ export class Server implements AsyncIterable<ServerRequest> {
 	[Symbol.asyncIterator](): AsyncIterableIterator<ServerRequest> {
 		const mux: MuxAsyncIterator<ServerRequest> = new MuxAsyncIterator();
 		mux.add(this.acceptConnAndIterateHttpRequests(mux));
+
 		return mux.iterate();
 	}
 }
@@ -429,6 +478,7 @@ export function serve(addr: string | ServerConfig): Server {
 	}
 
 	const listener = listen(addr);
+
 	return new Server(listener);
 }
 
@@ -468,7 +518,9 @@ export function serveTLS(options: HTTPSOptions): Server {
 		...options,
 		transport: "tcp",
 	};
+
 	const listener = listenTLS(tlsOptions);
+
 	return new Server(listener);
 }
 

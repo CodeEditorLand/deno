@@ -10,7 +10,9 @@ test(function testCopyBytes(): void {
 	const dst = new Uint8Array(4);
 
 	dst.fill(0);
+
 	let src = Uint8Array.of(1, 2);
+
 	let len = copyBytes(dst, src, 0);
 	assert(len === 2);
 	assertEquals(dst, Uint8Array.of(1, 2, 0, 0));
@@ -46,6 +48,7 @@ test(async function ioTempfile(): Promise<void> {
 		postfix: "-postfix",
 	});
 	console.log(f.file, f.filepath);
+
 	const base = path.basename(f.filepath);
 	assert(!!base.match(/^prefix-.+?-postfix$/));
 	await remove(f.filepath);

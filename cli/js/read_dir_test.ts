@@ -28,6 +28,7 @@ testPerm({ read: true }, function readDirSyncSuccess(): void {
 
 testPerm({ read: false }, function readDirSyncPerm(): void {
 	let caughtError = false;
+
 	try {
 		Deno.readDirSync("tests/");
 	} catch (e) {
@@ -40,6 +41,7 @@ testPerm({ read: false }, function readDirSyncPerm(): void {
 
 testPerm({ read: true }, function readDirSyncNotDir(): void {
 	let caughtError = false;
+
 	let src;
 
 	try {
@@ -54,6 +56,7 @@ testPerm({ read: true }, function readDirSyncNotDir(): void {
 
 testPerm({ read: true }, function readDirSyncNotFound(): void {
 	let caughtError = false;
+
 	let src;
 
 	try {
@@ -73,6 +76,7 @@ testPerm({ read: true }, async function readDirSuccess(): Promise<void> {
 
 testPerm({ read: false }, async function readDirPerm(): Promise<void> {
 	let caughtError = false;
+
 	try {
 		await Deno.readDir("tests/");
 	} catch (e) {

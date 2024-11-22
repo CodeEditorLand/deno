@@ -5,6 +5,7 @@ import * as headers from "./headers.ts";
 import * as streams from "./streams/mod.ts";
 
 const { Headers } = headers;
+
 const { ReadableStream } = streams;
 
 function byteUpperCase(s: string): string {
@@ -18,6 +19,7 @@ function byteUpperCase(s: string): string {
 
 function normalizeMethod(m: string): string {
 	const u = byteUpperCase(m);
+
 	if (
 		u === "DELETE" ||
 		u === "GET" ||
@@ -82,6 +84,7 @@ export class Request extends body.Body implements domTypes.Request {
 		}
 
 		const contentType = headers.get("content-type") || "";
+
 		super(b, contentType);
 		this.headers = headers;
 
@@ -138,7 +141,9 @@ export class Request extends body.Body implements domTypes.Request {
 		}
 
 		const iterators = this.headers.entries();
+
 		const headersList: Array<[string, string]> = [];
+
 		for (const header of iterators) {
 			headersList.push(header);
 		}
@@ -157,6 +162,7 @@ export class Request extends body.Body implements domTypes.Request {
 			headers: new Headers(headersList),
 			credentials: this.credentials,
 		});
+
 		return cloned;
 	}
 }

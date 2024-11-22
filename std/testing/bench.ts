@@ -100,10 +100,13 @@ export async function runBenchmarks({
 	);
 	// Init main counters and error flag
 	const filtered = candidates.length - benchmarks.length;
+
 	let measured = 0;
+
 	let failed = false;
 	// Setting up a shared benchmark clock and timer
 	const clock: BenchmarkClock = { start: NaN, stop: NaN };
+
 	const b = createBenchmarkTimer(clock);
 	// Iterating given benchmark definitions (await-in-loop)
 	console.log(
@@ -111,11 +114,13 @@ export async function runBenchmarks({
 		benchmarks.length,
 		`benchmark${benchmarks.length === 1 ? " ..." : "s ..."}`,
 	);
+
 	for (const { name, runs = 0, func } of benchmarks) {
 		// See https://github.com/denoland/deno/pull/1452 about groupCollapsed
 		console.groupCollapsed(`benchmark ${name} ... `);
 		// Trying benchmark.func
 		let result = "";
+
 		try {
 			if (runs === 1) {
 				// b is a benchmark timer interfacing an unset (NaN) benchmark clock
@@ -126,6 +131,7 @@ export async function runBenchmarks({
 			} else if (runs > 1) {
 				// Averaging runs
 				let pendingRuns = runs;
+
 				let totalMs = 0;
 				// Would be better 2 not run these serially
 				while (true) {
@@ -140,6 +146,7 @@ export async function runBenchmarks({
 					// Once all ran
 					if (!--pendingRuns) {
 						result = `${runs} runs avg: ${totalMs / runs}ms`;
+
 						break;
 					}
 				}
@@ -148,6 +155,7 @@ export async function runBenchmarks({
 			failed = true;
 			console.groupEnd();
 			console.error(red(err.stack));
+
 			break;
 		}
 		// Reporting

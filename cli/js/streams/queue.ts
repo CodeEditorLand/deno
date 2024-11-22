@@ -32,6 +32,7 @@ export class QueueImpl<T> implements Queue<T> {
 	push(t: T): void {
 		this.writeChunk_.push(t);
 		this.length_ += 1;
+
 		if (this.writeChunk_.length === CHUNK_SIZE) {
 			this.writeChunk_ = [];
 			this.chunks_.push(this.writeChunk_);
@@ -52,6 +53,7 @@ export class QueueImpl<T> implements Queue<T> {
 		const t = this.readChunk_.shift();
 
 		this.length_ -= 1;
+
 		if (
 			this.readChunk_.length === 0 &&
 			this.readChunk_ !== this.writeChunk_

@@ -9,6 +9,7 @@ if (Deno.build.os !== "win") {
 			stdout: "piped",
 			args: ["python", "-c", "import os; print(os.getuid())"],
 		});
+
 		const gidProc = Deno.run({
 			stdout: "piped",
 			args: ["python", "-c", "import os; print(os.getgid())"],
@@ -16,9 +17,11 @@ if (Deno.build.os !== "win") {
 
 		assertEquals((await uidProc.status()).code, 0);
 		assertEquals((await gidProc.status()).code, 0);
+
 		const uid = parseInt(
 			new TextDecoder("utf-8").decode(await uidProc.output()),
 		);
+
 		const gid = parseInt(
 			new TextDecoder("utf-8").decode(await gidProc.output()),
 		);
@@ -28,6 +31,7 @@ if (Deno.build.os !== "win") {
 
 	testPerm({}, async function chownNoWritePermission(): Promise<void> {
 		const filePath = "chown_test_file.txt";
+
 		try {
 			await Deno.chown(filePath, 1000, 1000);
 		} catch (e) {
@@ -40,6 +44,7 @@ if (Deno.build.os !== "win") {
 		{ run: true, write: true },
 		async function chownSyncFileNotExist(): Promise<void> {
 			const { uid, gid } = await getUidAndGid();
+
 			const filePath = Deno.makeTempDirSync() + "/chown_test_file.txt";
 
 			try {
@@ -55,6 +60,7 @@ if (Deno.build.os !== "win") {
 		{ run: true, write: true },
 		async function chownFileNotExist(): Promise<void> {
 			const { uid, gid } = await getUidAndGid();
+
 			const filePath =
 				(await Deno.makeTempDir()) + "/chown_test_file.txt";
 
@@ -69,8 +75,11 @@ if (Deno.build.os !== "win") {
 
 	testPerm({ write: true }, function chownSyncPermissionDenied(): void {
 		const enc = new TextEncoder();
+
 		const dirPath = Deno.makeTempDirSync();
+
 		const filePath = dirPath + "/chown_test_file.txt";
+
 		const fileData = enc.encode("Hello");
 		Deno.writeFileSync(filePath, fileData);
 
@@ -88,8 +97,11 @@ if (Deno.build.os !== "win") {
 		{ write: true },
 		async function chownPermissionDenied(): Promise<void> {
 			const enc = new TextEncoder();
+
 			const dirPath = await Deno.makeTempDir();
+
 			const filePath = dirPath + "/chown_test_file.txt";
+
 			const fileData = enc.encode("Hello");
 			await Deno.writeFile(filePath, fileData);
 
@@ -113,8 +125,11 @@ if (Deno.build.os !== "win") {
 			const { uid, gid } = await getUidAndGid();
 
 			const enc = new TextEncoder();
+
 			const dirPath = Deno.makeTempDirSync();
+
 			const filePath = dirPath + "/chown_test_file.txt";
+
 			const fileData = enc.encode("Hello");
 			Deno.writeFileSync(filePath, fileData);
 
@@ -133,8 +148,11 @@ if (Deno.build.os !== "win") {
 			const { uid, gid } = await getUidAndGid();
 
 			const enc = new TextEncoder();
+
 			const dirPath = await Deno.makeTempDir();
+
 			const filePath = dirPath + "/chown_test_file.txt";
+
 			const fileData = enc.encode("Hello");
 			await Deno.writeFile(filePath, fileData);
 

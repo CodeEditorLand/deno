@@ -40,7 +40,9 @@ const encoder = new TextEncoder();
 const serverArgs = parse(args) as FileServerArgs;
 
 const CORSEnabled = serverArgs.cors ? true : false;
+
 const target = posix.resolve(serverArgs._[1] || "");
+
 const addr = `0.0.0.0:${serverArgs.port || serverArgs.p || 4500}`;
 
 if (serverArgs.h || serverArgs.help) {
@@ -67,6 +69,7 @@ function modeToString(isDir: boolean, maybeMode: number | null): string {
 		return "(unknown mode)";
 	}
 	const mode = maybeMode!.toString(8);
+
 	if (mode.length < 3) {
 		return "(unknown mode)";
 	}
@@ -78,13 +81,17 @@ function modeToString(isDir: boolean, maybeMode: number | null): string {
 			output = modeMap[+v] + output;
 		});
 	output = `(${isDir ? "d" : "-"}${output})`;
+
 	return output;
 }
 
 function fileLenToString(len: number): string {
 	const multiplier = 1024;
+
 	let base = 1;
+
 	const suffix = ["B", "K", "M", "G", "T"];
+
 	let suffixIndex = 0;
 
 	while (base * multiplier < len) {
@@ -106,6 +113,7 @@ async function serveFile(
 		open(filePath),
 		stat(filePath),
 	]);
+
 	const headers = new Headers();
 	headers.set("content-length", fileInfo.len.toString());
 	headers.set("content-type", "text/plain; charset=utf-8");
@@ -115,6 +123,7 @@ async function serveFile(
 		body: file,
 		headers,
 	};
+
 	return res;
 }
 
@@ -124,17 +133,23 @@ async function serveDir(
 	dirPath: string,
 ): Promise<Response> {
 	const dirUrl = `/${posix.relative(target, dirPath)}`;
+
 	const listEntry: EntryInfo[] = [];
+
 	const fileInfos = await readDir(dirPath);
+
 	for (const fileInfo of fileInfos) {
 		const filePath = posix.join(dirPath, fileInfo.name);
+
 		const fileUrl = posix.join(dirUrl, fileInfo.name);
+
 		if (fileInfo.name === "index.html" && fileInfo.isFile()) {
 			// in case index.html as dir...
 			return await serveFile(req, filePath);
 		}
 		// Yuck!
 		let mode = null;
+
 		try {
 			mode = (await stat(filePath)).mode;
 		} catch (e) {}
@@ -148,7 +163,9 @@ async function serveDir(
 	listEntry.sort((a, b) =>
 		a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1,
 	);
+
 	const formattedDirUrl = `${dirUrl.replace(/\/$/, "")}/`;
+
 	const page = encoder.encode(dirViewerTemplate(formattedDirUrl, listEntry));
 
 	const headers = new Headers();
@@ -159,7 +176,9 @@ async function serveDir(
 		body: page,
 		headers,
 	};
+
 	setContentLength(res);
+
 	return res;
 }
 
@@ -179,7 +198,9 @@ async function serveFallback(req: ServerRequest, e: Error): Promise<Response> {
 
 function serverLog(req: ServerRequest, res: Response): void {
 	const d = new Date().toISOString();
+
 	const dateFmt = `[${d.slice(0, 10)} ${d.slice(11, 19)}]`;
+
 	const s = `${dateFmt} "${req.method} ${req.url} ${req.proto}" ${res.status}`;
 	console.log(s);
 }
@@ -284,10 +305,12 @@ function dirViewerTemplate(dirname: string, entries: EntryInfo[]): string {
 
 function html(strings: TemplateStringsArray, ...values: unknown[]): string {
 	const l = strings.length - 1;
+
 	let html = "";
 
 	for (let i = 0; i < l; i++) {
 		let v = values[i];
+
 		if (v instanceof Array) {
 			v = v.join("");
 		}
@@ -295,17 +318,22 @@ function html(strings: TemplateStringsArray, ...values: unknown[]): string {
 		html += s;
 	}
 	html += strings[l];
+
 	return html;
 }
 
 listenAndServe(addr, async (req): Promise<void> => {
 	const normalizedUrl = posix.normalize(req.url);
+
 	const decodedUrl = decodeURIComponent(normalizedUrl);
+
 	const fsPath = posix.join(target, decodedUrl);
 
 	let response: Response;
+
 	try {
 		const info = await stat(fsPath);
+
 		if (info.isDirectory()) {
 			response = await serveDir(req, fsPath);
 		} else {
