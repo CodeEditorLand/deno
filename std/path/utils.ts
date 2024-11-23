@@ -54,9 +54,7 @@ export function normalizeString(
 
 	for (let i = 0, len = path.length; i <= len; ++i) {
 		if (i < len) code = path.charCodeAt(i);
-
 		else if (isPathSeparator(code!)) break;
-
 		else code = CHAR_FORWARD_SLASH;
 
 		if (isPathSeparator(code)) {
@@ -97,14 +95,12 @@ export function normalizeString(
 				}
 				if (allowAboveRoot) {
 					if (res.length > 0) res += `${separator}..`;
-
 					else res = "..";
 					lastSegmentLength = 2;
 				}
 			} else {
 				if (res.length > 0)
 					res += separator + path.slice(lastSlash + 1, i);
-
 				else res = path.slice(lastSlash + 1, i);
 				lastSegmentLength = i - lastSlash - 1;
 			}
