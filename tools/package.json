@@ -1,6 +1,6 @@
 {
 	"devDependencies": {
-		"magic-string": "0.30.13"
+		"magic-string": "0.30.14"
 	},
 	"name": "deno"
 }
