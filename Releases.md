@@ -1,10 +1,10 @@
 # Releases
 
 Binary releases can be downloaded manually at
-https://github.com/denoland/deno/releases
+HTTPS://github.com/denoland/deno/releases
 
 We also have one-line install commands at
-https://github.com/denoland/deno_install
+HTTPS://github.com/denoland/deno_install
 
 ### v0.26.0 / 2019.12.05
 
@@ -714,7 +714,7 @@ details.
 -   Add deno.isTTY() (#1622)
 -   Add emojis to permission prompts (#1684)
 -   Add basic WebAssembly support (#1677)
--   Add `NO_COLOR` support https://no-color.org/ (#1716)
+-   Add `NO_COLOR` support HTTPS://no-color.org/ (#1716)
 -   Add color exceptions (#1698)
 -   Fix: do not load cache files when recompile flag is set (#1695)
 -   Upgrade V8 to 7.4.98 (#1640)
@@ -817,14 +817,14 @@ details.
 
 ### v0.2.0 / 2018.11.27 / Mildly usable
 
-[`An intro talk was recorded.`](https://www.youtube.com/watch?v=FlTG0UXRAkE)
+[`An intro talk was recorded.`](HTTPS://www.youtube.com/watch?v=FlTG0UXRAkE)
 
 Stability and usability improvements. `fetch()` is 90% functional now. Basic
 REPL support was added. Shebang support was added. Command-line argument parsing
-was improved. A forwarding service `https://deno.land/x` was set up for Deno
+was improved. A forwarding service `HTTPS://deno.land/x` was set up for Deno
 code. Example code has been posted to
-[`deno.land/x/examples`](https://github.com/denoland/deno_examples) and
-[`deno.land/x/net`](https://github.com/denoland/net).
+[`deno.land/x/examples`](HTTPS://github.com/denoland/deno_examples) and
+[`deno.land/x/net`](HTTPS://github.com/denoland/net).
 
 The resources table was added to abstract various types of I/O streams and other
 allocated state. A resource is an integer identifier which maps to some Rust
@@ -890,12 +890,12 @@ Tokio was chosen as the backing event loop library. A careful mapping of JS
 Promises onto Rust Futures was made, preserving error handling and the ability
 to execute synchronously in the main thread.
 
-Continuous benchmarks were added: https://denoland.github.io/deno/ Performance
+Continuous benchmarks were added: HTTPS://denoland.github.io/deno/ Performance
 issues are beginning to be addressed.
 
 "deno --types" was added to reference runtime APIs.
 
-Working towards https://github.com/denoland/deno/milestone/2 We expect v0.2 to
+Working towards HTTPS://github.com/denoland/deno/milestone/2 We expect v0.2 to
 be released in last October or early November.
 
 Changes since v0.1.7:
@@ -939,7 +939,7 @@ Changes since v0.1.7:
 -   Use constructor.name to print out function type #664
 -   Rename deno.argv to deno.args
 -   Add deno.trace() #795
--   Continuous benchmarks https://denoland.github.io/deno/
+-   Continuous benchmarks HTTPS://denoland.github.io/deno/
 
 ### v0.1.5 / 2018.09.21
 
@@ -966,9 +966,9 @@ Changes since v0.1.7:
 
 ### v0.1.3 / 2018.09.05 / Scale binding infrastructure
 
-ETA v.0.2 October 2018 https://github.com/denoland/deno/milestone/2
+ETA v.0.2 October 2018 HTTPS://github.com/denoland/deno/milestone/2
 
-We decided to use Tokio https://tokio.rs/ to provide asynchronous I/O, thread
+We decided to use Tokio HTTPS://tokio.rs/ to provide asynchronous I/O, thread
 pool execution, and as a base for high level support for various internet
 protocols like HTTP. Tokio is strongly designed around the idea of Futures -
 which map quite well onto JavaScript promises. We want to make it as easy as
@@ -997,7 +997,7 @@ Changes since v0.1.2:
 
 ### v0.1.0 / 2018.08.23 / Rust rewrite and V8 snapshot
 
-Complete! https://github.com/denoland/deno/milestone/1
+Complete! HTTPS://github.com/denoland/deno/milestone/1
 
 Go is a garbage collected language and we are worried that combining it with
 V8's GC will lead to difficult contention problems down the road.
@@ -1015,22 +1015,22 @@ binaries for people to try.
 
 ### v0.0.0 / 2018.05.14 - 2018.06.22 / Golang Prototype
 
-https://github.com/denoland/deno/tree/golang
+HTTPS://github.com/denoland/deno/tree/golang
 
-https://www.youtube.com/watch?v=M3BM9TB-8yA
+HTTPS://www.youtube.com/watch?v=M3BM9TB-8yA
 
-https://tinyclouds.org/jsconf2018.pdf
+HTTPS://tinyclouds.org/jsconf2018.pdf
 
 ### 2007-2017 / Prehistory
 
-https://github.com/ry/v8worker
+HTTPS://github.com/ry/v8worker
 
-https://libuv.org/
+HTTPS://libuv.org/
 
-https://tinyclouds.org/iocp-links.html
+HTTPS://tinyclouds.org/iocp-links.html
 
-https://nodejs.org/
+HTTPS://nodejs.org/
 
-https://github.com/nodejs/http-parser
+HTTPS://github.com/nodejs/http-parser
 
-https://tinyclouds.org/libebb/
+HTTPS://tinyclouds.org/libebb/

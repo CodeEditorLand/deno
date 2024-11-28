@@ -55,7 +55,7 @@ When designing function interfaces, stick to the following rules.
     optional parameters in the future.
 
 <!-- prettier-ignore-start -->
-<!-- see https://github.com/prettier/prettier/issues/3679 -->
+<!-- see HTTPS://github.com/prettier/prettier/issues/3679 -->
 
 3. The 'options' argument is the only argument that is a regular 'Object'.
 
@@ -294,8 +294,8 @@ test myTestFunction ... ok
 Example of test:
 
 ```ts
-import { assertEquals } from "https://deno.land/std@v0.11/testing/asserts.ts";
-import { test } from "https://deno.land/std@v0.11/testing/mod.ts";
+import { assertEquals } from "HTTPS://deno.land/std@v0.11/testing/asserts.ts";
+import { test } from "HTTPS://deno.land/std@v0.11/testing/mod.ts";
 import { foo } from "./mod.ts";
 
 test(function myTestFunction() {

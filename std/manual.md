@@ -8,10 +8,10 @@
 
 We encourage brave early adopters, but expect bugs large and small. The API is
 subject to change without notice.
-[`Bug reports`](https://github.com/denoland/deno/issues) do help!
+[`Bug reports`](HTTPS://github.com/denoland/deno/issues) do help!
 
 We are
-[`actively working towards 1.0`](https://github.com/denoland/deno/issues/2473),
+[`actively working towards 1.0`](HTTPS://github.com/denoland/deno/issues/2473),
 but there is no date guarantee.
 
 ## Introduction
@@ -30,7 +30,7 @@ It's built on V8, Rust, and Tokio.
 -   Has built in utilities like a dependency inspector (`deno info`) and a code
     formatter (`deno fmt`).
 -   Has
-    [`a set of reviewed (audited) standard modules`](https://github.com/denoland/deno/tree/master/std)
+    [`a set of reviewed (audited) standard modules`](HTTPS://github.com/denoland/deno/tree/master/std)
     that are guaranteed to work with Deno.
 -   Scripts can be bundled into a single javascript file.
 
@@ -41,7 +41,7 @@ programmer.
 
 Deno will always be distributed as a single executable. Given a URL to a Deno
 program, it is runnable with nothing more than
-[`the 10 megabyte zipped executable`](https://github.com/denoland/deno/releases).
+[`the 10 megabyte zipped executable`](HTTPS://github.com/denoland/deno/releases).
 Deno explicitly takes on the role of both runtime and package manager. It uses a
 standard browser-compatible protocol for loading modules: URLs.
 
@@ -77,7 +77,7 @@ have been historically written with bash or python.
     imported via URLs:
 
 ```javascript
-import * as log from "https://deno.land/std/log/mod.ts";
+import * as log from "HTTPS://deno.land/std/log/mod.ts";
 ```
 
 ### Other key behaviors
@@ -98,8 +98,8 @@ import * as log from "https://deno.land/std/log/mod.ts";
 - bundling (`deno bundle`)
 - runtime type info (`deno types`)
 - test runner (`deno test`)
-- command-line debugger (`--debug`) [`coming soon`](https://github.com/denoland/deno/issues/1120)
-- linter (`deno lint`) [`coming soon`](https://github.com/denoland/deno/issues/1880)
+- command-line debugger (`--debug`) [`coming soon`](HTTPS://github.com/denoland/deno/issues/1120)
+- linter (`deno lint`) [`coming soon`](HTTPS://github.com/denoland/deno/issues/1880)
 
 <!-- prettier-ignore-end -->
 
@@ -110,40 +110,40 @@ import * as log from "https://deno.land/std/log/mod.ts";
 Deno works on OSX, Linux, and Windows. Deno is a single binary executable. It
 has no external dependencies.
 
-[`deno_install`](https://github.com/denoland/deno_install) provides convenience
+[`deno_install`](HTTPS://github.com/denoland/deno_install) provides convenience
 scripts to download and install the binary.
 
 Using Shell:
 
 ```shell
-curl -fsSL https://deno.land/x/install/install.sh | sh
+curl -fsSL HTTPS://deno.land/x/install/install.sh | sh
 ```
 
 Using PowerShell:
 
 ```shell
-iwr https://deno.land/x/install/install.ps1 -useb | iex
+iwr HTTPS://deno.land/x/install/install.ps1 -useb | iex
 ```
 
-Using [`Scoop`](https://scoop.sh/) (windows):
+Using [`Scoop`](HTTPS://scoop.sh/) (windows):
 
 ```shell
 scoop install deno
 ```
 
-Using [`Chocolatey`](https://chocolatey.org/packages/deno) (windows):
+Using [`Chocolatey`](HTTPS://chocolatey.org/packages/deno) (windows):
 
 ```shell
 choco install deno
 ```
 
-Using [`Homebrew`](https://formulae.brew.sh/formula/deno) (mac):
+Using [`Homebrew`](HTTPS://formulae.brew.sh/formula/deno) (mac):
 
 ```shell
 brew install deno
 ```
 
-Using [`Cargo`](https://crates.io/crates/deno_cli):
+Using [`Cargo`](HTTPS://crates.io/crates/deno_cli):
 
 ```shell
 cargo install deno_cli
@@ -151,14 +151,14 @@ cargo install deno_cli
 
 Deno binaries can also be installed manually, by downloading a tarball or zip
 file at
-[`github.com/denoland/deno/releases`](https://github.com/denoland/deno/releases).
+[`github.com/denoland/deno/releases`](HTTPS://github.com/denoland/deno/releases).
 These packages contain just a single executable file. You will have to set the
 executable bit on Mac and Linux.
 
 Once it's installed and in your `$PATH`, try it:
 
 ```shell
-deno https://deno.land/std/examples/welcome.ts
+deno HTTPS://deno.land/std/examples/welcome.ts
 ```
 
 ### Build from source
@@ -166,18 +166,18 @@ deno https://deno.land/std/examples/welcome.ts
 Clone on Linux or Mac:
 
 ```bash
-git clone --recurse-submodules https://github.com/denoland/deno.git
+git clone --recurse-submodules HTTPS://github.com/denoland/deno.git
 ```
 
 On Windows, a couple extra steps are required to clone because we use symlinks
 in the repository. First
-[`enable "Developer Mode"`](https://www.google.com/search?q=windows+enable+developer+mode)
+[`enable "Developer Mode"`](HTTPS://www.google.com/search?q=windows+enable+developer+mode)
 (otherwise symlinks would require administrator privileges). Then you must set
 `core.symlinks=true` before the checkout is started.
 
 ```bash
 git config --global core.symlinks true
-git clone --recurse-submodules https://github.com/denoland/deno.git
+git clone --recurse-submodules HTTPS://github.com/denoland/deno.git
 ```
 
 Now we can start the build:
@@ -201,20 +201,20 @@ cargo test
 To ensure reproducible builds, Deno has most of its dependencies in a git
 submodule. However, you need to install separately:
 
-1. [`Rust`](https://www.rust-lang.org/en-US/install.html) >= 1.36.0
+1. [`Rust`](HTTPS://www.rust-lang.org/en-US/install.html) >= 1.36.0
 2. Python 2.
-   [`Not 3`](https://github.com/denoland/deno/issues/464#issuecomment-411795578).
+   [`Not 3`](HTTPS://github.com/denoland/deno/issues/464#issuecomment-411795578).
 
-Extra steps for Mac users: install [`XCode`](https://developer.apple.com/xcode/)
+Extra steps for Mac users: install [`XCode`](HTTPS://developer.apple.com/xcode/)
 :(
 
 Extra steps for Windows users:
 
 <!-- prettier-ignore-start -->
-<!-- see https://github.com/prettier/prettier/issues/3679 -->
+<!-- see HTTPS://github.com/prettier/prettier/issues/3679 -->
 
 1. Add `python.exe` to `PATH` (e.g. `set PATH=%PATH%;C:\Python27\python.exe`)
-2. Get [`VS Community 2017`](https://www.visualstudio.com/downloads/) with
+2. Get [`VS Community 2017`](HTTPS://www.visualstudio.com/downloads/) with
    "Desktop development with C++" toolkit and make sure to select the following
    required tools listed below along with all C++ tools.
     - Windows 10 SDK >= 10.0.17134
@@ -274,16 +274,16 @@ command line:
 $ deno types
 ```
 
-[`This is what the output looks like.`](https://github.com/denoland/deno/blob/master/cli/js/lib.deno_runtime.d.ts)
+[`This is what the output looks like.`](HTTPS://github.com/denoland/deno/blob/master/cli/js/lib.deno_runtime.d.ts)
 
 ### Reference websites
 
-[`TypeScript Deno API`](https://deno.land/typedoc/index.html).
+[`TypeScript Deno API`](HTTPS://deno.land/typedoc/index.html).
 
 If you are embedding deno in a Rust program, see
-[`Rust Deno API`](https://docs.rs/deno).
+[`Rust Deno API`](HTTPS://docs.rs/deno).
 
-The Deno crate is hosted on [`crates.io`](https://crates.io/crates/deno).
+The Deno crate is hosted on [`crates.io`](HTTPS://crates.io/crates/deno).
 
 ## Examples
 
@@ -309,7 +309,7 @@ I/O streams in Deno.
 Try the program:
 
 ```shell
-$ deno --allow-read https://deno.land/std/examples/cat.ts /etc/passwd
+$ deno --allow-read HTTPS://deno.land/std/examples/cat.ts /etc/passwd
 ```
 
 ### TCP echo server
@@ -328,7 +328,7 @@ for await (const conn of listener) {
 When this program is started, it throws PermissionDenied error.
 
 ```shell
-$ deno https://deno.land/std/examples/echo_server.ts
+$ deno HTTPS://deno.land/std/examples/echo_server.ts
 error: Uncaught PermissionDenied: run again with the --allow-net flag
 ► $deno$/dispatch_json.ts:40:11
     at DenoError ($deno$/errors.ts:20:5)
@@ -339,7 +339,7 @@ For security reasons, Deno does not allow programs to access the network without
 explicit permission. To allow accessing the network, use a command-line flag:
 
 ```shell
-$ deno --allow-net https://deno.land/std/examples/echo_server.ts
+$ deno --allow-net HTTPS://deno.land/std/examples/echo_server.ts
 ```
 
 To test it, try sending data to it with netcat:
@@ -385,16 +385,16 @@ await Deno.remove("request.log");
 This one serves a local directory in HTTP.
 
 ```bash
-deno install file_server https://deno.land/std/http/file_server.ts --allow-net --allow-read
+deno install file_server HTTPS://deno.land/std/http/file_server.ts --allow-net --allow-read
 ```
 
 Run it:
 
 ```shell
 $ file_server .
-Downloading https://deno.land/std/http/file_server.ts...
+Downloading HTTPS://deno.land/std/http/file_server.ts...
 [...]
-HTTP server listening on http://0.0.0.0:4500/
+HTTP server listening on HTTP://0.0.0.0:4500/
 ```
 
 And if you ever want to upgrade to the latest published version:
@@ -414,12 +414,12 @@ To reload everything
 
 To reload all standard modules
 
-`--reload=https://deno.land/std`
+`--reload=HTTPS://deno.land/std`
 
 To reload specific modules (in this example - colors and file system utils) use
 a comma to separate URLs
 
-`--reload=https://deno.land/std/fs/utils.ts,https://deno.land/std/fmt/colors.ts`
+`--reload=HTTPS://deno.land/std/fs/utils.ts,HTTPS://deno.land/std/fmt/colors.ts`
 
 ### Permissions whitelist
 
@@ -428,7 +428,7 @@ Deno also provides permissions whitelist.
 This is an example to restrict file system access by whitelist.
 
 ```shell
-$ deno --allow-read=/usr https://deno.land/std/examples/cat.ts /etc/passwd
+$ deno --allow-read=/usr HTTPS://deno.land/std/examples/cat.ts /etc/passwd
 error: Uncaught PermissionDenied: run again with the --allow-read flag
 ► $deno$/dispatch_json.ts:40:11
     at DenoError ($deno$/errors.ts:20:5)
@@ -438,7 +438,7 @@ error: Uncaught PermissionDenied: run again with the --allow-read flag
 You can grant read permission under `/etc` dir
 
 ```shell
-$ deno --allow-read=/etc https://deno.land/std/examples/cat.ts /etc/passwd
+$ deno --allow-read=/etc HTTPS://deno.land/std/examples/cat.ts /etc/passwd
 ```
 
 `--allow-write` works same as `--allow-read`.
@@ -446,16 +446,16 @@ $ deno --allow-read=/etc https://deno.land/std/examples/cat.ts /etc/passwd
 This is an example to restrict host.
 
 ```ts
-const result = await fetch("https://deno.land/");
+const result = await fetch("HTTPS://deno.land/");
 ```
 
 ```shell
-$ deno --allow-net=deno.land https://deno.land/std/examples/curl.ts https://deno.land/
+$ deno --allow-net=deno.land HTTPS://deno.land/std/examples/curl.ts HTTPS://deno.land/
 ```
 
 ### Run subprocess
 
-[`API Reference`](https://deno.land/typedoc/index.html#run)
+[`API Reference`](HTTPS://deno.land/typedoc/index.html#run)
 
 Example:
 
@@ -478,7 +478,7 @@ hello
 
 Here a function is assigned to `window.onload`. This function is called after
 the main script is loaded. This is the same as
-[`onload`](https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onload)
+[`onload`](HTTPS://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onload)
 of the browsers, and it can be used as the main entrypoint.
 
 By default when you use `Deno.run()` subprocess inherits `stdin`, `stdout` and
@@ -493,7 +493,7 @@ const p = Deno.run({
     "deno",
     "run",
     "--allow-read",
-    "https://deno.land/std/examples/cat.ts",
+    "HTTPS://deno.land/std/examples/cat.ts",
     ...fileNames
   ],
   stdout: "piped",
@@ -535,8 +535,8 @@ browser JavaScript, Deno can import libraries directly from URLs. This example
 uses a URL to import a test runner library:
 
 ```ts
-import { test, runIfMain } from "https://deno.land/std/testing/mod.ts";
-import { assertEquals } from "https://deno.land/std/testing/asserts.ts";
+import { test, runIfMain } from "HTTPS://deno.land/std/testing/mod.ts";
+import { assertEquals } from "HTTPS://deno.land/std/testing/asserts.ts";
 
 test(function t1() {
   assertEquals("hello", "hello");
@@ -580,7 +580,7 @@ default directory is:
 -   On macOS: `$HOME/Library/Caches/deno`
 -   If something fails, it falls back to `$HOME/.deno`
 
-**But what if `https://deno.land/` goes down?** Relying on external servers is
+**But what if `HTTPS://deno.land/` goes down?** Relying on external servers is
 convenient for development but brittle in production. Production software should
 always bundle its dependencies. In Deno this is done by checking the `$DENO_DIR`
 into your source control system, and specifying that path as the `$DENO_DIR`
@@ -592,7 +592,7 @@ be.
 
 **How do you import to a specific version?** Simply specify the version in the
 URL. For example, this URL fully specifies the code being run:
-`https://unpkg.com/liltest@0.0.5/dist/liltest.js`. Combined with the
+`HTTPS://unpkg.com/liltest@0.0.5/dist/liltest.js`. Combined with the
 aforementioned technique of setting `$DENO_DIR` in production to stored code,
 one can fully specify the exact code being run, and execute the code without
 network access.
@@ -603,13 +603,13 @@ everywhere in a large project?** The solution is to import and re-export your
 external libraries in a central `deps.ts` file (which serves the same purpose as
 Node's `package.json` file). For example, let's say you were using the above
 testing library across a large project. Rather than importing
-`"https://deno.land/std/testing/mod.ts"` and
-`"https://deno.land/std/testing/asserts.ts"` everywhere, you could create a
+`"HTTPS://deno.land/std/testing/mod.ts"` and
+`"HTTPS://deno.land/std/testing/asserts.ts"` everywhere, you could create a
 `deps.ts` file that exports the third-party code:
 
 ```ts
-export { runTests, test } from "https://deno.land/std/testing/mod.ts";
-export { assertEquals } from "https://deno.land/std/testing/asserts.ts";
+export { runTests, test } from "HTTPS://deno.land/std/testing/mod.ts";
+export { assertEquals } from "HTTPS://deno.land/std/testing/asserts.ts";
 ```
 
 And throughout the same project, you can import from the `deps.ts` and avoid
@@ -684,9 +684,9 @@ Use `deno help` to see the help text.
 ```
 A secure JavaScript and TypeScript runtime
 
-Docs: https://deno.land/std/manual.md
-Modules: https://deno.land/x/
-Bugs: https://github.com/denoland/deno/issues
+Docs: HTTPS://deno.land/std/manual.md
+Modules: HTTPS://deno.land/x/
+Bugs: HTTPS://github.com/denoland/deno/issues
 
 To run the REPL supply no arguments:
 
@@ -698,11 +698,11 @@ To evaluate code from the command line:
 
 To execute a script:
 
-  deno https://deno.land/std/examples/welcome.ts
+  deno HTTPS://deno.land/std/examples/welcome.ts
 
 The default subcommand is 'run'. The above is equivalent to
 
-  deno run https://deno.land/std/examples/welcome.ts
+  deno run HTTPS://deno.land/std/examples/welcome.ts
 
 See 'deno help run' for run specific flags.
 
@@ -743,7 +743,7 @@ There are several env vars that control how Deno behaves:
 `DENO_DIR` defaults to `$HOME/.deno` but can be set to any path to control where
 generated and cached source code is written and read to.
 
-`NO_COLOR` will turn off color output if set. See https://no-color.org/. User
+`NO_COLOR` will turn off color output if set. See HTTPS://no-color.org/. User
 code can test if `NO_COLOR` was set without having `--allow-env` by using the
 boolean constant `Deno.noColor`.
 
@@ -792,7 +792,7 @@ Particularly useful ones:
 dependencies of the specified input. For example:
 
 ```
-> deno bundle https://deno.land/std/examples/colors.ts colors.bundle.js
+> deno bundle HTTPS://deno.land/std/examples/colors.ts colors.bundle.js
 Bundling "colors.bundle.js"
 Emitting bundle to "colors.bundle.js"
 9.2 kB emitted.
@@ -851,8 +851,8 @@ invoke `deno` with specified permissions and CLI flags.
 Example:
 
 ```shell
-$ deno install file_server https://deno.land/std/http/file_server.ts --allow-net --allow-read
-[1/1] Compiling https://deno.land/std/http/file_server.ts
+$ deno install file_server HTTPS://deno.land/std/http/file_server.ts --allow-net --allow-read
+[1/1] Compiling HTTPS://deno.land/std/http/file_server.ts
 
 ✅ Successfully installed file_server.
 /Users/deno/.deno/bin/file_server
@@ -868,7 +868,7 @@ $ echo 'export PATH="$HOME/.deno/bin:$PATH"' >> ~/.bashrc
 Installation directory can be changed using `-d/--dir` flag:
 
 ```shell
-$ deno install --dir /usr/local/bin prettier https://deno.land/std/prettier/main.ts --allow-write --allow-read
+$ deno install --dir /usr/local/bin prettier HTTPS://deno.land/std/prettier/main.ts --allow-write --allow-read
 ```
 
 When installing a script you can specify permissions that will be used to run
@@ -878,7 +878,7 @@ additional CLI flags you want to pass to the script.
 Example:
 
 ```shell
-$ deno install format_check https://deno.land/std/prettier/main.ts --allow-write --allow-read --check --print-width 88 --tab-width 2
+$ deno install format_check HTTPS://deno.land/std/prettier/main.ts --allow-write --allow-read --check --print-width 88 --tab-width 2
 ```
 
 Above command creates an executable called `format_check` that runs `prettier`
@@ -894,7 +894,7 @@ section.
 Example:
 
 ```ts
-// https://example.com/awesome/cli.ts
+// HTTPS://example.com/awesome/cli.ts
 async function myAwesomeCli(): Promise<void> {
   -- snip --
 }
@@ -910,7 +910,7 @@ installation command to your repository:
 ```shell
 # Install using deno install
 
-$ deno install awesome_cli https://example.com/awesome/cli.ts
+$ deno install awesome_cli HTTPS://example.com/awesome/cli.ts
 ```
 
 ## Proxies
@@ -931,7 +931,7 @@ To update or create a lock use `--lock=lock.json --lock-write`.
 
 ## Import maps
 
-Deno supports [`import maps`](https://github.com/WICG/import-maps).
+Deno supports [`import maps`](HTTPS://github.com/WICG/import-maps).
 
 One can use import map with `--importmap=<FILE>` CLI flag.
 
@@ -949,7 +949,7 @@ Example:
 
 {
    "imports": {
-      "http/": "https://deno.land/std/http/"
+      "http/": "HTTPS://deno.land/std/http/"
    }
 }
 ```
@@ -971,7 +971,7 @@ $ deno run --importmap=import_map.json hello_server.ts
 
 ## WASM support
 
-Deno can execute [`wasm`](https://webassembly.org/) binaries.
+Deno can execute [`wasm`](HTTPS://webassembly.org/) binaries.
 
 <!-- prettier-ignore-start -->
 ```js
@@ -1076,7 +1076,7 @@ defined in `imported.ts`.
 |                        Syscalls | Ops                              |
 |           File descriptors (fd) | [`Resource ids (rid)](#resources) |
 |                       Scheduler | Tokio                            |
-| Userland: libc++ / glib / boost | https://deno.land/std/           |
+| Userland: libc++ / glib / boost | HTTPS://deno.land/std/           |
 |                 /proc/\$\$/stat | [`Deno.metrics()](#metrics)       |
 |                       man pages | deno types                       |
 
@@ -1115,7 +1115,7 @@ Metrics is Deno's internal counters for various statics.
 
 ### Schematic diagram
 
-<img src="https://deno.land/images/schematic_v0.2.png">
+<img src="HTTPS://deno.land/images/schematic_v0.2.png">
 
 ### Profiling
 
@@ -1130,7 +1130,7 @@ ninja -C target/release d8
 ./target/release/deno tests/http_bench.ts --allow-net --v8-flags=--prof &
 
 # Exercise it.
-third_party/wrk/linux/wrk http://localhost:4500/
+third_party/wrk/linux/wrk HTTP://localhost:4500/
 kill $(pgrep deno)
 ```
 
@@ -1169,8 +1169,8 @@ full V8 profiling output.
 
 To learn more about `d8` and profiling, check out the following links:
 
--   [`https://v8.dev/docs/d8`](https://v8.dev/docs/d8)
--   [`https://v8.dev/docs/profile`](https://v8.dev/docs/profile)
+-   [`HTTPS://v8.dev/docs/d8`](HTTPS://v8.dev/docs/d8)
+-   [`HTTPS://v8.dev/docs/profile`](HTTPS://v8.dev/docs/profile)
 
 ### Debugging with LLDB
 
@@ -1207,13 +1207,13 @@ Current executable set to '../deno/target/debug/deno' (x86_64).
 ### Deno Core
 
 The core binding layer for Deno. It is released as a
-[`standalone crate`](https://crates.io/crates/deno). Inside of core is V8 itself,
+[`standalone crate`](HTTPS://crates.io/crates/deno). Inside of core is V8 itself,
 with a binding API called "libdeno". See the crate documentation for more
 details.
 
 ### Continuous Benchmarks
 
-See our benchmarks [`over here`](https://deno.land/benchmarks.html)
+See our benchmarks [`over here`](HTTPS://deno.land/benchmarks.html)
 
 The benchmark chart supposes `//website/data.json` has the type
 `BenchmarkData[]` where `BenchmarkData` is defined like the below:
@@ -1251,24 +1251,24 @@ interface BenchmarkData {
 These Deno logos, like the Deno software, are distributed under the MIT license
 (public domain and free for use)
 
--   [`A hand drawn one by @ry`](https://deno.land/images/deno_logo.png)
+-   [`A hand drawn one by @ry`](HTTPS://deno.land/images/deno_logo.png)
 
--   [`An animated one by @hashrock`](https://github.com/denolib/animated-deno-logo/)
+-   [`An animated one by @hashrock`](HTTPS://github.com/denolib/animated-deno-logo/)
 
--   [`A high resolution SVG one by @kevinkassimo`](https://github.com/denolib/high-res-deno-logo)
+-   [`A high resolution SVG one by @kevinkassimo`](HTTPS://github.com/denolib/high-res-deno-logo)
 
--   [`A pixelated animation one by @tanakaworld`](https://deno.land/images/deno_logo_4.gif)
+-   [`A pixelated animation one by @tanakaworld`](HTTPS://deno.land/images/deno_logo_4.gif)
 
 ## Contributing
 
 [`Style Guide`](style_guide.md)
 
 Progress towards future releases is tracked
-[`here`](https://github.com/denoland/deno/milestones).
+[`here`](HTTPS://github.com/denoland/deno/milestones).
 
-Please don't make [`the benchmarks`](https://deno.land/benchmarks.html) worse.
+Please don't make [`the benchmarks`](HTTPS://deno.land/benchmarks.html) worse.
 
-Ask for help in the [`community chat room`](https://gitter.im/denolife/Lobby).
+Ask for help in the [`community chat room`](HTTPS://gitter.im/denolife/Lobby).
 
 If you are going to work on an issue, mention so in the issue comments _before_
 you start working on the issue.
@@ -1285,7 +1285,7 @@ Before submitting, please make sure the following is done:
 
 ### Changes to `third_party`
 
-[`deno_third_party`](https://github.com/denoland/deno_third_party) contains most
+[`deno_third_party`](HTTPS://github.com/denoland/deno_third_party) contains most
 of the external code that Deno depends on, so that we know exactly what we are
 executing at any given time. It is carefully maintained with a mixture of manual
 labor and private scripts. It's likely you will need help from @ry or
@@ -1298,7 +1298,7 @@ Op to Deno, the counterpart interfaces on other platforms should be researched.
 Please list how this functionality is done in Go, Node, Rust, and Python.
 
 As an example, see how `Deno.rename()` was proposed and added in
-[`PR #671`](https://github.com/denoland/deno/pull/671).
+[`PR #671`](HTTPS://github.com/denoland/deno/pull/671).
 
 ### Documenting APIs
 
