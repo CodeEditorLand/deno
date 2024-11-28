@@ -7,7 +7,9 @@ export function notImplemented(msg?: string): never {
 // API helpers
 
 export type MaybeNull<T> = T | null;
+
 export type MaybeDefined<T> = T | undefined;
+
 export type MaybeEmpty<T> = T | null | undefined;
 
 export function intoCallbackAPI<T>(

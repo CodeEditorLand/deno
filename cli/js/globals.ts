@@ -108,44 +108,59 @@ window.crypto = csprng as unknown as Crypto;
 // We have to export the type aliases, so that TypeScript _knows_ they are
 // being used, which it cannot statically determine within this module.
 window.Blob = blob.DenoBlob;
+
 export type Blob = domTypes.Blob;
 
 export type Body = domTypes.Body;
 
 window.File = domFile.DomFileImpl as domTypes.DomFileConstructor;
+
 export type File = domTypes.DomFile;
 
 export type CustomEventInit = domTypes.CustomEventInit;
 window.CustomEvent = customEvent.CustomEvent;
+
 export type CustomEvent = domTypes.CustomEvent;
+
 export type EventInit = domTypes.EventInit;
 window.Event = event.Event;
+
 export type Event = domTypes.Event;
+
 export type EventListener = domTypes.EventListener;
 window.EventTarget = eventTarget.EventTarget;
+
 export type EventTarget = domTypes.EventTarget;
 window.URL = url.URL;
+
 export type URL = url.URL;
 window.URLSearchParams = urlSearchParams.URLSearchParams;
+
 export type URLSearchParams = domTypes.URLSearchParams;
 
 // Using the `as` keyword to use standard compliant interfaces as the Deno
 // implementations contain some implementation details we wouldn't want to
 // expose in the runtime type library.
 window.Headers = headers.Headers as domTypes.HeadersConstructor;
+
 export type Headers = domTypes.Headers;
 window.FormData = formData.FormData as domTypes.FormDataConstructor;
+
 export type FormData = domTypes.FormData;
 
 window.TextEncoder = textEncoding.TextEncoder;
+
 export type TextEncoder = textEncoding.TextEncoder;
 window.TextDecoder = textEncoding.TextDecoder;
+
 export type TextDecoder = textEncoding.TextDecoder;
 
 window.Request = request.Request as domTypes.RequestConstructor;
+
 export type Request = domTypes.Request;
 
 window.Response = fetchTypes.Response;
+
 export type Response = domTypes.Response;
 
 window.performance = new performanceUtil.Performance();
@@ -159,6 +174,7 @@ window.workerClose = workers.workerClose;
 window.postMessage = workers.postMessage;
 
 window.Worker = workers.WorkerImpl;
+
 export type Worker = workers.Worker;
 
 window[domTypes.eventTargetHost] = null;

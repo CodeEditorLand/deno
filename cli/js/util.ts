@@ -114,6 +114,7 @@ export function containsOnlyASCII(str: string): boolean {
 }
 
 const TypedArrayConstructor = Object.getPrototypeOf(Uint8Array);
+
 export function isTypedArray(x: unknown): x is TypedArray {
 	return x instanceof TypedArrayConstructor;
 }

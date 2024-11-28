@@ -19,6 +19,7 @@ import {
 const { cwd, env } = Deno;
 
 export const sep = "\\";
+
 export const delimiter = ";";
 
 export function resolve(...pathSegments: string[]): string {

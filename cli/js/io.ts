@@ -4,6 +4,7 @@
 // Thank you! We love Go!
 
 export const EOF: unique symbol = Symbol("EOF");
+
 export type EOF = typeof EOF;
 
 // Seek whence values.

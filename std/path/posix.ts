@@ -13,6 +13,7 @@ import {
 const { cwd } = Deno;
 
 export const sep = "/";
+
 export const delimiter = ":";
 
 // path.resolve([from ...], to)

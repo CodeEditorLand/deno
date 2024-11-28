@@ -17,6 +17,7 @@ import { DenoError, ErrorKind } from "../errors.ts";
 // common stream fields
 
 export const state_ = Symbol("state_");
+
 export const storedError_ = Symbol("storedError_");
 
 // ---------

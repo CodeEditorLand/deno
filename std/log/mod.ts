@@ -66,12 +66,16 @@ export function getLogger(name?: string): Logger {
 
 export const debug = (msg: string, ...args: unknown[]): void =>
 	getLogger("default").debug(msg, ...args);
+
 export const info = (msg: string, ...args: unknown[]): void =>
 	getLogger("default").info(msg, ...args);
+
 export const warning = (msg: string, ...args: unknown[]): void =>
 	getLogger("default").warning(msg, ...args);
+
 export const error = (msg: string, ...args: unknown[]): void =>
 	getLogger("default").error(msg, ...args);
+
 export const critical = (msg: string, ...args: unknown[]): void =>
 	getLogger("default").critical(msg, ...args);
 

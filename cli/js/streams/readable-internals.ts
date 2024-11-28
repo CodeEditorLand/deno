@@ -22,53 +22,75 @@ import * as shared from "./shared-internals.ts";
 
 // ReadableStreamDefaultController
 export const controlledReadableStream_ = Symbol("controlledReadableStream_");
+
 export const pullAlgorithm_ = Symbol("pullAlgorithm_");
+
 export const cancelAlgorithm_ = Symbol("cancelAlgorithm_");
+
 export const strategySizeAlgorithm_ = Symbol("strategySizeAlgorithm_");
+
 export const strategyHWM_ = Symbol("strategyHWM_");
+
 export const started_ = Symbol("started_");
+
 export const closeRequested_ = Symbol("closeRequested_");
+
 export const pullAgain_ = Symbol("pullAgain_");
+
 export const pulling_ = Symbol("pulling_");
+
 export const cancelSteps_ = Symbol("cancelSteps_");
+
 export const pullSteps_ = Symbol("pullSteps_");
 
 // ReadableByteStreamController
 export const autoAllocateChunkSize_ = Symbol("autoAllocateChunkSize_");
+
 export const byobRequest_ = Symbol("byobRequest_");
+
 export const controlledReadableByteStream_ = Symbol(
 	"controlledReadableByteStream_",
 );
+
 export const pendingPullIntos_ = Symbol("pendingPullIntos_");
 
 // ReadableStreamDefaultReader
 export const closedPromise_ = Symbol("closedPromise_");
+
 export const ownerReadableStream_ = Symbol("ownerReadableStream_");
+
 export const readRequests_ = Symbol("readRequests_");
+
 export const readIntoRequests_ = Symbol("readIntoRequests_");
 
 // ReadableStreamBYOBRequest
 export const associatedReadableByteStreamController_ = Symbol(
 	"associatedReadableByteStreamController_",
 );
+
 export const view_ = Symbol("view_");
 
 // ReadableStreamBYOBReader
 
 // ReadableStream
 export const reader_ = Symbol("reader_");
+
 export const readableStreamController_ = Symbol("readableStreamController_");
 
 export type StartFunction<OutputType> = (
 	controller: SDReadableStreamControllerBase<OutputType>,
 ) => void | PromiseLike<void>;
+
 export type StartAlgorithm = () => Promise<void> | void;
+
 export type PullFunction<OutputType> = (
 	controller: SDReadableStreamControllerBase<OutputType>,
 ) => void | PromiseLike<void>;
+
 export type PullAlgorithm<OutputType> = (
 	controller: SDReadableStreamControllerBase<OutputType>,
 ) => PromiseLike<void>;
+
 export type CancelAlgorithm = (reason?: shared.ErrorResult) => Promise<void>;
 
 // ----

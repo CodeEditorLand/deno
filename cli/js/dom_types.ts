@@ -23,6 +23,7 @@ export type HeadersInit =
 	| Headers
 	| Array<[string, string]>
 	| Record<string, string>;
+
 export type URLSearchParamsInit = string | string[][] | Record<string, string>;
 type BodyInit =
 	| Blob
@@ -31,6 +32,7 @@ type BodyInit =
 	| URLSearchParams
 	| ReadableStream
 	| string;
+
 export type RequestInfo = Request | string;
 type ReferrerPolicy =
 	| ""
@@ -39,7 +41,9 @@ type ReferrerPolicy =
 	| "origin-only"
 	| "origin-when-cross-origin"
 	| "unsafe-url";
+
 export type BlobPart = BufferSource | Blob | string;
+
 export type FormDataEntryValue = DomFile | string;
 
 export interface DomIterable<K, V> {
@@ -73,8 +77,11 @@ export enum NodeType {
 }
 
 export const eventTargetHost: unique symbol = Symbol();
+
 export const eventTargetListeners: unique symbol = Symbol();
+
 export const eventTargetMode: unique symbol = Symbol();
+
 export const eventTargetNodeType: unique symbol = Symbol();
 
 export interface EventTarget {

@@ -22,6 +22,7 @@ function getEventTargetParent(
 }
 
 export const eventTargetAssignedSlot: unique symbol = Symbol();
+
 export const eventTargetHasActivationBehavior: unique symbol = Symbol();
 
 export class EventTarget implements domTypes.EventTarget {

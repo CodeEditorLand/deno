@@ -52,7 +52,9 @@ function getEnv(key: string): string | undefined {
  *       console.log(myEnv.TEST_VAR == newEnv.TEST_VAR);
  */
 export function env(): { [index: string]: string };
+
 export function env(key: string): string | undefined;
+
 export function env(
 	key?: string,
 ): { [index: string]: string } | string | undefined {

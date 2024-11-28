@@ -15,6 +15,7 @@ import { Queue, QueueImpl } from "./queue.ts";
 import { isFiniteNonNegativeNumber } from "./shared-internals.ts";
 
 export const queue_ = Symbol("queue_");
+
 export const queueTotalSize_ = Symbol("queueTotalSize_");
 
 export interface QueueElement<V> {

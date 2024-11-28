@@ -1390,5 +1390,7 @@ function pathToFileURL(filepath: string): URL {
 }
 
 export const builtinModules = Module.builtinModules;
+
 export const createRequire = Module.createRequire;
+
 export default Module;

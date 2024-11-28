@@ -6,7 +6,9 @@
 import { Any, ArrayObject } from "./utils.ts";
 
 export type KindType = "sequence" | "scalar" | "mapping";
+
 export type StyleVariant = "lowercase" | "uppercase" | "camelcase" | "decimal";
+
 export type RepresentFn = (data: Any, style?: StyleVariant) => Any;
 
 const DEFAULT_RESOLVE = (): boolean => true;
