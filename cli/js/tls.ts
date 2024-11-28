@@ -10,6 +10,7 @@ interface DialTLSOptions {
 	hostname?: string;
 	certFile?: string;
 }
+
 const dialTLSDefaults = { hostname: "127.0.0.1", transport: "tcp" };
 
 /**
