@@ -16,6 +16,7 @@ if (Deno.build.os !== "win") {
 		});
 
 		assertEquals((await uidProc.status()).code, 0);
+
 		assertEquals((await gidProc.status()).code, 0);
 
 		const uid = parseInt(
@@ -36,6 +37,7 @@ if (Deno.build.os !== "win") {
 			await Deno.chown(filePath, 1000, 1000);
 		} catch (e) {
 			assertEquals(e.kind, Deno.ErrorKind.PermissionDenied);
+
 			assertEquals(e.name, "PermissionDenied");
 		}
 	});
@@ -51,6 +53,7 @@ if (Deno.build.os !== "win") {
 				Deno.chownSync(filePath, uid, gid);
 			} catch (e) {
 				assertEquals(e.kind, Deno.ErrorKind.NotFound);
+
 				assertEquals(e.name, "NotFound");
 			}
 		},
@@ -68,6 +71,7 @@ if (Deno.build.os !== "win") {
 				await Deno.chown(filePath, uid, gid);
 			} catch (e) {
 				assertEquals(e.kind, Deno.ErrorKind.NotFound);
+
 				assertEquals(e.name, "NotFound");
 			}
 		},
@@ -81,6 +85,7 @@ if (Deno.build.os !== "win") {
 		const filePath = dirPath + "/chown_test_file.txt";
 
 		const fileData = enc.encode("Hello");
+
 		Deno.writeFileSync(filePath, fileData);
 
 		try {
@@ -88,8 +93,10 @@ if (Deno.build.os !== "win") {
 			Deno.chownSync(filePath, 0, 0);
 		} catch (e) {
 			assertEquals(e.kind, Deno.ErrorKind.PermissionDenied);
+
 			assertEquals(e.name, "PermissionDenied");
 		}
+
 		Deno.removeSync(dirPath, { recursive: true });
 	});
 
@@ -103,6 +110,7 @@ if (Deno.build.os !== "win") {
 			const filePath = dirPath + "/chown_test_file.txt";
 
 			const fileData = enc.encode("Hello");
+
 			await Deno.writeFile(filePath, fileData);
 
 			try {
@@ -110,8 +118,10 @@ if (Deno.build.os !== "win") {
 				await Deno.chown(filePath, 0, 0);
 			} catch (e) {
 				assertEquals(e.kind, Deno.ErrorKind.PermissionDenied);
+
 				assertEquals(e.name, "PermissionDenied");
 			}
+
 			await Deno.remove(dirPath, { recursive: true });
 		},
 	);
@@ -131,6 +141,7 @@ if (Deno.build.os !== "win") {
 			const filePath = dirPath + "/chown_test_file.txt";
 
 			const fileData = enc.encode("Hello");
+
 			Deno.writeFileSync(filePath, fileData);
 
 			// the test script creates this file with the same uid and gid,
@@ -154,6 +165,7 @@ if (Deno.build.os !== "win") {
 			const filePath = dirPath + "/chown_test_file.txt";
 
 			const fileData = enc.encode("Hello");
+
 			await Deno.writeFile(filePath, fileData);
 
 			// the test script creates this file with the same uid and gid,

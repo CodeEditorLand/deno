@@ -23,10 +23,12 @@ interface RunPermissionDescriptor {
 }
 interface ReadWritePermissionDescriptor {
 	name: "read" | "write";
+
 	path?: string;
 }
 interface NetPermissionDescriptor {
 	name: "net";
+
 	url?: string;
 }
 interface EnvPermissionDescriptor {

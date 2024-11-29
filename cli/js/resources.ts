@@ -17,5 +17,6 @@ export function resources(): ResourceMap {
 	for (const resourceTuple of res) {
 		resources[resourceTuple[0]] = resourceTuple[1];
 	}
+
 	return resources;
 }

@@ -29,6 +29,7 @@ test(function _isSubdir(): void {
 		const expected = p[2] as boolean;
 
 		const sep = p[3] as string;
+
 		assertEquals(
 			isSubdir(src, dest, sep),
 			expected,

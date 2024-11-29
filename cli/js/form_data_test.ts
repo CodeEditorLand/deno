@@ -9,6 +9,7 @@ test(function formDataParamsAppendSuccess(): void {
 	const formData = new FormData();
 
 	formData.append("a", "true");
+
 	assertEquals(formData.get("a"), "true");
 });
 
@@ -18,10 +19,13 @@ test(function formDataParamsDeleteSuccess(): void {
 	formData.append("a", "true");
 
 	formData.append("b", "false");
+
 	assertEquals(formData.get("b"), "false");
 
 	formData.delete("b");
+
 	assertEquals(formData.get("a"), "true");
+
 	assertEquals(formData.get("b"), null);
 });
 
@@ -33,8 +37,11 @@ test(function formDataParamsGetAllSuccess(): void {
 	formData.append("b", "false");
 
 	formData.append("a", "null");
+
 	assertEquals(formData.getAll("a"), ["true", "null"]);
+
 	assertEquals(formData.getAll("b"), ["false"]);
+
 	assertEquals(formData.getAll("c"), []);
 });
 
@@ -50,10 +57,15 @@ test(function formDataParamsGetSuccess(): void {
 	formData.append("d", undefined);
 
 	formData.append("e", null);
+
 	assertEquals(formData.get("a"), "true");
+
 	assertEquals(formData.get("b"), "false");
+
 	assertEquals(formData.get("c"), null);
+
 	assertEquals(formData.get("d"), "undefined");
+
 	assertEquals(formData.get("e"), "null");
 });
 
@@ -63,8 +75,11 @@ test(function formDataParamsHasSuccess(): void {
 	formData.append("a", "true");
 
 	formData.append("b", "false");
+
 	assert(formData.has("a"));
+
 	assert(formData.has("b"));
+
 	assert(!formData.has("c"));
 });
 
@@ -76,16 +91,21 @@ test(function formDataParamsSetSuccess(): void {
 	formData.append("b", "false");
 
 	formData.append("a", "null");
+
 	assertEquals(formData.getAll("a"), ["true", "null"]);
+
 	assertEquals(formData.getAll("b"), ["false"]);
 
 	formData.set("a", "false");
+
 	assertEquals(formData.getAll("a"), ["false"]);
 
 	formData.set("d", undefined);
+
 	assertEquals(formData.get("d"), "undefined");
 
 	formData.set("e", null);
+
 	assertEquals(formData.get("e"), "null");
 });
 
@@ -114,14 +134,19 @@ test(function formDataParamsForEachSuccess(): void {
 	for (const [name, value] of init) {
 		formData.append(name, value);
 	}
+
 	let callNum = 0;
 
 	formData.forEach((value, key, parent): void => {
 		assertEquals(formData, parent);
+
 		assertEquals(value, init[callNum][1]);
+
 		assertEquals(key, init[callNum][0]);
+
 		callNum++;
 	});
+
 	assertEquals(callNum, init.length);
 });
 
@@ -139,6 +164,7 @@ test(function formDataParamsArgumentsCheck(): void {
 
 		try {
 			formData[method]();
+
 			hasThrown = 1;
 		} catch (err) {
 			errMsg = err.message;
@@ -149,7 +175,9 @@ test(function formDataParamsArgumentsCheck(): void {
 				hasThrown = 3;
 			}
 		}
+
 		assertEquals(hasThrown, 2);
+
 		assertEquals(
 			errMsg,
 			`FormData.${method} requires at least 1 argument, but only 0 present`,
@@ -165,6 +193,7 @@ test(function formDataParamsArgumentsCheck(): void {
 
 		try {
 			formData[method]();
+
 			hasThrown = 1;
 		} catch (err) {
 			errMsg = err.message;
@@ -175,17 +204,21 @@ test(function formDataParamsArgumentsCheck(): void {
 				hasThrown = 3;
 			}
 		}
+
 		assertEquals(hasThrown, 2);
+
 		assertEquals(
 			errMsg,
 			`FormData.${method} requires at least 2 arguments, but only 0 present`,
 		);
 
 		hasThrown = 0;
+
 		errMsg = "";
 
 		try {
 			formData[method]("foo");
+
 			hasThrown = 1;
 		} catch (err) {
 			errMsg = err.message;
@@ -196,7 +229,9 @@ test(function formDataParamsArgumentsCheck(): void {
 				hasThrown = 3;
 			}
 		}
+
 		assertEquals(hasThrown, 2);
+
 		assertEquals(
 			errMsg,
 			`FormData.${method} requires at least 2 arguments, but only 1 present`,
@@ -206,5 +241,6 @@ test(function formDataParamsArgumentsCheck(): void {
 
 test(function toStringShouldBeWebCompatibility(): void {
 	const formData = new FormData();
+
 	assertEquals(formData.toString(), "[object FormData]");
 });

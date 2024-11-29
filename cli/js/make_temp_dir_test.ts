@@ -11,12 +11,16 @@ testPerm({ write: true }, function makeTempDirSyncSuccess(): void {
 	for (const dir of [dir1, dir2]) {
 		// Check that the prefix and suffix are applied.
 		const lastPart = dir.replace(/^.*[\\\/]/, "");
+
 		assert(lastPart.startsWith("hello"));
+
 		assert(lastPart.endsWith("world"));
 	}
 	// Check that the `dir` option works.
 	const dir3 = Deno.makeTempDirSync({ dir: dir1 });
+
 	assert(dir3.startsWith(dir1));
+
 	assert(/^[\\\/]/.test(dir3.slice(dir1.length)));
 	// Check that creating a temp dir inside a nonexisting directory fails.
 	let err;
@@ -26,7 +30,9 @@ testPerm({ write: true }, function makeTempDirSyncSuccess(): void {
 	} catch (err_) {
 		err = err_;
 	}
+
 	assertEquals(err.kind, Deno.ErrorKind.NotFound);
+
 	assertEquals(err.name, "NotFound");
 });
 
@@ -39,7 +45,9 @@ test(function makeTempDirSyncPerm(): void {
 	} catch (err_) {
 		err = err_;
 	}
+
 	assertEquals(err.kind, Deno.ErrorKind.PermissionDenied);
+
 	assertEquals(err.name, "PermissionDenied");
 });
 
@@ -53,12 +61,16 @@ testPerm({ write: true }, async function makeTempDirSuccess(): Promise<void> {
 	for (const dir of [dir1, dir2]) {
 		// Check that the prefix and suffix are applied.
 		const lastPart = dir.replace(/^.*[\\\/]/, "");
+
 		assert(lastPart.startsWith("hello"));
+
 		assert(lastPart.endsWith("world"));
 	}
 	// Check that the `dir` option works.
 	const dir3 = await Deno.makeTempDir({ dir: dir1 });
+
 	assert(dir3.startsWith(dir1));
+
 	assert(/^[\\\/]/.test(dir3.slice(dir1.length)));
 	// Check that creating a temp dir inside a nonexisting directory fails.
 	let err;
@@ -68,6 +80,8 @@ testPerm({ write: true }, async function makeTempDirSuccess(): Promise<void> {
 	} catch (err_) {
 		err = err_;
 	}
+
 	assertEquals(err.kind, Deno.ErrorKind.NotFound);
+
 	assertEquals(err.name, "NotFound");
 });

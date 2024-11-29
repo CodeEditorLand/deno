@@ -7,8 +7,11 @@ export { extname } from "../path/mod.ts";
 interface DB {
 	[mediaType: string]: {
 		source?: string;
+
 		compressible?: boolean;
+
 		charset?: string;
+
 		extensions?: string[];
 	};
 }

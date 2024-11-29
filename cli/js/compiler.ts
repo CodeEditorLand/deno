@@ -58,7 +58,9 @@ type CompilerRequest = {
 	rootNames: string[];
 	// TODO(ry) add compiler config to this interface.
 	// options: ts.CompilerOptions;
+
 	configPath?: string;
+
 	config?: string;
 } & (
 	| {
@@ -66,12 +68,14 @@ type CompilerRequest = {
 	  }
 	| {
 			type: CompilerRequestType.Bundle;
+
 			outFile?: string;
 	  }
 );
 
 interface ConfigureResponse {
 	ignoredOptions?: string[];
+
 	diagnostics?: ts.Diagnostic[];
 }
 
@@ -139,14 +143,18 @@ const ignoredCompilerOptions: readonly string[] = [
 /** The shape of the SourceFile that comes from the privileged side */
 interface SourceFileJson {
 	url: string;
+
 	filename: string;
+
 	mediaType: MediaType;
+
 	sourceCode: string;
 }
 
 /** A self registering abstraction of source files. */
 class SourceFile {
 	extension!: ts.Extension;
+
 	filename!: string;
 
 	/** An array of tuples which represent the imports for the source file.  The
@@ -156,17 +164,24 @@ class SourceFile {
 	importedFiles?: Array<[string, string]>;
 
 	mediaType!: MediaType;
+
 	processed = false;
+
 	sourceCode!: string;
+
 	tsSourceFile?: ts.SourceFile;
+
 	url!: string;
 
 	constructor(json: SourceFileJson) {
 		if (SourceFile._moduleCache.has(json.url)) {
 			throw new TypeError("SourceFile already exists");
 		}
+
 		Object.assign(this, json);
+
 		this.extension = getExtension(this.url, this.mediaType);
+
 		SourceFile._moduleCache.set(this.url, this);
 	}
 
@@ -179,8 +194,10 @@ class SourceFile {
 
 		if (!innerCache) {
 			innerCache = new Map();
+
 			SourceFile._specifierCache.set(containingFile, innerCache);
 		}
+
 		innerCache.set(moduleSpecifier, this);
 	}
 
@@ -189,6 +206,7 @@ class SourceFile {
 		if (this.processed) {
 			throw new Error("SourceFile has already been processed.");
 		}
+
 		assert(this.sourceCode != null);
 		// we shouldn't process imports for files which contain the nocheck pragma
 		// (like bundles)
@@ -197,11 +215,13 @@ class SourceFile {
 
 			return [];
 		}
+
 		const preProcessedFileInfo = ts.preProcessFile(
 			this.sourceCode,
 			true,
 			true,
 		);
+
 		this.processed = true;
 
 		const files = (this.importedFiles = [] as Array<[string, string]>);
@@ -231,8 +251,11 @@ class SourceFile {
 		} else {
 			process(importedFiles);
 		}
+
 		process(referencedFiles);
+
 		process(libReferenceDirectives);
+
 		process(typeReferenceDirectives);
 
 		return files;
@@ -260,6 +283,7 @@ class SourceFile {
 
 			return sourceFile && sourceFile.url;
 		}
+
 		return undefined;
 	}
 
@@ -271,6 +295,7 @@ class SourceFile {
 
 interface EmitResult {
 	emitSkipped: boolean;
+
 	diagnostics?: Diagnostic;
 }
 
@@ -305,9 +330,11 @@ async function processImports(
 	if (!specifiers.length) {
 		return [];
 	}
+
 	const sources = specifiers.map(([, moduleSpecifier]) => moduleSpecifier);
 
 	const sourceFiles = await fetchSourceFiles(sources, referrer);
+
 	assert(sourceFiles.length === specifiers.length);
 
 	for (let i = 0; i < sourceFiles.length; i++) {
@@ -316,18 +343,21 @@ async function processImports(
 		const sourceFile =
 			SourceFile.get(sourceFileJson.url) ||
 			new SourceFile(sourceFileJson);
+
 		sourceFile.cache(specifiers[i][0], referrer);
 
 		if (!sourceFile.processed) {
 			await processImports(sourceFile.imports(), sourceFile.url);
 		}
 	}
+
 	return sourceFiles;
 }
 
 /** Ops to rest for caching source map and compiled js */
 function cache(extension: string, moduleId: string, contents: string): void {
 	util.log("compiler::cache", { extension, moduleId });
+
 	sendSync(dispatch.OP_CACHE, { extension, moduleId, contents });
 }
 
@@ -384,6 +414,7 @@ class Host implements ts.CompilerHost {
 		if (sourceFile) {
 			return sourceFile;
 		}
+
 		const url = filename.split("/").pop()!;
 
 		const assetName = url.includes(".") ? url : `${url}.d.ts`;
@@ -421,6 +452,7 @@ class Host implements ts.CompilerHost {
 				// disabled until we have effective way to modify source maps
 				sourceMap: false,
 			};
+
 			Object.assign(this._options, bundlerOptions);
 		}
 	}
@@ -439,6 +471,7 @@ class Host implements ts.CompilerHost {
 		if (error) {
 			return { diagnostics: [error] };
 		}
+
 		const { options, errors } = ts.convertCompilerOptionsFromJson(
 			config.compilerOptions,
 			cwd(),
@@ -452,9 +485,11 @@ class Host implements ts.CompilerHost {
 				(!(key in this._options) || options[key] !== this._options[key])
 			) {
 				ignoredOptions.push(key);
+
 				delete options[key];
 			}
 		}
+
 		Object.assign(this._options, options);
 
 		return {
@@ -505,6 +540,7 @@ class Host implements ts.CompilerHost {
 			const sourceFile = fileName.startsWith(ASSETS)
 				? this._getAsset(fileName)
 				: SourceFile.get(fileName);
+
 			assert(sourceFile != null);
 
 			if (!sourceFile.tsSourceFile) {
@@ -514,6 +550,7 @@ class Host implements ts.CompilerHost {
 					languageVersion,
 				);
 			}
+
 			return sourceFile!.tsSourceFile;
 		} catch (e) {
 			if (onError) {
@@ -521,6 +558,7 @@ class Host implements ts.CompilerHost {
 			} else {
 				throw e;
 			}
+
 			return undefined;
 		}
 	}
@@ -550,6 +588,7 @@ class Host implements ts.CompilerHost {
 			if (!sourceFile) {
 				return undefined;
 			}
+
 			return {
 				resolvedFileName: sourceFile.url,
 				isExternalLibraryImport: specifier.startsWith(ASSETS),
@@ -636,6 +675,7 @@ window.compilerMain = function compilerMain(): void {
 		data: CompilerRequest;
 	}): Promise<void> => {
 		const { rootNames, configPath, config } = request;
+
 		util.log(">>> compile start", {
 			rootNames,
 			type: CompilerRequestType[request.type],
@@ -667,6 +707,7 @@ window.compilerMain = function compilerMain(): void {
 			const configResult = host.configure(configPath, config);
 
 			const ignoredOptions = configResult.ignoredOptions;
+
 			diagnostics = configResult.diagnostics;
 
 			if (ignoredOptions) {
@@ -724,10 +765,13 @@ window.compilerMain = function compilerMain(): void {
 						`Bundling "${resolvedRootModules.join(`", "`)}"`,
 					);
 				}
+
 				if (request.type === CompilerRequestType.Bundle) {
 					setRootExports(program, resolvedRootModules);
 				}
+
 				const emitResult = program.emit();
+
 				emitSkipped = emitResult.emitSkipped;
 				// emitResult.diagnostics is `readonly` in TS3.5+ and can't be assigned
 				// without casting.
@@ -764,6 +808,7 @@ function base64ToUint8Array(data: string): Uint8Array {
 	for (let i = 0; i < size; i++) {
 		bytes[i] = binString.charCodeAt(i);
 	}
+
 	return bytes;
 }
 

@@ -6,6 +6,7 @@ const { DenoError, ErrorKind } = Deno;
 
 export interface GlobOptions {
 	extended?: boolean;
+
 	globstar?: boolean;
 }
 
@@ -95,9 +96,11 @@ export function normalizeGlob(
 			`Glob contains invalid characters: "${glob}"`,
 		);
 	}
+
 	if (!globstar) {
 		return normalize(glob);
 	}
+
 	const s = SEP_PATTERN.source;
 
 	const badParentPattern = new RegExp(
@@ -116,6 +119,7 @@ export function joinGlobs(
 	if (!globstar || globs.length == 0) {
 		return join(...globs);
 	}
+
 	if (globs.length === 0) return ".";
 
 	let joined: string | undefined;
@@ -125,9 +129,11 @@ export function joinGlobs(
 
 		if (path.length > 0) {
 			if (!joined) joined = path;
+
 			else joined += `${SEP}${path}`;
 		}
 	}
+
 	if (!joined) return ".";
 
 	return normalizeGlob(joined, { extended, globstar });

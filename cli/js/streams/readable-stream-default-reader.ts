@@ -22,10 +22,13 @@ export class ReadableStreamDefaultReader<OutputType>
 		if (!rs.isReadableStream(stream)) {
 			throw new TypeError();
 		}
+
 		if (rs.isReadableStreamLocked(stream)) {
 			throw new TypeError("The stream is locked.");
 		}
+
 		rs.readableStreamReaderGenericInitialize(this, stream);
+
 		this[rs.readRequests_] = [];
 	}
 
@@ -33,6 +36,7 @@ export class ReadableStreamDefaultReader<OutputType>
 		if (!rs.isReadableStreamDefaultReader(this)) {
 			return Promise.reject(new TypeError());
 		}
+
 		return this[rs.closedPromise_].promise;
 	}
 
@@ -40,6 +44,7 @@ export class ReadableStreamDefaultReader<OutputType>
 		if (!rs.isReadableStreamDefaultReader(this)) {
 			return Promise.reject(new TypeError());
 		}
+
 		const stream = this[rs.ownerReadableStream_];
 
 		if (stream === undefined) {
@@ -47,6 +52,7 @@ export class ReadableStreamDefaultReader<OutputType>
 				new TypeError("Reader is not associated with a stream"),
 			);
 		}
+
 		return rs.readableStreamCancel(stream, reason);
 	}
 
@@ -54,11 +60,13 @@ export class ReadableStreamDefaultReader<OutputType>
 		if (!rs.isReadableStreamDefaultReader(this)) {
 			return Promise.reject(new TypeError());
 		}
+
 		if (this[rs.ownerReadableStream_] === undefined) {
 			return Promise.reject(
 				new TypeError("Reader is not associated with a stream"),
 			);
 		}
+
 		return rs.readableStreamDefaultReaderRead(this, true);
 	}
 
@@ -66,14 +74,17 @@ export class ReadableStreamDefaultReader<OutputType>
 		if (!rs.isReadableStreamDefaultReader(this)) {
 			throw new TypeError();
 		}
+
 		if (this[rs.ownerReadableStream_] === undefined) {
 			return;
 		}
+
 		if (this[rs.readRequests_].length !== 0) {
 			throw new TypeError(
 				"Cannot release a stream with pending read requests",
 			);
 		}
+
 		rs.readableStreamReaderGenericRelease(this);
 	}
 }

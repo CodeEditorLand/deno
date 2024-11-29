@@ -23,21 +23,33 @@ export {
 
 interface TestPermissions {
 	read?: boolean;
+
 	write?: boolean;
+
 	net?: boolean;
+
 	env?: boolean;
+
 	run?: boolean;
+
 	plugin?: boolean;
+
 	hrtime?: boolean;
 }
 
 export interface Permissions {
 	read: boolean;
+
 	write: boolean;
+
 	net: boolean;
+
 	env: boolean;
+
 	run: boolean;
+
 	plugin: boolean;
+
 	hrtime: boolean;
 }
 
@@ -282,7 +294,9 @@ testPerm({ read: true }, async function parsingUnitTestOutput(): Promise<void> {
 		await Deno.readFile(`${testDataPath}/unit_test_output1.txt`),
 		false,
 	);
+
 	assertEquals(result.actual, 96);
+
 	assertEquals(result.expected, 96);
 
 	// This is an example of a silently dying unit test.
@@ -290,7 +304,9 @@ testPerm({ read: true }, async function parsingUnitTestOutput(): Promise<void> {
 		await Deno.readFile(`${testDataPath}/unit_test_output2.txt`),
 		false,
 	);
+
 	assertEquals(result.actual, undefined);
+
 	assertEquals(result.expected, 96);
 
 	// This is an example of compiling before successful unit tests.
@@ -298,11 +314,15 @@ testPerm({ read: true }, async function parsingUnitTestOutput(): Promise<void> {
 		await Deno.readFile(`${testDataPath}/unit_test_output3.txt`),
 		false,
 	);
+
 	assertEquals(result.actual, 96);
+
 	assertEquals(result.expected, 96);
 
 	// Check what happens on empty output.
 	result = parseUnitTestOutput(new TextEncoder().encode("\n\n\n"), false);
+
 	assertEquals(result.actual, undefined);
+
 	assertEquals(result.expected, undefined);
 });

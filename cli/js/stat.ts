@@ -5,12 +5,19 @@ import { FileInfo, FileInfoImpl } from "./file_info.ts";
 
 export interface StatResponse {
 	isFile: boolean;
+
 	isSymlink: boolean;
+
 	len: number;
+
 	modified: number;
+
 	accessed: number;
+
 	created: number;
+
 	mode: number;
+
 	hasMode: boolean; // false on windows
 	name: string | null;
 }

@@ -10,7 +10,9 @@ import {
 
 interface TestResult {
 	perms: string;
+
 	output: string;
+
 	result: number;
 }
 
@@ -53,6 +55,7 @@ async function main(): Promise<void> {
 
 	for (const perms of permissionCombinations.values()) {
 		const permsFmt = fmtPerms(perms);
+
 		console.log(`Running tests for: ${permsFmt}`);
 
 		const cliPerms = permsToCliFlags(perms);
@@ -78,6 +81,7 @@ async function main(): Promise<void> {
 
 		if (!actual && !expected) {
 			console.error("Bad cli/js/unit_test.ts output");
+
 			result = 1;
 		} else if (expected !== actual) {
 			result = 1;
@@ -96,12 +100,15 @@ async function main(): Promise<void> {
 
 	for (const testResult of testResults) {
 		console.log(`Summary for ${testResult.perms}`);
+
 		console.log(testResult.output + "\n");
+
 		testsFailed = testsFailed || Boolean(testResult.result);
 	}
 
 	if (testsFailed) {
 		console.error("Unit tests failed");
+
 		Deno.exit(1);
 	}
 

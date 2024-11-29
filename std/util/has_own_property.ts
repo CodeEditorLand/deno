@@ -26,5 +26,6 @@ export function hasOwnProperty<T>(obj: T, v: PropertyKey): boolean {
 	if (obj == null) {
 		return false;
 	}
+
 	return Object.prototype.hasOwnProperty.call(obj, v);
 }

@@ -10,11 +10,14 @@ const INVALID_RUNE = ["\r", "\n", '"'];
 
 export class ParseError extends Error {
 	StartLine: number;
+
 	Line: number;
 
 	constructor(start: number, line: number, message: string) {
 		super(message);
+
 		this.StartLine = start;
+
 		this.Line = line;
 	}
 }
@@ -31,9 +34,13 @@ export class ParseError extends Error {
  */
 export interface ParseOptions {
 	comma?: string;
+
 	comment?: string;
+
 	trimLeadingSpace?: boolean;
+
 	lazyQuotes?: boolean;
+
 	fieldsPerRecord?: number;
 }
 
@@ -67,6 +74,7 @@ async function read(
 	const r = await tp.readLine();
 
 	if (r === Deno.EOF) return Deno.EOF;
+
 	line = r;
 	// Normalize \r\n to \n on all input lines.
 	if (
@@ -75,6 +83,7 @@ async function read(
 		line[line.length - 1] === "\n"
 	) {
 		line = line.substring(0, line.length - 2);
+
 		line = line + "\n";
 	}
 
@@ -92,10 +101,12 @@ async function read(
 	result = line.split(opt.comma!);
 
 	let quoteError = false;
+
 	result = result.map((r): string => {
 		if (opt.trimLeadingSpace) {
 			r = r.trimLeft();
 		}
+
 		if (r[0] === '"' && r[r.length - 1] === '"') {
 			r = r.substring(1, r.length - 1);
 		} else if (r[0] === '"') {
@@ -107,6 +118,7 @@ async function read(
 				quoteError = true;
 			}
 		}
+
 		return r;
 	});
 
@@ -117,6 +129,7 @@ async function read(
 			'bare " in non-quoted-field',
 		);
 	}
+
 	return result;
 }
 
@@ -137,13 +150,16 @@ export async function readAll(
 	let first = true;
 
 	let lineIndex = 0;
+
 	chkOptions(opt);
 
 	for (;;) {
 		const r = await read(lineIndex, reader, opt);
 
 		if (r === Deno.EOF) break;
+
 		lineResult = r;
+
 		lineIndex++;
 		// If fieldsPerRecord is 0, Read sets it to
 		// the number of fields in the first record
@@ -167,9 +183,11 @@ export async function readAll(
 					"wrong number of fields",
 				);
 			}
+
 			result.push(lineResult);
 		}
 	}
+
 	return result;
 }
 
@@ -180,11 +198,13 @@ export async function readAll(
  */
 export interface HeaderOption {
 	name: string;
+
 	parse?: (input: string) => unknown;
 }
 
 export interface ExtendedParseOptions extends ParseOptions {
 	header: boolean | string[] | HeaderOption[];
+
 	parse?: (input: unknown) => unknown;
 }
 
@@ -222,6 +242,7 @@ export async function parse(
 	} else {
 		r = await readAll(new BufReader(new StringReader(input)), opt);
 	}
+
 	if (opt.header) {
 		let headers: HeaderOption[] = [];
 
@@ -232,6 +253,7 @@ export async function parse(
 				headers = opt.header as HeaderOption[];
 			} else {
 				const h = opt.header as string[];
+
 				headers = h.map((e): HeaderOption => {
 					return {
 						name: e,
@@ -244,12 +266,15 @@ export async function parse(
 					name: e,
 				};
 			});
+
 			i++;
 		}
+
 		return r.map((e): unknown => {
 			if (e.length !== headers.length) {
 				throw `Error number of fields line:${i}`;
 			}
+
 			i++;
 
 			const out: Record<string, unknown> = {};
@@ -263,14 +288,18 @@ export async function parse(
 					out[h.name] = e[j];
 				}
 			}
+
 			if (opt.parse) {
 				return opt.parse(out);
 			}
+
 			return out;
 		});
 	}
+
 	if (opt.parse) {
 		return r.map((e: string[]): unknown => opt.parse!(e));
 	}
+
 	return r;
 }

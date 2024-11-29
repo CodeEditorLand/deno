@@ -18,11 +18,15 @@ function nextPromiseId(): number {
 
 export interface RecordMinimal {
 	promiseId: number;
+
 	opId: number; // Maybe better called dispatchId
 	arg: number;
+
 	result: number;
+
 	err?: {
 		kind: ErrorKind;
+
 		message: string;
 	};
 }
@@ -51,6 +55,7 @@ export function recordFromBufMinimal(
 		const kind = result as ErrorKind;
 
 		const message = decoder.decode(ui8.slice(12));
+
 		err = { kind, message };
 	} else if (ui8.length != 12) {
 		err = { kind: ErrorKind.InvalidData, message: "Bad message" };
@@ -69,6 +74,7 @@ function unwrapResponse(res: RecordMinimal): number {
 	if (res.err != null) {
 		throw new DenoError(res.err!.kind, res.err!.message);
 	}
+
 	return res.result;
 }
 
@@ -87,8 +93,11 @@ export function asyncMsgFromRust(opId: number, ui8: Uint8Array): void {
 	const { promiseId } = record;
 
 	const promise = promiseTableMin.get(promiseId);
+
 	promiseTableMin.delete(promiseId);
+
 	util.assert(promise);
+
 	promise.resolve(record);
 }
 
@@ -99,7 +108,9 @@ export async function sendAsyncMinimal(
 ): Promise<number> {
 	const promiseId = nextPromiseId(); // AKA cmdId
 	scratch32[0] = promiseId;
+
 	scratch32[1] = arg;
+
 	scratch32[2] = 0; // result
 	const promise = util.createResolvable<RecordMinimal>();
 

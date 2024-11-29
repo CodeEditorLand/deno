@@ -16,10 +16,15 @@ export class Event implements domTypes.Event {
 	isTrusted!: boolean;
 	// Each event has the following associated flags
 	private _canceledFlag = false;
+
 	private _dispatchedFlag = false;
+
 	private _initializedFlag = false;
+
 	private _inPassiveListenerFlag = false;
+
 	private _stopImmediatePropagationFlag = false;
+
 	private _stopPropagationFlag = false;
 
 	// Property for objects on which listeners will be invoked
@@ -27,8 +32,11 @@ export class Event implements domTypes.Event {
 
 	constructor(type: string, eventInitDict: domTypes.EventInit = {}) {
 		requiredArguments("Event", arguments.length, 1);
+
 		type = String(type);
+
 		this._initializedFlag = true;
+
 		eventAttributes.set(this, {
 			type,
 			bubbles: eventInitDict.bubbles || false,
@@ -41,6 +49,7 @@ export class Event implements domTypes.Event {
 			target: null,
 			timeStamp: Date.now(),
 		});
+
 		Reflect.defineProperty(this, "isTrusted", {
 			enumerable: true,
 			get: isTrusted,
@@ -266,11 +275,14 @@ export class Event implements domTypes.Event {
 		}
 
 		currentHiddenLevel = currentTargetHiddenSubtreeLevel;
+
 		maxHiddenLevel = currentTargetHiddenSubtreeLevel;
 
 		for (
 			let index = currentTargetIndex + 1;
+
 			index < this._path.length;
+
 			index++
 		) {
 			const { item, rootOfClosedTree, slotInClosedTree } =
@@ -332,6 +344,7 @@ export class Event implements domTypes.Event {
 	 */
 	stopImmediatePropagation(): void {
 		this._stopPropagationFlag = true;
+
 		this._stopImmediatePropagationFlag = true;
 	}
 }

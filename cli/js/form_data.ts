@@ -17,17 +17,21 @@ class FormDataBase {
 	 *       formData.append('name', 'second');
 	 */
 	append(name: string, value: string): void;
+
 	append(name: string, value: blob.DenoBlob, filename?: string): void;
+
 	append(
 		name: string,
 		value: string | blob.DenoBlob,
 		filename?: string,
 	): void {
 		requiredArguments("FormData.append", arguments.length, 2);
+
 		name = String(name);
 
 		if (value instanceof blob.DenoBlob) {
 			const dfile = new domFile.DomFileImpl([value], filename || name);
+
 			this[dataSymbol].push([name, dfile]);
 		} else {
 			this[dataSymbol].push([name, String(value)]);
@@ -40,6 +44,7 @@ class FormDataBase {
 	 */
 	delete(name: string): void {
 		requiredArguments("FormData.delete", arguments.length, 1);
+
 		name = String(name);
 
 		let i = 0;
@@ -60,6 +65,7 @@ class FormDataBase {
 	 */
 	getAll(name: string): domTypes.FormDataEntryValue[] {
 		requiredArguments("FormData.getAll", arguments.length, 1);
+
 		name = String(name);
 
 		const values = [];
@@ -80,6 +86,7 @@ class FormDataBase {
 	 */
 	get(name: string): domTypes.FormDataEntryValue | null {
 		requiredArguments("FormData.get", arguments.length, 1);
+
 		name = String(name);
 
 		for (const entry of this[dataSymbol]) {
@@ -98,6 +105,7 @@ class FormDataBase {
 	 */
 	has(name: string): boolean {
 		requiredArguments("FormData.has", arguments.length, 1);
+
 		name = String(name);
 
 		return this[dataSymbol].some((entry): boolean => entry[0] === name);
@@ -115,6 +123,7 @@ class FormDataBase {
 
 	set(name: string, value: string | blob.DenoBlob, filename?: string): void {
 		requiredArguments("FormData.set", arguments.length, 2);
+
 		name = String(name);
 
 		// If there are any entries in the context object’s entry list whose name
@@ -131,10 +140,12 @@ class FormDataBase {
 							[value],
 							filename || name,
 						);
+
 						this[dataSymbol][i][1] = dfile;
 					} else {
 						this[dataSymbol][i][1] = String(value);
 					}
+
 					found = true;
 				} else {
 					this[dataSymbol].splice(i, 1);
@@ -142,6 +153,7 @@ class FormDataBase {
 					continue;
 				}
 			}
+
 			i++;
 		}
 
@@ -152,6 +164,7 @@ class FormDataBase {
 					[value],
 					filename || name,
 				);
+
 				this[dataSymbol].push([name, dfile]);
 			} else {
 				this[dataSymbol].push([name, String(value)]);

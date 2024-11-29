@@ -37,6 +37,7 @@ test(function multipartScanUntilBoundary1(): void {
 		0,
 		true,
 	);
+
 	assertEquals(n, Deno.EOF);
 });
 
@@ -50,6 +51,7 @@ test(function multipartScanUntilBoundary2(): void {
 		0,
 		true,
 	);
+
 	assertEquals(n, 3);
 });
 
@@ -63,6 +65,7 @@ test(function multipartScanUntilBoundary3(): void {
 		0,
 		false,
 	);
+
 	assertEquals(n, data.length);
 });
 
@@ -76,6 +79,7 @@ test(function multipartScanUntilBoundary4(): void {
 		0,
 		false,
 	);
+
 	assertEquals(n, 3);
 });
 
@@ -83,6 +87,7 @@ test(function multipartMatchAfterPrefix1(): void {
 	const data = `${boundary}\r`;
 
 	const v = matchAfterPrefix(e.encode(data), e.encode(boundary), false);
+
 	assertEquals(v, 1);
 });
 
@@ -90,6 +95,7 @@ test(function multipartMatchAfterPrefix2(): void {
 	const data = `${boundary}hoge`;
 
 	const v = matchAfterPrefix(e.encode(data), e.encode(boundary), false);
+
 	assertEquals(v, -1);
 });
 
@@ -97,6 +103,7 @@ test(function multipartMatchAfterPrefix3(): void {
 	const data = `${boundary}`;
 
 	const v = matchAfterPrefix(e.encode(data), e.encode(boundary), false);
+
 	assertEquals(v, 0);
 });
 
@@ -104,21 +111,27 @@ test(async function multipartMultipartWriter(): Promise<void> {
 	const buf = new Buffer();
 
 	const mw = new MultipartWriter(buf);
+
 	await mw.writeField("foo", "foo");
+
 	await mw.writeField("bar", "bar");
 
 	const f = await open(path.resolve("./multipart/fixtures/sample.txt"), "r");
+
 	await mw.writeFile("file", "sample.txt", f);
+
 	await mw.close();
 });
 
 test(function multipartMultipartWriter2(): void {
 	const w = new StringWriter();
+
 	assertThrows(
 		(): MultipartWriter => new MultipartWriter(w, ""),
 		Error,
 		"invalid boundary length",
 	);
+
 	assertThrows(
 		(): MultipartWriter =>
 			new MultipartWriter(
@@ -129,11 +142,13 @@ test(function multipartMultipartWriter2(): void {
 		Error,
 		"invalid boundary length",
 	);
+
 	assertThrows(
 		(): MultipartWriter => new MultipartWriter(w, "aaa aaa"),
 		Error,
 		"invalid boundary character",
 	);
+
 	assertThrows(
 		(): MultipartWriter => new MultipartWriter(w, "boundary¥¥"),
 		Error,
@@ -145,8 +160,11 @@ test(async function multipartMultipartWriter3(): Promise<void> {
 	const w = new StringWriter();
 
 	const mw = new MultipartWriter(w);
+
 	await mw.writeField("foo", "foo");
+
 	await mw.close();
+
 	await assertThrowsAsync(
 		async (): Promise<void> => {
 			await mw.close();
@@ -154,6 +172,7 @@ test(async function multipartMultipartWriter3(): Promise<void> {
 		Error,
 		"closed",
 	);
+
 	await assertThrowsAsync(
 		async (): Promise<void> => {
 			// @ts-ignore
@@ -162,6 +181,7 @@ test(async function multipartMultipartWriter3(): Promise<void> {
 		Error,
 		"closed",
 	);
+
 	await assertThrowsAsync(
 		async (): Promise<void> => {
 			await mw.writeField("bar", "bar");
@@ -169,6 +189,7 @@ test(async function multipartMultipartWriter3(): Promise<void> {
 		Error,
 		"closed",
 	);
+
 	assertThrows(
 		(): void => {
 			mw.createFormField("bar");
@@ -176,6 +197,7 @@ test(async function multipartMultipartWriter3(): Promise<void> {
 		Error,
 		"closed",
 	);
+
 	assertThrows(
 		(): void => {
 			mw.createFormFile("bar", "file");
@@ -195,11 +217,15 @@ test(async function multipartMultipartReader(): Promise<void> {
 	);
 
 	const form = await mr.readForm(10 << 20);
+
 	assertEquals(form["foo"], "foo");
+
 	assertEquals(form["bar"], "bar");
 
 	const file = form["file"] as FormFile;
+
 	assertEquals(isFormFile(file), true);
+
 	assert(file.content !== void 0);
 });
 
@@ -214,21 +240,27 @@ test(async function multipartMultipartReader2(): Promise<void> {
 	const form = await mr.readForm(20); //
 	try {
 		assertEquals(form["foo"], "foo");
+
 		assertEquals(form["bar"], "bar");
 
 		const file = form["file"] as FormFile;
+
 		assertEquals(file.type, "application/octet-stream");
 
 		const f = await open(file.tempfile!);
 
 		const w = new StringWriter();
+
 		await copy(w, f);
 
 		const json = JSON.parse(w.toString());
+
 		assertEquals(json["compilerOptions"]["target"], "es2018");
+
 		f.close();
 	} finally {
 		const file = form["file"] as FormFile;
+
 		await remove(file.tempfile!);
 	}
 });

@@ -9,11 +9,13 @@ function assertSameContent(files: FileInfo[]): void {
 	for (const file of files) {
 		if (file.name === "subdir") {
 			assert(file.isDirectory());
+
 			counter++;
 		}
 
 		if (file.name === "002_hello.ts") {
 			assertEquals(file.mode!, Deno.statSync(`tests/${file.name}`).mode!);
+
 			counter++;
 		}
 	}
@@ -23,6 +25,7 @@ function assertSameContent(files: FileInfo[]): void {
 
 testPerm({ read: true }, function readDirSyncSuccess(): void {
 	const files = Deno.readDirSync("tests/");
+
 	assertSameContent(files);
 });
 
@@ -33,9 +36,12 @@ testPerm({ read: false }, function readDirSyncPerm(): void {
 		Deno.readDirSync("tests/");
 	} catch (e) {
 		caughtError = true;
+
 		assertEquals(e.kind, Deno.ErrorKind.PermissionDenied);
+
 		assertEquals(e.name, "PermissionDenied");
 	}
+
 	assert(caughtError);
 });
 
@@ -48,9 +54,12 @@ testPerm({ read: true }, function readDirSyncNotDir(): void {
 		src = Deno.readDirSync("cli/tests/fixture.json");
 	} catch (err) {
 		caughtError = true;
+
 		assertEquals(err.kind, Deno.ErrorKind.Other);
 	}
+
 	assert(caughtError);
+
 	assertEquals(src, undefined);
 });
 
@@ -63,14 +72,18 @@ testPerm({ read: true }, function readDirSyncNotFound(): void {
 		src = Deno.readDirSync("bad_dir_name");
 	} catch (err) {
 		caughtError = true;
+
 		assertEquals(err.kind, Deno.ErrorKind.NotFound);
 	}
+
 	assert(caughtError);
+
 	assertEquals(src, undefined);
 });
 
 testPerm({ read: true }, async function readDirSuccess(): Promise<void> {
 	const files = await Deno.readDir("tests/");
+
 	assertSameContent(files);
 });
 
@@ -81,8 +94,11 @@ testPerm({ read: false }, async function readDirPerm(): Promise<void> {
 		await Deno.readDir("tests/");
 	} catch (e) {
 		caughtError = true;
+
 		assertEquals(e.kind, Deno.ErrorKind.PermissionDenied);
+
 		assertEquals(e.name, "PermissionDenied");
 	}
+
 	assert(caughtError);
 });

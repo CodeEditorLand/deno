@@ -21,6 +21,7 @@ test(async function createTarArchive(): Promise<void> {
 
 	// put data on memory
 	const content = new TextEncoder().encode("hello tar world!");
+
 	await tar.append("output.txt", {
 		reader: new Deno.Buffer(content),
 		contentSize: content.byteLength,
@@ -49,6 +50,7 @@ test(async function deflateTarArchive(): Promise<void> {
 	const tar = new Tar();
 
 	const content = new TextEncoder().encode(text);
+
 	await tar.append(fileName, {
 		reader: new Deno.Buffer(content),
 		contentSize: content.byteLength,
@@ -65,6 +67,7 @@ test(async function deflateTarArchive(): Promise<void> {
 
 	// tests
 	assertEquals(result.fileName, fileName);
+
 	assertEquals(untarText, text);
 });
 
@@ -78,6 +81,7 @@ test(async function appendFileWithLongNameToTarArchive(): Promise<void> {
 	const tar = new Tar();
 
 	const content = new TextEncoder().encode(text);
+
 	await tar.append(fileName, {
 		reader: new Deno.Buffer(content),
 		contentSize: content.byteLength,
@@ -94,6 +98,7 @@ test(async function appendFileWithLongNameToTarArchive(): Promise<void> {
 
 	// tests
 	assertEquals(result.fileName, fileName);
+
 	assertEquals(untarText, text);
 });
 

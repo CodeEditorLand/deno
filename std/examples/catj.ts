@@ -85,13 +85,21 @@ const parsedArgs = parse(Deno.args.slice(1));
 
 if (parsedArgs.h || parsedArgs.help || parsedArgs._.length === 0) {
 	console.log("Usage: catj [-h|--help] [file...]");
+
 	console.log();
+
 	console.log("Examples:");
+
 	console.log();
+
 	console.log("// print file:\n   catj file.json");
+
 	console.log();
+
 	console.log("// print multiple files:\n   catj file1.json file2.json");
+
 	console.log();
+
 	console.log("// print from stdin:\n   cat file.json | catj -");
 }
 
@@ -99,12 +107,14 @@ if (parsedArgs._[0] === "-") {
 	const contents = await Deno.readAll(Deno.stdin);
 
 	const json = JSON.parse(decoder.decode(contents));
+
 	print(json);
 } else {
 	for (const fileName of parsedArgs._) {
 		const fileContents = await Deno.readFile(fileName);
 
 		const json = JSON.parse(decoder.decode(fileContents));
+
 		print(json);
 	}
 }

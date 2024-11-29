@@ -29,6 +29,7 @@ test(async function arrayBufferFromByteArrays(): Promise<void> {
 		const body = buildBody(new type(buffer));
 
 		const text = new TextDecoder("utf-8").decode(await body.arrayBuffer());
+
 		assertEquals(text, "ahoyhoy8");
 	}
 });
@@ -47,8 +48,11 @@ testPerm({ net: true }, async function bodyMultipartFormData(): Promise<void> {
 	body.contentType = "multipart/form-data;boundary=boundary";
 
 	const formData = await body.formData();
+
 	assert(formData.has("field_1"));
+
 	assertEquals(formData.get("field_1").toString(), "value_1 \r\n");
+
 	assert(formData.has("field_2"));
 });
 
@@ -65,8 +69,12 @@ testPerm({ net: true }, async function bodyURLEncodedFormData(): Promise<void> {
 	body.contentType = "application/x-www-form-urlencoded";
 
 	const formData = await body.formData();
+
 	assert(formData.has("field_1"));
+
 	assertEquals(formData.get("field_1").toString(), "Hi");
+
 	assert(formData.has("field_2"));
+
 	assertEquals(formData.get("field_2").toString(), "<Deno>");
 });

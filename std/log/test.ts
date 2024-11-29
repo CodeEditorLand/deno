@@ -45,6 +45,7 @@ test(async function defaultHandlers(): Promise<void> {
 		});
 
 		logger("foo");
+
 		logger("bar", 1, 2);
 
 		assertEquals(handler.messages, [
@@ -72,6 +73,7 @@ test(async function getLogger(): Promise<void> {
 	const logger = log.getLogger();
 
 	assertEquals(logger.levelName, "DEBUG");
+
 	assertEquals(logger.handlers, [handler]);
 });
 
@@ -93,6 +95,7 @@ test(async function getLoggerWithName(): Promise<void> {
 	const logger = log.getLogger("bar");
 
 	assertEquals(logger.levelName, "INFO");
+
 	assertEquals(logger.handlers, [fooHandler]);
 });
 
@@ -105,5 +108,6 @@ test(async function getLoggerUnknown(): Promise<void> {
 	const logger = log.getLogger("nonexistent");
 
 	assertEquals(logger.levelName, "NOTSET");
+
 	assertEquals(logger.handlers, []);
 });

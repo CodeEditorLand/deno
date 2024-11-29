@@ -3,9 +3,13 @@ import { assert, assertEquals, test } from "./test_util.ts";
 
 function testFirstArgument(arg1, expectedSize): void {
 	const file = new File(arg1, "name");
+
 	assert(file instanceof File);
+
 	assertEquals(file.name, "name");
+
 	assertEquals(file.size, expectedSize);
+
 	assertEquals(file.type, "");
 }
 
@@ -78,7 +82,9 @@ test(function fileObjectInFileBits(): void {
 
 function testSecondArgument(arg2, expectedFileName): void {
 	const file = new File(["bits"], arg2);
+
 	assert(file instanceof File);
+
 	assertEquals(file.name, expectedFileName);
 }
 

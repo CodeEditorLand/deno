@@ -57,6 +57,7 @@ class PluginImpl implements Plugin {
 
 interface OpenPluginResponse {
 	rid: number;
+
 	ops: {
 		[name: string]: number;
 	};

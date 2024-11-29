@@ -44,6 +44,7 @@ test(async function ensureFileIfItExist(): Promise<void> {
 	const testFile = path.join(testDir, "test.txt");
 
 	await Deno.mkdir(testDir, true);
+
 	await Deno.writeFile(testFile, new Uint8Array());
 
 	await ensureFile(testFile);
@@ -63,6 +64,7 @@ test(function ensureFileSyncIfItExist(): void {
 	const testFile = path.join(testDir, "test.txt");
 
 	Deno.mkdirSync(testDir, true);
+
 	Deno.writeFileSync(testFile, new Uint8Array());
 
 	ensureFileSync(testFile);

@@ -7,10 +7,13 @@ testPerm({ read: true, write: true }, function renameSyncSuccess(): void {
 	const oldpath = testDir + "/oldpath";
 
 	const newpath = testDir + "/newpath";
+
 	Deno.mkdirSync(oldpath);
+
 	Deno.renameSync(oldpath, newpath);
 
 	const newPathInfo = Deno.statSync(newpath);
+
 	assert(newPathInfo.isDirectory());
 
 	let caughtErr = false;
@@ -21,9 +24,12 @@ testPerm({ read: true, write: true }, function renameSyncSuccess(): void {
 		oldPathInfo = Deno.statSync(oldpath);
 	} catch (e) {
 		caughtErr = true;
+
 		assertEquals(e.kind, Deno.ErrorKind.NotFound);
 	}
+
 	assert(caughtErr);
+
 	assertEquals(oldPathInfo, undefined);
 });
 
@@ -34,11 +40,14 @@ testPerm({ read: false, write: true }, function renameSyncReadPerm(): void {
 		const oldpath = "/oldbaddir";
 
 		const newpath = "/newbaddir";
+
 		Deno.renameSync(oldpath, newpath);
 	} catch (e) {
 		err = e;
 	}
+
 	assertEquals(err.kind, Deno.ErrorKind.PermissionDenied);
+
 	assertEquals(err.name, "PermissionDenied");
 });
 
@@ -49,11 +58,14 @@ testPerm({ read: true, write: false }, function renameSyncWritePerm(): void {
 		const oldpath = "/oldbaddir";
 
 		const newpath = "/newbaddir";
+
 		Deno.renameSync(oldpath, newpath);
 	} catch (e) {
 		err = e;
 	}
+
 	assertEquals(err.kind, Deno.ErrorKind.PermissionDenied);
+
 	assertEquals(err.name, "PermissionDenied");
 });
 
@@ -65,10 +77,13 @@ testPerm(
 		const oldpath = testDir + "/oldpath";
 
 		const newpath = testDir + "/newpath";
+
 		Deno.mkdirSync(oldpath);
+
 		await Deno.rename(oldpath, newpath);
 
 		const newPathInfo = Deno.statSync(newpath);
+
 		assert(newPathInfo.isDirectory());
 
 		let caughtErr = false;
@@ -79,9 +94,12 @@ testPerm(
 			oldPathInfo = Deno.statSync(oldpath);
 		} catch (e) {
 			caughtErr = true;
+
 			assertEquals(e.kind, Deno.ErrorKind.NotFound);
 		}
+
 		assert(caughtErr);
+
 		assertEquals(oldPathInfo, undefined);
 	},
 );

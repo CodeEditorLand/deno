@@ -7,6 +7,7 @@ testPerm({ read: true, write: true }, function symlinkSyncSuccess(): void {
 	const oldname = testDir + "/oldname";
 
 	const newname = testDir + "/newname";
+
 	Deno.mkdirSync(oldname);
 
 	let errOnWindows;
@@ -16,15 +17,20 @@ testPerm({ read: true, write: true }, function symlinkSyncSuccess(): void {
 	} catch (e) {
 		errOnWindows = e;
 	}
+
 	if (errOnWindows) {
 		assertEquals(Deno.build.os, "win");
+
 		assertEquals(errOnWindows.kind, Deno.ErrorKind.Other);
+
 		assertEquals(errOnWindows.message, "Not implemented");
 	} else {
 		const newNameInfoLStat = Deno.lstatSync(newname);
 
 		const newNameInfoStat = Deno.statSync(newname);
+
 		assert(newNameInfoLStat.isSymlink());
+
 		assert(newNameInfoStat.isDirectory());
 	}
 });
@@ -37,7 +43,9 @@ test(function symlinkSyncPerm(): void {
 	} catch (e) {
 		err = e;
 	}
+
 	assertEquals(err.kind, Deno.ErrorKind.PermissionDenied);
+
 	assertEquals(err.name, "PermissionDenied");
 });
 
@@ -57,8 +65,10 @@ testPerm({ write: true }, function symlinkSyncNotImplemented(): void {
 	} catch (e) {
 		err = e;
 	}
+
 	if (err) {
 		assertEquals(Deno.build.os, "win");
+
 		assertEquals(err.message, "Not implemented");
 	}
 });
@@ -71,6 +81,7 @@ testPerm(
 		const oldname = testDir + "/oldname";
 
 		const newname = testDir + "/newname";
+
 		Deno.mkdirSync(oldname);
 
 		let errOnWindows;
@@ -80,14 +91,18 @@ testPerm(
 		} catch (e) {
 			errOnWindows = e;
 		}
+
 		if (errOnWindows) {
 			assertEquals(errOnWindows.kind, Deno.ErrorKind.Other);
+
 			assertEquals(errOnWindows.message, "Not implemented");
 		} else {
 			const newNameInfoLStat = Deno.lstatSync(newname);
 
 			const newNameInfoStat = Deno.statSync(newname);
+
 			assert(newNameInfoLStat.isSymlink());
+
 			assert(newNameInfoStat.isDirectory());
 		}
 	},

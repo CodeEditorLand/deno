@@ -468,18 +468,23 @@ for (const t of testCases) {
 			if (t.Comma) {
 				comma = t.Comma;
 			}
+
 			if (t.Comment) {
 				comment = t.Comment;
 			}
+
 			if (t.TrimLeadingSpace) {
 				trim = true;
 			}
+
 			if (t.UseFieldsPerRecord) {
 				fieldsPerRec = t.FieldsPerRecord;
 			}
+
 			if (t.LazyQuotes) {
 				lazyquote = t.LazyQuotes;
 			}
+
 			let actual;
 
 			if (t.Error) {
@@ -499,7 +504,9 @@ for (const t of testCases) {
 				} catch (e) {
 					err = e;
 				}
+
 				assert(err);
+
 				assertEquals(err.message, t.Error);
 			} else {
 				actual = await readAll(
@@ -514,6 +521,7 @@ for (const t of testCases) {
 				);
 
 				const expected = t.Output;
+
 				assertEquals(actual, expected);
 			}
 		},
@@ -628,6 +636,7 @@ for (const testCase of parseTestCases) {
 				header: testCase.header,
 				parse: testCase.parse as (input: unknown) => unknown,
 			});
+
 			assertEquals(r, testCase.result);
 		},
 	});

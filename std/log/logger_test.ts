@@ -7,6 +7,7 @@ import { Logger, LogRecord } from "./logger.ts";
 
 class TestHandler extends BaseHandler {
 	public messages: string[] = [];
+
 	public records: LogRecord[] = [];
 
 	handle(record: LogRecord): void {
@@ -26,7 +27,9 @@ test(function simpleLogger(): void {
 	let logger = new Logger("DEBUG");
 
 	assertEquals(logger.level, LogLevel.DEBUG);
+
 	assertEquals(logger.levelName, "DEBUG");
+
 	assertEquals(logger.handlers, []);
 
 	logger = new Logger("DEBUG", [handler]);
@@ -42,9 +45,13 @@ test(function customHandler(): void {
 	logger.debug("foo", 1, 2);
 
 	const record = handler.records[0];
+
 	assertEquals(record.msg, "foo");
+
 	assertEquals(record.args, [1, 2]);
+
 	assertEquals(record.level, LogLevel.DEBUG);
+
 	assertEquals(record.levelName, "DEBUG");
 
 	assertEquals(handler.messages, ["DEBUG foo"]);
@@ -55,16 +62,22 @@ test(function logFunctions(): void {
 		const handler = new TestHandler(level);
 
 		const logger = new Logger(level, [handler]);
+
 		logger.debug("foo");
+
 		logger.info("bar");
+
 		logger.warning("baz");
+
 		logger.error("boo");
+
 		logger.critical("doo");
 
 		return handler;
 	};
 
 	let handler: TestHandler;
+
 	handler = doLog("DEBUG");
 
 	assertEquals(handler.messages, [

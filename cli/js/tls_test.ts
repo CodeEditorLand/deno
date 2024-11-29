@@ -16,7 +16,9 @@ test(async function dialTLSNoPerm(): Promise<void> {
 	} catch (e) {
 		err = e;
 	}
+
 	assertEquals(err.kind, Deno.ErrorKind.PermissionDenied);
+
 	assertEquals(err.name, "PermissionDenied");
 });
 
@@ -32,7 +34,9 @@ test(async function dialTLSCertFileNoReadPerm(): Promise<void> {
 	} catch (e) {
 		err = e;
 	}
+
 	assertEquals(err.kind, Deno.ErrorKind.PermissionDenied);
+
 	assertEquals(err.name, "PermissionDenied");
 });
 
@@ -56,7 +60,9 @@ testPerm(
 		} catch (e) {
 			err = e;
 		}
+
 		assertEquals(err.kind, Deno.ErrorKind.NotFound);
+
 		assertEquals(err.name, "NotFound");
 
 		try {
@@ -67,7 +73,9 @@ testPerm(
 		} catch (e) {
 			err = e;
 		}
+
 		assertEquals(err.kind, Deno.ErrorKind.NotFound);
+
 		assertEquals(err.name, "NotFound");
 	},
 );
@@ -85,7 +93,9 @@ testPerm({ net: true }, async function listenTLSNoReadPerm(): Promise<void> {
 	} catch (e) {
 		err = e;
 	}
+
 	assertEquals(err.kind, Deno.ErrorKind.PermissionDenied);
+
 	assertEquals(err.name, "PermissionDenied");
 });
 
@@ -104,6 +114,7 @@ testPerm(
 		const testDir = Deno.makeTempDirSync();
 
 		const keyFilename = testDir + "/key.pem";
+
 		Deno.writeFileSync(keyFilename, new Uint8Array([]), {
 			perm: 0o666,
 		});
@@ -116,7 +127,9 @@ testPerm(
 		} catch (e) {
 			err = e;
 		}
+
 		assertEquals(err.kind, Deno.ErrorKind.Other);
+
 		assertEquals(err.name, "Other");
 	},
 );
@@ -136,6 +149,7 @@ testPerm(
 		const testDir = Deno.makeTempDirSync();
 
 		const certFilename = testDir + "/cert.crt";
+
 		Deno.writeFileSync(certFilename, new Uint8Array([]), {
 			perm: 0o666,
 		});
@@ -148,7 +162,9 @@ testPerm(
 		} catch (e) {
 			err = e;
 		}
+
 		assertEquals(err.kind, Deno.ErrorKind.Other);
+
 		assertEquals(err.name, "Other");
 	},
 );
@@ -173,8 +189,11 @@ testPerm(
 
 		listener.accept().then(async (conn): Promise<void> => {
 			assert(conn.remoteAddr != null);
+
 			assert(conn.localAddr != null);
+
 			await conn.write(response);
+
 			conn.close();
 		});
 
@@ -183,6 +202,7 @@ testPerm(
 			port,
 			certFile: "cli/tests/tls/RootCA.pem",
 		});
+
 		assert(conn.rid > 0);
 
 		const w = new BufWriter(conn);
@@ -192,33 +212,44 @@ testPerm(
 		const body = `GET / HTTP/1.1\r\nHost: ${hostname}:${port}\r\n\r\n`;
 
 		const writeResult = await w.write(encoder.encode(body));
+
 		assertEquals(body.length, writeResult);
+
 		await w.flush();
 
 		const tpr = new TextProtoReader(r);
 
 		const statusLine = await tpr.readLine();
+
 		assert(
 			statusLine !== Deno.EOF,
 			`line must be read: ${String(statusLine)}`,
 		);
 
 		const m = statusLine.match(/^(.+?) (.+?) (.+?)$/);
+
 		assert(m !== null, "must be matched");
 
 		const [_, proto, status, ok] = m;
+
 		assertEquals(proto, "HTTP/1.1");
+
 		assertEquals(status, "200");
+
 		assertEquals(ok, "OK");
 
 		const headers = await tpr.readMIMEHeader();
+
 		assert(headers !== Deno.EOF);
 
 		const contentLength = parseInt(headers.get("content-length"));
 
 		const bodyBuf = new Uint8Array(contentLength);
+
 		await r.readFull(bodyBuf);
+
 		assertEquals(decoder.decode(bodyBuf), "Hello World\n");
+
 		conn.close();
 	},
 );

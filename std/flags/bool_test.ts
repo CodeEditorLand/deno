@@ -16,6 +16,7 @@ test(function flagBooleanDefaultFalse(): void {
 	});
 
 	assertEquals(typeof argv.verbose, "boolean");
+
 	assertEquals(typeof argv.t, "boolean");
 });
 
@@ -32,7 +33,9 @@ test(function booleanGroups(): void {
 	});
 
 	assertEquals(typeof argv.x, "boolean");
+
 	assertEquals(typeof argv.y, "boolean");
+
 	assertEquals(typeof argv.z, "boolean");
 });
 
@@ -58,6 +61,7 @@ test(function booleanAndAliasWithChainableApi(): void {
 	};
 
 	assertEquals(aliasedArgv, expected);
+
 	assertEquals(propertyArgv, expected);
 });
 
@@ -80,7 +84,9 @@ test(function booleanAndAliasWithOptionsHash(): void {
 		h: true,
 		_: ["derp"],
 	};
+
 	assertEquals(aliasedArgv, expected);
+
 	assertEquals(propertyArgv, expected);
 });
 
@@ -108,8 +114,11 @@ test(function booleanAndAliasArrayWithOptionsHash(): void {
 		h: true,
 		_: ["derp"],
 	};
+
 	assertEquals(aliasedArgv, expected);
+
 	assertEquals(propertyArgv, expected);
+
 	assertEquals(altPropertyArgv, expected);
 });
 
@@ -134,6 +143,7 @@ test(function booleanAndAliasUsingExplicitTrue(): void {
 	};
 
 	assertEquals(aliasedArgv, expected);
+
 	assertEquals(propertyArgv, expected);
 });
 
@@ -145,6 +155,7 @@ test(function booleanAndNonBoolean(): void {
 	});
 
 	assertEquals(parsed.boool, true);
+
 	assertEquals(parsed.other, "true");
 
 	const parsed2 = parse(["--boool", "--other=false"], {
@@ -152,6 +163,7 @@ test(function booleanAndNonBoolean(): void {
 	});
 
 	assertEquals(parsed2.boool, true);
+
 	assertEquals(parsed2.other, "false");
 });
 
@@ -179,28 +191,35 @@ test(function booleanParsingFalse(): void {
 
 test(function booleanParsingTrueLike(): void {
 	const parsed = parse(["-t", "true123"], { boolean: ["t"] });
+
 	assertEquals(parsed.t, true);
 
 	const parsed2 = parse(["-t", "123"], { boolean: ["t"] });
+
 	assertEquals(parsed2.t, true);
 
 	const parsed3 = parse(["-t", "false123"], { boolean: ["t"] });
+
 	assertEquals(parsed3.t, true);
 });
 
 test(function booleanNegationAfterBoolean(): void {
 	const parsed = parse(["--foo", "--no-foo"], { boolean: ["foo"] });
+
 	assertEquals(parsed.foo, false);
 
 	const parsed2 = parse(["--foo", "--no-foo", "123"], { boolean: ["foo"] });
+
 	assertEquals(parsed2.foo, false);
 });
 
 test(function booleanAfterBooleanNegation(): void {
 	const parsed = parse(["--no--foo", "--foo"], { boolean: ["foo"] });
+
 	assertEquals(parsed.foo, true);
 
 	const parsed2 = parse(["--no--foo", "--foo", "123"], { boolean: ["foo"] });
+
 	assertEquals(parsed2.foo, true);
 });
 
@@ -208,20 +227,24 @@ test(function latestFlagIsBooleanNegation(): void {
 	const parsed = parse(["--no-foo", "--foo", "--no-foo"], {
 		boolean: ["foo"],
 	});
+
 	assertEquals(parsed.foo, false);
 
 	const parsed2 = parse(["--no-foo", "--foo", "--no-foo", "123"], {
 		boolean: ["foo"],
 	});
+
 	assertEquals(parsed2.foo, false);
 });
 
 test(function latestFlagIsBoolean(): void {
 	const parsed = parse(["--foo", "--no-foo", "--foo"], { boolean: ["foo"] });
+
 	assertEquals(parsed.foo, true);
 
 	const parsed2 = parse(["--foo", "--no-foo", "--foo", "123"], {
 		boolean: ["foo"],
 	});
+
 	assertEquals(parsed2.foo, true);
 });

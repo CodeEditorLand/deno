@@ -7,7 +7,9 @@ import { noColor } from "./deno.ts";
 
 interface Code {
 	open: string;
+
 	close: string;
+
 	regexp: RegExp;
 }
 

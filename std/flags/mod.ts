@@ -1,12 +1,16 @@
 // Copyright 2018-2019 the Deno authors. All rights reserved. MIT license.
 export interface ArgParsingOptions {
 	unknown?: (i: unknown) => unknown;
+
 	boolean?: boolean | string | string[];
+
 	alias?: { [key: string]: string | string[] };
+
 	string?: string | string[];
 
 	default?: { [key: string]: unknown };
 	"--"?: boolean;
+
 	stopEarly?: boolean;
 }
 
@@ -22,8 +26,11 @@ const DEFAULT_OPTIONS = {
 
 interface Flags {
 	bools: { [key: string]: boolean };
+
 	strings: { [key: string]: boolean };
+
 	unknownFn: (i: unknown) => unknown;
+
 	allBools: boolean;
 }
 
@@ -47,6 +54,7 @@ function isNumber(x: unknown): boolean {
 
 function hasKey(obj: NestedMapping, keys: string[]): boolean {
 	let o = obj;
+
 	keys.slice(0, -1).forEach(function (key: string): void {
 		o = (get(o, key) || {}) as NestedMapping;
 	});
@@ -143,10 +151,12 @@ export function parse(
 
 	function setKey(obj: NestedMapping, keys: string[], value: unknown): void {
 		let o = obj;
+
 		keys.slice(0, -1).forEach(function (key): void {
 			if (get(o, key) === undefined) {
 				o[key] = {};
 			}
+
 			o = get(o, key) as NestedMapping;
 		});
 
@@ -199,6 +209,7 @@ export function parse(
 	// all args after "--" are not parsed
 	if (args.indexOf("--") !== -1) {
 		notFlags = args.slice(args.indexOf("--") + 1);
+
 		args = args.slice(0, args.indexOf("--"));
 	}
 
@@ -239,9 +250,11 @@ export function parse(
 				(get(aliases, key) ? !aliasIsBoolean(key) : true)
 			) {
 				setArg(key, next, arg);
+
 				i++;
 			} else if (/^(true|false)$/.test(next)) {
 				setArg(key, next === "true", arg);
+
 				i++;
 			} else {
 				setArg(key, get(flags.strings, key) ? "" : true, arg);
@@ -262,6 +275,7 @@ export function parse(
 
 				if (/[A-Za-z]/.test(letters[j]) && /=/.test(next)) {
 					setArg(letters[j], next.split("=")[1], arg);
+
 					broken = true;
 
 					break;
@@ -272,6 +286,7 @@ export function parse(
 					/-?\d+(\.\d*)?(e-?\d+)?$/.test(next)
 				) {
 					setArg(letters[j], next, arg);
+
 					broken = true;
 
 					break;
@@ -279,6 +294,7 @@ export function parse(
 
 				if (letters[j + 1] && letters[j + 1].match(/\W/)) {
 					setArg(letters[j], arg.slice(j + 2), arg);
+
 					broken = true;
 
 					break;
@@ -301,9 +317,11 @@ export function parse(
 					(get(aliases, key) ? !aliasIsBoolean(key) : true)
 				) {
 					setArg(key, args[i + 1], arg);
+
 					i++;
 				} else if (args[i + 1] && /^(true|false)$/.test(args[i + 1])) {
 					setArg(key, args[i + 1] === "true", arg);
+
 					i++;
 				} else {
 					setArg(key, get(flags.strings, key) ? "" : true, arg);
@@ -315,6 +333,7 @@ export function parse(
 					flags.strings["_"] || !isNumber(arg) ? arg : Number(arg),
 				);
 			}
+
 			if (options.stopEarly) {
 				argv._.push(...args.slice(i + 1));
 
@@ -335,6 +354,7 @@ export function parse(
 
 	if (options["--"]) {
 		argv["--"] = [];
+
 		notFlags.forEach(function (key): void {
 			argv["--"].push(key);
 		});

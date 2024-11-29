@@ -12,6 +12,7 @@ function parseFile(filePath: string): object {
 	if (!existsSync(filePath)) {
 		throw new Error(`File not found: ${filePath}`);
 	}
+
 	const strFile = readFileStrSync(filePath);
 
 	return parse(strFile);
@@ -36,6 +37,7 @@ test({
 		};
 
 		const actual = parseFile(path.join(testFilesDir, "string.toml"));
+
 		assertEquals(actual, expected);
 	},
 });
@@ -46,6 +48,7 @@ test({
 		const expected = { boolean: { bool1: true, bool2: false } };
 
 		const actual = parseFile(path.join(testFilesDir, "CRLF.toml"));
+
 		assertEquals(actual, expected);
 	},
 });
@@ -56,6 +59,7 @@ test({
 		const expected = { boolean: { bool1: true, bool2: false } };
 
 		const actual = parseFile(path.join(testFilesDir, "boolean.toml"));
+
 		assertEquals(actual, expected);
 	},
 });
@@ -82,6 +86,7 @@ test({
 		};
 
 		const actual = parseFile(path.join(testFilesDir, "integer.toml"));
+
 		assertEquals(actual, expected);
 	},
 });
@@ -109,6 +114,7 @@ test({
 		};
 
 		const actual = parseFile(path.join(testFilesDir, "float.toml"));
+
 		assertEquals(actual, expected);
 	},
 });
@@ -127,6 +133,7 @@ test({
 		};
 
 		const actual = parseFile(path.join(testFilesDir, "arrays.toml"));
+
 		assertEquals(actual, expected);
 	},
 });
@@ -161,6 +168,7 @@ test({
 		};
 
 		const actual = parseFile(path.join(testFilesDir, "table.toml"));
+
 		assertEquals(actual, expected);
 	},
 });
@@ -177,6 +185,7 @@ test({
 		};
 
 		const actual = parseFile(path.join(testFilesDir, "simple.toml"));
+
 		assertEquals(actual, expected);
 	},
 });
@@ -197,6 +206,7 @@ test({
 		};
 
 		const actual = parseFile(path.join(testFilesDir, "datetime.toml"));
+
 		assertEquals(actual, expected);
 	},
 });
@@ -243,6 +253,7 @@ test({
 		};
 
 		const actual = parseFile(path.join(testFilesDir, "inlineTable.toml"));
+
 		assertEquals(actual, expected);
 	},
 });
@@ -259,6 +270,7 @@ test({
 		};
 
 		const actual = parseFile(path.join(testFilesDir, "arrayTable.toml"));
+
 		assertEquals(actual, expected);
 	},
 });
@@ -306,6 +318,7 @@ test({
 		};
 		/* eslint-enable @typescript-eslint/camelcase */
 		const actual = parseFile(path.join(testFilesDir, "cargo.toml"));
+
 		assertEquals(actual, expected);
 	},
 });
@@ -423,6 +436,7 @@ the     = "array"
 `;
 
 		const actual = stringify(src);
+
 		assertEquals(actual, expected);
 	},
 });

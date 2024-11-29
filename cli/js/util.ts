@@ -110,6 +110,7 @@ export function containsOnlyASCII(str: string): boolean {
 	if (typeof str !== "string") {
 		return false;
 	}
+
 	return /^[\x00-\x7F]*$/.test(str);
 }
 
@@ -133,6 +134,7 @@ export function isIterable<T, P extends keyof T, K extends T[P]>(
 	if (o == null) {
 		return false;
 	}
+
 	return (
 		typeof (o as unknown as Iterable<[P, K]>)[Symbol.iterator] ===
 		"function"
@@ -178,6 +180,7 @@ export function getPrivateValue<
 	if (weakMap.has(instance)) {
 		return weakMap.get(instance)![key];
 	}
+
 	throw new TypeError("Illegal invocation");
 }
 
@@ -208,6 +211,7 @@ export function hasOwnProperty<T>(obj: T, v: PropertyKey): boolean {
 	if (obj == null) {
 		return false;
 	}
+
 	return Object.prototype.hasOwnProperty.call(obj, v);
 }
 
@@ -239,6 +243,7 @@ export function commonPath(paths: string[], sep = "/"): string {
 	if (first === "" || remaining.length === 0) {
 		return "";
 	}
+
 	const parts = first.split(sep);
 
 	let endOfPrefix = parts.length;
@@ -256,6 +261,7 @@ export function commonPath(paths: string[], sep = "/"): string {
 			return "";
 		}
 	}
+
 	const prefix = parts.slice(0, endOfPrefix).join(sep);
 
 	return prefix.endsWith(sep) ? prefix : `${prefix}${sep}`;
@@ -269,6 +275,7 @@ export function humanFileSize(bytes: number): string {
 	if (Math.abs(bytes) < thresh) {
 		return bytes + " B";
 	}
+
 	const units = ["kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
 
 	let u = -1;

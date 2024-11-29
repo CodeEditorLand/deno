@@ -26,6 +26,7 @@ function copyBytes(dst: Uint8Array, src: Uint8Array, off = 0): number {
 	if (src.byteLength > r) {
 		src = src.subarray(0, r);
 	}
+
 	dst.set(src, off);
 
 	return src.byteLength;
@@ -99,9 +100,11 @@ export class Buffer implements Reader, SyncReader, Writer, SyncWriter {
 
 			return;
 		}
+
 		if (n < 0 || n > this.length) {
 			throw Error("bytes.Buffer: truncation out of range");
 		}
+
 		this._reslice(this.off + n);
 	}
 
@@ -110,6 +113,7 @@ export class Buffer implements Reader, SyncReader, Writer, SyncWriter {
 	 */
 	reset(): void {
 		this._reslice(0);
+
 		this.off = 0;
 	}
 
@@ -126,11 +130,13 @@ export class Buffer implements Reader, SyncReader, Writer, SyncWriter {
 
 			return l;
 		}
+
 		return -1;
 	}
 
 	private _reslice(len: number): void {
 		assert(len <= this.buf.buffer.byteLength);
+
 		this.buf = new Uint8Array(this.buf.buffer, 0, len);
 	}
 
@@ -147,9 +153,12 @@ export class Buffer implements Reader, SyncReader, Writer, SyncWriter {
 				// this edge case is tested in 'bufferReadEmptyAtEOF' test
 				return 0;
 			}
+
 			return EOF;
 		}
+
 		const nread = copyBytes(p, this.buf.subarray(this.off));
+
 		this.off += nread;
 
 		return nread;
@@ -189,6 +198,7 @@ export class Buffer implements Reader, SyncReader, Writer, SyncWriter {
 		if (i >= 0) {
 			return i;
 		}
+
 		const c = this.capacity;
 
 		if (n <= Math.floor(c / 2) - m) {
@@ -205,11 +215,14 @@ export class Buffer implements Reader, SyncReader, Writer, SyncWriter {
 		} else {
 			// Not enough space anywhere, we need to allocate.
 			const buf = new Uint8Array(2 * c + n);
+
 			copyBytes(buf, this.buf.subarray(this.off));
+
 			this.buf = buf;
 		}
 		// Restore this.off and len(this.buf).
 		this.off = 0;
+
 		this._reslice(m + n);
 
 		return m;
@@ -225,7 +238,9 @@ export class Buffer implements Reader, SyncReader, Writer, SyncWriter {
 		if (n < 0) {
 			throw Error("Buffer.grow: negative count");
 		}
+
 		const m = this._grow(n);
+
 		this._reslice(m);
 	}
 
@@ -240,6 +255,7 @@ export class Buffer implements Reader, SyncReader, Writer, SyncWriter {
 		while (true) {
 			try {
 				const i = this._grow(MIN_READ);
+
 				this._reslice(i);
 
 				const fub = new Uint8Array(this.buf.buffer, i);
@@ -249,7 +265,9 @@ export class Buffer implements Reader, SyncReader, Writer, SyncWriter {
 				if (nread === EOF) {
 					return n;
 				}
+
 				this._reslice(i + nread);
+
 				n += nread;
 			} catch (e) {
 				return n;
@@ -265,6 +283,7 @@ export class Buffer implements Reader, SyncReader, Writer, SyncWriter {
 		while (true) {
 			try {
 				const i = this._grow(MIN_READ);
+
 				this._reslice(i);
 
 				const fub = new Uint8Array(this.buf.buffer, i);
@@ -274,7 +293,9 @@ export class Buffer implements Reader, SyncReader, Writer, SyncWriter {
 				if (nread === EOF) {
 					return n;
 				}
+
 				this._reslice(i + nread);
+
 				n += nread;
 			} catch (e) {
 				return n;
@@ -287,6 +308,7 @@ export class Buffer implements Reader, SyncReader, Writer, SyncWriter {
  */
 export async function readAll(r: Reader): Promise<Uint8Array> {
 	const buf = new Buffer();
+
 	await buf.readFrom(r);
 
 	return buf.bytes();
@@ -296,6 +318,7 @@ export async function readAll(r: Reader): Promise<Uint8Array> {
  */
 export function readAllSync(r: SyncReader): Uint8Array {
 	const buf = new Buffer();
+
 	buf.readFromSync(r);
 
 	return buf.bytes();

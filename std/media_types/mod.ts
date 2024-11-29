@@ -92,6 +92,7 @@ export function charset(type: string): string | undefined {
 	if (!m) {
 		return;
 	}
+
 	const [match] = m;
 
 	const mime = db[match.toLowerCase()];

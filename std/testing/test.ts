@@ -18,6 +18,7 @@ test(function testingAssertEqualActualUncoercable(): void {
 	} catch (e) {
 		didThrow = true;
 	}
+
 	assert(didThrow);
 });
 
@@ -31,6 +32,7 @@ test(function testingAssertEqualExpectedUncoercable(): void {
 	} catch (e) {
 		didThrow = true;
 	}
+
 	assert(didThrow);
 });
 
@@ -38,6 +40,7 @@ test(function testingAssertStrictEqual(): void {
 	const a = {};
 
 	const b = a;
+
 	assertStrictEq(a, b);
 });
 
@@ -54,18 +57,22 @@ test(function testingAssertNotStrictEqual(): void {
 		assert(
 			e.message === "actual: [object Object] expected: [object Object]",
 		);
+
 		didThrow = true;
 	}
+
 	assert(didThrow);
 });
 
 test(function testingDoesThrow(): void {
 	let count = 0;
+
 	assertThrows((): void => {
 		count++;
 
 		throw new Error();
 	});
+
 	assert(count === 1);
 });
 
@@ -77,23 +84,29 @@ test(function testingDoesNotThrow(): void {
 	try {
 		assertThrows((): void => {
 			count++;
+
 			console.log("Hello world");
 		});
 	} catch (e) {
 		assert(e.message === "Expected function to throw.");
+
 		didThrow = true;
 	}
+
 	assert(count === 1);
+
 	assert(didThrow);
 });
 
 test(function testingThrowsErrorType(): void {
 	let count = 0;
+
 	assertThrows((): void => {
 		count++;
 
 		throw new TypeError();
 	}, TypeError);
+
 	assert(count === 1);
 });
 
@@ -110,14 +123,18 @@ test(function testingThrowsNotErrorType(): void {
 		}, RangeError);
 	} catch (e) {
 		assert(e.message === `Expected error to be instance of "RangeError".`);
+
 		didThrow = true;
 	}
+
 	assert(count === 1);
+
 	assert(didThrow);
 });
 
 test(function testingThrowsMsgIncludes(): void {
 	let count = 0;
+
 	assertThrows(
 		(): void => {
 			count++;
@@ -127,6 +144,7 @@ test(function testingThrowsMsgIncludes(): void {
 		TypeError,
 		"world",
 	);
+
 	assert(count === 1);
 });
 
@@ -150,29 +168,36 @@ test(function testingThrowsMsgNotIncludes(): void {
 			e.message ===
 				`Expected error message to include "foobar", but got "Hello world!".`,
 		);
+
 		didThrow = true;
 	}
+
 	assert(count === 1);
+
 	assert(didThrow);
 });
 
 test(async function testingDoesThrowAsync(): Promise<void> {
 	let count = 0;
+
 	await assertThrowsAsync(async (): Promise<void> => {
 		count++;
 
 		throw new Error();
 	});
+
 	assert(count === 1);
 });
 
 test(async function testingDoesReject(): Promise<void> {
 	let count = 0;
+
 	await assertThrowsAsync((): Promise<never> => {
 		count++;
 
 		return Promise.reject(new Error());
 	});
+
 	assert(count === 1);
 });
 
@@ -184,13 +209,17 @@ test(async function testingDoesNotThrowAsync(): Promise<void> {
 	try {
 		await assertThrowsAsync(async (): Promise<void> => {
 			count++;
+
 			console.log("Hello world");
 		});
 	} catch (e) {
 		assert(e.message === "Expected function to throw.");
+
 		didThrow = true;
 	}
+
 	assert(count === 1);
+
 	assert(didThrow);
 });
 
@@ -202,25 +231,31 @@ test(async function testingDoesNotRejectAsync(): Promise<void> {
 	try {
 		await assertThrowsAsync((): Promise<void> => {
 			count++;
+
 			console.log("Hello world");
 
 			return Promise.resolve();
 		});
 	} catch (e) {
 		assert(e.message === "Expected function to throw.");
+
 		didThrow = true;
 	}
+
 	assert(count === 1);
+
 	assert(didThrow);
 });
 
 test(async function testingThrowsAsyncErrorType(): Promise<void> {
 	let count = 0;
+
 	await assertThrowsAsync((): Promise<void> => {
 		count++;
 
 		throw new TypeError();
 	}, TypeError);
+
 	assert(count === 1);
 });
 
@@ -237,14 +272,18 @@ test(async function testingThrowsAsyncNotErrorType(): Promise<void> {
 		}, RangeError);
 	} catch (e) {
 		assert(e.message === `Expected error to be instance of "RangeError".`);
+
 		didThrow = true;
 	}
+
 	assert(count === 1);
+
 	assert(didThrow);
 });
 
 test(async function testingThrowsAsyncMsgIncludes(): Promise<void> {
 	let count = 0;
+
 	await assertThrowsAsync(
 		async (): Promise<void> => {
 			count++;
@@ -254,6 +293,7 @@ test(async function testingThrowsAsyncMsgIncludes(): Promise<void> {
 		TypeError,
 		"world",
 	);
+
 	assert(count === 1);
 });
 
@@ -277,9 +317,12 @@ test(async function testingThrowsAsyncMsgNotIncludes(): Promise<void> {
 			e.message ===
 				`Expected error message to include "foobar", but got "Hello world!".`,
 		);
+
 		didThrow = true;
 	}
+
 	assert(count === 1);
+
 	assert(didThrow);
 });
 

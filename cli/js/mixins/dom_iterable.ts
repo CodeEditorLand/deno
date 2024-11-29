@@ -57,6 +57,7 @@ export function DomIterableMixin<K, V, TBase extends Constructor>(
 				arguments.length,
 				1,
 			);
+
 			callbackfn = callbackfn.bind(
 				thisArg == null ? window : Object(thisArg),
 			);

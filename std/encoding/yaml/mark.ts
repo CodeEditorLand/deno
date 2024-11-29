@@ -31,6 +31,7 @@ export class Mark {
 
 			if (this.position - start > maxLength / 2 - 1) {
 				head = " ... ";
+
 				start += 5;
 
 				break;
@@ -49,6 +50,7 @@ export class Mark {
 
 			if (end - this.position > maxLength / 2 - 1) {
 				tail = " ... ";
+
 				end -= 5;
 
 				break;

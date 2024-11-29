@@ -4,20 +4,26 @@ import { getLevelByName, getLevelName, LogLevel } from "./levels.ts";
 
 export interface LogRecord {
 	msg: string;
+
 	args: unknown[];
+
 	datetime: Date;
+
 	level: number;
+
 	levelName: string;
 }
 
 export class Logger {
 	level: number;
+
 	levelName: string;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	handlers: any[];
 
 	constructor(levelName: string, handlers?: BaseHandler[]) {
 		this.level = getLevelByName(levelName);
+
 		this.levelName = levelName;
 
 		this.handlers = handlers || [];
@@ -36,6 +42,7 @@ export class Logger {
 			level: level,
 			levelName: getLevelName(level),
 		};
+
 		this.handlers.forEach((handler): void => {
 			handler.handle(record);
 		});

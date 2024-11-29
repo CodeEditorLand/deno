@@ -4,7 +4,9 @@ import * as dispatch from "./dispatch.ts";
 
 export interface MakeTempDirOptions {
 	dir?: string;
+
 	prefix?: string;
+
 	suffix?: string;
 }
 

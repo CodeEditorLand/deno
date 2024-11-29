@@ -12,12 +12,19 @@ enum WorP {
 
 class Flags {
 	plus?: boolean;
+
 	dash?: boolean;
+
 	sharp?: boolean;
+
 	space?: boolean;
+
 	zero?: boolean;
+
 	lessthan?: boolean;
+
 	width = -1;
+
 	precision = -1;
 }
 
@@ -42,12 +49,17 @@ class Printf {
 	format: string;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	args: any[];
+
 	i: number;
 
 	state: State = State.PASSTHROUGH;
+
 	verb = "";
+
 	buf = "";
+
 	argNum = 0;
+
 	flags: Flags = new Flags();
 
 	haveSeen: boolean[];
@@ -58,8 +70,11 @@ class Printf {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	constructor(format: string, ...args: any[]) {
 		this.format = format;
+
 		this.args = args;
+
 		this.haveSeen = new Array(args.length);
+
 		this.i = 0;
 	}
 
@@ -74,15 +89,18 @@ class Printf {
 					} else {
 						this.buf += c;
 					}
+
 					break;
 
 				case State.PERCENT:
 					if (c === "%") {
 						this.buf += c;
+
 						this.state = State.PASSTHROUGH;
 					} else {
 						this.handleFormat();
 					}
+
 					break;
 
 				default:
@@ -99,14 +117,17 @@ class Printf {
 		for (let i = 0; i !== this.haveSeen.length; ++i) {
 			if (!this.haveSeen[i]) {
 				extras = true;
+
 				err += ` '${Deno.inspect(this.args[i])}'`;
 			}
 		}
+
 		err += ")";
 
 		if (extras) {
 			this.buf += err;
 		}
+
 		return this.buf;
 	}
 
@@ -124,6 +145,7 @@ class Printf {
 					switch (c) {
 						case "[":
 							this.handlePositional();
+
 							this.state = State.POSITIONAL;
 
 							break;
@@ -140,6 +162,7 @@ class Printf {
 
 						case "-":
 							flags.dash = true;
+
 							flags.zero = false; // only left pad zeros, dash takes precedence
 							break;
 
@@ -167,11 +190,14 @@ class Printf {
 							) {
 								if (c === ".") {
 									this.flags.precision = 0;
+
 									this.state = State.PRECISION;
+
 									this.i++;
 								} else {
 									this.state = State.WIDTH;
 								}
+
 								this.handleWidthAndPrecision(flags);
 							} else {
 								this.handleVerb();
@@ -187,7 +213,9 @@ class Printf {
 							this.flags.precision === -1
 								? WorP.WIDTH
 								: WorP.PRECISION;
+
 						this.handleWidthOrPrecisionRef(worp);
+
 						this.state = State.PERCENT;
 
 						break;
@@ -196,6 +224,7 @@ class Printf {
 
 						return; // always end in verb
 					}
+
 				default:
 					throw new Error(
 						`Should not be here ${this.state}, library bug!`,
@@ -203,12 +232,15 @@ class Printf {
 			} // switch state
 		}
 	}
+
 	handleWidthOrPrecisionRef(wOrP: WorP): void {
 		if (this.argNum >= this.args.length) {
 			// handle Positional should have already taken care of it...
 			return;
 		}
+
 		const arg = this.args[this.argNum];
+
 		this.haveSeen[this.argNum] = true;
 
 		if (typeof arg === "number") {
@@ -223,10 +255,13 @@ class Printf {
 			}
 		} else {
 			const tmp = wOrP === WorP.WIDTH ? "WIDTH" : "PREC";
+
 			this.tmpError = `%!(BAD ${tmp} '${this.args[this.argNum]}')`;
 		}
+
 		this.argNum++;
 	}
+
 	handleWidthAndPrecision(flags: Flags): void {
 		const fmt = this.format;
 
@@ -239,6 +274,7 @@ class Printf {
 						case ".":
 							// initialize precision, %9.f -> precision=0
 							this.flags.precision = 0;
+
 							this.state = State.PRECISION;
 
 							break;
@@ -255,12 +291,16 @@ class Printf {
 							// if we encounter a non (number|*|.) we're done with prec & wid
 							if (isNaN(val)) {
 								this.i--;
+
 								this.state = State.PERCENT;
 
 								return;
 							}
+
 							flags.width = flags.width == -1 ? 0 : flags.width;
+
 							flags.width *= 10;
+
 							flags.width += val;
 					} // switch c
 					break;
@@ -271,16 +311,20 @@ class Printf {
 
 						break;
 					}
+
 					const val = parseInt(c);
 
 					if (isNaN(val)) {
 						// one too far, rewind
 						this.i--;
+
 						this.state = State.PERCENT;
 
 						return;
 					}
+
 					flags.precision *= 10;
+
 					flags.precision += val;
 
 					break;
@@ -296,9 +340,11 @@ class Printf {
 			// sanity only
 			throw new Error("Can't happen? Bug.");
 		}
+
 		let positional = 0;
 
 		const format = this.format;
+
 		this.i++;
 
 		let err = false;
@@ -307,6 +353,7 @@ class Printf {
 			if (format[this.i] === "]") {
 				break;
 			}
+
 			positional *= 10;
 
 			const val = parseInt(format[this.i]);
@@ -315,19 +362,26 @@ class Printf {
 				//throw new Error(
 				//  `invalid character in positional: ${format}[${format[this.i]}]`
 				//);
+
 				this.tmpError = "%!(BAD INDEX)";
+
 				err = true;
 			}
+
 			positional += val;
 		}
+
 		if (positional - 1 >= this.args.length) {
 			this.tmpError = "%!(BAD INDEX)";
+
 			err = true;
 		}
+
 		this.argNum = err ? this.argNum : positional - 1;
 
 		return;
 	}
+
 	handleLessThan(): string {
 		const arg = this.args[this.argNum];
 
@@ -336,20 +390,26 @@ class Printf {
 				`arg ${arg} is not an array. Todo better error handling`,
 			);
 		}
+
 		let str = "[ ";
 
 		for (let i = 0; i !== arg.length; ++i) {
 			if (i !== 0) str += ", ";
+
 			str += this._handleVerb(arg[i]);
 		}
+
 		return str + " ]";
 	}
+
 	handleVerb(): void {
 		const verb = this.format[this.i];
+
 		this.verb = verb;
 
 		if (this.tmpError) {
 			this.buf += this.tmpError;
+
 			this.tmpError = undefined;
 
 			if (this.argNum < this.haveSeen.length) {
@@ -366,6 +426,7 @@ class Printf {
 				this.buf += this._handleVerb(arg);
 			}
 		}
+
 		this.argNum++; // if there is a further positional, it will reset.
 		this.state = State.PASSTHROUGH;
 	}
@@ -468,6 +529,7 @@ class Printf {
 
 		return s.padStart(this.flags.width, padding);
 	}
+
 	padNum(nStr: string, neg: boolean): string {
 		let sign: string;
 
@@ -478,6 +540,7 @@ class Printf {
 		} else {
 			sign = "";
 		}
+
 		const zero = this.flags.zero;
 
 		if (!zero) {
@@ -500,6 +563,7 @@ class Printf {
 			// see above
 			nStr = sign + nStr;
 		}
+
 		return nStr;
 	}
 
@@ -510,12 +574,14 @@ class Printf {
 
 		if (prec !== -1) {
 			this.flags.zero = false;
+
 			num = n === 0 && prec === 0 ? "" : num;
 
 			while (num.length < prec) {
 				num = "0" + num;
 			}
 		}
+
 		let prefix = "";
 
 		if (this.flags.sharp) {
@@ -546,6 +612,7 @@ class Printf {
 		if (upcase) {
 			num = num.toUpperCase();
 		}
+
 		return this.padNum(num, n < 0);
 	}
 
@@ -557,6 +624,7 @@ class Printf {
 		} catch (RangeError) {
 			s = UNICODE_REPLACEMENT_CHARACTER;
 		}
+
 		return this.pad(s);
 	}
 
@@ -569,17 +637,21 @@ class Printf {
 
 			return this.padNum("NaN", false);
 		}
+
 		if (n === Number.POSITIVE_INFINITY) {
 			this.flags.zero = false;
+
 			this.flags.plus = true;
 
 			return this.padNum("Inf", false);
 		}
+
 		if (n === Number.NEGATIVE_INFINITY) {
 			this.flags.zero = false;
 
 			return this.padNum("Inf", true);
 		}
+
 		return "";
 	}
 
@@ -587,14 +659,18 @@ class Printf {
 		if (fractional.length > precision) {
 			fractional = "1" + fractional; // prepend a 1 in case of leading 0
 			let tmp = parseInt(fractional.substr(0, precision + 2)) / 10;
+
 			tmp = Math.round(tmp);
+
 			fractional = Math.floor(tmp).toString();
+
 			fractional = fractional.substr(1); // remove extra 1
 		} else {
 			while (fractional.length < precision) {
 				fractional += "0";
 			}
 		}
+
 		return fractional;
 	}
 
@@ -617,6 +693,7 @@ class Printf {
 			this.flags.precision !== -1
 				? this.flags.precision
 				: DEFAULT_PRECISION;
+
 		fractional = this.roundFractionToPrecision(fractional, precision);
 
 		let e = m[F.exponent];
@@ -656,6 +733,7 @@ class Printf {
 				for (let i = 0; i !== Math.abs(e) - 1; ++i) {
 					nStr += "0";
 				}
+
 				return (nStr += m);
 			} else {
 				const splIdx = e + 1;
@@ -663,6 +741,7 @@ class Printf {
 				while (m.length < splIdx) {
 					m += "0";
 				}
+
 				return m.substr(0, splIdx) + "." + m.substr(splIdx);
 			}
 		}
@@ -679,6 +758,7 @@ class Printf {
 			this.flags.precision !== -1
 				? this.flags.precision
 				: DEFAULT_PRECISION;
+
 		fractional = this.roundFractionToPrecision(fractional, precision);
 
 		return this.padNum(`${dig}.${fractional}`, n < 0);
@@ -718,6 +798,7 @@ class Printf {
 			this.flags.precision !== -1
 				? this.flags.precision
 				: DEFAULT_PRECISION;
+
 		P = P === 0 ? 1 : P;
 
 		const m = n.toExponential().match(FLOAT_REGEXP);
@@ -732,6 +813,7 @@ class Printf {
 
 		if (P > X && X >= -4) {
 			this.flags.precision = P - (X + 1);
+
 			nStr = this.fmtFloatF(n);
 
 			if (!this.flags.sharp) {
@@ -739,12 +821,14 @@ class Printf {
 			}
 		} else {
 			this.flags.precision = P - 1;
+
 			nStr = this.fmtFloatE(n);
 
 			if (!this.flags.sharp) {
 				nStr = nStr.replace(/\.?0*e/, upcase ? "E" : "e");
 			}
 		}
+
 		return nStr;
 	}
 
@@ -752,6 +836,7 @@ class Printf {
 		if (this.flags.precision !== -1) {
 			s = s.substr(0, this.flags.precision);
 		}
+
 		return this.pad(s);
 	}
 
@@ -780,11 +865,14 @@ class Printf {
 					// lower half of the codePoint, ie. as if a string
 					// is a list of 8bit values instead of UCS2 runes
 					const c = (val.charCodeAt(i) & 0xff).toString(16);
+
 					hex += c.length === 1 ? `0${c}` : c;
 				}
+
 				if (upper) {
 					hex = hex.toUpperCase();
 				}
+
 				return this.pad(hex);
 
 				break;

@@ -9,9 +9,11 @@ import {
 
 /** websocket echo server */
 const port = Deno.args[1] || "8080";
+
 console.log(`websocket server is running on :${port}`);
 for await (const req of serve(`:${port}`)) {
 	const { headers, conn } = req;
+
 	acceptWebSocket({
 		conn,
 		headers,
@@ -30,11 +32,13 @@ for await (const req of serve(`:${port}`)) {
 					if (done) {
 						break;
 					}
+
 					const ev = value;
 
 					if (typeof ev === "string") {
 						// text message
 						console.log("ws:Text", ev);
+
 						await sock.send(ev);
 					} else if (ev instanceof Uint8Array) {
 						// binary message
@@ -46,10 +50,12 @@ for await (const req of serve(`:${port}`)) {
 					} else if (isWebSocketCloseEvent(ev)) {
 						// close
 						const { code, reason } = ev;
+
 						console.log("ws:Close", code, reason);
 					}
 				} catch (e) {
 					console.error(`failed to receive frame: ${e}`);
+
 					await sock.close(1000).catch(console.error);
 				}
 			}

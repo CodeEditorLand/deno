@@ -51,6 +51,7 @@ function renderRow(row: string[], columnWidths: number[]): string {
 			out += tableChars.middle;
 		}
 	}
+
 	out += tableChars.right;
 
 	return out;
@@ -73,6 +74,7 @@ export function cliTable(head: string[], columns: string[][]): string {
 			if (rows[j] === undefined) {
 				rows[j] = [];
 			}
+
 			const value = (rows[j][i] = hasOwnProperty(column, j)
 				? column[j]
 				: "");
@@ -80,6 +82,7 @@ export function cliTable(head: string[], columns: string[][]): string {
 			const width = columnWidths[i] || 0;
 
 			const counted = countBytes(value);
+
 			columnWidths[i] = Math.max(width, counted);
 		}
 	}

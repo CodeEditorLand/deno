@@ -53,11 +53,17 @@ declare global {
 		getColumnNumber(): number | null;
 
 		getEvalOrigin(): string | null;
+
 		isToplevel(): boolean;
+
 		isEval(): boolean;
+
 		isNative(): boolean;
+
 		isConstructor(): boolean;
+
 		isAsync(): boolean;
+
 		isPromiseAll(): boolean;
 
 		getPromiseIndex(): number | null;
@@ -209,6 +215,7 @@ window.addEventListener("unload", (e: domTypes.Event): void => {
 // have different signatures
 export interface ImportMeta {
 	url: string;
+
 	main: boolean;
 }
 

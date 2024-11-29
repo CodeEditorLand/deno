@@ -1,6 +1,7 @@
 // Copyright 2018-2019 the Deno authors. All rights reserved. MIT license.
 interface FarthestPoint {
 	y: number;
+
 	id: number;
 }
 
@@ -12,6 +13,7 @@ export enum DiffType {
 
 export interface DiffResult<T> {
 	type: DiffType;
+
 	value: T;
 }
 
@@ -36,6 +38,7 @@ function createCommon<T>(A: T[], B: T[], reverse?: boolean): T[] {
 			return common;
 		}
 	}
+
 	return common;
 }
 
@@ -47,9 +50,11 @@ export default function diff<T>(A: T[], B: T[]): Array<DiffResult<T>> {
 		B.slice(prefixCommon.length),
 		true,
 	).reverse();
+
 	A = suffixCommon.length
 		? A.slice(prefixCommon.length, -suffixCommon.length)
 		: A.slice(prefixCommon.length);
+
 	B = suffixCommon.length
 		? B.slice(prefixCommon.length, -suffixCommon.length)
 		: B.slice(prefixCommon.length);
@@ -85,6 +90,7 @@ export default function diff<T>(A: T[], B: T[]): Array<DiffResult<T>> {
 			),
 		];
 	}
+
 	const offset = N;
 
 	const delta = M - N;
@@ -115,6 +121,7 @@ export default function diff<T>(A: T[], B: T[]): Array<DiffResult<T>> {
 		swapped: boolean,
 	): Array<{
 		type: DiffType;
+
 		value: T;
 	}> {
 		const M = A.length;
@@ -141,21 +148,28 @@ export default function diff<T>(A: T[], B: T[]): Array<DiffResult<T>> {
 					type: swapped ? DiffType.removed : DiffType.added,
 					value: B[b],
 				});
+
 				b -= 1;
 			} else if (type === ADDED) {
 				result.unshift({
 					type: swapped ? DiffType.added : DiffType.removed,
 					value: A[a],
 				});
+
 				a -= 1;
 			} else {
 				result.unshift({ type: DiffType.common, value: A[a] });
+
 				a -= 1;
+
 				b -= 1;
 			}
+
 			j = routes[prev];
+
 			type = routes[prev + diffTypesPtrOffset];
 		}
+
 		return result;
 	}
 
@@ -174,15 +188,21 @@ export default function diff<T>(A: T[], B: T[]): Array<DiffResult<T>> {
 			(slide && slide.y) > (down && down.y) + 1
 		) {
 			const prev = slide.id;
+
 			ptr++;
+
 			routes[ptr] = prev;
+
 			routes[ptr + diffTypesPtrOffset] = ADDED;
 
 			return { y: slide.y, id: ptr };
 		} else {
 			const prev = down.id;
+
 			ptr++;
+
 			routes[ptr] = prev;
+
 			routes[ptr + diffTypesPtrOffset] = REMOVED;
 
 			return { y: down.y + 1, id: ptr };
@@ -207,12 +227,18 @@ export default function diff<T>(A: T[], B: T[]): Array<DiffResult<T>> {
 
 		while (fp.y + k < M && fp.y < N && A[fp.y + k] === B[fp.y]) {
 			const prev = fp.id;
+
 			ptr++;
+
 			fp.id = ptr;
+
 			fp.y += 1;
+
 			routes[ptr] = prev;
+
 			routes[ptr + diffTypesPtrOffset] = COMMON;
 		}
+
 		return fp;
 	}
 
@@ -229,6 +255,7 @@ export default function diff<T>(A: T[], B: T[]): Array<DiffResult<T>> {
 				B,
 			);
 		}
+
 		for (let k = delta + p; k > delta; --k) {
 			fp[k + offset] = snake(
 				k,
@@ -239,6 +266,7 @@ export default function diff<T>(A: T[], B: T[]): Array<DiffResult<T>> {
 				B,
 			);
 		}
+
 		fp[delta + offset] = snake(
 			delta,
 			fp[delta - 1 + offset],
@@ -248,6 +276,7 @@ export default function diff<T>(A: T[], B: T[]): Array<DiffResult<T>> {
 			B,
 		);
 	}
+
 	return [
 		...prefixCommon.map(
 			(c): DiffResult<typeof c> => ({ type: DiffType.common, value: c }),

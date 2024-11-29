@@ -30,7 +30,10 @@ test(async function malformedJsonControlBuffer(): Promise<void> {
 	const resText = new TextDecoder().decode(res);
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const resJson = JSON.parse(resText) as any;
+
 	assert(!resJson.ok);
+
 	assert(resJson.err);
+
 	assertEquals(resJson.err!.kind, Deno.ErrorKind.InvalidInput);
 });

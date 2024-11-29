@@ -11,6 +11,7 @@ const { readFileSync, cwd } = Deno;
 	const document = new TextDecoder().decode(yml);
 
 	const obj = parse(document) as object;
+
 	console.log(obj);
 
 	let i = 0;
@@ -21,6 +22,7 @@ const { readFileSync, cwd } = Deno;
 		for (const [key, value] of Object.entries(o)) {
 			console.log(key, value);
 		}
+
 		i++;
 	}
 })();

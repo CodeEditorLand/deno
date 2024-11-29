@@ -22,6 +22,7 @@ export async function ensureLink(src: string, dest: string): Promise<void> {
 				`Ensure path exists, expected 'file', got '${destFilePathType}'`,
 			);
 		}
+
 		return;
 	}
 
@@ -48,6 +49,7 @@ export function ensureLinkSync(src: string, dest: string): void {
 				`Ensure path exists, expected 'file', got '${destFilePathType}'`,
 			);
 		}
+
 		return;
 	}
 

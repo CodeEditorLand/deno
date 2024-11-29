@@ -5,6 +5,7 @@ import { collectUint8Arrays, deferred, MuxAsyncIterator } from "./async.ts";
 
 test(async function asyncDeferred(): Promise<void> {
 	const d = deferred<number>();
+
 	d.resolve(12);
 });
 
@@ -26,7 +27,9 @@ async function* gen456(): AsyncIterableIterator<number> {
 
 test(async function asyncMuxAsyncIterator(): Promise<void> {
 	const mux = new MuxAsyncIterator<number>();
+
 	mux.add(gen123());
+
 	mux.add(gen456());
 
 	const results = new Set();
@@ -34,20 +37,27 @@ test(async function asyncMuxAsyncIterator(): Promise<void> {
 	for await (const value of mux) {
 		results.add(value);
 	}
+
 	assertEquals(results.size, 6);
 });
 
 test(async function collectUint8Arrays0(): Promise<void> {
 	async function* gen(): AsyncIterableIterator<Uint8Array> {}
+
 	const result = await collectUint8Arrays(gen());
+
 	assert(result instanceof Uint8Array);
+
 	assertEquals(result.length, 0);
 });
 
 test(async function collectUint8Arrays0(): Promise<void> {
 	async function* gen(): AsyncIterableIterator<Uint8Array> {}
+
 	const result = await collectUint8Arrays(gen());
+
 	assert(result instanceof Uint8Array);
+
 	assertStrictEq(result.length, 0);
 });
 
@@ -57,8 +67,11 @@ test(async function collectUint8Arrays1(): Promise<void> {
 	async function* gen(): AsyncIterableIterator<Uint8Array> {
 		yield buf;
 	}
+
 	const result = await collectUint8Arrays(gen());
+
 	assertStrictEq(result, buf);
+
 	assertStrictEq(result.length, 3);
 });
 
@@ -72,8 +85,11 @@ test(async function collectUint8Arrays4(): Promise<void> {
 
 		yield new Uint8Array([6]);
 	}
+
 	const result = await collectUint8Arrays(gen());
+
 	assert(result instanceof Uint8Array);
+
 	assertStrictEq(result.length, 6);
 
 	for (let i = 0; i < 6; i++) {

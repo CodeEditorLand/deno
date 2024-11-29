@@ -8,6 +8,7 @@ test(function booleanDefaultTrue(): void {
 		boolean: "sometrue",
 		default: { sometrue: true },
 	});
+
 	assertEquals(argv.sometrue, true);
 });
 
@@ -16,6 +17,7 @@ test(function booleanDefaultFalse(): void {
 		boolean: "somefalse",
 		default: { somefalse: false },
 	});
+
 	assertEquals(argv.somefalse, false);
 });
 
@@ -24,11 +26,13 @@ test(function booleanDefaultNull(): void {
 		boolean: "maybe",
 		default: { maybe: null },
 	});
+
 	assertEquals(argv.maybe, null);
 
 	const argv2 = parse(["--maybe"], {
 		boolean: "maybe",
 		default: { maybe: null },
 	});
+
 	assertEquals(argv2.maybe, true);
 });

@@ -24,6 +24,7 @@ export class ReadableStreamBYOBRequest {
 		if (!rs.isReadableStreamBYOBRequest(this)) {
 			throw new TypeError();
 		}
+
 		return this[rs.view_]!;
 	}
 
@@ -31,6 +32,7 @@ export class ReadableStreamBYOBRequest {
 		if (!rs.isReadableStreamBYOBRequest(this)) {
 			throw new TypeError();
 		}
+
 		if (this[rs.associatedReadableByteStreamController_] === undefined) {
 			throw new TypeError();
 		}
@@ -45,9 +47,11 @@ export class ReadableStreamBYOBRequest {
 		if (!rs.isReadableStreamBYOBRequest(this)) {
 			throw new TypeError();
 		}
+
 		if (this[rs.associatedReadableByteStreamController_] === undefined) {
 			throw new TypeError();
 		}
+
 		if (!ArrayBuffer.isView(view)) {
 			throw new TypeError("view parameter must be a TypedArray");
 		}

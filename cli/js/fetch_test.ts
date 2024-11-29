@@ -16,8 +16,11 @@ testPerm({ net: true }, async function fetchConnectionError(): Promise<void> {
 	} catch (err_) {
 		err = err_;
 	}
+
 	assertEquals(err.kind, Deno.ErrorKind.HttpOther);
+
 	assertEquals(err.name, "HttpOther");
+
 	assertStrContains(err.message, "error trying to connect");
 });
 
@@ -27,6 +30,7 @@ testPerm({ net: true }, async function fetchJsonSuccess(): Promise<void> {
 	);
 
 	const json = await response.json();
+
 	assertEquals(json.name, "deno");
 });
 
@@ -38,7 +42,9 @@ test(async function fetchPerm(): Promise<void> {
 	} catch (err_) {
 		err = err_;
 	}
+
 	assertEquals(err.kind, Deno.ErrorKind.PermissionDenied);
+
 	assertEquals(err.name, "PermissionDenied");
 });
 
@@ -46,6 +52,7 @@ testPerm({ net: true }, async function fetchUrl(): Promise<void> {
 	const response = await fetch(
 		"http://localhost:4545/cli/tests/fixture.json",
 	);
+
 	assertEquals(response.url, "http://localhost:4545/cli/tests/fixture.json");
 });
 
@@ -53,6 +60,7 @@ testPerm({ net: true }, async function fetchURL(): Promise<void> {
 	const response = await fetch(
 		new URL("http://localhost:4545/cli/tests/fixture.json"),
 	);
+
 	assertEquals(response.url, "http://localhost:4545/cli/tests/fixture.json");
 });
 
@@ -62,7 +70,9 @@ testPerm({ net: true }, async function fetchHeaders(): Promise<void> {
 	);
 
 	const headers = response.headers;
+
 	assertEquals(headers.get("Content-Type"), "application/json");
+
 	assert(headers.get("Server").startsWith("SimpleHTTP"));
 });
 
@@ -74,7 +84,9 @@ testPerm({ net: true }, async function fetchBlob(): Promise<void> {
 	const headers = response.headers;
 
 	const blob = await response.blob();
+
 	assertEquals(blob.type, headers.get("Content-Type"));
+
 	assertEquals(blob.size, Number(headers.get("Content-Length")));
 });
 
@@ -82,12 +94,16 @@ testPerm({ net: true }, async function fetchBodyUsed(): Promise<void> {
 	const response = await fetch(
 		"http://localhost:4545/cli/tests/fixture.json",
 	);
+
 	assertEquals(response.bodyUsed, false);
+
 	assertThrows((): void => {
 		// Assigning to read-only property throws in the strict mode.
 		response.bodyUsed = true;
 	});
+
 	await response.blob();
+
 	assertEquals(response.bodyUsed, true);
 });
 
@@ -113,8 +129,11 @@ testPerm({ net: true }, async function responseClone(): Promise<void> {
 	);
 
 	const response1 = response.clone();
+
 	assert(response !== response1);
+
 	assertEquals(response.status, response1.status);
+
 	assertEquals(response.statusText, response1.statusText);
 
 	const ab = await response.arrayBuffer();
@@ -134,7 +153,9 @@ testPerm({ net: true }, async function fetchEmptyInvalid(): Promise<void> {
 	} catch (err_) {
 		err = err_;
 	}
+
 	assertEquals(err.kind, Deno.ErrorKind.RelativeUrlWithoutBase);
+
 	assertEquals(err.name, "RelativeUrlWithoutBase");
 });
 
@@ -146,8 +167,11 @@ testPerm(
 		);
 
 		const formData = await response.formData();
+
 		assert(formData.has("field_1"));
+
 		assertEquals(formData.get("field_1").toString(), "value_1 \r\n");
+
 		assert(formData.has("field_2"));
 		/* TODO(ry) Re-enable this test once we bring back the global File type.
   const file = formData.get("field_2") as File;
@@ -165,9 +189,13 @@ testPerm(
 		);
 
 		const formData = await response.formData();
+
 		assert(formData.has("field_1"));
+
 		assertEquals(formData.get("field_1").toString(), "Hi");
+
 		assert(formData.has("field_2"));
+
 		assertEquals(formData.get("field_2").toString(), "<Deno>");
 	},
 );
@@ -175,10 +203,13 @@ testPerm(
 testPerm({ net: true }, async function fetchWithRedirection(): Promise<void> {
 	const response = await fetch("http://localhost:4546/"); // will redirect to http://localhost:4545/
 	assertEquals(response.status, 200);
+
 	assertEquals(response.statusText, "OK");
+
 	assertEquals(response.url, "http://localhost:4545/");
 
 	const body = await response.text();
+
 	assert(body.includes("<title>Directory listing for /</title>"));
 });
 
@@ -187,9 +218,11 @@ testPerm(
 	async function fetchWithRelativeRedirection(): Promise<void> {
 		const response = await fetch("http://localhost:4545/tests"); // will redirect to /tests/
 		assertEquals(response.status, 200);
+
 		assertEquals(response.statusText, "OK");
 
 		const body = await response.text();
+
 		assert(body.includes("<title>Directory listing for /tests/</title>"));
 	},
 );
@@ -213,7 +246,9 @@ testPerm({ net: true }, async function fetchInitStringBody(): Promise<void> {
 	});
 
 	const text = await response.text();
+
 	assertEquals(text, data);
+
 	assert(response.headers.get("content-type").startsWith("text/plain"));
 });
 
@@ -230,6 +265,7 @@ testPerm(
 		const response = await fetch(req);
 
 		const text = await response.text();
+
 		assertEquals(text, data);
 	},
 );
@@ -245,6 +281,7 @@ testPerm(
 		});
 
 		const text = await response.text();
+
 		assertEquals(text, data);
 	},
 );
@@ -262,7 +299,9 @@ testPerm(
 		});
 
 		const text = await response.text();
+
 		assertEquals(text, data);
+
 		assert(
 			response.headers
 				.get("content-type")
@@ -284,7 +323,9 @@ testPerm({ net: true }, async function fetchInitBlobBody(): Promise<void> {
 	});
 
 	const text = await response.text();
+
 	assertEquals(text, data);
+
 	assert(response.headers.get("content-type").startsWith("text/javascript"));
 });
 
@@ -295,10 +336,12 @@ testPerm({ net: true }, async function fetchUserAgent(): Promise<void> {
 		method: "POST",
 		body: new TextEncoder().encode(data),
 	});
+
 	assertEquals(
 		response.headers.get("user-agent"),
 		`Deno/${Deno.version.deno}`,
 	);
+
 	await response.text();
 });
 
@@ -340,7 +383,9 @@ function bufferServer(addr: string): Deno.Buffer {
     // write() to complete is not a guarantee that we've read the incoming
     // request.
     await Promise.all([p1, p2]);
+
     conn.close();
+
     listener.close();
   });
   return buf;

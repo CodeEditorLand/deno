@@ -11,7 +11,9 @@ function pathBase(p: string): string {
 const token = Deno.env()["GIST_TOKEN"];
 if (!token) {
 	console.error("GIST_TOKEN environmental variable not set.");
+
 	console.error("Get a token here: https://github.com/settings/tokens");
+
 	Deno.exit(1);
 }
 
@@ -22,6 +24,7 @@ if (parsedArgs._.length === 0) {
 		"Usage: gist.ts --allow-env --allow-net [-t|--title Example] some_file " +
 			"[next_file]",
 	);
+
 	Deno.exit(1);
 }
 
@@ -32,6 +35,7 @@ for (const filename of parsedArgs._) {
 	const content = await Deno.readFile(filename);
 
 	const contentStr = new TextDecoder().decode(content);
+
 	files[base] = { content: contentStr };
 }
 
@@ -55,9 +59,12 @@ const res = await fetch("https://api.github.com/gists", {
 
 if (res.ok) {
 	const resObj = await res.json();
+
 	console.log("Success");
+
 	console.log(resObj["html_url"]);
 } else {
 	const err = await res.text();
+
 	console.error("Failure to POST", err);
 }

@@ -2,12 +2,16 @@
 
 class RBNode<T> {
 	public left: this | null;
+
 	public right: this | null;
+
 	public red: boolean;
 
 	constructor(public data: T) {
 		this.left = null;
+
 		this.right = null;
+
 		this.red = true;
 	}
 
@@ -38,9 +42,11 @@ class RBTree<T> {
 		if (res === null) {
 			return null;
 		}
+
 		while (res.left !== null) {
 			res = res.left;
 		}
+
 		return res.data;
 	}
 
@@ -57,6 +63,7 @@ class RBTree<T> {
 				res = res.getChild(c > 0);
 			}
 		}
+
 		return null;
 	}
 
@@ -67,6 +74,7 @@ class RBTree<T> {
 		if (this.root === null) {
 			// empty tree
 			this.root = new RBNode(data);
+
 			ret = true;
 		} else {
 			const head = new RBNode(null as unknown as T); // fake tree root
@@ -80,6 +88,7 @@ class RBTree<T> {
 			let ggp = head; // grand-grand-parent
 			let p: RBNode<T> | null = null; // parent
 			let node: RBNode<T> | null = this.root;
+
 			ggp.right = this.root;
 
 			// search down
@@ -87,12 +96,16 @@ class RBTree<T> {
 				if (node === null) {
 					// insert new node at the bottom
 					node = new RBNode(data);
+
 					p!.setChild(dir, node);
+
 					ret = true;
 				} else if (isRed(node.left) && isRed(node.right)) {
 					// color flip
 					node.red = true;
+
 					node.left!.red = false;
+
 					node.right!.red = false;
 				}
 
@@ -115,14 +128,18 @@ class RBTree<T> {
 				}
 
 				last = dir;
+
 				dir = Number(cmp < 0); // Fix type
 
 				// update helpers
 				if (gp !== null) {
 					ggp = gp;
 				}
+
 				gp = p;
+
 				p = node;
+
 				node = node.getChild(dir);
 			}
 
@@ -144,6 +161,7 @@ class RBTree<T> {
 
 		const head = new RBNode(null as unknown as T); // fake tree root
 		let node = head;
+
 		node.right = this.root;
 
 		let p = null; // parent
@@ -156,7 +174,9 @@ class RBTree<T> {
 
 			// update helpers
 			gp = p;
+
 			p = node;
+
 			node = node.getChild(dir)!;
 
 			const cmp = this.comparator(data, node.data);
@@ -172,7 +192,9 @@ class RBTree<T> {
 			if (!isRed(node) && !isRed(node.getChild(dir))) {
 				if (isRed(node.getChild(!dir))) {
 					const sr = singleRotate(node, dir);
+
 					p.setChild(last, sr);
+
 					p = sr;
 				} else if (!isRed(node.getChild(!dir))) {
 					const sibling = p.getChild(!last);
@@ -184,7 +206,9 @@ class RBTree<T> {
 						) {
 							// color flip
 							p.red = false;
+
 							sibling.red = true;
+
 							node.red = true;
 						} else {
 							const dir2 = gp!.right === p;
@@ -197,9 +221,13 @@ class RBTree<T> {
 
 							// ensure correct coloring
 							const gpc = gp!.getChild(dir2)!;
+
 							gpc.red = true;
+
 							node.red = true;
+
 							gpc.left!.red = false;
+
 							gpc.right!.red = false;
 						}
 					}
@@ -210,6 +238,7 @@ class RBTree<T> {
 		// replace and remove if found
 		if (found !== null) {
 			found.data = node.data;
+
 			p!.setChild(p!.right === node, node.getChild(node.left === null));
 		}
 
@@ -232,9 +261,11 @@ function singleRotate<T>(root: RBNode<T>, dir: boolean | number): RBNode<T> {
 	const save = root.getChild(!dir)!;
 
 	root.setChild(!dir, save.getChild(dir));
+
 	save.setChild(dir, root);
 
 	root.red = true;
+
 	save.red = false;
 
 	return save;

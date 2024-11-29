@@ -86,12 +86,15 @@ function encodeHex(character: number): string {
 
 	if (character <= 0xff) {
 		handle = "x";
+
 		length = 2;
 	} else if (character <= 0xffff) {
 		handle = "u";
+
 		length = 4;
 	} else if (character <= 0xffffffff) {
 		handle = "U";
+
 		length = 8;
 	} else {
 		throw new YAMLError(
@@ -117,9 +120,11 @@ function indentString(string: string, spaces: number): string {
 
 		if (next === -1) {
 			line = string.slice(position);
+
 			position = length;
 		} else {
 			line = string.slice(position, next + 1);
+
 			position = next + 1;
 		}
 
@@ -140,7 +145,9 @@ function testImplicitResolving(state: DumperState, str: string): boolean {
 
 	for (
 		let index = 0, length = state.implicitTypes.length;
+
 		index < length;
+
 		index += 1
 	) {
 		type = state.implicitTypes[index];
@@ -271,6 +278,7 @@ function chooseScalarStyle(
 			if (!isPrintable(char)) {
 				return STYLE_DOUBLE;
 			}
+
 			plain = plain && isPlainSafe(char);
 		}
 	} else {
@@ -287,11 +295,13 @@ function chooseScalarStyle(
 						// Foldable line = too long, and not more-indented.
 						(i - previousLineBreak - 1 > lineWidth &&
 							string[previousLineBreak + 1] !== " ");
+
 					previousLineBreak = i;
 				}
 			} else if (!isPrintable(char)) {
 				return STYLE_DOUBLE;
 			}
+
 			plain = plain && isPlainSafe(char);
 		}
 		// in case the end is missing a \n
@@ -350,6 +360,7 @@ function foldLine(line: string, width: number): string {
 			// skip the space that was output as \n
 			start = end + 1; // derive start <= length-1
 		}
+
 		curr = next;
 	}
 
@@ -383,7 +394,9 @@ function foldString(string: string, width: number): string {
 	// first line (possibly an empty line)
 	let result = ((): string => {
 		let nextLF = string.indexOf("\n");
+
 		nextLF = nextLF !== -1 ? nextLF : string.length;
+
 		lineRe.lastIndex = nextLF;
 		// eslint-disable-next-line @typescript-eslint/no-use-before-define
 		return foldLine(string.slice(0, nextLF), width);
@@ -399,12 +412,15 @@ function foldString(string: string, width: number): string {
 	while ((match = lineRe.exec(string))) {
 		const prefix = match[1],
 			line = match[2];
+
 		moreIndented = line[0] === " ";
+
 		result +=
 			prefix +
 			(!prevMoreIndented && !moreIndented && line !== "" ? "\n" : "") +
 			// eslint-disable-next-line @typescript-eslint/no-use-before-define
 			foldLine(line, width);
+
 		prevMoreIndented = moreIndented;
 	}
 
@@ -436,7 +452,9 @@ function escapeString(string: string): string {
 				continue;
 			}
 		}
+
 		escapeSeq = ESCAPE_SEQUENCES[char];
+
 		result +=
 			!escapeSeq && isPrintable(char)
 				? string[i]
@@ -479,6 +497,7 @@ function writeScalar(
 		if (string.length === 0) {
 			return "''";
 		}
+
 		if (
 			!state.noCompatMode &&
 			DEPRECATED_BOOLEANS_SYNTAX.indexOf(string) !== -1
@@ -563,11 +582,13 @@ function writeFlowSequence(
 		// eslint-disable-next-line @typescript-eslint/no-use-before-define
 		if (writeNode(state, level, object[index], false, false)) {
 			if (index !== 0) _result += `,${!state.condenseFlow ? " " : ""}`;
+
 			_result += state.dump;
 		}
 	}
 
 	state.tag = _tag;
+
 	state.dump = `[${_result}]`;
 }
 
@@ -600,6 +621,7 @@ function writeBlockSequence(
 	}
 
 	state.tag = _tag;
+
 	state.dump = _result || "[]"; // Empty sequence if no valid values.
 }
 
@@ -617,7 +639,9 @@ function writeFlowMapping(
 
 	for (
 		let index = 0, length = objectKeyList.length;
+
 		index < length;
+
 		index += 1
 	) {
 		pairBuffer = state.condenseFlow ? '"' : "";
@@ -625,6 +649,7 @@ function writeFlowMapping(
 		if (index !== 0) pairBuffer += ", ";
 
 		objectKey = objectKeyList[index];
+
 		objectValue = object[objectKey];
 
 		// eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -650,6 +675,7 @@ function writeFlowMapping(
 	}
 
 	state.tag = _tag;
+
 	state.dump = `{${_result}}`;
 }
 
@@ -683,7 +709,9 @@ function writeBlockMapping(
 
 	for (
 		let index = 0, length = objectKeyList.length;
+
 		index < length;
+
 		index += 1
 	) {
 		pairBuffer = "";
@@ -693,6 +721,7 @@ function writeBlockMapping(
 		}
 
 		objectKey = objectKeyList[index];
+
 		objectValue = object[objectKey];
 
 		// eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -736,6 +765,7 @@ function writeBlockMapping(
 	}
 
 	state.tag = _tag;
+
 	state.dump = _result || "{}"; // Empty mapping if no valid pairs.
 }
 
@@ -801,6 +831,7 @@ function writeNode(
 	iskey = false,
 ): boolean {
 	state.tag = null;
+
 	state.dump = object;
 
 	if (!detectType(state, object, false)) {
@@ -822,6 +853,7 @@ function writeNode(
 
 	if (objectOrArray) {
 		duplicateIndex = state.duplicates.indexOf(object);
+
 		duplicate = duplicateIndex !== -1;
 	}
 
@@ -843,6 +875,7 @@ function writeNode(
 		) {
 			state.usedDuplicates[duplicateIndex] = true;
 		}
+
 		if (type === "[object Object]") {
 			if (block && Object.keys(state.dump).length !== 0) {
 				writeBlockMapping(state, level, state.dump, compact);
@@ -912,7 +945,9 @@ function inspectNode(
 			if (Array.isArray(object)) {
 				for (
 					let idx = 0, length = object.length;
+
 					idx < length;
+
 					idx += 1
 				) {
 					inspectNode(object[idx], objects, duplicatesIndexes);
@@ -922,7 +957,9 @@ function inspectNode(
 
 				for (
 					let idx = 0, length = objectKeyList.length;
+
 					idx < length;
+
 					idx += 1
 				) {
 					inspectNode(
@@ -947,6 +984,7 @@ function getDuplicateReferences(object: object, state: DumperState): void {
 	for (let index = 0; index < length; index += 1) {
 		state.duplicates.push(objects[duplicatesIndexes[index]]);
 	}
+
 	state.usedDuplicates = new Array(length);
 }
 

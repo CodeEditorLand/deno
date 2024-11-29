@@ -12,12 +12,15 @@ const body4 = new TextEncoder().encode("World 4\n");
 
 async function delayedRespond(request: ServerRequest): Promise<void> {
 	await delay(3000);
+
 	await request.respond({ status: 200, body });
 }
 
 async function largeRespond(request: ServerRequest, c: string): Promise<void> {
 	const b = new Uint8Array(1024 * 1024);
+
 	b.fill(c.charCodeAt(0));
+
 	await request.respond({ status: 200, body: b });
 }
 
@@ -51,5 +54,6 @@ for await (const request of server) {
 
 			break;
 	}
+
 	step++;
 }

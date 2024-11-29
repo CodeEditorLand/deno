@@ -12,7 +12,9 @@ test(function fromInit(): void {
 
 	// @ts-ignore
 	assertEquals("ahoyhoy", req._bodySource);
+
 	assertEquals(req.url, "https://example.com");
+
 	assertEquals(req.headers.get("test-header"), "value");
 });
 
@@ -20,13 +22,16 @@ test(function fromRequest(): void {
 	const r = new Request("https://example.com");
 	// @ts-ignore
 	r._bodySource = "ahoyhoy";
+
 	r.headers.set("test-header", "value");
 
 	const req = new Request(r);
 
 	// @ts-ignore
 	assertEquals(req._bodySource, r._bodySource);
+
 	assertEquals(req.url, r.url);
+
 	assertEquals(req.headers.get("test-header"), r.headers.get("test-header"));
 });
 

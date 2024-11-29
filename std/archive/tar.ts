@@ -48,12 +48,15 @@ export class FileReader implements Deno.Reader {
 		if (!this.file) {
 			this.file = await Deno.open(this.filePath, this.mode);
 		}
+
 		const res = await Deno.read(this.file.rid, p);
 
 		if (res === Deno.EOF) {
 			await Deno.close(this.file.rid);
+
 			this.file = undefined;
 		}
+
 		return res;
 	}
 }
@@ -73,12 +76,15 @@ export class FileWriter implements Deno.Writer {
 		if (!this.file) {
 			this.file = await Deno.open(this.filePath, this.mode);
 		}
+
 		return Deno.write(this.file.rid, p);
 	}
 
 	public dispose(): void {
 		if (!this.file) return;
+
 		Deno.close(this.file.rid);
+
 		this.file = undefined;
 	}
 }
@@ -101,6 +107,7 @@ function trim(buffer: Uint8Array): Uint8Array {
  */
 function clean(length: number): Uint8Array {
 	const buffer = new Uint8Array(length);
+
 	buffer.fill(0, 0, length - 1);
 
 	return buffer;
@@ -209,9 +216,12 @@ function formatHeader(data: TarData): Uint8Array {
 		buffer = clean(512);
 
 	let offset = 0;
+
 	ustarStructure.forEach(function (value): void {
 		const entry = encoder.encode(data[value.field as keyof TarData] || "");
+
 		buffer.set(entry, offset);
+
 		offset += value.length; // space it out with nulls
 	});
 
@@ -226,9 +236,12 @@ function parseHeader(buffer: Uint8Array): { [key: string]: Uint8Array } {
 	const data: { [key: string]: Uint8Array } = {};
 
 	let offset = 0;
+
 	ustarStructure.forEach(function (value): void {
 		const arr = buffer.subarray(offset, offset + value.length);
+
 		data[value.field] = arr;
+
 		offset += value.length;
 	});
 
@@ -237,16 +250,27 @@ function parseHeader(buffer: Uint8Array): { [key: string]: Uint8Array } {
 
 export interface TarData {
 	fileName?: string;
+
 	fileNamePrefix?: string;
+
 	fileMode?: string;
+
 	uid?: string;
+
 	gid?: string;
+
 	fileSize?: string;
+
 	mtime?: string;
+
 	checksum?: string;
+
 	type?: string;
+
 	ustar?: string;
+
 	owner?: string;
+
 	group?: string;
 }
 
@@ -263,10 +287,15 @@ export interface TarDataWithSource extends TarData {
 
 export interface TarInfo {
 	fileMode?: number;
+
 	mtime?: number;
+
 	uid?: number;
+
 	gid?: number;
+
 	owner?: string;
+
 	group?: string;
 }
 
@@ -296,14 +325,20 @@ export interface UntarOptions extends TarInfo {
  */
 export class Tar {
 	data: TarDataWithSource[];
+
 	written: number;
+
 	out: Uint8Array;
+
 	private blockSize: number;
 
 	constructor(recordsPerBlock?: number) {
 		this.data = [];
+
 		this.written = 0;
+
 		this.blockSize = (recordsPerBlock || 20) * recordSize;
+
 		this.out = clean(this.blockSize);
 	}
 
@@ -328,12 +363,15 @@ export class Tar {
 
 				if (i <= 155) {
 					fileNamePrefix = fileName.substr(0, i);
+
 					fileName = fileName.substr(i + 1);
 
 					break;
 				}
+
 				i--;
 			}
+
 			if (
 				i < 0 ||
 				fileName.length > 100 ||
@@ -345,6 +383,7 @@ export class Tar {
 				);
 			}
 		}
+
 		fileNamePrefix = fileNamePrefix!;
 
 		opts = opts || {};
@@ -368,6 +407,7 @@ export class Tar {
 				"ustar format does not allow owner name length >= 32 bytes",
 			);
 		}
+
 		if (typeof opts.group === "string" && opts.group.length >= 32) {
 			throw new Error(
 				"ustar format does not allow group name length >= 32 bytes",
@@ -395,6 +435,7 @@ export class Tar {
 		let checksum = 0;
 
 		const encoder = new TextEncoder();
+
 		Object.keys(tarData)
 			.filter((key): boolean => ["filePath", "reader"].indexOf(key) < 0)
 			.forEach(function (key): void {
@@ -404,6 +445,7 @@ export class Tar {
 			});
 
 		tarData.checksum = pad(checksum, 6) + "\u0000 ";
+
 		this.data.push(tarData);
 	}
 
@@ -412,17 +454,20 @@ export class Tar {
 	 */
 	getReader(): Deno.Reader {
 		const readers: Deno.Reader[] = [];
+
 		this.data.forEach((tarData): void => {
 			let { reader } = tarData;
 
 			const { filePath } = tarData;
 
 			const headerArr = formatHeader(tarData);
+
 			readers.push(new Deno.Buffer(headerArr));
 
 			if (!reader) {
 				reader = new FileReader(filePath!);
 			}
+
 			readers.push(reader);
 
 			// to the nearest multiple of recordSize
@@ -449,10 +494,12 @@ export class Tar {
  */
 export class Untar {
 	reader: BufReader;
+
 	block: Uint8Array;
 
 	constructor(reader: Deno.Reader) {
 		this.reader = new BufReader(reader);
+
 		this.block = new Uint8Array(recordSize);
 	}
 
@@ -466,11 +513,13 @@ export class Untar {
 
 		const encoder = new TextEncoder(),
 			decoder = new TextDecoder("ascii");
+
 		Object.keys(header)
 			.filter((key): boolean => key !== "checksum")
 			.forEach(function (key): void {
 				checksum += header[key].reduce((p, c): number => p + c, 0);
 			});
+
 		checksum += encoder
 			.encode("        ")
 			.reduce((p, c): number => p + c, 0);
@@ -528,7 +577,9 @@ export class Untar {
 
 			const arr =
 				rest < recordSize ? this.block.subarray(0, rest) : this.block;
+
 			await Deno.copy(writer, new Deno.Buffer(arr));
+
 			rest -= recordSize;
 		}
 

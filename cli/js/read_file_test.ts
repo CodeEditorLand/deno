@@ -3,6 +3,7 @@ import { assert, assertEquals, testPerm } from "./test_util.ts";
 
 testPerm({ read: true }, function readFileSyncSuccess(): void {
 	const data = Deno.readFileSync("cli/tests/fixture.json");
+
 	assert(data.byteLength > 0);
 
 	const decoder = new TextDecoder("utf-8");
@@ -10,6 +11,7 @@ testPerm({ read: true }, function readFileSyncSuccess(): void {
 	const json = decoder.decode(data);
 
 	const pkg = JSON.parse(json);
+
 	assertEquals(pkg.name, "deno");
 });
 
@@ -20,9 +22,12 @@ testPerm({ read: false }, function readFileSyncPerm(): void {
 		Deno.readFileSync("cli/tests/fixture.json");
 	} catch (e) {
 		caughtError = true;
+
 		assertEquals(e.kind, Deno.ErrorKind.PermissionDenied);
+
 		assertEquals(e.name, "PermissionDenied");
 	}
+
 	assert(caughtError);
 });
 
@@ -35,14 +40,18 @@ testPerm({ read: true }, function readFileSyncNotFound(): void {
 		data = Deno.readFileSync("bad_filename");
 	} catch (e) {
 		caughtError = true;
+
 		assertEquals(e.kind, Deno.ErrorKind.NotFound);
 	}
+
 	assert(caughtError);
+
 	assert(data === undefined);
 });
 
 testPerm({ read: true }, async function readFileSuccess(): Promise<void> {
 	const data = await Deno.readFile("cli/tests/fixture.json");
+
 	assert(data.byteLength > 0);
 
 	const decoder = new TextDecoder("utf-8");
@@ -50,6 +59,7 @@ testPerm({ read: true }, async function readFileSuccess(): Promise<void> {
 	const json = decoder.decode(data);
 
 	const pkg = JSON.parse(json);
+
 	assertEquals(pkg.name, "deno");
 });
 
@@ -60,8 +70,11 @@ testPerm({ read: false }, async function readFilePerm(): Promise<void> {
 		await Deno.readFile("cli/tests/fixture.json");
 	} catch (e) {
 		caughtError = true;
+
 		assertEquals(e.kind, Deno.ErrorKind.PermissionDenied);
+
 		assertEquals(e.name, "PermissionDenied");
 	}
+
 	assert(caughtError);
 });

@@ -10,6 +10,7 @@ const tlsOptions = {
 };
 
 const s = serveTLS(tlsOptions);
+
 console.log(
 	`Simple HTTPS server listening on ${tlsOptions.hostname}:${tlsOptions.port}`,
 );

@@ -17,6 +17,7 @@ test(function nums(): void {
 		"0xdeadbeef",
 		"789",
 	]);
+
 	assertEquals(argv, {
 		x: 1234,
 		y: 5.67,
@@ -25,17 +26,26 @@ test(function nums(): void {
 		hex: 0xdeadbeef,
 		_: [789],
 	});
+
 	assertEquals(typeof argv.x, "number");
+
 	assertEquals(typeof argv.y, "number");
+
 	assertEquals(typeof argv.z, "number");
+
 	assertEquals(typeof argv.w, "string");
+
 	assertEquals(typeof argv.hex, "number");
+
 	assertEquals(typeof argv._[0], "number");
 });
 
 test(function alreadyNumber(): void {
 	const argv = parse(["-x", 1234, 789]);
+
 	assertEquals(argv, { x: 1234, _: [789] });
+
 	assertEquals(typeof argv.x, "number");
+
 	assertEquals(typeof argv._[0], "number");
 });

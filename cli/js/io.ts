@@ -127,6 +127,7 @@ export async function copy(dst: Writer, src: Reader): Promise<number> {
 			n += await dst.write(b.subarray(0, result));
 		}
 	}
+
 	return n;
 }
 

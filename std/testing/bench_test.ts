@@ -8,6 +8,7 @@ test(async function benching(): Promise<void> {
 		b.start();
 
 		for (let i = 0; i < 1e9; i++);
+
 		b.stop();
 	});
 
@@ -15,6 +16,7 @@ test(async function benching(): Promise<void> {
 		b.start();
 
 		for (let i = 1e9; i > 0; i--);
+
 		b.stop();
 	});
 
@@ -23,20 +25,26 @@ test(async function benching(): Promise<void> {
 
 		for (let i = 0; i < 10; i++) {
 			const r = await fetch("https://deno.land/");
+
 			await r.text();
 		}
+
 		b.stop();
 	});
 
 	bench(async function promiseAllFetchDenolandX10(b): Promise<void> {
 		const urls = new Array(10).fill("https://deno.land/");
+
 		b.start();
+
 		await Promise.all(
 			urls.map(async (denoland: string): Promise<void> => {
 				const r = await fetch(denoland);
+
 				await r.text();
 			}),
 		);
+
 		b.stop();
 	});
 
@@ -47,6 +55,7 @@ test(async function benching(): Promise<void> {
 			b.start();
 
 			for (let i = 0; i < 1e6; i++);
+
 			b.stop();
 		},
 	});

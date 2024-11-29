@@ -4,6 +4,7 @@ import * as domTypes from "./dom_types.ts";
 
 export class DomFileImpl extends blob.DenoBlob implements domTypes.DomFile {
 	lastModified: number;
+
 	name: string;
 
 	constructor(

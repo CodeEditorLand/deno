@@ -47,9 +47,11 @@ function constructYamlFloat(data: string): number {
 	if (value === ".inf") {
 		return sign === 1 ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY;
 	}
+
 	if (value === ".nan") {
 		return NaN;
 	}
+
 	if (value.indexOf(":") >= 0) {
 		value.split(":").forEach((v): void => {
 			digits.unshift(parseFloat(v));
@@ -61,11 +63,13 @@ function constructYamlFloat(data: string): number {
 
 		digits.forEach((d): void => {
 			valueNb += d * base;
+
 			base *= 60;
 		});
 
 		return sign * valueNb;
 	}
+
 	return sign * parseFloat(value);
 }
 

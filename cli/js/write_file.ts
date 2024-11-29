@@ -11,7 +11,9 @@ import { stat, statSync } from "./stat.ts";
  */
 export interface WriteFileOptions {
 	perm?: number;
+
 	create?: boolean;
+
 	append?: boolean;
 }
 
@@ -44,6 +46,7 @@ export function writeFileSync(
 	}
 
 	writeAllSync(file, data);
+
 	file.close();
 }
 
@@ -76,5 +79,6 @@ export async function writeFile(
 	}
 
 	await writeAll(file, data);
+
 	file.close();
 }

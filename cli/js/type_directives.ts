@@ -2,7 +2,9 @@
 
 interface FileReference {
 	fileName: string;
+
 	pos: number;
+
 	end: number;
 }
 
@@ -18,6 +20,7 @@ export function getMappedModuleName(
 			return value;
 		}
 	}
+
 	return source.fileName;
 }
 
@@ -61,12 +64,14 @@ export function parseTypeDirectives(
 		const [matchString, , fileName] = maybeMatch;
 
 		const { index: pos } = maybeMatch;
+
 		directives.push({
 			fileName,
 			pos,
 			end: pos + matchString.length,
 		});
 	}
+
 	if (!directives.length) {
 		return;
 	}
@@ -96,8 +101,10 @@ export function parseTypeDirectives(
 				pos: targetPos,
 				end: targetPos + targetFileName.length,
 			};
+
 			results.set(target, fileName);
 		}
+
 		sourceCode = sourceCode.substring(0, pos);
 	}
 

@@ -12,11 +12,13 @@ test(async function readFileSuccess() {
 			if (err) {
 				rej(err);
 			}
+
 			res(data);
 		});
 	});
 
 	assert(data instanceof Uint8Array);
+
 	assertEquals(new TextDecoder().decode(data as Uint8Array), "hello world");
 });
 
@@ -26,22 +28,28 @@ test(async function readFileEncodeUtf8Success() {
 			if (err) {
 				rej(err);
 			}
+
 			res(data);
 		});
 	});
 
 	assertEquals(typeof data, "string");
+
 	assertEquals(data as string, "hello world");
 });
 
 test(function readFileSyncSuccess() {
 	const data = readFileSync(testData);
+
 	assert(data instanceof Uint8Array);
+
 	assertEquals(new TextDecoder().decode(data as Uint8Array), "hello world");
 });
 
 test(function readFileEncodeUtf8Success() {
 	const data = readFileSync(testData, { encoding: "utf8" });
+
 	assertEquals(typeof data, "string");
+
 	assertEquals(data as string, "hello world");
 });

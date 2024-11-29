@@ -4,6 +4,7 @@ import { isIterable, requiredArguments } from "./util.ts";
 
 export class URLSearchParams {
 	private params: Array<[string, string]> = [];
+
 	private url: URL | null = null;
 
 	constructor(init: string | string[][] | Record<string, string> = "") {
@@ -57,7 +58,9 @@ export class URLSearchParams {
 	 */
 	append(name: string, value: string): void {
 		requiredArguments("URLSearchParams.append", arguments.length, 2);
+
 		this.params.push([String(name), String(value)]);
+
 		this.updateSteps();
 	}
 
@@ -68,6 +71,7 @@ export class URLSearchParams {
 	 */
 	delete(name: string): void {
 		requiredArguments("URLSearchParams.delete", arguments.length, 1);
+
 		name = String(name);
 
 		let i = 0;
@@ -79,6 +83,7 @@ export class URLSearchParams {
 				i++;
 			}
 		}
+
 		this.updateSteps();
 	}
 
@@ -89,6 +94,7 @@ export class URLSearchParams {
 	 */
 	getAll(name: string): string[] {
 		requiredArguments("URLSearchParams.getAll", arguments.length, 1);
+
 		name = String(name);
 
 		const values = [];
@@ -108,6 +114,7 @@ export class URLSearchParams {
 	 */
 	get(name: string): string | null {
 		requiredArguments("URLSearchParams.get", arguments.length, 1);
+
 		name = String(name);
 
 		for (const entry of this.params) {
@@ -126,6 +133,7 @@ export class URLSearchParams {
 	 */
 	has(name: string): boolean {
 		requiredArguments("URLSearchParams.has", arguments.length, 1);
+
 		name = String(name);
 
 		return this.params.some((entry): boolean => entry[0] === name);
@@ -145,6 +153,7 @@ export class URLSearchParams {
 		// set the value of the first such name-value pair to value
 		// and remove the others.
 		name = String(name);
+
 		value = String(value);
 
 		let found = false;
@@ -155,7 +164,9 @@ export class URLSearchParams {
 			if (this.params[i][0] === name) {
 				if (!found) {
 					this.params[i][1] = value;
+
 					found = true;
+
 					i++;
 				} else {
 					this.params.splice(i, 1);
@@ -184,6 +195,7 @@ export class URLSearchParams {
 		this.params = this.params.sort((a, b): number =>
 			a[0] === b[0] ? 0 : a[0] > b[0] ? 1 : -1,
 		);
+
 		this.updateSteps();
 	}
 
@@ -286,6 +298,7 @@ export class URLSearchParams {
 			if (pair.length === 0) {
 				continue;
 			}
+
 			const position = pair.indexOf("=");
 
 			const name = pair.slice(
@@ -294,6 +307,7 @@ export class URLSearchParams {
 			);
 
 			const value = pair.slice(name.length + 1);
+
 			this.append(decodeURIComponent(name), decodeURIComponent(value));
 		}
 	}
@@ -309,6 +323,7 @@ export class URLSearchParams {
 					"URLSearchParams.constructor tuple array argument must only contain pair elements",
 				);
 			}
+
 			this.append(tuple[0], tuple[1]);
 		}
 	}

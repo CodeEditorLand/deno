@@ -24,6 +24,7 @@ function randomBoundary(): string {
 	for (let i = 0; i < 24; i++) {
 		boundary += Math.floor(Math.random() * 10).toString(16);
 	}
+
 	return boundary;
 }
 
@@ -51,6 +52,7 @@ export function matchAfterPrefix(
 	if (buf.length === prefix.length) {
 		return eof ? 1 : 0;
 	}
+
 	const c = buf[prefix.length];
 
 	if (
@@ -62,6 +64,7 @@ export function matchAfterPrefix(
 	) {
 		return 1;
 	}
+
 	return -1;
 }
 
@@ -102,6 +105,7 @@ export function scanUntilBoundary(
 					return Deno.EOF;
 			}
 		}
+
 		if (hasPrefix(dashBoundary, buf)) {
 			return 0;
 		}
@@ -122,6 +126,7 @@ export function scanUntilBoundary(
 				return i > 0 ? i : Deno.EOF;
 		}
 	}
+
 	if (hasPrefix(newLineDashBoundary, buf)) {
 		return 0;
 	}
@@ -140,6 +145,7 @@ export function scanUntilBoundary(
 
 class PartReader implements Reader, Closer {
 	n: number | Deno.EOF = 0;
+
 	total = 0;
 
 	constructor(
@@ -162,7 +168,9 @@ class PartReader implements Reader, Closer {
 			if (peekBuf === Deno.EOF) {
 				throw new UnexpectedEOFError();
 			}
+
 			const eof = peekBuf.length < peekLength;
+
 			this.n = scanUntilBoundary(
 				peekBuf,
 				this.mr.dashBoundary,
@@ -174,6 +182,7 @@ class PartReader implements Reader, Closer {
 			if (this.n === 0) {
 				// Force buffered I/O to read more into buffer.
 				assertStrictEq(eof, false);
+
 				peekLength++;
 			}
 		}
@@ -187,8 +196,11 @@ class PartReader implements Reader, Closer {
 		const buf = p.subarray(0, nread);
 
 		const r = await br.readFull(buf);
+
 		assertStrictEq(r, buf);
+
 		this.n -= nread;
+
 		this.total += nread;
 
 		return nread;
@@ -197,6 +209,7 @@ class PartReader implements Reader, Closer {
 	close(): void {}
 
 	private contentDisposition!: string;
+
 	private contentDispositionParams!: { [key: string]: string };
 
 	private getContentDispositionParams(): { [key: string]: string } {
@@ -207,7 +220,9 @@ class PartReader implements Reader, Closer {
 		const params: { [key: string]: string } = {};
 
 		const comps = cd!.split(";");
+
 		this.contentDisposition = comps[0];
+
 		comps
 			.slice(1)
 			.map((v: string): string => v.trim())
@@ -240,6 +255,7 @@ class PartReader implements Reader, Closer {
 		if (this.contentDisposition === "form-data") {
 			return p["name"];
 		}
+
 		return "";
 	}
 }
@@ -255,17 +271,23 @@ function skipLWSPChar(u: Uint8Array): Uint8Array {
 
 	for (let i = 0; i < u.length; i++) {
 		if (u[i] === sp || u[i] === ht) continue;
+
 		ret[j++] = u[i];
 	}
+
 	return ret.slice(0, j);
 }
 
 /** Reader for parsing multipart/form-data */
 export class MultipartReader {
 	readonly newLine = encoder.encode("\r\n");
+
 	readonly newLineDashBoundary = encoder.encode(`\r\n--${this.boundary}`);
+
 	readonly dashBoundaryDash = encoder.encode(`--${this.boundary}--`);
+
 	readonly dashBoundary = encoder.encode(`--${this.boundary}`);
+
 	readonly bufReader: BufReader;
 
 	constructor(
@@ -294,20 +316,25 @@ export class MultipartReader {
 			if (p === Deno.EOF) {
 				break;
 			}
+
 			if (p.formName === "") {
 				continue;
 			}
+
 			buf.reset();
 
 			if (!p.fileName) {
 				// value
 				const n = await copyN(buf, p, maxValueBytes);
+
 				maxValueBytes -= n;
 
 				if (maxValueBytes < 0) {
 					throw new RangeError("message too large");
 				}
+
 				const value = buf.toString();
+
 				result[p.formName] = value;
 
 				continue;
@@ -332,6 +359,7 @@ export class MultipartReader {
 						new MultiReader(buf, p),
 						maxValueBytes,
 					);
+
 					file.close();
 
 					formFile = {
@@ -350,24 +378,31 @@ export class MultipartReader {
 					content: buf.bytes(),
 					size: buf.length,
 				};
+
 				maxMemory -= n;
+
 				maxValueBytes -= n;
 			}
+
 			result[p.formName] = formFile!;
 		}
+
 		return result;
 	}
 
 	private currentPart: PartReader | undefined;
+
 	private partsRead = 0;
 
 	private async nextPart(): Promise<PartReader | Deno.EOF> {
 		if (this.currentPart) {
 			this.currentPart.close();
 		}
+
 		if (equal(this.dashBoundary, encoder.encode("--"))) {
 			throw new Error("boundary is empty");
 		}
+
 		let expectNewPart = false;
 
 		for (;;) {
@@ -376,6 +411,7 @@ export class MultipartReader {
 			if (line === Deno.EOF) {
 				throw new UnexpectedEOFError();
 			}
+
 			if (this.isBoundaryDelimiterLine(line)) {
 				this.partsRead++;
 
@@ -386,25 +422,32 @@ export class MultipartReader {
 				if (headers === Deno.EOF) {
 					throw new UnexpectedEOFError();
 				}
+
 				const np = new PartReader(this, headers);
+
 				this.currentPart = np;
 
 				return np;
 			}
+
 			if (this.isFinalBoundary(line)) {
 				return Deno.EOF;
 			}
+
 			if (expectNewPart) {
 				throw new Error(`expecting a new Part; got line ${line}`);
 			}
+
 			if (this.partsRead === 0) {
 				continue;
 			}
+
 			if (equal(line, this.newLine)) {
 				expectNewPart = true;
 
 				continue;
 			}
+
 			throw new Error(`unexpected line in nextPart(): ${line}`);
 		}
 	}
@@ -413,6 +456,7 @@ export class MultipartReader {
 		if (!hasPrefix(line, this.dashBoundaryDash)) {
 			return false;
 		}
+
 		const rest = line.slice(this.dashBoundaryDash.length, line.length);
 
 		return rest.length === 0 || equal(skipLWSPChar(rest), this.newLine);
@@ -422,6 +466,7 @@ export class MultipartReader {
 		if (!hasPrefix(line, this.dashBoundary)) {
 			return false;
 		}
+
 		const rest = line.slice(this.dashBoundary.length);
 
 		return equal(skipLWSPChar(rest), this.newLine);
@@ -430,7 +475,9 @@ export class MultipartReader {
 
 class PartWriter implements Writer {
 	closed = false;
+
 	private readonly partHeader: string;
+
 	private headersWritten = false;
 
 	constructor(
@@ -446,10 +493,13 @@ class PartWriter implements Writer {
 		} else {
 			buf += `\r\n--${boundary}\r\n`;
 		}
+
 		for (const [key, value] of headers.entries()) {
 			buf += `${key}: ${value}\r\n`;
 		}
+
 		buf += `\r\n`;
+
 		this.partHeader = buf;
 	}
 
@@ -461,10 +511,13 @@ class PartWriter implements Writer {
 		if (this.closed) {
 			throw new Error("part is closed");
 		}
+
 		if (!this.headersWritten) {
 			await this.writer.write(encoder.encode(this.partHeader));
+
 			this.headersWritten = true;
 		}
+
 		return this.writer.write(p);
 	}
 }
@@ -473,6 +526,7 @@ function checkBoundary(b: string): string {
 	if (b.length < 1 || b.length > 70) {
 		throw new Error(`invalid boundary length: ${b.length}`);
 	}
+
 	const end = b.length - 1;
 
 	for (let i = 0; i < end; i++) {
@@ -482,6 +536,7 @@ function checkBoundary(b: string): string {
 			throw new Error("invalid boundary character: " + c);
 		}
 	}
+
 	return b;
 }
 
@@ -494,7 +549,9 @@ export class MultipartWriter {
 	}
 
 	private lastPart: PartWriter | undefined;
+
 	private bufWriter: BufWriter;
+
 	private isClosed = false;
 
 	constructor(
@@ -506,6 +563,7 @@ export class MultipartWriter {
 		} else {
 			this._boundary = randomBoundary();
 		}
+
 		this.bufWriter = new BufWriter(writer);
 	}
 
@@ -517,15 +575,18 @@ export class MultipartWriter {
 		if (this.isClosed) {
 			throw new Error("multipart: writer is closed");
 		}
+
 		if (this.lastPart) {
 			this.lastPart.close();
 		}
+
 		const part = new PartWriter(
 			this.writer,
 			this.boundary,
 			headers,
 			!this.lastPart,
 		);
+
 		this.lastPart = part;
 
 		return part;
@@ -533,10 +594,12 @@ export class MultipartWriter {
 
 	createFormFile(field: string, filename: string): Writer {
 		const h = new Headers();
+
 		h.set(
 			"Content-Disposition",
 			`form-data; name="${field}"; filename="${filename}"`,
 		);
+
 		h.set("Content-Type", "application/octet-stream");
 
 		return this.createPart(h);
@@ -544,7 +607,9 @@ export class MultipartWriter {
 
 	createFormField(field: string): Writer {
 		const h = new Headers();
+
 		h.set("Content-Disposition", `form-data; name="${field}"`);
+
 		h.set("Content-Type", "application/octet-stream");
 
 		return this.createPart(h);
@@ -552,6 +617,7 @@ export class MultipartWriter {
 
 	async writeField(field: string, value: string): Promise<void> {
 		const f = await this.createFormField(field);
+
 		await f.write(encoder.encode(value));
 	}
 
@@ -561,6 +627,7 @@ export class MultipartWriter {
 		file: Reader,
 	): Promise<void> {
 		const f = await this.createFormFile(field, filename);
+
 		await copy(f, file);
 	}
 
@@ -573,12 +640,17 @@ export class MultipartWriter {
 		if (this.isClosed) {
 			throw new Error("multipart: writer is closed");
 		}
+
 		if (this.lastPart) {
 			this.lastPart.close();
+
 			this.lastPart = void 0;
 		}
+
 		await this.writer.write(encoder.encode(`\r\n--${this.boundary}--\r\n`));
+
 		await this.flush();
+
 		this.isClosed = true;
 	}
 }

@@ -26,6 +26,7 @@ class HeadersBase {
 
 	private _normalizeParams(name: string, value?: string): string[] {
 		name = String(name).toLowerCase();
+
 		value = String(value).trim();
 
 		return [name, value];
@@ -71,10 +72,13 @@ class HeadersBase {
 						tuple[0],
 						tuple[1],
 					);
+
 					this._validateName(name);
+
 					this._validateValue(value);
 
 					const existingValue = this[headerMap].get(name);
+
 					this[headerMap].set(
 						name,
 						existingValue ? `${existingValue}, ${value}` : value,
@@ -90,8 +94,11 @@ class HeadersBase {
 						rawName,
 						rawValue,
 					);
+
 					this._validateName(name);
+
 					this._validateValue(value);
+
 					this[headerMap].set(name, value);
 				}
 			}
@@ -102,11 +109,14 @@ class HeadersBase {
 		let headerSize = this[headerMap].size;
 
 		let output = "";
+
 		this[headerMap].forEach((value, key) => {
 			const prefix = headerSize === this[headerMap].size ? " " : "";
 
 			const postfix = headerSize === 1 ? " " : ", ";
+
 			output = output + `${prefix}${key}: ${value}${postfix}`;
+
 			headerSize--;
 		});
 
@@ -118,12 +128,15 @@ class HeadersBase {
 		requiredArguments("Headers.append", arguments.length, 2);
 
 		const [newname, newvalue] = this._normalizeParams(name, value);
+
 		this._validateName(newname);
+
 		this._validateValue(newvalue);
 
 		const v = this[headerMap].get(newname);
 
 		const str = v ? `${v}, ${newvalue}` : newvalue;
+
 		this[headerMap].set(newname, str);
 	}
 
@@ -131,7 +144,9 @@ class HeadersBase {
 		requiredArguments("Headers.delete", arguments.length, 1);
 
 		const [newname] = this._normalizeParams(name);
+
 		this._validateName(newname);
+
 		this[headerMap].delete(newname);
 	}
 
@@ -139,6 +154,7 @@ class HeadersBase {
 		requiredArguments("Headers.get", arguments.length, 1);
 
 		const [newname] = this._normalizeParams(name);
+
 		this._validateName(newname);
 
 		const value = this[headerMap].get(newname);
@@ -150,6 +166,7 @@ class HeadersBase {
 		requiredArguments("Headers.has", arguments.length, 1);
 
 		const [newname] = this._normalizeParams(name);
+
 		this._validateName(newname);
 
 		return this[headerMap].has(newname);
@@ -159,8 +176,11 @@ class HeadersBase {
 		requiredArguments("Headers.set", arguments.length, 2);
 
 		const [newname, newvalue] = this._normalizeParams(name, value);
+
 		this._validateName(newname);
+
 		this._validateValue(newvalue);
+
 		this[headerMap].set(newname, newvalue);
 	}
 

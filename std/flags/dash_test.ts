@@ -5,15 +5,21 @@ import { parse } from "./mod.ts";
 
 test(function hyphen(): void {
 	assertEquals(parse(["-n", "-"]), { n: "-", _: [] });
+
 	assertEquals(parse(["-"]), { _: ["-"] });
+
 	assertEquals(parse(["-f-"]), { f: "-", _: [] });
+
 	assertEquals(parse(["-b", "-"], { boolean: "b" }), { b: true, _: ["-"] });
+
 	assertEquals(parse(["-s", "-"], { string: "s" }), { s: "-", _: [] });
 });
 
 test(function doubleDash(): void {
 	assertEquals(parse(["-a", "--", "b"]), { a: true, _: ["b"] });
+
 	assertEquals(parse(["--a", "--", "b"]), { a: true, _: ["b"] });
+
 	assertEquals(parse(["--a", "--", "b"]), { a: true, _: ["b"] });
 });
 

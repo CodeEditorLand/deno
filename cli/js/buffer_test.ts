@@ -22,20 +22,26 @@ function init(): void {
 		for (let i = 0; i < N; i++) {
 			testBytes[i] = "a".charCodeAt(0) + (i % 26);
 		}
+
 		const decoder = new TextDecoder();
+
 		testString = decoder.decode(testBytes);
 	}
 }
 
 function check(buf: Deno.Buffer, s: string): void {
 	const bytes = buf.bytes();
+
 	assertEquals(buf.length, bytes.byteLength);
 
 	const decoder = new TextDecoder();
 
 	const bytesStr = decoder.decode(bytes);
+
 	assertEquals(bytesStr, s);
+
 	assertEquals(buf.length, buf.toString().length);
+
 	assertEquals(buf.length, s.length);
 }
 
@@ -52,12 +58,16 @@ async function fillBytes(
 
 	for (; n > 0; n--) {
 		const m = await buf.write(fub);
+
 		assertEquals(m, fub.byteLength);
 
 		const decoder = new TextDecoder();
+
 		s += decoder.decode(fub);
+
 		check(buf, s);
 	}
+
 	return s;
 }
 
@@ -72,9 +82,12 @@ async function empty(buf: Buffer, s: string, fub: Uint8Array): Promise<void> {
 		if (r === Deno.EOF) {
 			break;
 		}
+
 		s = s.slice(r);
+
 		check(buf, s);
 	}
+
 	check(buf, "");
 }
 
@@ -82,6 +95,7 @@ function repeat(c: string, bytes: number): Uint8Array {
 	assertEquals(c.length, 1);
 
 	const ui8 = new Uint8Array(bytes);
+
 	ui8.fill(c.charCodeAt(0));
 
 	return ui8;
@@ -91,6 +105,7 @@ test(function bufferNewBuffer(): void {
 	init();
 
 	const buf = new Buffer(testBytes.buffer as ArrayBuffer);
+
 	check(buf, testString);
 });
 
@@ -103,30 +118,41 @@ test(async function bufferBasicOperations(): Promise<void> {
 		check(buf, "");
 
 		buf.reset();
+
 		check(buf, "");
 
 		buf.truncate(0);
+
 		check(buf, "");
 
 		let n = await buf.write(testBytes.subarray(0, 1));
+
 		assertEquals(n, 1);
+
 		check(buf, "a");
 
 		n = await buf.write(testBytes.subarray(1, 2));
+
 		assertEquals(n, 1);
+
 		check(buf, "ab");
 
 		n = await buf.write(testBytes.subarray(2, 26));
+
 		assertEquals(n, 24);
+
 		check(buf, testString.slice(0, 26));
 
 		buf.truncate(26);
+
 		check(buf, testString.slice(0, 26));
 
 		buf.truncate(20);
+
 		check(buf, testString.slice(0, 20));
 
 		await empty(buf, testString.slice(0, 20), new Uint8Array(5));
+
 		await empty(buf, "", new Uint8Array(100));
 
 		// TODO buf.writeByte()
@@ -142,6 +168,7 @@ test(async function bufferReadEmptyAtEOF(): Promise<void> {
 	const zeroLengthTmp = new Uint8Array(0);
 
 	const result = await buf.read(zeroLengthTmp);
+
 	assertEquals(result, 0);
 });
 
@@ -154,8 +181,10 @@ test(async function bufferLargeByteWrites(): Promise<void> {
 
 	for (let i = 3; i < limit; i += 3) {
 		const s = await fillBytes(buf, "", 5, testBytes);
+
 		await empty(buf, s, new Uint8Array(Math.floor(testString.length / i)));
 	}
+
 	check(buf, "");
 });
 
@@ -169,6 +198,7 @@ test(async function bufferTooLargeByteWrites(): Promise<void> {
 	const xBytes = repeat("x", 0);
 
 	const buf = new Buffer(xBytes.buffer as ArrayBuffer);
+
 	await buf.read(tmp);
 
 	let err;
@@ -180,6 +210,7 @@ test(async function bufferTooLargeByteWrites(): Promise<void> {
 	}
 
 	assertEquals(err.kind, Deno.ErrorKind.TooLarge);
+
 	assertEquals(err.name, "TooLarge");
 });
 
@@ -192,13 +223,16 @@ test(async function bufferLargeByteReads(): Promise<void> {
 		const n = Math.floor(testBytes.byteLength / i);
 
 		const s = await fillBytes(buf, "", 5, testBytes.subarray(0, n));
+
 		await empty(buf, s, new Uint8Array(testString.length));
 	}
+
 	check(buf, "");
 });
 
 test(function bufferCapWithPreallocatedSlice(): void {
 	const buf = new Buffer(new ArrayBuffer(10));
+
 	assertEquals(buf.capacity, 10);
 });
 
@@ -216,9 +250,11 @@ test(async function bufferReadFrom(): Promise<void> {
 		);
 
 		const b = new Buffer();
+
 		await b.readFrom(buf);
 
 		const fub = new Uint8Array(testString.length);
+
 		await empty(b, s, fub);
 	}
 });
@@ -237,9 +273,11 @@ test(async function bufferReadFromSync(): Promise<void> {
 		);
 
 		const b = new Buffer();
+
 		b.readFromSync(buf);
 
 		const fub = new Uint8Array(testString.length);
+
 		await empty(b, s, fub);
 	}
 });
@@ -256,15 +294,18 @@ test(async function bufferTestGrow(): Promise<void> {
 			const result = await buf.read(tmp);
 
 			const nread = result === Deno.EOF ? 0 : result;
+
 			buf.grow(growLen);
 
 			const yBytes = repeat("y", growLen);
+
 			await buf.write(yBytes);
 			// Check that buffer has correct data.
 			assertEquals(
 				buf.bytes().subarray(0, startLen - nread),
 				xBytes.subarray(nread),
 			);
+
 			assertEquals(
 				buf
 					.bytes()
@@ -281,6 +322,7 @@ test(async function testReadAll(): Promise<void> {
 	const reader = new Buffer(testBytes.buffer as ArrayBuffer);
 
 	const actualBytes = await readAll(reader);
+
 	assertEquals(testBytes.byteLength, actualBytes.byteLength);
 
 	for (let i = 0; i < testBytes.length; ++i) {
@@ -294,6 +336,7 @@ test(function testReadAllSync(): void {
 	const reader = new Buffer(testBytes.buffer as ArrayBuffer);
 
 	const actualBytes = readAllSync(reader);
+
 	assertEquals(testBytes.byteLength, actualBytes.byteLength);
 
 	for (let i = 0; i < testBytes.length; ++i) {
@@ -305,9 +348,11 @@ test(async function testWriteAll(): Promise<void> {
 	init();
 
 	const writer = new Buffer();
+
 	await writeAll(writer, testBytes);
 
 	const actualBytes = writer.bytes();
+
 	assertEquals(testBytes.byteLength, actualBytes.byteLength);
 
 	for (let i = 0; i < testBytes.length; ++i) {
@@ -319,9 +364,11 @@ test(function testWriteAllSync(): void {
 	init();
 
 	const writer = new Buffer();
+
 	writeAllSync(writer, testBytes);
 
 	const actualBytes = writer.bytes();
+
 	assertEquals(testBytes.byteLength, actualBytes.byteLength);
 
 	for (let i = 0; i < testBytes.length; ++i) {

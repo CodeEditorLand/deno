@@ -48,6 +48,7 @@ function normalizeSourceCode(source: string): string {
 
 test(async function testPrettierCheckAndFormatFiles(): Promise<void> {
 	const tempDir = await Deno.makeTempDir();
+
 	await copy(testdata, tempDir, { overwrite: true });
 
 	const files = [
@@ -59,11 +60,15 @@ test(async function testPrettierCheckAndFormatFiles(): Promise<void> {
 	];
 
 	let p = await run([...cmd, "--check", ...files]);
+
 	assertEquals(p.code, 1);
+
 	assertEquals(normalizeOutput(p.stdout), "Some files are not formatted");
 
 	p = await run([...cmd, "--write", ...files]);
+
 	assertEquals(p.code, 0);
+
 	assertEquals(
 		normalizeOutput(p.stdout),
 		normalizeOutput(`Formatting ${tempDir}/0.ts
@@ -74,7 +79,9 @@ Formatting ${tempDir}/4.tsx
 	);
 
 	p = await run([...cmd, "--check", ...files]);
+
 	assertEquals(p.code, 0);
+
 	assertEquals(normalizeOutput(p.stdout), "Every file is formatted");
 
 	emptyDir(tempDir);
@@ -82,16 +89,21 @@ Formatting ${tempDir}/4.tsx
 
 test(async function testPrettierCheckAndFormatDirs(): Promise<void> {
 	const tempDir = await Deno.makeTempDir();
+
 	await copy(testdata, tempDir, { overwrite: true });
 
 	const dirs = [join(tempDir, "foo"), join(tempDir, "bar")];
 
 	let p = await run([...cmd, "--check", ...dirs]);
+
 	assertEquals(p.code, 1);
+
 	assertEquals(normalizeOutput(p.stdout), "Some files are not formatted");
 
 	p = await run([...cmd, "--write", ...dirs]);
+
 	assertEquals(p.code, 0);
+
 	assertEquals(
 		normalizeOutput(p.stdout),
 		normalizeOutput(`Formatting ${tempDir}/bar/0.ts
@@ -101,7 +113,9 @@ Formatting ${tempDir}/foo/1.js`),
 	);
 
 	p = await run([...cmd, "--check", ...dirs]);
+
 	assertEquals(p.code, 0);
+
 	assertEquals(normalizeOutput(p.stdout), "Every file is formatted");
 
 	emptyDir(tempDir);
@@ -109,6 +123,7 @@ Formatting ${tempDir}/foo/1.js`),
 
 test(async function testPrettierOptions(): Promise<void> {
 	const tempDir = await Deno.makeTempDir();
+
 	await copy(testdata, tempDir, { overwrite: true });
 
 	const file0 = join(tempDir, "opts", "0.ts");
@@ -123,6 +138,7 @@ test(async function testPrettierOptions(): Promise<void> {
 		decoder.decode(await Deno.readFile(f));
 
 	await run([...cmd, "--no-semi", "--write", file0]);
+
 	assertEquals(
 		normalizeSourceCode(await getSourceCode(file0)),
 		`console.log(0)
@@ -139,9 +155,11 @@ console.log([function foo() {}, function baz() {}, a => {}])
 		"--write",
 		file0,
 	]);
+
 	assertEquals(
 		normalizeSourceCode(await getSourceCode(file0)),
 		`console.log(0);
+
 console.log([
     function foo() {},
     function baz() {},
@@ -151,9 +169,11 @@ console.log([
 	);
 
 	await run([...cmd, "--print-width", "30", "--use-tabs", "--write", file0]);
+
 	assertEquals(
 		normalizeSourceCode(await getSourceCode(file0)),
 		`console.log(0);
+
 console.log([
 	function foo() {},
 	function baz() {},
@@ -163,6 +183,7 @@ console.log([
 	);
 
 	await run([...cmd, "--single-quote", "--write", file1]);
+
 	assertEquals(
 		normalizeSourceCode(await getSourceCode(file1)),
 		`console.log('1');
@@ -178,9 +199,11 @@ console.log([
 		"--write",
 		file0,
 	]);
+
 	assertEquals(
 		normalizeSourceCode(await getSourceCode(file0)),
 		`console.log(0);
+
 console.log([
   function foo() {},
   function baz() {},
@@ -190,6 +213,7 @@ console.log([
 	);
 
 	await run([...cmd, "--no-bracket-spacing", "--write", file2]);
+
 	assertEquals(
 		normalizeSourceCode(await getSourceCode(file2)),
 		`console.log({a: 1});
@@ -197,14 +221,17 @@ console.log([
 	);
 
 	await run([...cmd, "--arrow-parens", "always", "--write", file0]);
+
 	assertEquals(
 		normalizeSourceCode(await getSourceCode(file0)),
 		`console.log(0);
+
 console.log([function foo() {}, function baz() {}, (a) => {}]);
 `,
 	);
 
 	await run([...cmd, "--prose-wrap", "always", "--write", file3]);
+
 	assertEquals(
 		normalizeSourceCode(await getSourceCode(file3)),
 		"Lorem ipsum dolor sit amet, consectetur adipiscing elit, " +
@@ -213,6 +240,7 @@ console.log([function foo() {}, function baz() {}, (a) => {}]);
 	);
 
 	await run([...cmd, "--end-of-line", "crlf", "--write", file2]);
+
 	assertEquals(await getSourceCode(file2), "console.log({ a: 1 });\r\n");
 
 	emptyDir(tempDir);
@@ -220,6 +248,7 @@ console.log([function foo() {}, function baz() {}, (a) => {}]);
 
 test(async function testPrettierPrintToStdout(): Promise<void> {
 	const tempDir = await Deno.makeTempDir();
+
 	await copy(testdata, tempDir, { overwrite: true });
 
 	const file0 = join(tempDir, "0.ts");
@@ -264,10 +293,15 @@ test(async function testPrettierPrintToStdout(): Promise<void> {
 test(async function testPrettierReadFromStdin(): Promise<void> {
 	interface TestCase {
 		stdin: string;
+
 		stdout: string;
+
 		stderr: string;
+
 		code: number;
+
 		success: boolean;
+
 		parser?: string;
 	}
 
@@ -300,27 +334,37 @@ test(async function testPrettierReadFromStdin(): Promise<void> {
 		});
 
 		const n = await Deno.copy(p2.stdin!, p1.stdout!);
+
 		assertEquals(n, new TextEncoder().encode(stdin).length);
 
 		const status1 = await p1.status();
+
 		assertEquals(status1.code, 0);
+
 		assertEquals(status1.success, true);
+
 		p2.stdin!.close();
 
 		const status2 = await p2.status();
+
 		assertEquals(status2.code, expectedCode);
+
 		assertEquals(status2.success, expectedSuccess);
 
 		const decoder = new TextDecoder("utf-8");
+
 		assertEquals(
 			decoder.decode(await Deno.readAll(p2.stdout!)),
 			expectedStdout,
 		);
+
 		assertEquals(
 			decoder.decode(await Deno.readAll(p2.stderr!)).split(EOL)[0],
 			expectedStderr,
 		);
+
 		p2.close();
+
 		p1.close();
 	}
 
@@ -437,8 +481,10 @@ test(async function testPrettierWithAutoConfig(): Promise<void> {
 test(async function testPrettierWithSpecifiedConfig(): Promise<void> {
 	interface Config {
 		dir: string;
+
 		name: string;
 	}
+
 	const configs: Config[] = [
 		{
 			dir: "config_file_json",

@@ -7,7 +7,9 @@ import { Conn, ConnImpl, Listener, ListenerImpl, Transport } from "./net.ts";
 // https://docs.rs/rustls/0.16.0/rustls/struct.ClientConfig.html
 interface DialTLSOptions {
 	port: number;
+
 	hostname?: string;
+
 	certFile?: string;
 }
 
@@ -34,9 +36,13 @@ class TLSListenerImpl extends ListenerImpl {
 
 export interface ListenTLSOptions {
 	port: number;
+
 	hostname?: string;
+
 	transport?: Transport;
+
 	certFile: string;
+
 	keyFile: string;
 }
 

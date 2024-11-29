@@ -41,9 +41,12 @@ async function readBytes(buf: BufReader): Promise<string> {
 		if (c === Deno.EOF) {
 			break; // EOF
 		}
+
 		b[nb] = c;
+
 		nb++;
 	}
+
 	const decoder = new TextDecoder();
 
 	return decoder.decode(b.subarray(0, nb));
@@ -55,11 +58,13 @@ test(async function bufioReaderSimple(): Promise<void> {
 	const b = new BufReader(stringsReader(data));
 
 	const s = await readBytes(b);
+
 	assertEquals(s, data);
 });
 
 interface ReadMaker {
 	name: string;
+
 	fn: (r: Reader) => Reader;
 }
 
@@ -86,8 +91,10 @@ async function reads(buf: BufReader, m: number): Promise<string> {
 		if (result === Deno.EOF) {
 			break;
 		}
+
 		nb += result;
 	}
+
 	const decoder = new TextDecoder();
 
 	return decoder.decode(b.subarray(0, nb));
@@ -95,6 +102,7 @@ async function reads(buf: BufReader, m: number): Promise<string> {
 
 interface NamedBufReader {
 	name: string;
+
 	fn: (r: BufReader) => Promise<string>;
 }
 
@@ -133,9 +141,12 @@ test(async function bufioBufReader(): Promise<void> {
 
 	for (let i = 0; i < texts.length - 1; i++) {
 		texts[i] = str + "\n";
+
 		all += texts[i];
+
 		str += String.fromCharCode((i % 26) + 97);
 	}
+
 	texts[texts.length - 1] = all;
 
 	for (const text of texts) {
@@ -151,6 +162,7 @@ test(async function bufioBufReader(): Promise<void> {
 					const debugStr =
 						`reader=${readmaker.name} ` +
 						`fn=${bufreader.name} bufsize=${bufsize} want=${text} got=${s}`;
+
 					assertEquals(s, text, debugStr);
 				}
 			}
@@ -169,16 +181,20 @@ test(async function bufioBufferFull(): Promise<void> {
 
 	try {
 		await buf.readSlice(charCode("!"));
+
 		fail("readSlice should throw");
 	} catch (err) {
 		assert(err instanceof BufferFullError);
+
 		assert(err.partial instanceof Uint8Array);
+
 		assertEquals(decoder.decode(err.partial), "And now, hello, ");
 	}
 
 	const line = assertNotEOF(await buf.readSlice(charCode("!")));
 
 	const actual = decoder.decode(line);
+
 	assertEquals(actual, "world!");
 });
 
@@ -188,10 +204,13 @@ test(async function bufioReadString(): Promise<void> {
 	const buf = new BufReader(stringsReader(string), MIN_READ_BUFFER_SIZE);
 
 	const line = assertNotEOF(await buf.readString(","));
+
 	assertEquals(line, "And now,");
+
 	assertEquals(line.length, 8);
 
 	const line2 = assertNotEOF(await buf.readString(","));
+
 	assertEquals(line2, " hello world!");
 
 	assertEquals(await buf.readString(","), Deno.EOF);
@@ -229,13 +248,17 @@ class TestReader implements Reader {
 		if (nread > this.data.byteLength) {
 			nread = this.data.byteLength;
 		}
+
 		if (nread > buf.byteLength) {
 			nread = buf.byteLength;
 		}
+
 		if (nread === 0) {
 			return Deno.EOF;
 		}
+
 		copyBytes(buf as Uint8Array, this.data);
+
 		this.data = this.data.subarray(nread);
 
 		return nread;
@@ -256,10 +279,13 @@ async function testReadLine(input: Uint8Array): Promise<void> {
 			if (r === Deno.EOF) {
 				break;
 			}
+
 			const { line, more } = r;
+
 			assertEquals(more, false);
 			// eslint-disable-next-line @typescript-eslint/restrict-plus-operands
 			const want = testOutput.subarray(done, done + line.byteLength);
+
 			assertEquals(
 				line,
 				want,
@@ -268,6 +294,7 @@ async function testReadLine(input: Uint8Array): Promise<void> {
 
 			done += line.byteLength;
 		}
+
 		assertEquals(
 			done,
 			testOutput.byteLength,
@@ -279,6 +306,7 @@ async function testReadLine(input: Uint8Array): Promise<void> {
 
 test(async function bufioReadLine(): Promise<void> {
 	await testReadLine(testInput);
+
 	await testReadLine(testInputrn);
 });
 
@@ -293,49 +321,65 @@ test(async function bufioPeek(): Promise<void> {
 	);
 
 	let actual = assertNotEOF(await buf.peek(1));
+
 	assertEquals(decoder.decode(actual), "a");
 
 	actual = assertNotEOF(await buf.peek(4));
+
 	assertEquals(decoder.decode(actual), "abcd");
 
 	try {
 		await buf.peek(32);
+
 		fail("peek() should throw");
 	} catch (err) {
 		assert(err instanceof BufferFullError);
+
 		assert(err.partial instanceof Uint8Array);
+
 		assertEquals(decoder.decode(err.partial), "abcdefghijklmnop");
 	}
 
 	await buf.read(p.subarray(0, 3));
+
 	assertEquals(decoder.decode(p.subarray(0, 3)), "abc");
 
 	actual = assertNotEOF(await buf.peek(1));
+
 	assertEquals(decoder.decode(actual), "d");
 
 	actual = assertNotEOF(await buf.peek(1));
+
 	assertEquals(decoder.decode(actual), "d");
 
 	actual = assertNotEOF(await buf.peek(1));
+
 	assertEquals(decoder.decode(actual), "d");
 
 	actual = assertNotEOF(await buf.peek(2));
+
 	assertEquals(decoder.decode(actual), "de");
 
 	const res = await buf.read(p.subarray(0, 3));
+
 	assertEquals(decoder.decode(p.subarray(0, 3)), "def");
+
 	assert(res !== Deno.EOF);
 
 	actual = assertNotEOF(await buf.peek(4));
+
 	assertEquals(decoder.decode(actual), "ghij");
 
 	await buf.read(p);
+
 	assertEquals(decoder.decode(p), "ghijklmnop");
 
 	actual = assertNotEOF(await buf.peek(0));
+
 	assertEquals(decoder.decode(actual), "");
 
 	const r = await buf.peek(1);
+
 	assert(r === Deno.EOF);
 	/* TODO
 	Test for issue 3022, not exposing a reader's error on a successful Peek.
@@ -343,6 +387,7 @@ test(async function bufioPeek(): Promise<void> {
 	if s, err := buf.Peek(2); string(s) != "ab" || err != nil {
 		t.Errorf(`Peek(2) on "abcd", EOF = %q, %v; want "ab", nil`, string(s), err)
 	}
+
 	if s, err := buf.Peek(4); string(s) != "abcd" || err != nil {
 		t.Errorf(
       `Peek(4) on "abcd", EOF = %q, %v; want "abcd", nil`,
@@ -350,9 +395,11 @@ test(async function bufioPeek(): Promise<void> {
       err
     )
 	}
+
 	if n, err := buf.Read(p[0:5]); string(p[0:n]) != "abcd" || err != nil {
 		t.Fatalf("Read after peek = %q, %v; want abcd, EOF", p[0:n], err)
 	}
+
 	if n, err := buf.Read(p[0:1]); string(p[0:n]) != "" || err != io.EOF {
 		t.Fatalf(`second Read after peek = %q, %v; want "", EOF`, p[0:n], err)
 	}
@@ -382,11 +429,13 @@ test(async function bufioWriter(): Promise<void> {
 			const context = `nwrite=${nwrite} bufsize=${bs}`;
 
 			const n = await buf.write(data.subarray(0, nwrite));
+
 			assertEquals(n, nwrite, context);
 
 			await buf.flush();
 
 			const written = w.bytes();
+
 			assertEquals(written.byteLength, nwrite);
 
 			for (let l = 0; l < written.byteLength; l++) {
@@ -410,7 +459,9 @@ test(async function bufReaderReadFull(): Promise<void> {
 		const buf = new Uint8Array(6);
 
 		const r = assertNotEOF(await bufr.readFull(buf));
+
 		assertEquals(r, buf);
+
 		assertEquals(dec.decode(buf), "Hello ");
 	}
 	{
@@ -418,11 +469,15 @@ test(async function bufReaderReadFull(): Promise<void> {
 
 		try {
 			await bufr.readFull(buf);
+
 			fail("readFull() should throw");
 		} catch (err) {
 			assert(err instanceof UnexpectedEOFError);
+
 			assert(err.partial instanceof Uint8Array);
+
 			assertEquals(err.partial.length, 5);
+
 			assertEquals(dec.decode(buf.subarray(0, 5)), "World");
 		}
 	}

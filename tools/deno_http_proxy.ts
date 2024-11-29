@@ -14,6 +14,7 @@ async function proxyRequest(req: ServerRequest): Promise<void> {
 		method: req.method,
 		headers: req.headers,
 	});
+
 	req.respond(resp);
 }
 

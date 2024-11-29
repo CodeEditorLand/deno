@@ -8,6 +8,7 @@ const revLookup: number[] = [];
 const code = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 for (let i = 0, len = code.length; i < len; ++i) {
 	lookup[i] = code[i];
+
 	revLookup[code.charCodeAt(i)] = i;
 }
 
@@ -77,8 +78,11 @@ export function toByteArray(b64: string): Uint8Array {
 			(revLookup[b64.charCodeAt(i + 1)] << 12) |
 			(revLookup[b64.charCodeAt(i + 2)] << 6) |
 			revLookup[b64.charCodeAt(i + 3)];
+
 		arr[curByte++] = (tmp >> 16) & 0xff;
+
 		arr[curByte++] = (tmp >> 8) & 0xff;
+
 		arr[curByte++] = tmp & 0xff;
 	}
 
@@ -86,6 +90,7 @@ export function toByteArray(b64: string): Uint8Array {
 		tmp =
 			(revLookup[b64.charCodeAt(i)] << 2) |
 			(revLookup[b64.charCodeAt(i + 1)] >> 4);
+
 		arr[curByte++] = tmp & 0xff;
 	}
 
@@ -94,7 +99,9 @@ export function toByteArray(b64: string): Uint8Array {
 			(revLookup[b64.charCodeAt(i)] << 10) |
 			(revLookup[b64.charCodeAt(i + 1)] << 4) |
 			(revLookup[b64.charCodeAt(i + 2)] >> 2);
+
 		arr[curByte++] = (tmp >> 8) & 0xff;
+
 		arr[curByte++] = tmp & 0xff;
 	}
 
@@ -120,8 +127,10 @@ function encodeChunk(uint8: Uint8Array, start: number, end: number): string {
 			((uint8[i] << 16) & 0xff0000) +
 			((uint8[i + 1] << 8) & 0xff00) +
 			(uint8[i + 2] & 0xff);
+
 		output.push(tripletToBase64(tmp));
 	}
+
 	return output.join("");
 }
 
@@ -149,9 +158,11 @@ export function fromByteArray(uint8: Uint8Array): string {
 	// pad the end with zeros, but make sure to not forget the extra bytes
 	if (extraBytes === 1) {
 		tmp = uint8[len - 1];
+
 		parts.push(lookup[tmp >> 2] + lookup[(tmp << 4) & 0x3f] + "==");
 	} else if (extraBytes === 2) {
 		tmp = (uint8[len - 2] << 8) + uint8[len - 1];
+
 		parts.push(
 			lookup[tmp >> 10] +
 				lookup[(tmp >> 4) & 0x3f] +

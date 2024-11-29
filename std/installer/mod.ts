@@ -87,6 +87,7 @@ function getFlagFromPermission(perm: Permission): string {
 		case Permission.All:
 			return "--allow-all";
 	}
+
 	return "";
 }
 
@@ -106,6 +107,7 @@ function getInstallerDir(): string {
 
 async function readCharacter(): Promise<string> {
 	const byteArray = new Uint8Array(1024);
+
 	await stdin.read(byteArray);
 
 	const line = decoder.decode(byteArray);
@@ -117,6 +119,7 @@ async function yesNoPrompt(message: string): Promise<boolean> {
 	console.log(`${message} [yN]`);
 
 	const input = await readCharacter();
+
 	console.log();
 
 	return input === "y" || input === "Y";
@@ -144,9 +147,11 @@ function checkIfExistsInPath(filePath: string): boolean {
 				fileAbsolutePath = HOMEDRIVE + "\\" + fileAbsolutePath;
 			}
 		}
+
 		if (pathInEnv === fileAbsolutePath) {
 			return true;
 		}
+
 		fileAbsolutePath = filePath;
 	}
 
@@ -189,7 +194,9 @@ async function generateExecutable(
 `;
 
 		const cmdFile = filePath + ".cmd";
+
 		await writeFile(cmdFile, encoder.encode(template));
+
 		await chmod(cmdFile, 0o755);
 	}
 
@@ -211,7 +218,9 @@ else
 fi
 exit $ret
 `;
+
 	await writeFile(filePath, encoder.encode(template));
+
 	await chmod(filePath, 0o755);
 }
 
@@ -224,6 +233,7 @@ export async function install(
 	if (!installationDir) {
 		installationDir = getInstallerDir();
 	}
+
 	await ensureDir(installationDir);
 
 	// if install local module
@@ -285,10 +295,12 @@ export async function install(
 	await generateExecutable(filePath, commands);
 
 	console.log(`✅ Successfully installed ${moduleName}`);
+
 	console.log(filePath);
 
 	if (!checkIfExistsInPath(installationDir)) {
 		console.log(`\nℹ️  Add ${installationDir} to PATH`);
+
 		console.log(
 			"    echo 'export PATH=\"" +
 				installationDir +
@@ -321,6 +333,7 @@ async function main(): Promise<void> {
 		await install(moduleName, moduleUrl, flags, installationDir);
 	} catch (e) {
 		console.log(e);
+
 		exit(1);
 	}
 }

@@ -49,9 +49,13 @@ test({
 	name: "[encoding.hex] encodedLen",
 	fn(): void {
 		assertEquals(encodedLen(0), 0);
+
 		assertEquals(encodedLen(1), 2);
+
 		assertEquals(encodedLen(2), 4);
+
 		assertEquals(encodedLen(3), 6);
+
 		assertEquals(encodedLen(4), 8);
 	},
 });
@@ -67,7 +71,9 @@ test({
 			const dest = new Uint8Array(encodedLen(src.length));
 
 			const int = encode(dest, src);
+
 			assertEquals(src, new Uint8Array([97, 98, 99]));
+
 			assertEquals(int, 6);
 		}
 
@@ -92,7 +98,9 @@ test({
 			const src = new Uint8Array(dec as number[]);
 
 			const n = encode(dest, src);
+
 			assertEquals(dest.length, n);
+
 			assertEquals(new TextDecoder().decode(dest), enc);
 		}
 	},
@@ -111,9 +119,13 @@ test({
 	name: "[encoding.hex] decodedLen",
 	fn(): void {
 		assertEquals(decodedLen(0), 0);
+
 		assertEquals(decodedLen(2), 1);
+
 		assertEquals(decodedLen(4), 2);
+
 		assertEquals(decodedLen(6), 3);
+
 		assertEquals(decodedLen(8), 4);
 	},
 });
@@ -138,7 +150,9 @@ test({
 			const src = new TextEncoder().encode(enc as string);
 
 			const [, err] = decode(dest, src);
+
 			assertEquals(err, undefined);
+
 			assertEquals(Array.from(dest), Array.from(dec as number[]));
 		}
 	},
@@ -165,10 +179,12 @@ test({
 				out,
 				new TextEncoder().encode(input as string),
 			);
+
 			assertEquals(
 				new TextDecoder("ascii").decode(out.slice(0, n)),
 				output as string,
 			);
+
 			assertEquals(err, expectedErr);
 		}
 	},
@@ -188,6 +204,7 @@ test({
 				);
 			} else {
 				const out = decodeString(input as string);
+
 				assertEquals(
 					new TextDecoder("ascii").decode(out),
 					output as string,

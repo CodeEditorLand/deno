@@ -41,6 +41,7 @@ function resolveYamlInteger(data: string): boolean {
 	if (ch === "0") {
 		// 0
 		if (index + 1 === max) return true;
+
 		ch = data[++index];
 
 		// base 2, base 8, base 16
@@ -55,8 +56,10 @@ function resolveYamlInteger(data: string): boolean {
 				if (ch === "_") continue;
 
 				if (ch !== "0" && ch !== "1") return false;
+
 				hasDigits = true;
 			}
+
 			return hasDigits && ch !== "_";
 		}
 
@@ -70,8 +73,10 @@ function resolveYamlInteger(data: string): boolean {
 				if (ch === "_") continue;
 
 				if (!isHexCode(data.charCodeAt(index))) return false;
+
 				hasDigits = true;
 			}
+
 			return hasDigits && ch !== "_";
 		}
 
@@ -82,8 +87,10 @@ function resolveYamlInteger(data: string): boolean {
 			if (ch === "_") continue;
 
 			if (!isOctCode(data.charCodeAt(index))) return false;
+
 			hasDigits = true;
 		}
+
 		return hasDigits && ch !== "_";
 	}
 
@@ -103,6 +110,7 @@ function resolveYamlInteger(data: string): boolean {
 		if (!isDecCode(data.charCodeAt(index))) {
 			return false;
 		}
+
 		hasDigits = true;
 	}
 
@@ -132,7 +140,9 @@ function constructYamlInteger(data: string): number {
 
 	if (ch === "-" || ch === "+") {
 		if (ch === "-") sign = -1;
+
 		value = value.slice(1);
+
 		ch = value[0];
 	}
 
@@ -157,6 +167,7 @@ function constructYamlInteger(data: string): number {
 
 		digits.forEach((d): void => {
 			valueInt += d * base;
+
 			base *= 60;
 		});
 

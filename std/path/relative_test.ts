@@ -61,6 +61,7 @@ test(function relative() {
 		const expected = p[2];
 
 		const actual = path.posix.relative(p[0], p[1]);
+
 		assertEquals(actual, expected);
 	});
 });
@@ -70,6 +71,7 @@ test(function relativeWin32() {
 		const expected = p[2];
 
 		const actual = path.win32.relative(p[0], p[1]);
+
 		assertEquals(actual, expected);
 	});
 });

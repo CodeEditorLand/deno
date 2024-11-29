@@ -4,6 +4,7 @@ function args(args: string[]) {
 	for (let i = 0; i < args.length; i++) {
 		map[i] = args[i];
 	}
+
 	Deno.stdout.write(new TextEncoder().encode(JSON.stringify(map)));
 }
 

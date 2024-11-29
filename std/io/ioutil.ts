@@ -21,19 +21,24 @@ export async function copyN(
 		if (size - bytesRead < 1024) {
 			buf = new Uint8Array(size - bytesRead);
 		}
+
 		const result = await r.read(buf);
 
 		const nread = result === Deno.EOF ? 0 : result;
+
 		bytesRead += nread;
 
 		if (nread > 0) {
 			const n = await dest.write(buf.slice(0, nread));
+
 			assert(n === nread, "could not write");
 		}
+
 		if (result === Deno.EOF) {
 			break;
 		}
 	}
+
 	return bytesRead;
 }
 
@@ -82,6 +87,7 @@ export async function readLong(buf: BufReader): Promise<number | Deno.EOF> {
 			"Long value too big to be represented as a Javascript number.",
 		);
 	}
+
 	return Number(big);
 }
 
@@ -91,7 +97,9 @@ export function sliceLongToBytes(d: number, dest = new Array(8)): number[] {
 
 	for (let i = 0; i < 8; i++) {
 		dest[7 - i] = Number(big & 0xffn);
+
 		big >>= 8n;
 	}
+
 	return dest;
 }

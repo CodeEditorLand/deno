@@ -21,6 +21,7 @@ export class DenoError<T extends ErrorKind> extends Error {
 		msg: string,
 	) {
 		super(msg);
+
 		this.name = ErrorKind[kind];
 	}
 }

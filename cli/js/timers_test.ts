@@ -3,6 +3,7 @@ import { assert, assertEquals, assertNotEquals, test } from "./test_util.ts";
 
 function deferred(): {
 	promise: Promise<{}>;
+
 	resolve: (value?: {} | PromiseLike<{}>) => void;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	reject: (reason?: any) => void;
@@ -13,6 +14,7 @@ function deferred(): {
 
 	const promise = new Promise((res, rej): void => {
 		resolve = res;
+
 		reject = rej;
 	});
 
@@ -34,8 +36,10 @@ test(async function timeoutSuccess(): Promise<void> {
 
 	setTimeout((): void => {
 		count++;
+
 		resolve();
 	}, 500);
+
 	await promise;
 	// count should increment
 	assertEquals(count, 1);
@@ -49,8 +53,11 @@ test(async function timeoutArgs(): Promise<void> {
 	setTimeout(
 		(a, b, c): void => {
 			assertEquals(a, arg);
+
 			assertEquals(b, arg.toString());
+
 			assertEquals(c, [arg]);
+
 			resolve();
 		},
 		10,
@@ -58,6 +65,7 @@ test(async function timeoutArgs(): Promise<void> {
 		arg.toString(),
 		[arg],
 	);
+
 	await promise;
 });
 
@@ -69,7 +77,9 @@ test(async function timeoutCancelSuccess(): Promise<void> {
 	}, 1);
 	// Cancelled, count should not increment
 	clearTimeout(id);
+
 	await waitForMs(600);
+
 	assertEquals(count, 0);
 });
 
@@ -84,8 +94,11 @@ test(async function timeoutCancelMultiple(): Promise<void> {
 	const t2 = setTimeout(uncalled, 10);
 
 	const t3 = setTimeout(uncalled, 10);
+
 	clearTimeout(t1);
+
 	clearTimeout(t2);
+
 	clearTimeout(t3);
 
 	// Set timers and cancel them in reverse order.
@@ -94,8 +107,11 @@ test(async function timeoutCancelMultiple(): Promise<void> {
 	const t5 = setTimeout(uncalled, 20);
 
 	const t6 = setTimeout(uncalled, 20);
+
 	clearTimeout(t6);
+
 	clearTimeout(t5);
+
 	clearTimeout(t4);
 
 	// Sleep until we're certain that the cancelled timers aren't gonna fire.
@@ -112,9 +128,12 @@ test(async function timeoutCancelInvalidSilentFail(): Promise<void> {
 		count++;
 		// Should have no effect
 		clearTimeout(id);
+
 		resolve();
 	}, 500);
+
 	await promise;
+
 	assertEquals(count, 1);
 
 	// Should silently fail (no panic)
@@ -128,9 +147,12 @@ test(async function intervalSuccess(): Promise<void> {
 
 	const id = setInterval((): void => {
 		count++;
+
 		clearInterval(id);
+
 		resolve();
 	}, 100);
+
 	await promise;
 	// Clear interval
 	clearInterval(id);
@@ -144,8 +166,11 @@ test(async function intervalCancelSuccess(): Promise<void> {
 	const id = setInterval((): void => {
 		count++;
 	}, 1);
+
 	clearInterval(id);
+
 	await waitForMs(500);
+
 	assertEquals(count, 0);
 });
 
@@ -161,10 +186,13 @@ test(async function intervalOrdering(): Promise<void> {
 			clearTimeout(timers[i]);
 		}
 	}
+
 	for (let i = 0; i < 10; i++) {
 		timers[i] = setTimeout(onTimeout, 1);
 	}
+
 	await waitForMs(500);
+
 	assertEquals(timeouts, 1);
 });
 
@@ -180,7 +208,9 @@ test(
 		setTimeout((): void => {
 			count++;
 		}, 2 ** 31);
+
 		await waitForMs(1);
+
 		assertEquals(count, 1);
 	},
 );
@@ -191,11 +221,13 @@ test(async function timeoutCallbackThis(): Promise<void> {
 	const obj = {
 		foo(): void {
 			assertEquals(this, window);
+
 			resolve();
 		},
 	};
 
 	setTimeout(obj.foo, 1);
+
 	await promise;
 });
 
@@ -223,6 +255,7 @@ test(async function timeoutBindThis(): Promise<void> {
 
 			try {
 				setTimeout.call(thisArg, noop, 1);
+
 				hasThrown = 1;
 			} catch (err) {
 				if (err instanceof TypeError) {
@@ -231,6 +264,7 @@ test(async function timeoutBindThis(): Promise<void> {
 					hasThrown = 3;
 				}
 			}
+
 			assertEquals(hasThrown, 1);
 		},
 	);
@@ -242,6 +276,7 @@ test(async function timeoutBindThis(): Promise<void> {
 
 			try {
 				setTimeout.call(thisArg, noop, 1);
+
 				hasThrown = 1;
 			} catch (err) {
 				if (err instanceof TypeError) {
@@ -250,6 +285,7 @@ test(async function timeoutBindThis(): Promise<void> {
 					hasThrown = 3;
 				}
 			}
+
 			assertEquals(hasThrown, 2);
 		},
 	);
@@ -265,7 +301,9 @@ test(async function clearTimeoutShouldConvertToNumber(): Promise<void> {
 			return 1;
 		},
 	};
+
 	clearTimeout(obj as unknown as number);
+
 	assert(called);
 });
 
@@ -274,6 +312,7 @@ test(function setTimeoutShouldThrowWithBigint(): void {
 
 	try {
 		setTimeout((): void => {}, 1n as unknown as number);
+
 		hasThrown = 1;
 	} catch (err) {
 		if (err instanceof TypeError) {
@@ -282,6 +321,7 @@ test(function setTimeoutShouldThrowWithBigint(): void {
 			hasThrown = 3;
 		}
 	}
+
 	assertEquals(hasThrown, 2);
 });
 
@@ -290,6 +330,7 @@ test(function clearTimeoutShouldThrowWithBigint(): void {
 
 	try {
 		clearTimeout(1n as unknown as number);
+
 		hasThrown = 1;
 	} catch (err) {
 		if (err instanceof TypeError) {
@@ -298,18 +339,23 @@ test(function clearTimeoutShouldThrowWithBigint(): void {
 			hasThrown = 3;
 		}
 	}
+
 	assertEquals(hasThrown, 2);
 });
 
 test(function testFunctionName(): void {
 	assertEquals(clearTimeout.name, "clearTimeout");
+
 	assertEquals(clearInterval.name, "clearInterval");
 });
 
 test(function testFunctionParamsLength(): void {
 	assertEquals(setTimeout.length, 1);
+
 	assertEquals(setInterval.length, 1);
+
 	assertEquals(clearTimeout.length, 0);
+
 	assertEquals(clearInterval.length, 0);
 });
 
@@ -323,15 +369,18 @@ test(async function timerMaxCpuBug(): Promise<void> {
 	// We can check this by counting how many ops have triggered in the interim.
 	// Certainly less than 10 ops should have been dispatched in next 100 ms.
 	const { opsDispatched } = Deno.metrics();
+
 	await waitForMs(100);
 
 	const opsDispatched_ = Deno.metrics().opsDispatched;
+
 	console.log(
 		"opsDispatched",
 		opsDispatched,
 		"opsDispatched_",
 		opsDispatched_,
 	);
+
 	assert(opsDispatched_ - opsDispatched < 10);
 });
 
@@ -345,6 +394,7 @@ test(async function timerBasicMicrotaskOrdering(): Promise<void> {
 	setTimeout(() => {
 		Promise.resolve().then(() => {
 			count++;
+
 			s += "de";
 
 			if (count === 2) {
@@ -355,13 +405,16 @@ test(async function timerBasicMicrotaskOrdering(): Promise<void> {
 
 	setTimeout(() => {
 		count++;
+
 		s += "no";
 
 		if (count === 2) {
 			resolve();
 		}
 	});
+
 	await promise;
+
 	assertEquals(s, "deno");
 });
 
@@ -369,30 +422,40 @@ test(async function timerNestedMicrotaskOrdering(): Promise<void> {
 	let s = "";
 
 	const { promise, resolve } = deferred();
+
 	s += "0";
 
 	setTimeout(() => {
 		s += "4";
 
 		setTimeout(() => (s += "8"));
+
 		Promise.resolve().then(() => {
 			setTimeout(() => {
 				s += "9";
+
 				resolve();
 			});
 		});
 	});
 
 	setTimeout(() => (s += "5"));
+
 	Promise.resolve().then(() => (s += "2"));
+
 	Promise.resolve().then(() =>
 		setTimeout(() => {
 			s += "6";
+
 			Promise.resolve().then(() => (s += "7"));
 		}),
 	);
+
 	Promise.resolve().then(() => Promise.resolve().then(() => (s += "3")));
+
 	s += "1";
+
 	await promise;
+
 	assertEquals(s, "0123456789");
 });

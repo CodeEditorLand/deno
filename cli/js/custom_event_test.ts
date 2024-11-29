@@ -15,11 +15,17 @@ test(function customEventInitializedWithDetail(): void {
 	const event = new CustomEvent(type, customEventInit);
 
 	assertEquals(event.bubbles, true);
+
 	assertEquals(event.cancelable, true);
+
 	assertEquals(event.currentTarget, null);
+
 	assertEquals(event.detail, detail);
+
 	assertEquals(event.isTrusted, false);
+
 	assertEquals(event.target, null);
+
 	assertEquals(event.type, type);
 });
 
@@ -27,5 +33,6 @@ test(function toStringShouldBeWebCompatibility(): void {
 	const type = "touchstart";
 
 	const event = new CustomEvent(type, {});
+
 	assertEquals(event.toString(), "[object CustomEvent]");
 });

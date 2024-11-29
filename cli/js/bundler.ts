@@ -69,12 +69,16 @@ export function emitBundle(
 	} else {
 		instantiate = `instantiate("${rootName}");\n`;
 	}
+
 	const bundle = `${bundleLoader}\n${data}\n${instantiate}`;
 
 	if (fileName) {
 		const encodedData = encoder.encode(bundle);
+
 		console.warn(`Emitting bundle to "${fileName}"`);
+
 		writeFileSync(fileName, encodedData);
+
 		console.warn(`${humanFileSize(encodedData.length)} emitted.`);
 	} else {
 		console.log(bundle);
@@ -89,9 +93,11 @@ export function setRootExports(
 	// get a reference to the type checker, this will let us find symbols from
 	// the AST.
 	const checker = program.getTypeChecker();
+
 	assert(rootModules.length === 1);
 	// get a reference to the main source file for the bundle
 	const mainSourceFile = program.getSourceFile(rootModules[0]);
+
 	assert(mainSourceFile);
 	// retrieve the internal TypeScript symbol for this AST node
 	const mainSymbol = checker.getSymbolAtLocation(mainSourceFile);
@@ -99,6 +105,7 @@ export function setRootExports(
 	if (!mainSymbol) {
 		return;
 	}
+
 	rootExports = checker
 		.getExportsOfModule(mainSymbol)
 		// .getExportsOfModule includes type only symbols which are exported from

@@ -57,7 +57,9 @@ function constructYamlBinary(data: string): Deno.Buffer {
 	for (let idx = 0; idx < max; idx++) {
 		if (idx % 4 === 0 && idx) {
 			result.push((bits >> 16) & 0xff);
+
 			result.push((bits >> 8) & 0xff);
+
 			result.push(bits & 0xff);
 		}
 
@@ -70,10 +72,13 @@ function constructYamlBinary(data: string): Deno.Buffer {
 
 	if (tailbits === 0) {
 		result.push((bits >> 16) & 0xff);
+
 		result.push((bits >> 8) & 0xff);
+
 		result.push(bits & 0xff);
 	} else if (tailbits === 18) {
 		result.push((bits >> 10) & 0xff);
+
 		result.push((bits >> 2) & 0xff);
 	} else if (tailbits === 12) {
 		result.push((bits >> 4) & 0xff);
@@ -96,8 +101,11 @@ function representYamlBinary(object: Uint8Array): string {
 	for (let idx = 0; idx < max; idx++) {
 		if (idx % 3 === 0 && idx) {
 			result += map[(bits >> 18) & 0x3f];
+
 			result += map[(bits >> 12) & 0x3f];
+
 			result += map[(bits >> 6) & 0x3f];
+
 			result += map[bits & 0x3f];
 		}
 
@@ -110,18 +118,27 @@ function representYamlBinary(object: Uint8Array): string {
 
 	if (tail === 0) {
 		result += map[(bits >> 18) & 0x3f];
+
 		result += map[(bits >> 12) & 0x3f];
+
 		result += map[(bits >> 6) & 0x3f];
+
 		result += map[bits & 0x3f];
 	} else if (tail === 2) {
 		result += map[(bits >> 10) & 0x3f];
+
 		result += map[(bits >> 4) & 0x3f];
+
 		result += map[(bits << 2) & 0x3f];
+
 		result += map[64];
 	} else if (tail === 1) {
 		result += map[(bits >> 2) & 0x3f];
+
 		result += map[(bits << 4) & 0x3f];
+
 		result += map[64];
+
 		result += map[64];
 	}
 

@@ -25,9 +25,12 @@ test(function runPermissions(): void {
 		Deno.run({ args: ["python", "-c", "print('hello world')"] });
 	} catch (e) {
 		caughtError = true;
+
 		assertEquals(e.kind, Deno.ErrorKind.PermissionDenied);
+
 		assertEquals(e.name, "PermissionDenied");
 	}
+
 	assert(caughtError);
 });
 
@@ -37,10 +40,15 @@ testPerm({ run: true }, async function runSuccess(): Promise<void> {
 	});
 
 	const status = await p.status();
+
 	console.log("status", status);
+
 	assertEquals(status.success, true);
+
 	assertEquals(status.code, 0);
+
 	assertEquals(status.signal, undefined);
+
 	p.close();
 });
 
@@ -52,9 +60,13 @@ testPerm(
 		});
 
 		const status = await p.status();
+
 		assertEquals(status.success, false);
+
 		assertEquals(status.code, 42);
+
 		assertEquals(status.signal, undefined);
+
 		p.close();
 	},
 );
@@ -65,14 +77,19 @@ testPerm(
 		if (Deno.build.os === "win") {
 			return; // No signals on windows.
 		}
+
 		const p = run({
 			args: ["python", "-c", "import os;os.kill(os.getpid(), 9)"],
 		});
 
 		const status = await p.status();
+
 		assertEquals(status.success, false);
+
 		assertEquals(status.code, undefined);
+
 		assertEquals(status.signal, 9);
+
 		p.close();
 	},
 );
@@ -85,8 +102,11 @@ testPerm({ run: true }, function runNotFound(): void {
 	} catch (e) {
 		error = e;
 	}
+
 	assert(error !== undefined);
+
 	assert(error instanceof DenoError);
+
 	assertEquals(error.kind, ErrorKind.NotFound);
 });
 
@@ -127,12 +147,17 @@ while True:
 		// Write the expected exit code *after* starting python.
 		// This is how we verify that `run()` is actually asynchronous.
 		const code = 84;
+
 		Deno.writeFileSync(`${cwd}/${exitCodeFile}`, enc.encode(`${code}`));
 
 		const status = await p.status();
+
 		assertEquals(status.success, false);
+
 		assertEquals(status.code, code);
+
 		assertEquals(status.signal, undefined);
+
 		p.close();
 	},
 );
@@ -146,20 +171,27 @@ testPerm({ run: true }, async function runStdinPiped(): Promise<void> {
 		],
 		stdin: "piped",
 	});
+
 	assert(!p.stdout);
+
 	assert(!p.stderr);
 
 	const msg = new TextEncoder().encode("hello");
 
 	const n = await p.stdin.write(msg);
+
 	assertEquals(n, msg.byteLength);
 
 	p.stdin.close();
 
 	const status = await p.status();
+
 	assertEquals(status.success, true);
+
 	assertEquals(status.code, 0);
+
 	assertEquals(status.signal, undefined);
+
 	p.close();
 });
 
@@ -168,7 +200,9 @@ testPerm({ run: true }, async function runStdoutPiped(): Promise<void> {
 		args: ["python", "-c", "import sys; sys.stdout.write('hello')"],
 		stdout: "piped",
 	});
+
 	assert(!p.stdin);
+
 	assert(!p.stderr);
 
 	const data = new Uint8Array(10);
@@ -178,18 +212,27 @@ testPerm({ run: true }, async function runStdoutPiped(): Promise<void> {
 	if (r === Deno.EOF) {
 		throw new Error("p.stdout.read(...) should not be EOF");
 	}
+
 	assertEquals(r, 5);
 
 	const s = new TextDecoder().decode(data.subarray(0, r));
+
 	assertEquals(s, "hello");
+
 	r = await p.stdout.read(data);
+
 	assertEquals(r, Deno.EOF);
+
 	p.stdout.close();
 
 	const status = await p.status();
+
 	assertEquals(status.success, true);
+
 	assertEquals(status.code, 0);
+
 	assertEquals(status.signal, undefined);
+
 	p.close();
 });
 
@@ -198,7 +241,9 @@ testPerm({ run: true }, async function runStderrPiped(): Promise<void> {
 		args: ["python", "-c", "import sys; sys.stderr.write('hello')"],
 		stderr: "piped",
 	});
+
 	assert(!p.stdin);
+
 	assert(!p.stdout);
 
 	const data = new Uint8Array(10);
@@ -208,18 +253,27 @@ testPerm({ run: true }, async function runStderrPiped(): Promise<void> {
 	if (r === Deno.EOF) {
 		throw new Error("p.stderr.read should not return EOF here");
 	}
+
 	assertEquals(r, 5);
 
 	const s = new TextDecoder().decode(data.subarray(0, r));
+
 	assertEquals(s, "hello");
+
 	r = await p.stderr.read(data);
+
 	assertEquals(r, Deno.EOF);
+
 	p.stderr.close();
 
 	const status = await p.status();
+
 	assertEquals(status.success, true);
+
 	assertEquals(status.code, 0);
+
 	assertEquals(status.signal, undefined);
+
 	p.close();
 });
 
@@ -232,7 +286,9 @@ testPerm({ run: true }, async function runOutput(): Promise<void> {
 	const output = await p.output();
 
 	const s = new TextDecoder().decode(output);
+
 	assertEquals(s, "hello");
+
 	p.close();
 });
 
@@ -245,7 +301,9 @@ testPerm({ run: true }, async function runStderrOutput(): Promise<void> {
 	const error = await p.stderrOutput();
 
 	const s = new TextDecoder().decode(error);
+
 	assertEquals(s, "error");
+
 	p.close();
 });
 
@@ -269,7 +327,9 @@ testPerm(
 		});
 
 		await p.status();
+
 		p.close();
+
 		file.close();
 
 		const fileContents = await readFile(fileName);
@@ -279,6 +339,7 @@ testPerm(
 		const text = decoder.decode(fileContents);
 
 		assertStrContains(text, "error");
+
 		assertStrContains(text, "output");
 	},
 );
@@ -291,6 +352,7 @@ testPerm(
 		const fileName = tempDir + "/redirected_stdio.txt";
 
 		const encoder = new TextEncoder();
+
 		await writeFile(fileName, encoder.encode("hello"));
 
 		const file = await open(fileName, "r");
@@ -305,8 +367,11 @@ testPerm(
 		});
 
 		const status = await p.status();
+
 		assertEquals(status.code, 0);
+
 		p.close();
+
 		file.close();
 	},
 );
@@ -328,7 +393,9 @@ testPerm({ run: true }, async function runEnv(): Promise<void> {
 	const output = await p.output();
 
 	const s = new TextDecoder().decode(output);
+
 	assertEquals(s, "01234567");
+
 	p.close();
 });
 
@@ -341,7 +408,9 @@ testPerm({ run: true }, async function runClose(): Promise<void> {
 		],
 		stderr: "piped",
 	});
+
 	assert(!p.stdin);
+
 	assert(!p.stdout);
 
 	p.close();
@@ -349,6 +418,7 @@ testPerm({ run: true }, async function runClose(): Promise<void> {
 	const data = new Uint8Array(10);
 
 	const r = await p.stderr.read(data);
+
 	assertEquals(r, Deno.EOF);
 });
 
@@ -373,9 +443,12 @@ if (Deno.build.os !== "win") {
 			Deno.kill(Deno.pid, Deno.Signal.SIGCONT);
 		} catch (e) {
 			caughtError = true;
+
 			assertEquals(e.kind, Deno.ErrorKind.PermissionDenied);
+
 			assertEquals(e.name, "PermissionDenied");
 		}
+
 		assert(caughtError);
 	});
 
@@ -385,6 +458,7 @@ if (Deno.build.os !== "win") {
 		});
 
 		assertEquals(Deno.Signal.SIGINT, 2);
+
 		kill(p.pid, Deno.Signal.SIGINT);
 
 		const status = await p.status();
@@ -401,7 +475,9 @@ if (Deno.build.os !== "win") {
 		const p = run({
 			args: ["python", "-c", "from time import sleep; sleep(10000)"],
 		});
+
 		assert(!p.stdin);
+
 		assert(!p.stdout);
 
 		let err;
@@ -413,7 +489,9 @@ if (Deno.build.os !== "win") {
 		}
 
 		assert(!!err);
+
 		assertEquals(err.kind, Deno.ErrorKind.InvalidInput);
+
 		assertEquals(err.name, "InvalidInput");
 
 		p.close();

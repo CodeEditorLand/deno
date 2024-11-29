@@ -10,17 +10,21 @@ import {
 
 testPerm({ env: true }, function envSuccess(): void {
 	const env = Deno.env();
+
 	assert(env !== null);
 	// eslint-disable-next-line @typescript-eslint/camelcase
 	env.test_var = "Hello World";
 
 	const newEnv = Deno.env();
+
 	assertEquals(env.test_var, newEnv.test_var);
+
 	assertEquals(Deno.env("test_var"), env.test_var);
 });
 
 testPerm({ env: true }, function envNotFound(): void {
 	const r = Deno.env("env_var_does_not_exist!");
+
 	assertEquals(r, undefined);
 });
 
@@ -32,8 +36,11 @@ test(function envPermissionDenied1(): void {
 	} catch (e) {
 		err = e;
 	}
+
 	assertNotEquals(err, undefined);
+
 	assertEquals(err.kind, Deno.ErrorKind.PermissionDenied);
+
 	assertEquals(err.name, "PermissionDenied");
 });
 
@@ -45,8 +52,11 @@ test(function envPermissionDenied2(): void {
 	} catch (e) {
 		err = e;
 	}
+
 	assertNotEquals(err, undefined);
+
 	assertEquals(err.kind, Deno.ErrorKind.PermissionDenied);
+
 	assertEquals(err.name, "PermissionDenied");
 });
 
@@ -72,6 +82,7 @@ if (Deno.build.os === "win") {
 			});
 
 			const status = await proc.status();
+
 			assertEquals(status.success, true);
 
 			const expectedValues = Object.values(expectedEnv);
@@ -79,10 +90,12 @@ if (Deno.build.os === "win") {
 			const actualValues = JSON.parse(
 				new TextDecoder().decode(await proc.output()),
 			);
+
 			assertEquals(actualValues, expectedValues);
 		};
 
 		assertEquals(Deno.env("path"), Deno.env("PATH"));
+
 		assertEquals(Deno.env("Path"), Deno.env("PATH"));
 
 		// Check 'foo', 'Foo' and 'Foo' are case folded.
@@ -92,7 +105,9 @@ if (Deno.build.os === "win") {
 		const lc1 = "µ";
 
 		const uc1 = lc1.toUpperCase();
+
 		assertNotEquals(lc1, uc1);
+
 		await checkChildEnv(
 			{ [lc1]: "mu", [uc1]: "MU" },
 			{ [lc1]: "mu", [uc1]: "MU" },
@@ -104,12 +119,16 @@ if (Deno.build.os === "win") {
 		const lc2 = c2.toLowerCase();
 
 		const uc2 = c2.toUpperCase();
+
 		assertNotEquals(c2, lc2);
+
 		assertNotEquals(c2, uc2);
+
 		await checkChildEnv(
 			{ [c2]: "Dz", [lc2]: "dz" },
 			{ [c2]: "Dz", [lc2]: "dz", [uc2]: "dz" },
 		);
+
 		await checkChildEnv(
 			{ [c2]: "Dz", [uc2]: "DZ" },
 			{ [c2]: "Dz", [uc2]: "DZ", [lc2]: "DZ" },
@@ -119,6 +138,7 @@ if (Deno.build.os === "win") {
 
 test(function osPid(): void {
 	console.log("pid", Deno.pid);
+
 	assert(Deno.pid > 0);
 });
 
@@ -137,9 +157,12 @@ testPerm({ env: false }, function homeDirPerm(): void {
 		Deno.homeDir();
 	} catch (err) {
 		caughtError = true;
+
 		assertEquals(err.kind, Deno.ErrorKind.PermissionDenied);
+
 		assertEquals(err.name, "PermissionDenied");
 	}
+
 	assert(caughtError);
 });
 
@@ -148,12 +171,15 @@ testPerm({ env: true }, function getUserDir(): void {
 
 	interface Runtime {
 		os: supportOS;
+
 		shouldHaveValue: boolean;
 	}
 
 	interface Scenes {
 		name: string;
+
 		fn: string;
+
 		runtime: Runtime[];
 	}
 
@@ -340,9 +366,12 @@ testPerm({ env: false }, function execPathPerm(): void {
 		Deno.execPath();
 	} catch (err) {
 		caughtError = true;
+
 		assertEquals(err.kind, Deno.ErrorKind.PermissionDenied);
+
 		assertEquals(err.name, "PermissionDenied");
 	}
+
 	assert(caughtError);
 });
 
@@ -357,8 +386,11 @@ testPerm({ env: false }, function hostnamePerm(): void {
 		Deno.hostname();
 	} catch (err) {
 		caughtError = true;
+
 		assertEquals(err.kind, Deno.ErrorKind.PermissionDenied);
+
 		assertEquals(err.name, "PermissionDenied");
 	}
+
 	assert(caughtError);
 });

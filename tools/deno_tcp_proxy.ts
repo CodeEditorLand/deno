@@ -23,6 +23,7 @@ async function handle(conn: Deno.Conn): Promise<void> {
 		}
 	} finally {
 		conn.close();
+
 		origin.close();
 	}
 }

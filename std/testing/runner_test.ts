@@ -21,6 +21,7 @@ async function findTestModulesArray(
 	for await (const testModule of findTestModules(include, exclude, root)) {
 		result.push(testModule);
 	}
+
 	return result;
 }
 
@@ -30,6 +31,7 @@ const TEST_DATA_PATH = urlToFilePath(TEST_DATA_URL);
 
 test(async function findTestModulesDir1(): Promise<void> {
 	const urls = await findTestModulesArray(["."], [], TEST_DATA_PATH);
+
 	assertEquals(urls.sort(), [
 		`${TEST_DATA_URL}/bar_test.js`,
 		`${TEST_DATA_URL}/foo_test.ts`,
@@ -44,6 +46,7 @@ test(async function findTestModulesDir1(): Promise<void> {
 
 test(async function findTestModulesDir2(): Promise<void> {
 	const urls = await findTestModulesArray(["subdir"], [], TEST_DATA_PATH);
+
 	assertEquals(urls.sort(), [
 		`${TEST_DATA_URL}/subdir/bar_test.js`,
 		`${TEST_DATA_URL}/subdir/foo_test.ts`,
@@ -58,6 +61,7 @@ test(async function findTestModulesGlob(): Promise<void> {
 		[],
 		TEST_DATA_PATH,
 	);
+
 	assertEquals(urls.sort(), [
 		`${TEST_DATA_URL}/bar_test.js`,
 		`${TEST_DATA_URL}/foo_test.ts`,
@@ -68,6 +72,7 @@ test(async function findTestModulesGlob(): Promise<void> {
 
 test(async function findTestModulesExcludeDir(): Promise<void> {
 	const urls = await findTestModulesArray(["."], ["subdir"], TEST_DATA_PATH);
+
 	assertEquals(urls.sort(), [
 		`${TEST_DATA_URL}/bar_test.js`,
 		`${TEST_DATA_URL}/foo_test.ts`,
@@ -78,6 +83,7 @@ test(async function findTestModulesExcludeDir(): Promise<void> {
 
 test(async function findTestModulesExcludeGlob(): Promise<void> {
 	const urls = await findTestModulesArray(["."], ["**/foo*"], TEST_DATA_PATH);
+
 	assertEquals(urls.sort(), [
 		`${TEST_DATA_URL}/bar_test.js`,
 		`${TEST_DATA_URL}/subdir/bar_test.js`,
@@ -95,5 +101,6 @@ test(async function findTestModulesRemote(): Promise<void> {
 	];
 
 	const matches = await findTestModulesArray(urls, []);
+
 	assertEquals(matches, urls);
 });

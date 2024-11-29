@@ -14,9 +14,11 @@ export class OneByteReader implements Reader {
 		if (p.byteLength === 0) {
 			return 0;
 		}
+
 		if (!(p instanceof Uint8Array)) {
 			throw Error("expected Uint8Array");
 		}
+
 		return this.r.read(p.subarray(0, 1));
 	}
 }
@@ -31,6 +33,7 @@ export class HalfReader implements Reader {
 		if (!(p instanceof Uint8Array)) {
 			throw Error("expected Uint8Array");
 		}
+
 		const half = Math.floor((p.byteLength + 1) / 2);
 
 		return this.r.read(p.subarray(0, half));
@@ -40,6 +43,7 @@ export class HalfReader implements Reader {
 export class ErrTimeout extends Error {
 	constructor() {
 		super("timeout");
+
 		this.name = "ErrTimeout";
 	}
 }
@@ -58,6 +62,7 @@ export class TimeoutReader implements Reader {
 		if (this.count === 2) {
 			throw new ErrTimeout();
 		}
+
 		return this.r.read(p);
 	}
 }

@@ -16,11 +16,13 @@ export async function emptyDir(dir: string): Promise<void> {
 
 		return;
 	}
+
 	while (items.length) {
 		const item = items.shift();
 
 		if (item && item.name) {
 			const fn = dir + "/" + item.name;
+
 			await Deno.remove(fn, { recursive: true });
 		}
 	}
@@ -43,11 +45,13 @@ export function emptyDirSync(dir: string): void {
 
 		return;
 	}
+
 	while (items.length) {
 		const item = items.shift();
 
 		if (item && item.name) {
 			const fn = dir + "/" + item.name;
+
 			Deno.removeSync(fn, { recursive: true });
 		}
 	}

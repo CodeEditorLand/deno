@@ -111,6 +111,7 @@ test(function join() {
 		const _p = p[0] as string[];
 
 		const actual = path.posix.join.apply(null, _p);
+
 		assertEquals(actual, p[1]);
 	});
 });
@@ -122,12 +123,15 @@ test(function joinWin32() {
 		const actual = path.win32.join
 			.apply(null, _p)
 			.replace(backslashRE, "/");
+
 		assertEquals(actual, p[1]);
 	});
+
 	windowsJoinTests.forEach(function (p) {
 		const _p = p[0] as string[];
 
 		const actual = path.win32.join.apply(null, _p);
+
 		assertEquals(actual, p[1]);
 	});
 });

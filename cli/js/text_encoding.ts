@@ -38,6 +38,7 @@ function decoderError(fatal: boolean): number | never {
 	if (fatal) {
 		throw new TypeError("Decoder error.");
 	}
+
 	return 0xfffd; // default code point
 }
 
@@ -55,6 +56,7 @@ function stringToCodePoints(input: string): number[] {
 	for (const c of input) {
 		u.push(c.codePointAt(0)!);
 	}
+
 	return u;
 }
 
@@ -74,12 +76,15 @@ class UTF8Encoder implements Encoder {
 
 		if (inRange(codePoint, 0x0080, 0x07ff)) {
 			count = 1;
+
 			offset = 0xc0;
 		} else if (inRange(codePoint, 0x0800, 0xffff)) {
 			count = 2;
+
 			offset = 0xe0;
 		} else if (inRange(codePoint, 0x10000, 0x10ffff)) {
 			count = 3;
+
 			offset = 0xf0;
 		} else {
 			throw TypeError(
@@ -91,7 +96,9 @@ class UTF8Encoder implements Encoder {
 
 		while (count > 0) {
 			const temp = codePoint >> (6 * (count - 1));
+
 			bytes.push(0x80 | (temp & 0x3f));
+
 			count--;
 		}
 
@@ -102,6 +109,7 @@ class UTF8Encoder implements Encoder {
 /** Decodes a string of data which has been encoded using base-64. */
 export function atob(s: string): string {
 	s = String(s);
+
 	s = s.replace(/[\t\n\f\r ]/g, "");
 
 	if (s.length % 4 === 0) {
@@ -130,6 +138,7 @@ export function atob(s: string): string {
 	for (let i = 0; i < byteArray.length; i++) {
 		result += String.fromCharCode(byteArray[i]);
 	}
+
 	return result;
 }
 
@@ -147,8 +156,10 @@ export function btoa(s: string): string {
 					"outside of the Latin1 range.",
 			);
 		}
+
 		byteArray.push(charCode);
 	}
+
 	const result = base64.fromByteArray(Uint8Array.from(byteArray));
 
 	return result;
@@ -156,6 +167,7 @@ export function btoa(s: string): string {
 
 interface DecoderOptions {
 	fatal?: boolean;
+
 	ignoreBOM?: boolean;
 }
 
@@ -169,6 +181,7 @@ interface Encoder {
 
 class SingleByteDecoder implements Decoder {
 	private _index: number[];
+
 	private _fatal: boolean;
 
 	constructor(index: number[], options: DecoderOptions) {
@@ -177,16 +190,21 @@ class SingleByteDecoder implements Decoder {
 				"Ignoring the BOM is available only with utf-8.",
 			);
 		}
+
 		this._fatal = options.fatal || false;
+
 		this._index = index;
 	}
+
 	handler(stream: Stream, byte: number): number {
 		if (byte === END_OF_STREAM) {
 			return FINISHED;
 		}
+
 		if (isASCIIByte(byte)) {
 			return byte;
 		}
+
 		const codePoint = this._index[byte - 0x80];
 
 		if (codePoint == null) {
@@ -260,6 +278,7 @@ function codePointsToString(codePoints: number[]): string {
 	for (const cp of codePoints) {
 		s += String.fromCodePoint(cp);
 	}
+
 	return s;
 }
 
@@ -268,6 +287,7 @@ class Stream {
 
 	constructor(tokens: number[] | Uint8Array) {
 		this._tokens = [].slice.call(tokens);
+
 		this._tokens.reverse();
 	}
 
@@ -306,6 +326,7 @@ export interface TextDecodeOptions {
 
 export interface TextDecoderOptions {
 	fatal?: boolean;
+
 	ignoreBOM?: boolean;
 }
 
@@ -335,9 +356,11 @@ export class TextDecoder {
 		if (options.ignoreBOM) {
 			this.ignoreBOM = true;
 		}
+
 		if (options.fatal) {
 			this.fatal = true;
 		}
+
 		label = String(label).trim().toLowerCase();
 
 		const encoding = encodings.get(label);
@@ -347,9 +370,11 @@ export class TextDecoder {
 				`The encoding label provided ('${label}') is invalid.`,
 			);
 		}
+
 		if (!decoders.has(encoding) && encoding !== "utf-8") {
 			throw new TypeError(`Internal decoder ('${encoding}') not found.`);
 		}
+
 		this._encoding = encoding;
 	}
 
@@ -423,6 +448,7 @@ export class TextDecoder {
 
 interface TextEncoderEncodeIntoResult {
 	read: number;
+
 	written: number;
 }
 
@@ -443,6 +469,7 @@ export class TextEncoder {
 			if (result === FINISHED) {
 				break;
 			}
+
 			if (Array.isArray(result)) {
 				output.push(...result);
 			} else {
@@ -452,6 +479,7 @@ export class TextEncoder {
 
 		return new Uint8Array(output);
 	}
+
 	encodeInto(input: string, dest: Uint8Array): TextEncoderEncodeIntoResult {
 		const encoder = new UTF8Encoder();
 
@@ -467,10 +495,12 @@ export class TextEncoder {
 			if (result === FINISHED) {
 				break;
 			}
+
 			read++;
 
 			if (Array.isArray(result)) {
 				dest.set(result, written);
+
 				written += result.length;
 
 				if (result.length > 3) {
@@ -479,6 +509,7 @@ export class TextEncoder {
 				}
 			} else {
 				dest[written] = result;
+
 				written++;
 			}
 		}
@@ -488,6 +519,7 @@ export class TextEncoder {
 			written,
 		};
 	}
+
 	get [Symbol.toStringTag](): string {
 		return "TextEncoder";
 	}

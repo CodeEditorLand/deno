@@ -35,6 +35,7 @@ function assertNotEOF<T extends {}>(val: T | Deno.EOF): T {
 
 interface ResponseTest {
 	response: Response;
+
 	raw: string;
 }
 
@@ -78,6 +79,7 @@ test(async function responseWrite(): Promise<void> {
 		const bufw = new BufWriter(buf);
 
 		const request = new ServerRequest();
+
 		request.w = bufw;
 
 		request.conn = {
@@ -96,7 +98,9 @@ test(async function responseWrite(): Promise<void> {
 		};
 
 		await request.respond(testCase.response);
+
 		assertEquals(buf.toString(), testCase.raw);
+
 		await request.done;
 	}
 });
@@ -104,13 +108,17 @@ test(async function responseWrite(): Promise<void> {
 test(async function requestBodyWithContentLength(): Promise<void> {
 	{
 		const req = new ServerRequest();
+
 		req.headers = new Headers();
+
 		req.headers.set("content-length", "5");
 
 		const buf = new Buffer(enc.encode("Hello"));
+
 		req.r = new BufReader(buf);
 
 		const body = dec.decode(await req.body());
+
 		assertEquals(body, "Hello");
 	}
 
@@ -119,13 +127,17 @@ test(async function requestBodyWithContentLength(): Promise<void> {
 		const longText = "1234\n".repeat(1000);
 
 		const req = new ServerRequest();
+
 		req.headers = new Headers();
+
 		req.headers.set("Content-Length", "5000");
 
 		const buf = new Buffer(enc.encode(longText));
+
 		req.r = new BufReader(buf);
 
 		const body = dec.decode(await req.body());
+
 		assertEquals(body, longText);
 	}
 });
@@ -135,7 +147,9 @@ test(async function requestBodyWithTransferEncoding(): Promise<void> {
 		const shortText = "Hello";
 
 		const req = new ServerRequest();
+
 		req.headers = new Headers();
+
 		req.headers.set("transfer-encoding", "chunked");
 
 		let chunksData = "";
@@ -149,18 +163,23 @@ test(async function requestBodyWithTransferEncoding(): Promise<void> {
 				maxChunkSize,
 				shortText.length - chunkOffset,
 			);
+
 			chunksData += `${chunkSize.toString(16)}\r\n${shortText.substr(
 				chunkOffset,
 				chunkSize,
 			)}\r\n`;
+
 			chunkOffset += chunkSize;
 		}
+
 		chunksData += "0\r\n\r\n";
 
 		const buf = new Buffer(enc.encode(chunksData));
+
 		req.r = new BufReader(buf);
 
 		const body = dec.decode(await req.body());
+
 		assertEquals(body, shortText);
 	}
 
@@ -169,7 +188,9 @@ test(async function requestBodyWithTransferEncoding(): Promise<void> {
 		const longText = "1234\n".repeat(1000);
 
 		const req = new ServerRequest();
+
 		req.headers = new Headers();
+
 		req.headers.set("transfer-encoding", "chunked");
 
 		let chunksData = "";
@@ -183,18 +204,23 @@ test(async function requestBodyWithTransferEncoding(): Promise<void> {
 				maxChunkSize,
 				longText.length - chunkOffset,
 			);
+
 			chunksData += `${chunkSize.toString(16)}\r\n${longText.substr(
 				chunkOffset,
 				chunkSize,
 			)}\r\n`;
+
 			chunkOffset += chunkSize;
 		}
+
 		chunksData += "0\r\n\r\n";
 
 		const buf = new Buffer(enc.encode(chunksData));
+
 		req.r = new BufReader(buf);
 
 		const body = dec.decode(await req.body());
+
 		assertEquals(body, longText);
 	}
 });
@@ -204,10 +230,13 @@ test(async function requestBodyStreamWithContentLength(): Promise<void> {
 		const shortText = "Hello";
 
 		const req = new ServerRequest();
+
 		req.headers = new Headers();
+
 		req.headers.set("content-length", "" + shortText.length);
 
 		const buf = new Buffer(enc.encode(shortText));
+
 		req.r = new BufReader(buf);
 
 		const it = await req.bodyStream();
@@ -216,7 +245,9 @@ test(async function requestBodyStreamWithContentLength(): Promise<void> {
 
 		for await (const chunk of it) {
 			const s = dec.decode(chunk);
+
 			assertEquals(shortText.substr(offset, s.length), s);
+
 			offset += s.length;
 		}
 	}
@@ -226,10 +257,13 @@ test(async function requestBodyStreamWithContentLength(): Promise<void> {
 		const longText = "1234\n".repeat(1000);
 
 		const req = new ServerRequest();
+
 		req.headers = new Headers();
+
 		req.headers.set("Content-Length", "5000");
 
 		const buf = new Buffer(enc.encode(longText));
+
 		req.r = new BufReader(buf);
 
 		const it = await req.bodyStream();
@@ -238,7 +272,9 @@ test(async function requestBodyStreamWithContentLength(): Promise<void> {
 
 		for await (const chunk of it) {
 			const s = dec.decode(chunk);
+
 			assertEquals(longText.substr(offset, s.length), s);
+
 			offset += s.length;
 		}
 	}
@@ -249,7 +285,9 @@ test(async function requestBodyStreamWithTransferEncoding(): Promise<void> {
 		const shortText = "Hello";
 
 		const req = new ServerRequest();
+
 		req.headers = new Headers();
+
 		req.headers.set("transfer-encoding", "chunked");
 
 		let chunksData = "";
@@ -263,15 +301,19 @@ test(async function requestBodyStreamWithTransferEncoding(): Promise<void> {
 				maxChunkSize,
 				shortText.length - chunkOffset,
 			);
+
 			chunksData += `${chunkSize.toString(16)}\r\n${shortText.substr(
 				chunkOffset,
 				chunkSize,
 			)}\r\n`;
+
 			chunkOffset += chunkSize;
 		}
+
 		chunksData += "0\r\n\r\n";
 
 		const buf = new Buffer(enc.encode(chunksData));
+
 		req.r = new BufReader(buf);
 
 		const it = await req.bodyStream();
@@ -280,7 +322,9 @@ test(async function requestBodyStreamWithTransferEncoding(): Promise<void> {
 
 		for await (const chunk of it) {
 			const s = dec.decode(chunk);
+
 			assertEquals(shortText.substr(offset, s.length), s);
+
 			offset += s.length;
 		}
 	}
@@ -290,7 +334,9 @@ test(async function requestBodyStreamWithTransferEncoding(): Promise<void> {
 		const longText = "1234\n".repeat(1000);
 
 		const req = new ServerRequest();
+
 		req.headers = new Headers();
+
 		req.headers.set("transfer-encoding", "chunked");
 
 		let chunksData = "";
@@ -304,15 +350,19 @@ test(async function requestBodyStreamWithTransferEncoding(): Promise<void> {
 				maxChunkSize,
 				longText.length - chunkOffset,
 			);
+
 			chunksData += `${chunkSize.toString(16)}\r\n${longText.substr(
 				chunkOffset,
 				chunkSize,
 			)}\r\n`;
+
 			chunkOffset += chunkSize;
 		}
+
 		chunksData += "0\r\n\r\n";
 
 		const buf = new Buffer(enc.encode(chunksData));
+
 		req.r = new BufReader(buf);
 
 		const it = await req.bodyStream();
@@ -321,7 +371,9 @@ test(async function requestBodyStreamWithTransferEncoding(): Promise<void> {
 
 		for await (const chunk of it) {
 			const s = dec.decode(chunk);
+
 			assertEquals(longText.substr(offset, s.length), s);
+
 			offset += s.length;
 		}
 	}
@@ -335,6 +387,7 @@ test(async function writeUint8ArrayResponse(): Promise<void> {
 	const res: Response = { body };
 
 	const buf = new Deno.Buffer();
+
 	await writeResponse(buf, res);
 
 	const decoder = new TextDecoder("utf-8");
@@ -342,23 +395,33 @@ test(async function writeUint8ArrayResponse(): Promise<void> {
 	const reader = new BufReader(buf);
 
 	let r: ReadLineResult;
+
 	r = assertNotEOF(await reader.readLine());
+
 	assertEquals(decoder.decode(r.line), "HTTP/1.1 200 OK");
+
 	assertEquals(r.more, false);
 
 	r = assertNotEOF(await reader.readLine());
+
 	assertEquals(decoder.decode(r.line), `content-length: ${shortText.length}`);
+
 	assertEquals(r.more, false);
 
 	r = assertNotEOF(await reader.readLine());
+
 	assertEquals(r.line.byteLength, 0);
+
 	assertEquals(r.more, false);
 
 	r = assertNotEOF(await reader.readLine());
+
 	assertEquals(decoder.decode(r.line), shortText);
+
 	assertEquals(r.more, false);
 
 	const eof = await reader.readLine();
+
 	assertEquals(eof, Deno.EOF);
 });
 
@@ -370,6 +433,7 @@ test(async function writeStringReaderResponse(): Promise<void> {
 	const res: Response = { body };
 
 	const buf = new Deno.Buffer();
+
 	await writeResponse(buf, res);
 
 	const decoder = new TextDecoder("utf-8");
@@ -377,28 +441,41 @@ test(async function writeStringReaderResponse(): Promise<void> {
 	const reader = new BufReader(buf);
 
 	let r: ReadLineResult;
+
 	r = assertNotEOF(await reader.readLine());
+
 	assertEquals(decoder.decode(r.line), "HTTP/1.1 200 OK");
+
 	assertEquals(r.more, false);
 
 	r = assertNotEOF(await reader.readLine());
+
 	assertEquals(decoder.decode(r.line), "transfer-encoding: chunked");
+
 	assertEquals(r.more, false);
 
 	r = assertNotEOF(await reader.readLine());
+
 	assertEquals(r.line.byteLength, 0);
+
 	assertEquals(r.more, false);
 
 	r = assertNotEOF(await reader.readLine());
+
 	assertEquals(decoder.decode(r.line), shortText.length.toString());
+
 	assertEquals(r.more, false);
 
 	r = assertNotEOF(await reader.readLine());
+
 	assertEquals(decoder.decode(r.line), shortText);
+
 	assertEquals(r.more, false);
 
 	r = assertNotEOF(await reader.readLine());
+
 	assertEquals(decoder.decode(r.line), "0");
+
 	assertEquals(r.more, false);
 });
 
@@ -431,7 +508,9 @@ malformedHeader
 	} catch (e) {
 		err = e;
 	}
+
 	assert(err instanceof Error);
+
 	assertEquals(err.message, "malformed MIME header line: malformedHeader");
 });
 
@@ -513,6 +592,7 @@ test(async function testReadRequestError(): Promise<void> {
 		} catch (e) {
 			err = e;
 		}
+
 		if (test.err === Deno.EOF) {
 			assertEquals(req, Deno.EOF);
 		} else if (typeof test.err === "string") {
@@ -521,6 +601,7 @@ test(async function testReadRequestError(): Promise<void> {
 			assert(err instanceof (test.err as typeof UnexpectedEOFError));
 		} else {
 			assertEquals(err, undefined);
+
 			assertNotEquals(req, Deno.EOF);
 
 			for (const h of test.headers!) {
@@ -559,10 +640,12 @@ test({
 			} catch (e) {
 				err = e;
 			}
+
 			if (t.err) {
 				assert(err instanceof Error, t.in);
 			} else {
 				assertEquals(err, undefined);
+
 				assertEquals(r, t.want, t.in);
 			}
 		}
@@ -586,9 +669,11 @@ test({
 			const r = new TextProtoReader(new BufReader(p.stdout!));
 
 			const s = await r.readLine();
+
 			assert(s !== Deno.EOF && s.includes("server listening"));
 
 			let serverIsRunning = true;
+
 			p.status()
 				.then((): void => {
 					serverIsRunning = false;
@@ -599,7 +684,9 @@ test({
 
 			// Reqeusts to the server and immediately closes the connection
 			const conn = await Deno.dial({ port: 4502 });
+
 			await conn.write(new TextEncoder().encode("GET / HTTP/1.0\n\n"));
+
 			conn.close();
 
 			// Waits for the server to handle the above (broken) request
@@ -631,9 +718,11 @@ test({
 			const r = new TextProtoReader(new BufReader(p.stdout!));
 
 			const s = await r.readLine();
+
 			assert(s !== Deno.EOF && s.includes("server listening"));
 
 			let serverIsRunning = true;
+
 			p.status()
 				.then((): void => {
 					serverIsRunning = false;
@@ -646,6 +735,7 @@ test({
 				port: 4503,
 				certFile: "http/testdata/tls/RootCA.pem",
 			});
+
 			await Deno.writeAll(
 				conn,
 				new TextEncoder().encode("GET / HTTP/1.0\r\n\r\n"),
@@ -654,10 +744,13 @@ test({
 			const res = new Uint8Array(100);
 
 			const nread = assertNotEOF(await conn.read(res));
+
 			conn.close();
 
 			const resStr = new TextDecoder().decode(res.subarray(0, nread));
+
 			assert(resStr.includes("Hello HTTPS"));
+
 			assert(serverIsRunning);
 		} finally {
 			// Stops the sever.
@@ -672,10 +765,13 @@ test({
 		const server = serve(":8123");
 
 		const nextWhileClosing = server[Symbol.asyncIterator]().next();
+
 		server.close();
+
 		assertEquals(await nextWhileClosing, { value: undefined, done: true });
 
 		const nextAfterClosing = server[Symbol.asyncIterator]().next();
+
 		assertEquals(await nextAfterClosing, { value: undefined, done: true });
 	},
 });
@@ -704,15 +800,20 @@ if (Deno.build.os !== "win") {
 
 				for await (const req of server) {
 					connRid = req.conn.rid;
+
 					reqCount++;
+
 					await req.body();
+
 					await connClosedPromise;
 
 					try {
 						await req.respond({
 							body: new TextEncoder().encode("Hello World"),
 						});
+
 						await delay(100);
+
 						req.done = deferred();
 						// This duplicate respond is to ensure we get a write failure from the
 						// other side. Our client would enter CLOSE_WAIT stage after close(),
@@ -726,9 +827,11 @@ if (Deno.build.os !== "win") {
 						break;
 					}
 				}
+
 				server.close();
 
 				const resources = Deno.resources();
+
 				assert(reqCount === 1);
 				// Server should be gone
 				assert(!(serverRid in resources));
@@ -742,13 +845,16 @@ if (Deno.build.os !== "win") {
 				hostname: "127.0.0.1",
 				port: 8124,
 			});
+
 			await Deno.writeAll(
 				conn,
 				new TextEncoder().encode("GET / HTTP/1.1\r\n\r\n"),
 			);
+
 			conn.close(); // abruptly closing connection before response.
 			// conn on server side enters CLOSE_WAIT state.
 			connClosedPromise.resolve();
+
 			await p;
 		},
 	});

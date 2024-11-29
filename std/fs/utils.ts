@@ -14,6 +14,7 @@ export function isSubdir(
 	if (src === dest) {
 		return false;
 	}
+
 	const srcArray = src.split(sep);
 
 	const destArray = dest.split(sep);

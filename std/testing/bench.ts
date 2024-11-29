@@ -4,31 +4,37 @@ const { exit, noColor } = Deno;
 
 interface BenchmarkClock {
 	start: number;
+
 	stop: number;
 }
 
 /** Provides methods for starting and stopping a benchmark clock. */
 export interface BenchmarkTimer {
 	start: () => void;
+
 	stop: () => void;
 }
 
 /** Defines a benchmark through a named function. */
 export interface BenchmarkFunction {
 	(b: BenchmarkTimer): void | Promise<void>;
+
 	name: string;
 }
 
 /** Defines a benchmark definition with configurable runs. */
 export interface BenchmarkDefinition {
 	func: BenchmarkFunction;
+
 	name: string;
+
 	runs?: number;
 }
 
 /** Defines runBenchmark's run constraints by matching benchmark names. */
 export interface BenchmarkRunOptions {
 	only?: RegExp;
+
 	skip?: RegExp;
 }
 
@@ -78,6 +84,7 @@ export function bench(
 	if (!benchmark.name) {
 		throw new Error("The benchmark function must not be anonymous");
 	}
+
 	if (typeof benchmark === "function") {
 		candidates.push({ name: benchmark.name, runs: 1, func: benchmark });
 	} else {
@@ -127,6 +134,7 @@ export async function runBenchmarks({
 				await func(b);
 				// Making sure the benchmark was started/stopped properly
 				assertTiming(clock);
+
 				result = `${clock.stop - clock.start}ms`;
 			} else if (runs > 1) {
 				// Averaging runs
@@ -153,14 +161,18 @@ export async function runBenchmarks({
 			}
 		} catch (err) {
 			failed = true;
+
 			console.groupEnd();
+
 			console.error(red(err.stack));
 
 			break;
 		}
 		// Reporting
 		console.log(blue(result));
+
 		console.groupEnd();
+
 		measured++;
 		// Resetting the benchmark clock
 		clock.start = clock.stop = NaN;

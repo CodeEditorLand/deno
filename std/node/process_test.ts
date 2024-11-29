@@ -10,9 +10,13 @@ test({
 	fn() {
 		// this should be run like other tests from directory up
 		assert(process.cwd().match(/\Wstd$/));
+
 		process.chdir("node");
+
 		assert(process.cwd().match(/\Wnode$/));
+
 		process.chdir("..");
+
 		assert(process.cwd().match(/\Wstd$/));
 	},
 });
@@ -39,8 +43,11 @@ test({
 	name: "process.version",
 	fn() {
 		assertEquals(typeof process, "object");
+
 		assertEquals(typeof process.version, "string");
+
 		assertEquals(typeof process.versions, "object");
+
 		assertEquals(typeof process.versions.node, "string");
 	},
 });
@@ -65,6 +72,7 @@ test({
 	name: "process.pid",
 	fn() {
 		assertEquals(typeof process.pid, "number");
+
 		assertEquals(process.pid, Deno.pid);
 	},
 });
@@ -73,6 +81,7 @@ test({
 	name: "process.on",
 	fn() {
 		assertEquals(typeof process.on, "function");
+
 		assertThrows(
 			() => {
 				process.on("uncaughtException", (_err: Error) => {});
@@ -87,6 +96,7 @@ test({
 	name: "process.argv",
 	fn() {
 		assert(Array.isArray(process.argv));
+
 		assert(
 			process.argv[0].match(/[^/\\]*deno[^/\\]*$/),
 			"deno included in the file name of argv[0]",

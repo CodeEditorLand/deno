@@ -8,8 +8,11 @@ import { isTypedArray } from "./util.ts";
 type ConsoleContext = Set<unknown>;
 type ConsoleOptions = Partial<{
 	showHidden: boolean;
+
 	depth: number;
+
 	colors: boolean;
+
 	indentLevel: number;
 }>;
 
@@ -33,6 +36,7 @@ const CHAR_UPPERCASE_O = 79; /* O */
 const CHAR_LOWERCASE_C = 99; /* c */
 export class CSI {
 	static kClear = "\x1b[1;1H";
+
 	static kClearScreenDown = "\x1b[0J";
 }
 
@@ -40,11 +44,13 @@ export class CSI {
 
 function cursorTo(stream: File, _x: number, _y?: number): void {
 	const uint8 = new TextEncoder().encode(CSI.kClear);
+
 	stream.write(uint8);
 }
 
 function clearScreenDown(stream: File): void {
 	const uint8 = new TextEncoder().encode(CSI.kClearScreenDown);
+
 	stream.write(uint8);
 }
 
@@ -52,6 +58,7 @@ function getClassInstanceName(instance: unknown): string {
 	if (typeof instance !== "object") {
 		return "";
 	}
+
 	if (!instance) {
 		return "";
 	}
@@ -73,13 +80,17 @@ function createFunctionString(value: Function, _ctx: ConsoleContext): string {
 		// from MDN spec
 		return `[${cstrName}: ${value.name}]`;
 	}
+
 	return `[${cstrName}]`;
 }
 
 interface IterablePrintConfig<T> {
 	typeName: string;
+
 	displayName: string;
+
 	delims: [string, string];
+
 	entryHandler: (
 		entry: T,
 		ctx: ConsoleContext,
@@ -98,6 +109,7 @@ function createIterableString<T>(
 	if (level >= maxLevel) {
 		return `[${config.typeName}]`;
 	}
+
 	ctx.add(value);
 
 	const entries: string[] = [];
@@ -107,6 +119,7 @@ function createIterableString<T>(
 			entries.push(config.entryHandler(el, ctx, level + 1, maxLevel));
 		}
 	} catch (e) {}
+
 	ctx.delete(value);
 
 	const iPrefix = `${config.displayName ? config.displayName + " " : ""}`;
@@ -300,6 +313,7 @@ function createRawObjectString(
 	if (level >= maxLevel) {
 		return "[Object]";
 	}
+
 	ctx.add(value);
 
 	let baseString = "";
@@ -311,6 +325,7 @@ function createRawObjectString(
 	if (className && className !== "Object" && className !== "anonymous") {
 		shouldShowClassName = true;
 	}
+
 	const keys = Object.keys(value);
 
 	const entries: string[] = keys.map((key): string => {
@@ -350,6 +365,7 @@ function createObjectString(
 			return String(value[customInspect]!());
 		} catch {}
 	}
+
 	if (value instanceof Error) {
 		return String(value.stack);
 	} else if (Array.isArray(value)) {
@@ -428,6 +444,7 @@ export function stringifyArgs(
 							} else {
 								tempStr = `${parseInt(String(tempInteger), 10)}`;
 							}
+
 							break;
 
 						case CHAR_LOWERCASE_F:
@@ -439,6 +456,7 @@ export function stringifyArgs(
 							} else {
 								tempStr = `${parseFloat(String(tempFloat))}`;
 							}
+
 							break;
 
 						case CHAR_LOWERCASE_O:
@@ -457,6 +475,7 @@ export function stringifyArgs(
 
 						case CHAR_PERCENT:
 							str += first.slice(lastPos, i);
+
 							lastPos = i + 1;
 
 							continue;
@@ -475,9 +494,11 @@ export function stringifyArgs(
 					}
 
 					str += tempStr;
+
 					lastPos = i + 1;
 				} else if (nextChar === CHAR_PERCENT) {
 					str += first.slice(lastPos, i);
+
 					lastPos = i + 1;
 				}
 			}
@@ -485,6 +506,7 @@ export function stringifyArgs(
 
 		if (lastPos !== 0) {
 			a++;
+
 			join = " ";
 
 			if (lastPos < first.length) {
@@ -495,6 +517,7 @@ export function stringifyArgs(
 
 	while (a < args.length) {
 		const value = args[a];
+
 		str += join;
 
 		if (typeof value === "string") {
@@ -508,7 +531,9 @@ export function stringifyArgs(
 				options.depth != undefined ? options.depth : DEFAULT_MAX_DEPTH,
 			);
 		}
+
 		join = " ";
+
 		a++;
 	}
 
@@ -520,6 +545,7 @@ export function stringifyArgs(
 		if (str.indexOf("\n") !== -1) {
 			str = str.replace(/\n/g, `\n${groupIndent}`);
 		}
+
 		str = groupIndent + str;
 	}
 
@@ -541,6 +567,7 @@ export class Console {
 	/** @internal */
 	constructor(private printFunc: PrintFunc) {
 		this.indentLevel = 0;
+
 		this[isConsoleInstance] = true;
 
 		// ref https://console.spec.whatwg.org/#console-namespace
@@ -548,6 +575,7 @@ export class Console {
 		// console must have as its [[Prototype]] an empty object, created as if
 		// by ObjectCreate(%ObjectPrototype%), instead of %ObjectPrototype%.
 		const console = Object.create({}) as Console;
+
 		Object.assign(console, this);
 
 		return console;
@@ -630,6 +658,7 @@ export class Console {
 
 		if (countMap.has(label)) {
 			const current = countMap.get(label) || 0;
+
 			countMap.set(label, current + 1);
 		} else {
 			countMap.set(label, 1);
@@ -692,10 +721,12 @@ export class Console {
 			resultData = [...data];
 		} else if (data instanceof Map) {
 			let idx = 0;
+
 			resultData = {};
 
 			data.forEach((v: unknown, k: unknown): void => {
 				resultData[idx] = { Key: k, Values: v };
+
 				idx++;
 			});
 		} else {
@@ -783,6 +814,7 @@ export class Console {
 		}
 
 		const startTime = timerMap.get(label) as number;
+
 		timerMap.delete(label);
 
 		const duration = Date.now() - startTime;
@@ -794,6 +826,7 @@ export class Console {
 		if (label.length > 0) {
 			this.log(...label);
 		}
+
 		this.indentLevel += 2;
 	};
 
@@ -807,7 +840,9 @@ export class Console {
 
 	clear = (): void => {
 		this.indentLevel = 0;
+
 		cursorTo(stdout, 0, 0);
+
 		clearScreenDown(stdout);
 	};
 
@@ -820,6 +855,7 @@ export class Console {
 		};
 		// @ts-ignore
 		Error.captureStackTrace(err, this.trace);
+
 		this.error((err as Error).stack);
 	};
 

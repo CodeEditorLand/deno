@@ -4,6 +4,7 @@ import * as dispatch from "./dispatch.ts";
 
 interface NowResponse {
 	seconds: number;
+
 	subsecNanos: number;
 }
 

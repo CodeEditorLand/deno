@@ -9,6 +9,7 @@ testPerm({ write: true }, function dirCwdChdirSuccess(): void {
 	const initialdir = Deno.cwd();
 
 	const path = Deno.makeTempDirSync();
+
 	Deno.chdir(path);
 
 	const current = Deno.cwd();
@@ -18,6 +19,7 @@ testPerm({ write: true }, function dirCwdChdirSuccess(): void {
 	} else {
 		assertEquals(current, path);
 	}
+
 	Deno.chdir(initialdir);
 });
 
@@ -27,7 +29,9 @@ testPerm({ write: true }, function dirCwdError(): void {
 		const initialdir = Deno.cwd();
 
 		const path = Deno.makeTempDirSync();
+
 		Deno.chdir(path);
+
 		Deno.removeSync(path);
 
 		try {
@@ -41,6 +45,7 @@ testPerm({ write: true }, function dirCwdError(): void {
 				throw Error("raised different exception");
 			}
 		}
+
 		Deno.chdir(initialdir);
 	}
 });

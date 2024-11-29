@@ -37,16 +37,21 @@ test(function testDomIterable(): void {
 	const domIterable = new DomIterable(fixture);
 
 	assertEquals(Array.from(domIterable.entries()), fixture);
+
 	assertEquals(Array.from(domIterable.values()), [1, 2]);
+
 	assertEquals(Array.from(domIterable.keys()), ["foo", "bar"]);
 
 	let result: Array<[string, number]> = [];
 
 	for (const [key, value] of domIterable) {
 		assert(key != null);
+
 		assert(value != null);
+
 		result.push([key, value]);
 	}
+
 	assertEquals(fixture, result);
 
 	result = [];
@@ -55,12 +60,18 @@ test(function testDomIterable(): void {
 
 	function callback(value, key, parent): void {
 		assertEquals(parent, domIterable);
+
 		assert(key != null);
+
 		assert(value != null);
+
 		assert(this === scope);
+
 		result.push([key, value]);
 	}
+
 	domIterable.forEach(callback, scope);
+
 	assertEquals(fixture, result);
 
 	assertEquals(DomIterable.name, Base.name);
@@ -76,11 +87,15 @@ test(function testDomIterableScope(): void {
 		function callback(): void {
 			assertEquals(this, expected);
 		}
+
 		domIterable.forEach(callback, thisArg);
 	}
 
 	checkScope(0, Object(0));
+
 	checkScope("", Object(""));
+
 	checkScope(null, window);
+
 	checkScope(undefined, window);
 });

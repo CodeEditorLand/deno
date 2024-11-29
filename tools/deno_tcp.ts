@@ -22,6 +22,7 @@ async function handle(conn: Deno.Conn): Promise<void> {
 			if (r === Deno.EOF) {
 				break;
 			}
+
 			await conn.write(response);
 		}
 	} finally {

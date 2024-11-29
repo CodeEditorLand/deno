@@ -4,9 +4,13 @@ import * as dispatch from "./dispatch.ts";
 
 export interface Metrics {
 	opsDispatched: number;
+
 	opsCompleted: number;
+
 	bytesSentControl: number;
+
 	bytesSentData: number;
+
 	bytesReceived: number;
 }
 

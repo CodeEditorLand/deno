@@ -35,6 +35,7 @@ test(async function textprotoReadEmpty(): Promise<void> {
 	const r = reader("");
 
 	const m = await r.readMIMEHeader();
+
 	assertEquals(m, Deno.EOF);
 });
 
@@ -42,12 +43,15 @@ test(async function textprotoReader(): Promise<void> {
 	const r = reader("line1\nline2\n");
 
 	let s = await r.readLine();
+
 	assertEquals(s, "line1");
 
 	s = await r.readLine();
+
 	assertEquals(s, "line2");
 
 	s = await r.readLine();
+
 	assert(s === Deno.EOF);
 });
 
@@ -61,7 +65,9 @@ test({
 		const r = reader(input);
 
 		const m = assertNotEOF(await r.readMIMEHeader());
+
 		assertEquals(m.get("My-Key"), "Value 1, Value 2");
+
 		assertEquals(m.get("Long-key"), "Even Longer Value");
 	},
 });
@@ -74,6 +80,7 @@ test({
 		const r = reader(input);
 
 		const m = assertNotEOF(await r.readMIMEHeader());
+
 		assertEquals(m.get("Foo"), "bar");
 	},
 });
@@ -86,6 +93,7 @@ test({
 		const r = reader(input);
 
 		const m = assertNotEOF(await r.readMIMEHeader());
+
 		assertEquals(m.get("Test-1"), "1");
 	},
 });
@@ -98,11 +106,13 @@ test({
 		for (let i = 0; i < 1024; i++) {
 			data.push("x");
 		}
+
 		const sdata = data.join("");
 
 		const r = reader(`Cookie: ${sdata}\r\n\r\n`);
 
 		const m = assertNotEOF(await r.readMIMEHeader());
+
 		assertEquals(m.get("Cookie"), sdata);
 	},
 });
@@ -122,9 +132,13 @@ test({
 		const r = reader(input);
 
 		const m = assertNotEOF(await r.readMIMEHeader());
+
 		assertEquals(m.get("Foo"), "bar");
+
 		assertEquals(m.get("Content-Language"), "en");
+
 		assertEquals(m.get("SID"), "0");
+
 		assertEquals(m.get("Privilege"), "127");
 		// Not a legal http header
 		assertThrows((): void => {
@@ -154,6 +168,7 @@ test({
 		} catch (e) {
 			err = e;
 		}
+
 		assert(err instanceof ProtocolError);
 	},
 });
@@ -179,6 +194,7 @@ test({
 		} catch (e) {
 			err = e;
 		}
+
 		assert(err instanceof ProtocolError);
 	},
 });
@@ -196,7 +212,9 @@ test({
 		const r = reader(input.join(""));
 
 		const m = assertNotEOF(await r.readMIMEHeader());
+
 		assertEquals(m.get("Accept"), "*/*");
+
 		assertEquals(m.get("Content-Disposition"), 'form-data; name="test"');
 	},
 });

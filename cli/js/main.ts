@@ -34,7 +34,9 @@ function denoMain(preserveDenoNamespace = true, name?: string): void {
 	for (let i = 1; i < s.argv.length; i++) {
 		args.push(s.argv[i]);
 	}
+
 	log("args", args);
+
 	Object.freeze(args);
 
 	if (!s.mainModule) {

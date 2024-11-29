@@ -22,6 +22,7 @@ interface EvalErrorInfo {
 
 declare interface DenoCore {
 	print(s: string, isErr?: boolean): void;
+
 	dispatch(
 		opId: number,
 		control: Uint8Array,
@@ -29,12 +30,18 @@ declare interface DenoCore {
 	): Uint8Array | null;
 
 	setAsyncHandler(cb: MessageCallback): void;
+
 	sharedQueue: {
 		head(): number;
+
 		numRecords(): number;
+
 		size(): number;
+
 		push(buf: Uint8Array): boolean;
+
 		reset(): void;
+
 		shift(): Uint8Array | null;
 	};
 

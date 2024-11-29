@@ -5,7 +5,9 @@ test(function resourcesStdio(): void {
 	const res = Deno.resources();
 
 	assertEquals(res[0], "stdin");
+
 	assertEquals(res[1], "stdout");
+
 	assertEquals(res[2], "stderr");
 });
 
@@ -17,22 +19,27 @@ testPerm({ net: true }, async function resourcesNet(): Promise<void> {
 	const listenerConn = await listener.accept();
 
 	const res = Deno.resources();
+
 	assertEquals(
 		Object.values(res).filter((r): boolean => r === "tcpListener").length,
 		1,
 	);
+
 	assertEquals(
 		Object.values(res).filter((r): boolean => r === "tcpStream").length,
 		2,
 	);
 
 	listenerConn.close();
+
 	dialerConn.close();
+
 	listener.close();
 });
 
 testPerm({ read: true }, async function resourcesFile(): Promise<void> {
 	const resourcesBefore = Deno.resources();
+
 	await Deno.open("tests/hello.txt");
 
 	const resourcesAfter = Deno.resources();
@@ -46,5 +53,6 @@ testPerm({ read: true }, async function resourcesFile(): Promise<void> {
 	const newRid = Object.keys(resourcesAfter).find((rid): boolean => {
 		return !resourcesBefore.hasOwnProperty(rid);
 	});
+
 	assertEquals(resourcesAfter[newRid], "fsFile");
 });

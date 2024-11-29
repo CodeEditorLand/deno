@@ -5,6 +5,7 @@ import { parse } from "./mod.ts";
 
 test(function _arseArgs(): void {
 	assertEquals(parse(["--no-moo"]), { moo: false, _: [] });
+
 	assertEquals(parse(["-v", "a", "-v", "b", "-v", "c"]), {
 		v: ["a", "b", "c"],
 		_: [],
@@ -50,7 +51,9 @@ test(function comprehensive(): void {
 
 test(function flagBoolean(): void {
 	const argv = parse(["-t", "moo"], { boolean: "t" });
+
 	assertEquals(argv, { t: true, _: ["moo"] });
+
 	assertEquals(typeof argv.t, "boolean");
 });
 
@@ -67,11 +70,13 @@ test(function flagBooleanValue(): void {
 	});
 
 	assertEquals(typeof argv.verbose, "boolean");
+
 	assertEquals(typeof argv.t, "boolean");
 });
 
 test(function newlinesInParams(): void {
 	const args = parse(["-s", "X\nX"]);
+
 	assertEquals(args, { _: [], s: "X\nX" });
 
 	// reproduce in bash:
@@ -79,35 +84,49 @@ test(function newlinesInParams(): void {
 	// line"
 	// deno program.js --s="$VALUE"
 	const args2 = parse(["--s=X\nX"]);
+
 	assertEquals(args2, { _: [], s: "X\nX" });
 });
 
 test(function strings(): void {
 	const s = parse(["-s", "0001234"], { string: "s" }).s;
+
 	assertEquals(s, "0001234");
+
 	assertEquals(typeof s, "string");
 
 	const x = parse(["-x", "56"], { string: "x" }).x;
+
 	assertEquals(x, "56");
+
 	assertEquals(typeof x, "string");
 });
 
 test(function stringArgs(): void {
 	const s = parse(["  ", "  "], { string: "_" })._;
+
 	assertEquals(s.length, 2);
+
 	assertEquals(typeof s[0], "string");
+
 	assertEquals(s[0], "  ");
+
 	assertEquals(typeof s[1], "string");
+
 	assertEquals(s[1], "  ");
 });
 
 test(function emptyStrings(): void {
 	const s = parse(["-s"], { string: "s" }).s;
+
 	assertEquals(s, "");
+
 	assertEquals(typeof s, "string");
 
 	const str = parse(["--str"], { string: "str" }).str;
+
 	assertEquals(str, "");
+
 	assertEquals(typeof str, "string");
 
 	const letters = parse(["-art"], {
@@ -115,7 +134,9 @@ test(function emptyStrings(): void {
 	});
 
 	assertEquals(letters.a, "");
+
 	assertEquals(letters.r, true);
+
 	assertEquals(letters.t, "");
 });
 
@@ -126,8 +147,11 @@ test(function stringAndAlias(): void {
 	});
 
 	assertEquals(x.str, "000123");
+
 	assertEquals(typeof x.str, "string");
+
 	assertEquals(x.s, "000123");
+
 	assertEquals(typeof x.s, "string");
 
 	const y = parse(["-s", "000123"], {
@@ -136,13 +160,17 @@ test(function stringAndAlias(): void {
 	});
 
 	assertEquals(y.str, "000123");
+
 	assertEquals(typeof y.str, "string");
+
 	assertEquals(y.s, "000123");
+
 	assertEquals(typeof y.s, "string");
 });
 
 test(function slashBreak(): void {
 	assertEquals(parse(["-I/foo/bar/baz"]), { I: "/foo/bar/baz", _: [] });
+
 	assertEquals(parse(["-xyz/foo/bar/baz"]), {
 		x: true,
 		y: true,
@@ -155,8 +183,11 @@ test(function alias(): void {
 	const argv = parse(["-f", "11", "--zoom", "55"], {
 		alias: { z: "zoom" },
 	});
+
 	assertEquals(argv.zoom, 55);
+
 	assertEquals(argv.z, argv.zoom);
+
 	assertEquals(argv.f, 11);
 });
 
@@ -164,9 +195,13 @@ test(function multiAlias(): void {
 	const argv = parse(["-f", "11", "--zoom", "55"], {
 		alias: { z: ["zm", "zoom"] },
 	});
+
 	assertEquals(argv.zoom, 55);
+
 	assertEquals(argv.z, argv.zoom);
+
 	assertEquals(argv.z, argv.zm);
+
 	assertEquals(argv.f, 11);
 });
 
@@ -190,12 +225,16 @@ test(function nestedDottedObjects(): void {
 			oO: true,
 		},
 	});
+
 	assertEquals(argv.beep, { boop: true });
 });
 
 test(function flagBuiltinProperty(): void {
 	const argv = parse(["--toString", "--valueOf", "foo"]);
+
 	assertEquals(argv, { toString: true, valueOf: "foo", _: [] });
+
 	assertEquals(typeof argv.toString, "boolean");
+
 	assertEquals(typeof argv.valueOf, "string");
 });

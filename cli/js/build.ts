@@ -21,6 +21,7 @@ export const build: BuildInfo = {
 
 export function setBuildInfo(os: OperatingSystem, arch: Arch): void {
 	build.os = os;
+
 	build.arch = arch;
 
 	Object.freeze(build);

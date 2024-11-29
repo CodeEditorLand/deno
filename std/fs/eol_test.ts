@@ -38,6 +38,7 @@ test({
 	name: "[EOL] Detect Mixed",
 	fn(): void {
 		assertEquals(detect(Mixedinput), EOL.CRLF);
+
 		assertEquals(detect(Mixedinput2), EOL.CRLF);
 	},
 });
@@ -46,14 +47,23 @@ test({
 	name: "[EOL] Format",
 	fn(): void {
 		assertEquals(format(CRLFinput, EOL.LF), LFinput);
+
 		assertEquals(format(LFinput, EOL.LF), LFinput);
+
 		assertEquals(format(LFinput, EOL.CRLF), CRLFinput);
+
 		assertEquals(format(CRLFinput, EOL.CRLF), CRLFinput);
+
 		assertEquals(format(CRLFinput, EOL.CRLF), CRLFinput);
+
 		assertEquals(format(NoNLinput, EOL.CRLF), NoNLinput);
+
 		assertEquals(format(Mixedinput, EOL.CRLF), CRLFinput);
+
 		assertEquals(format(Mixedinput, EOL.LF), LFinput);
+
 		assertEquals(format(Mixedinput2, EOL.CRLF), CRLFinput);
+
 		assertEquals(format(Mixedinput2, EOL.LF), LFinput);
 	},
 });

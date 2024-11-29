@@ -24,6 +24,7 @@ export class SDReadableStreamBYOBReader
 		if (!rs.isReadableStream(stream)) {
 			throw new TypeError();
 		}
+
 		if (
 			!rs.isReadableByteStreamController(
 				stream[rs.readableStreamController_],
@@ -31,10 +32,13 @@ export class SDReadableStreamBYOBReader
 		) {
 			throw new TypeError();
 		}
+
 		if (rs.isReadableStreamLocked(stream)) {
 			throw new TypeError("The stream is locked.");
 		}
+
 		rs.readableStreamReaderGenericInitialize(this, stream);
+
 		this[rs.readIntoRequests_] = [];
 	}
 
@@ -42,6 +46,7 @@ export class SDReadableStreamBYOBReader
 		if (!rs.isReadableStreamBYOBReader(this)) {
 			return Promise.reject(new TypeError());
 		}
+
 		return this[rs.closedPromise_].promise;
 	}
 
@@ -49,6 +54,7 @@ export class SDReadableStreamBYOBReader
 		if (!rs.isReadableStreamBYOBReader(this)) {
 			return Promise.reject(new TypeError());
 		}
+
 		const stream = this[rs.ownerReadableStream_];
 
 		if (stream === undefined) {
@@ -56,6 +62,7 @@ export class SDReadableStreamBYOBReader
 				new TypeError("Reader is not associated with a stream"),
 			);
 		}
+
 		return rs.readableStreamCancel(stream, reason);
 	}
 
@@ -63,11 +70,13 @@ export class SDReadableStreamBYOBReader
 		if (!rs.isReadableStreamBYOBReader(this)) {
 			return Promise.reject(new TypeError());
 		}
+
 		if (this[rs.ownerReadableStream_] === undefined) {
 			return Promise.reject(
 				new TypeError("Reader is not associated with a stream"),
 			);
 		}
+
 		if (!ArrayBuffer.isView(view)) {
 			return Promise.reject(
 				new TypeError("view argument must be a valid ArrayBufferView"),
@@ -79,6 +88,7 @@ export class SDReadableStreamBYOBReader
 				new TypeError("supplied buffer view must be > 0 bytes"),
 			);
 		}
+
 		return rs.readableStreamBYOBReaderRead(this, view, true);
 	}
 
@@ -86,12 +96,15 @@ export class SDReadableStreamBYOBReader
 		if (!rs.isReadableStreamBYOBReader(this)) {
 			throw new TypeError();
 		}
+
 		if (this[rs.ownerReadableStream_] === undefined) {
 			throw new TypeError("Reader is not associated with a stream");
 		}
+
 		if (this[rs.readIntoRequests_].length > 0) {
 			throw new TypeError();
 		}
+
 		rs.readableStreamReaderGenericRelease(this);
 	}
 }

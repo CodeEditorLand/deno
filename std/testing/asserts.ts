@@ -13,6 +13,7 @@ interface Constructor {
 export class AssertionError extends Error {
 	constructor(message: string) {
 		super(message);
+
 		this.name = "AssertionError";
 	}
 }
@@ -53,17 +54,25 @@ function createSign(diffType: DiffType): string {
 
 function buildMessage(diffResult: ReadonlyArray<DiffResult<string>>): string[] {
 	const messages: string[] = [];
+
 	messages.push("");
+
 	messages.push("");
+
 	messages.push(
 		`    ${gray(bold("[Diff]"))} ${red(bold("Left"))} / ${green(bold("Right"))}`,
 	);
+
 	messages.push("");
+
 	messages.push("");
+
 	diffResult.forEach((result: DiffResult<string>): void => {
 		const c = createColor(result.type);
+
 		messages.push(c(`${createSign(result.type)}${result.value}`));
 	});
+
 	messages.push("");
 
 	return messages;
@@ -87,16 +96,20 @@ export function equal(c: unknown, d: unknown): boolean {
 		) {
 			return String(a) === String(b);
 		}
+
 		if (Object.is(a, b)) {
 			return true;
 		}
+
 		if (a && typeof a === "object" && b && typeof b === "object") {
 			if (seen.get(a) === b) {
 				return true;
 			}
+
 			if (Object.keys(a || {}).length !== Object.keys(b || {}).length) {
 				return false;
 			}
+
 			if (isKeyedCollection(a) && isKeyedCollection(b)) {
 				if (a.size !== b.size) {
 					return false;
@@ -121,6 +134,7 @@ export function equal(c: unknown, d: unknown): boolean {
 
 				return unmatchedEntries === 0;
 			}
+
 			const merged = { ...a, ...b };
 
 			for (const key in merged) {
@@ -130,10 +144,12 @@ export function equal(c: unknown, d: unknown): boolean {
 					return false;
 				}
 			}
+
 			seen.set(a, b);
 
 			return true;
 		}
+
 		return false;
 	})(c, d);
 }
@@ -157,6 +173,7 @@ export function assertEquals(
 	if (equal(actual, expected)) {
 		return;
 	}
+
 	let message = "";
 
 	const actualString = createStr(actual);
@@ -168,13 +185,16 @@ export function assertEquals(
 			actualString.split("\n"),
 			expectedString.split("\n"),
 		);
+
 		message = buildMessage(diffResult).join("\n");
 	} catch (e) {
 		message = `\n${red(CAN_NOT_DISPLAY)} + \n\n`;
 	}
+
 	if (msg) {
 		message = msg;
 	}
+
 	throw new AssertionError(message);
 }
 
@@ -190,6 +210,7 @@ export function assertNotEquals(
 	if (!equal(actual, expected)) {
 		return;
 	}
+
 	let actualString: string;
 
 	let expectedString: string;
@@ -199,14 +220,17 @@ export function assertNotEquals(
 	} catch (e) {
 		actualString = "[Cannot display]";
 	}
+
 	try {
 		expectedString = String(expected);
 	} catch (e) {
 		expectedString = "[Cannot display]";
 	}
+
 	if (!msg) {
 		msg = `actual: ${actualString} expected: ${expectedString}`;
 	}
+
 	throw new AssertionError(msg);
 }
 
@@ -229,14 +253,17 @@ export function assertStrictEq(
 		} catch (e) {
 			actualString = "[Cannot display]";
 		}
+
 		try {
 			expectedString = String(expected);
 		} catch (e) {
 			expectedString = "[Cannot display]";
 		}
+
 		if (!msg) {
 			msg = `actual: ${actualString} expected: ${expectedString}`;
 		}
+
 		throw new AssertionError(msg);
 	}
 }
@@ -254,6 +281,7 @@ export function assertStrContains(
 		if (!msg) {
 			msg = `actual: "${actual}" expected to contains: "${expected}"`;
 		}
+
 		throw new AssertionError(msg);
 	}
 }
@@ -279,18 +307,24 @@ export function assertArrayContains(
 				break;
 			}
 		}
+
 		if (!found) {
 			missing.push(expected[i]);
 		}
 	}
+
 	if (missing.length === 0) {
 		return;
 	}
+
 	if (!msg) {
 		msg = `actual: "${actual}" expected to contains: "${expected}"`;
+
 		msg += "\n";
+
 		msg += `missing: ${missing}`;
 	}
+
 	throw new AssertionError(msg);
 }
 
@@ -307,6 +341,7 @@ export function assertMatch(
 		if (!msg) {
 			msg = `actual: "${actual}" expected to match: "${expected}"`;
 		}
+
 		throw new AssertionError(msg);
 	}
 }
@@ -346,6 +381,7 @@ export function assertThrows(
 
 			throw new AssertionError(msg);
 		}
+
 		if (msgIncludes && !e.message.includes(msgIncludes)) {
 			msg = `Expected error message to include "${msgIncludes}", but got "${
 				e.message
@@ -353,14 +389,18 @@ export function assertThrows(
 
 			throw new AssertionError(msg);
 		}
+
 		doesThrow = true;
+
 		error = e;
 	}
+
 	if (!doesThrow) {
 		msg = `Expected function to throw${msg ? `: ${msg}` : "."}`;
 
 		throw new AssertionError(msg);
 	}
+
 	return error;
 }
 
@@ -387,6 +427,7 @@ export async function assertThrowsAsync(
 
 			throw new AssertionError(msg);
 		}
+
 		if (msgIncludes && !e.message.includes(msgIncludes)) {
 			msg = `Expected error message to include "${msgIncludes}", but got "${
 				e.message
@@ -394,14 +435,18 @@ export async function assertThrowsAsync(
 
 			throw new AssertionError(msg);
 		}
+
 		doesThrow = true;
+
 		error = e;
 	}
+
 	if (!doesThrow) {
 		msg = `Expected function to throw${msg ? `: ${msg}` : "."}`;
 
 		throw new AssertionError(msg);
 	}
+
 	return error;
 }
 

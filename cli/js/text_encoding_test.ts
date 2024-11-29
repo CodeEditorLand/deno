@@ -5,6 +5,7 @@ test(function btoaSuccess(): void {
 	const text = "hello world";
 
 	const encoded = btoa(text);
+
 	assertEquals(encoded, "aGVsbG8gd29ybGQ=");
 });
 
@@ -12,6 +13,7 @@ test(function atobSuccess(): void {
 	const encoded = "aGVsbG8gd29ybGQ=";
 
 	const decoded = atob(encoded);
+
 	assertEquals(decoded, "hello world");
 });
 
@@ -28,6 +30,7 @@ test(function atobWithAsciiWhitespace(): void {
 
 	for (const encoded of encodedList) {
 		const decoded = atob(encoded);
+
 		assertEquals(decoded, "hello world");
 	}
 });
@@ -40,6 +43,7 @@ test(function atobThrows(): void {
 	} catch (e) {
 		threw = true;
 	}
+
 	assert(threw);
 });
 
@@ -51,6 +55,7 @@ test(function atobThrows2(): void {
 	} catch (e) {
 		threw = true;
 	}
+
 	assert(threw);
 });
 
@@ -64,7 +69,9 @@ test(function btoaFailed(): void {
 	} catch (e) {
 		err = e;
 	}
+
 	assert(!!err);
+
 	assertEquals(err.name, "InvalidInput");
 });
 
@@ -78,6 +85,7 @@ test(function textDecoder2(): void {
   ]);
 
 	const decoder = new TextDecoder();
+
 	assertEquals(decoder.decode(fixture), "𝓽𝓮𝔁𝓽");
 });
 
@@ -92,6 +100,7 @@ test(function textDecoderIgnoreBOM(): void {
   ]);
 
 	const decoder = new TextDecoder("utf-8", { ignoreBOM: true });
+
 	assertEquals(decoder.decode(fixture), "𝓽𝓮𝔁𝓽");
 });
 
@@ -106,6 +115,7 @@ test(function textDecoderNotBOM(): void {
   ]);
 
 	const decoder = new TextDecoder("utf-8", { ignoreBOM: true });
+
 	assertEquals(decoder.decode(fixture), "ﻉ𝓽𝓮𝔁𝓽");
 });
 
@@ -113,6 +123,7 @@ test(function textDecoderASCII(): void {
 	const fixture = new Uint8Array([0x89, 0x95, 0x9f, 0xbf]);
 
 	const decoder = new TextDecoder("ascii");
+
 	assertEquals(decoder.decode(fixture), "‰•Ÿ¿");
 });
 
@@ -123,11 +134,13 @@ test(function textDecoderErrorEncoding(): void {
 		new TextDecoder("foo");
 	} catch (e) {
 		didThrow = true;
+
 		assertEquals(
 			e.message,
 			"The encoding label provided ('foo') is invalid.",
 		);
 	}
+
 	assert(didThrow);
 });
 
@@ -152,7 +165,9 @@ test(function textEncodeInto(): void {
 	const bytes = new Uint8Array(5);
 
 	const result = encoder.encodeInto(fixture, bytes);
+
 	assertEquals(result.read, 4);
+
 	assertEquals(result.written, 4);
 	// prettier-ignore
 	assertEquals(Array.from(bytes), [
@@ -168,7 +183,9 @@ test(function textEncodeInto2(): void {
 	const bytes = new Uint8Array(17);
 
 	const result = encoder.encodeInto(fixture, bytes);
+
 	assertEquals(result.read, 8);
+
 	assertEquals(result.written, 16);
 	// prettier-ignore
 	assertEquals(Array.from(bytes), [
@@ -189,11 +206,13 @@ test(function textDecoderSharedUint8Array(): void {
 	for (let i = 0; i < ab.byteLength; i++) {
 		dataView.setUint8(i, charCodeA + i);
 	}
+
 	const ui8 = new Uint8Array(ab);
 
 	const decoder = new TextDecoder();
 
 	const actual = decoder.decode(ui8);
+
 	assertEquals(actual, "ABCDEF");
 });
 
@@ -207,18 +226,22 @@ test(function textDecoderSharedInt32Array(): void {
 	for (let i = 0; i < ab.byteLength; i++) {
 		dataView.setUint8(i, charCodeA + i);
 	}
+
 	const i32 = new Int32Array(ab);
 
 	const decoder = new TextDecoder();
 
 	const actual = decoder.decode(i32);
+
 	assertEquals(actual, "ABCDEFGH");
 });
 
 test(function toStringShouldBeWebCompatibility(): void {
 	const encoder = new TextEncoder();
+
 	assertEquals(encoder.toString(), "[object TextEncoder]");
 
 	const decoder = new TextDecoder();
+
 	assertEquals(decoder.toString(), "[object TextDecoder]");
 });

@@ -68,11 +68,14 @@ export function decodeUtf8(
 				throw new TypeError(
 					`Decoder error. Invalid byte in sequence at position ${i} in data.`,
 				);
+
 			outBuffer[outIndex++] = 0xfffd; // Replacement character
 			if (outIndex === outBufferLength) {
 				outString += String.fromCharCode.apply(null, outBuffer);
+
 				outIndex = 0;
 			}
+
 			state = 0;
 		}
 
@@ -87,6 +90,7 @@ export function decodeUtf8(
        8,8,2,2,2,2,2,2,2,2,2,2,2,2,2,2,  2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
       10,3,3,3,3,3,3,3,3,3,3,3,3,4,3,3, 11,6,6,6,5,8,8,8,8,8,8,8,8,8,8,8
     ][input[i]];
+
 		codepoint =
 			state !== 0
 				? (input[i] & 0x3f) | (codepoint << 6)
@@ -109,12 +113,15 @@ export function decodeUtf8(
 
 			if (outIndex === outBufferLength) {
 				outString += String.fromCharCode.apply(null, outBuffer);
+
 				outIndex = 0;
 			}
+
 			outBuffer[outIndex++] = 0xdc00 | (codepoint & 0x3ff);
 
 			if (outIndex === outBufferLength) {
 				outString += String.fromCharCode.apply(null, outBuffer);
+
 				outIndex = 0;
 			}
 		} else {
@@ -122,6 +129,7 @@ export function decodeUtf8(
 
 			if (outIndex === outBufferLength) {
 				outString += String.fromCharCode.apply(null, outBuffer);
+
 				outIndex = 0;
 			}
 		}
@@ -132,6 +140,7 @@ export function decodeUtf8(
 	if (state !== 0) {
 		if (fatal)
 			throw new TypeError(`Decoder error. Unexpected end of data.`);
+
 		outBuffer[outIndex++] = 0xfffd; // Replacement character
 	}
 

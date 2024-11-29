@@ -32,6 +32,7 @@ const DEFAULT_DELIMITER = "\n";
 // Generate longest proper prefix which is also suffix array.
 function createLPS(pat: Uint8Array): Uint8Array {
 	const lps = new Uint8Array(pat.length);
+
 	lps[0] = 0;
 
 	let prefixEnd = 0;
@@ -41,15 +42,19 @@ function createLPS(pat: Uint8Array): Uint8Array {
 	while (i < lps.length) {
 		if (pat[i] == pat[prefixEnd]) {
 			prefixEnd++;
+
 			lps[i] = prefixEnd;
+
 			i++;
 		} else if (prefixEnd === 0) {
 			lps[i] = 0;
+
 			i++;
 		} else {
 			prefixEnd = pat[prefixEnd - 1];
 		}
 	}
+
 	return lps;
 }
 
@@ -91,11 +96,14 @@ async function* chunks(
 
 			return;
 		}
+
 		if ((result as number) < 0) {
 			// Discard all remaining and silently fail.
 			return;
 		}
+
 		const sliceRead = inspectArr.subarray(0, result as number);
+
 		await writeAll(inputBuffer, sliceRead);
 
 		let sliceToProcess = inputBuffer.bytes();
@@ -103,6 +111,7 @@ async function* chunks(
 		while (inspectIndex < sliceToProcess.length) {
 			if (sliceToProcess[inspectIndex] === delimArr[matchIndex]) {
 				inspectIndex++;
+
 				matchIndex++;
 
 				if (matchIndex === delimLen) {
@@ -118,7 +127,9 @@ async function* chunks(
 					yield readyChunk;
 					// Reset match, different from KMP.
 					sliceToProcess = pendingBytes;
+
 					inspectIndex = 0;
+
 					matchIndex = 0;
 				}
 			} else {
@@ -164,8 +175,10 @@ async function main(): Promise<void> {
 
 	if (parsedArgs._.length != 1) {
 		console.error(HELP_MSG);
+
 		exit(1);
 	}
+
 	if (parsedArgs.help) {
 		return console.log(HELP_MSG);
 	}
@@ -179,6 +192,7 @@ async function main(): Promise<void> {
 	// new AsyncFunction()'s error message for this particular case isn't great.
 	if (!replVar.match(/^[_$A-z][_$A-z0-9]*$/)) {
 		console.error(`Bad replvar identifier: "${replVar}"`);
+
 		exit(1);
 	}
 

@@ -49,12 +49,19 @@ export interface FileInfo {
 // @internal
 export class FileInfoImpl implements FileInfo {
 	private readonly _isFile: boolean;
+
 	private readonly _isSymlink: boolean;
+
 	len: number;
+
 	modified: number | null;
+
 	accessed: number | null;
+
 	created: number | null;
+
 	mode: number | null;
+
 	name: string | null;
 
 	/* @internal */
@@ -71,13 +78,19 @@ export class FileInfoImpl implements FileInfo {
 		const name = this._res.name;
 
 		this._isFile = this._res.isFile;
+
 		this._isSymlink = this._res.isSymlink;
+
 		this.len = this._res.len;
+
 		this.modified = modified ? modified : null;
+
 		this.accessed = accessed ? accessed : null;
+
 		this.created = created ? created : null;
 		// null on Windows
 		this.mode = hasMode ? mode : null;
+
 		this.name = name ? name : null;
 	}
 

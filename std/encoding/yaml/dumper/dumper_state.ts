@@ -26,11 +26,13 @@ function compileStyleMap(
 
 	for (let index = 0, length = keys.length; index < length; index += 1) {
 		tag = keys[index];
+
 		style = String(map[tag]) as StyleVariant;
 
 		if (tag.slice(0, 2) === "!!") {
 			tag = `tag:yaml.org,2002:${tag.slice(2)}`;
 		}
+
 		type = schema.compiledTypeMap.fallback[tag];
 
 		if (
@@ -95,21 +97,36 @@ export interface DumperStateOptions {
 
 export class DumperState extends State {
 	public indent: number;
+
 	public noArrayIndent: boolean;
+
 	public skipInvalid: boolean;
+
 	public flowLevel: number;
+
 	public sortKeys: boolean | ((a: Any, b: Any) => number);
+
 	public lineWidth: number;
+
 	public noRefs: boolean;
+
 	public noCompatMode: boolean;
+
 	public condenseFlow: boolean;
+
 	public implicitTypes: Type[];
+
 	public explicitTypes: Type[];
+
 	public tag: string | null = null;
+
 	public result = "";
+
 	public duplicates: Any[] = [];
+
 	public usedDuplicates: Any[] = []; // changed from null to []
 	public styleMap: ArrayObject<StyleVariant>;
+
 	public dump: Any;
 
 	constructor({
@@ -126,18 +143,29 @@ export class DumperState extends State {
 		condenseFlow = false,
 	}: DumperStateOptions) {
 		super(schema);
+
 		this.indent = Math.max(1, indent);
+
 		this.noArrayIndent = noArrayIndent;
+
 		this.skipInvalid = skipInvalid;
+
 		this.flowLevel = flowLevel;
+
 		this.styleMap = compileStyleMap(this.schema as Schema, styles);
+
 		this.sortKeys = sortKeys;
+
 		this.lineWidth = lineWidth;
+
 		this.noRefs = noRefs;
+
 		this.noCompatMode = noCompatMode;
+
 		this.condenseFlow = condenseFlow;
 
 		this.implicitTypes = (this.schema as Schema).compiledImplicit;
+
 		this.explicitTypes = (this.schema as Schema).compiledExplicit;
 	}
 }

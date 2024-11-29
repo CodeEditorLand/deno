@@ -9,11 +9,17 @@ type FileInfo = Deno.FileInfo;
 
 export interface WalkOptions {
 	maxDepth?: number;
+
 	includeFiles?: boolean;
+
 	includeDirs?: boolean;
+
 	followSymlinks?: boolean;
+
 	exts?: string[];
+
 	match?: RegExp[];
+
 	skip?: RegExp[];
 }
 
@@ -26,17 +32,21 @@ function include(
 	if (exts && !exts.some((ext): boolean => filename.endsWith(ext))) {
 		return false;
 	}
+
 	if (match && !match.some((pattern): boolean => !!filename.match(pattern))) {
 		return false;
 	}
+
 	if (skip && skip.some((pattern): boolean => !!filename.match(pattern))) {
 		return false;
 	}
+
 	return true;
 }
 
 export interface WalkInfo {
 	filename: string;
+
 	info: FileInfo;
 }
 
@@ -74,12 +84,15 @@ export async function* walk(
 	if (maxDepth < 0) {
 		return;
 	}
+
 	if (includeDirs && include(root, exts, match, skip)) {
 		yield { filename: root, info: await stat(root) };
 	}
+
 	if (maxDepth < 1 || !include(root, null, null, skip)) {
 		return;
 	}
+
 	const ls: FileInfo[] = await readDir(root);
 
 	for (const info of ls) {
@@ -128,12 +141,15 @@ export function* walkSync(
 	if (maxDepth < 0) {
 		return;
 	}
+
 	if (includeDirs && include(root, exts, match, skip)) {
 		yield { filename: root, info: statSync(root) };
 	}
+
 	if (maxDepth < 1 || !include(root, null, null, skip)) {
 		return;
 	}
+
 	const ls: FileInfo[] = readDirSync(root);
 
 	for (const info of ls) {

@@ -11,6 +11,7 @@ class KeyValuePair {
 
 class ParserGroup {
 	arrValues: unknown[] = [];
+
 	objValues: Record<string, unknown> = {};
 
 	constructor(
@@ -21,17 +22,21 @@ class ParserGroup {
 
 class ParserContext {
 	currentGroup?: ParserGroup;
+
 	output: Record<string, unknown> = {};
 }
 
 class Parser {
 	tomlLines: string[];
+
 	context: ParserContext;
 
 	constructor(tomlString: string) {
 		this.tomlLines = this._split(tomlString);
+
 		this.context = new ParserContext();
 	}
+
 	_sanitize(): void {
 		const out: string[] = [];
 
@@ -44,7 +49,9 @@ class Parser {
 				out.push(s);
 			}
 		}
+
 		this.tomlLines = out;
+
 		this._mergeMultilines();
 	}
 
@@ -65,6 +72,7 @@ class Parser {
 			if (!m) {
 				return false;
 			}
+
 			return !line.endsWith(`"""`) || !line.endsWith(`'''`);
 		}
 
@@ -91,10 +99,13 @@ class Parser {
 
 			if (!capture && arrayStart(trimmed)) {
 				capture = true;
+
 				captureType = "array";
 			} else if (!capture && stringStart(trimmed)) {
 				isLiteral = isLiteralString(trimmed);
+
 				capture = true;
+
 				captureType = "string";
 			} else if (capture && arrayEnd(trimmed)) {
 				merge = true;
@@ -118,6 +129,7 @@ class Parser {
 
 			if (merge) {
 				capture = false;
+
 				merge = false;
 
 				if (captureType === "string") {
@@ -128,16 +140,21 @@ class Parser {
 							.replace(/'''/g, `'`)
 							.replace(/\n/g, "\\n"),
 					);
+
 					isLiteral = false;
 				} else {
 					merged.push(acc.join(""));
 				}
+
 				captureType = "";
+
 				acc = [];
 			}
 		}
+
 		this.tomlLines = merged;
 	}
+
 	_unflat(keys: string[], values: object = {}, cObj: object = {}): object {
 		const out: Record<string, unknown> = {};
 
@@ -147,14 +164,17 @@ class Parser {
 			if (Object.keys(cObj).length === 0) {
 				cObj = values;
 			}
+
 			const key: string | undefined = keys.pop();
 
 			if (key) {
 				out[key] = cObj;
 			}
+
 			return this._unflat(keys, values, out);
 		}
 	}
+
 	_groupToOutput(): void {
 		const arrProperty = this.context
 			.currentGroup!.name.replace(/"/g, "")
@@ -168,23 +188,30 @@ class Parser {
 		} else {
 			u = this._unflat(arrProperty, this.context.currentGroup!.objValues);
 		}
+
 		deepAssign(this.context.output, u);
+
 		delete this.context.currentGroup;
 	}
+
 	_split(str: string): string[] {
 		const out = [];
+
 		out.push(...str.split("\n"));
 
 		return out;
 	}
+
 	_isGroup(line: string): boolean {
 		const t = line.trim();
 
 		return t[0] === "[" && /\[(.*)\]/.exec(t) ? true : false;
 	}
+
 	_isDeclaration(line: string): boolean {
 		return line.split("=").length > 1;
 	}
+
 	_createGroup(line: string): void {
 		const captureReg = /\[(.*)\]/;
 
@@ -198,12 +225,15 @@ class Parser {
 
 		if (name.match(/\[.*\]/)) {
 			type = "array";
+
 			name = name.match(captureReg)![1];
 		} else {
 			type = "object";
 		}
+
 		this.context.currentGroup = new ParserGroup(type, name);
 	}
+
 	_processDeclaration(line: string): KeyValuePair {
 		const idx = line.indexOf("=");
 
@@ -232,6 +262,7 @@ class Parser {
 		if (cut3 === "inf" || cut4 === "+inf") {
 			return Infinity;
 		}
+
 		if (cut4 === "-inf") {
 			return -Infinity;
 		}
@@ -258,11 +289,13 @@ class Parser {
 		if (invalidArr) {
 			dataString = dataString.replace(/,]/g, "]");
 		}
+
 		const m = /(?:\'|\[|{|\").*(?:\'|\]|\"|})\s*[^#]/g.exec(dataString);
 
 		if (m) {
 			dataString = m[0].trim();
 		}
+
 		if (
 			dataString[0] === "{" &&
 			dataString[dataString.length - 1] === "}"
@@ -277,8 +310,10 @@ class Parser {
 				const newVal = ogVal
 					.replace(result[1], `"${result[1]}"`)
 					.replace(result[2], ":");
+
 				dataString = dataString.replace(ogVal, newVal);
 			}
+
 			return JSON.parse(dataString);
 		}
 
@@ -288,18 +323,22 @@ class Parser {
 		} else if (dataString.startsWith(`'\\n`)) {
 			dataString = dataString.replace(`'\\n`, `'`);
 		}
+
 		if (dataString.endsWith(`\\n"`)) {
 			dataString = dataString.replace(`\\n"`, `"`);
 		} else if (dataString.endsWith(`\\n'`)) {
 			dataString = dataString.replace(`\\n'`, `'`);
 		}
+
 		return eval(dataString);
 	}
+
 	_isLocalTime(str: string): boolean {
 		const reg = /(\d{2}):(\d{2}):(\d{2})/;
 
 		return reg.test(str);
 	}
+
 	_isParsableNumber(dataString: string): number | boolean {
 		const m = /((?:\+|-|)[0-9_\.e+\-]*)[^#]/i.exec(dataString.trim());
 
@@ -309,11 +348,13 @@ class Parser {
 			return parseFloat(m[0].replace(/_/g, ""));
 		}
 	}
+
 	_isDate(dateStr: string): boolean {
 		const reg = /\d{4}-\d{2}-\d{2}/;
 
 		return reg.test(dateStr);
 	}
+
 	_parseDeclarationName(declaration: string): string[] {
 		const out = [];
 
@@ -328,10 +369,12 @@ class Parser {
 				case ".":
 					if (!inLiteral) {
 						out.push(acc.join(""));
+
 						acc = [];
 					} else {
 						acc.push(c);
 					}
+
 					break;
 
 				case `"`:
@@ -340,6 +383,7 @@ class Parser {
 					} else {
 						inLiteral = true;
 					}
+
 					break;
 
 				default:
@@ -348,11 +392,14 @@ class Parser {
 					break;
 			}
 		}
+
 		if (acc.length !== 0) {
 			out.push(acc.join(""));
 		}
+
 		return out;
 	}
+
 	_parseLines(): void {
 		for (let i = 0; i < this.tomlLines.length; i++) {
 			const line = this.tomlLines[i];
@@ -368,6 +415,7 @@ class Parser {
 					this.context.currentGroup.arrValues.push(
 						this.context.currentGroup.objValues,
 					);
+
 					this.context.currentGroup.objValues = {};
 				}
 				// If we need to create a group or to change group
@@ -382,6 +430,7 @@ class Parser {
 					continue;
 				}
 			}
+
 			if (this._isDeclaration(line)) {
 				const kv = this._processDeclaration(line);
 
@@ -396,18 +445,22 @@ class Parser {
 				}
 			}
 		}
+
 		if (this.context.currentGroup) {
 			if (this.context.currentGroup.type === "array") {
 				this.context.currentGroup.arrValues.push(
 					this.context.currentGroup.objValues,
 				);
 			}
+
 			this._groupToOutput();
 		}
 	}
+
 	_cleanOutput(): void {
 		this._propertyClean(this.context.output);
 	}
+
 	_propertyClean(obj: Record<string, unknown>): void {
 		const keys = Object.keys(obj);
 
@@ -418,6 +471,7 @@ class Parser {
 				let v = obj[k];
 
 				const pathDeclaration = this._parseDeclarationName(k);
+
 				delete obj[k];
 
 				if (pathDeclaration.length > 1) {
@@ -425,11 +479,13 @@ class Parser {
 
 					if (shift) {
 						k = shift.replace(/"/g, "");
+
 						v = this._unflat(pathDeclaration, v as object);
 					}
 				} else {
 					k = k.replace(/"/g, "");
 				}
+
 				obj[k] = v;
 
 				if (v instanceof Object) {
@@ -439,9 +495,12 @@ class Parser {
 			}
 		}
 	}
+
 	parse(): object {
 		this._sanitize();
+
 		this._parseLines();
+
 		this._cleanOutput();
 
 		return this.context.output;
@@ -462,19 +521,24 @@ function joinKeys(keys: string[]): string {
 
 class Dumper {
 	maxPad = 0;
+
 	srcObject: object;
+
 	output: string[] = [];
 
 	constructor(srcObjc: object) {
 		this.srcObject = srcObjc;
 	}
+
 	dump(): string[] {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		this.output = this._parse(this.srcObject as any);
+
 		this.output = this._format();
 
 		return this.output;
 	}
+
 	_parse(obj: Record<string, unknown>, keys: string[] = []): string[] {
 		const out = [];
 
@@ -486,6 +550,7 @@ class Dumper {
 
 				return !this._isSimplySerializable(d[0]);
 			}
+
 			return !this._isSimplySerializable(obj[e]);
 		});
 
@@ -495,6 +560,7 @@ class Dumper {
 
 				return this._isSimplySerializable(d[0]);
 			}
+
 			return this._isSimplySerializable(obj[e]);
 		});
 
@@ -524,24 +590,30 @@ class Dumper {
 				// array of objects
 				for (let i = 0; i < value.length; i++) {
 					out.push("");
+
 					out.push(this._headerGroup([...keys, prop]));
+
 					out.push(...this._parse(value[i], [...keys, prop]));
 				}
 			} else if (typeof value === "object") {
 				out.push("");
+
 				out.push(this._header([...keys, prop]));
 
 				if (value) {
 					const toParse = value as Record<string, unknown>;
+
 					out.push(...this._parse(toParse, [...keys, prop]));
 				}
 				// out.push(...this._parse(value, `${path}${prop}.`));
 			}
 		}
+
 		out.push("");
 
 		return out;
 	}
+
 	_isSimplySerializable(value: unknown): boolean {
 		return (
 			typeof value === "string" ||
@@ -551,26 +623,33 @@ class Dumper {
 			value instanceof Array
 		);
 	}
+
 	_header(keys: string[]): string {
 		return `[${joinKeys(keys)}]`;
 	}
+
 	_headerGroup(keys: string[]): string {
 		return `[[${joinKeys(keys)}]]`;
 	}
+
 	_declaration(keys: string[]): string {
 		const title = joinKeys(keys);
 
 		if (title.length > this.maxPad) {
 			this.maxPad = title.length;
 		}
+
 		return `${title} = `;
 	}
+
 	_arrayDeclaration(keys: string[], value: unknown[]): string {
 		return `${this._declaration(keys)}${JSON.stringify(value)}`;
 	}
+
 	_strDeclaration(keys: string[], value: string): string {
 		return `${this._declaration(keys)}"${value}"`;
 	}
+
 	_numberDeclaration(keys: string[], value: number): string {
 		switch (value) {
 			case Infinity:
@@ -583,10 +662,12 @@ class Dumper {
 				return `${this._declaration(keys)}${value}`;
 		}
 	}
+
 	_dateDeclaration(keys: string[], value: Date): string {
 		function dtPad(v: string, lPad = 2): string {
 			return pad(v, lPad, { char: "0" });
 		}
+
 		const m = dtPad((value.getUTCMonth() + 1).toString());
 
 		const d = dtPad(value.getUTCDate().toString());
@@ -603,6 +684,7 @@ class Dumper {
 
 		return `${this._declaration(keys)}${fData}`;
 	}
+
 	_format(): string[] {
 		const rDeclaration = /(.*)\s=/;
 
@@ -618,6 +700,7 @@ class Dumper {
 
 					continue;
 				}
+
 				out.push(l);
 			} else {
 				const m = rDeclaration.exec(l);
@@ -644,6 +727,7 @@ class Dumper {
 				cleanedOutput.push(l);
 			}
 		}
+
 		return cleanedOutput;
 	}
 }

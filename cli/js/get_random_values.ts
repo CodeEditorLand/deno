@@ -20,6 +20,7 @@ export function getRandomValues<
 		| Uint32Array,
 >(typedArray: T): T {
 	assert(typedArray !== null, "Input must not be null");
+
 	assert(typedArray.length <= 65536, "Input must not be longer than 65536");
 
 	const ui8 = new Uint8Array(
@@ -27,6 +28,7 @@ export function getRandomValues<
 		typedArray.byteOffset,
 		typedArray.byteLength,
 	);
+
 	sendSync(dispatch.OP_GET_RANDOM_VALUES, {}, ui8);
 
 	return typedArray;

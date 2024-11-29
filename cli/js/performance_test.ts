@@ -6,6 +6,7 @@ testPerm({ hrtime: false }, function now(): void {
 
 	setTimeout((): void => {
 		const end = performance.now();
+
 		assert(end - start >= 10);
 	}, 10);
 });

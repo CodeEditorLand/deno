@@ -33,6 +33,7 @@ export function setContentLength(r: Response): void {
 		if (!r.headers.has("content-length")) {
 			if (r.body instanceof Uint8Array) {
 				const bodyLength = r.body.byteLength;
+
 				r.headers.append("Content-Length", bodyLength.toString());
 			} else {
 				r.headers.append("Transfer-Encoding", "chunked");
@@ -52,12 +53,16 @@ async function writeChunkedBody(w: Writer, r: Reader): Promise<void> {
 		const start = encoder.encode(`${chunk.byteLength.toString(16)}\r\n`);
 
 		const end = encoder.encode("\r\n");
+
 		await writer.write(start);
+
 		await writer.write(chunk);
+
 		await writer.write(end);
 	}
 
 	const endChunk = encoder.encode("0\r\n\r\n");
+
 	await writer.write(endChunk);
 }
 
@@ -75,6 +80,7 @@ export async function writeResponse(w: Writer, r: Response): Promise<void> {
 	if (!statusText) {
 		throw Error("bad status code");
 	}
+
 	if (!r.body) {
 		r.body = new Uint8Array();
 	}
@@ -88,36 +94,49 @@ export async function writeResponse(w: Writer, r: Response): Promise<void> {
 	for (const [key, value] of headers!) {
 		out += `${key}: ${value}\r\n`;
 	}
+
 	out += "\r\n";
 
 	const header = new TextEncoder().encode(out);
 
 	const n = await writer.write(header);
+
 	assert(n === header.byteLength);
 
 	if (r.body instanceof Uint8Array) {
 		const n = await writer.write(r.body);
+
 		assert(n === r.body.byteLength);
 	} else if (headers.has("content-length")) {
 		const bodyLength = parseInt(headers.get("content-length")!);
 
 		const n = await copy(writer, r.body);
+
 		assert(n === bodyLength);
 	} else {
 		await writeChunkedBody(writer, r.body);
 	}
+
 	await writer.flush();
 }
 
 export class ServerRequest {
 	url!: string;
+
 	method!: string;
+
 	proto!: string;
+
 	protoMinor!: number;
+
 	protoMajor!: number;
+
 	headers!: Headers;
+
 	conn!: Conn;
+
 	r!: BufReader;
+
 	w!: BufWriter;
 
 	done: Deferred<Error | undefined> = deferred();
@@ -129,6 +148,7 @@ export class ServerRequest {
 			if (Number.isNaN(len)) {
 				return new Uint8Array(0);
 			}
+
 			let buf = new Uint8Array(1024);
 
 			let rr = await this.r.read(buf);
@@ -139,11 +159,16 @@ export class ServerRequest {
 
 			while (rr !== Deno.EOF && nreadTotal < len) {
 				yield buf.subarray(0, nread);
+
 				buf = new Uint8Array(1024);
+
 				rr = await this.r.read(buf);
+
 				nread = rr === Deno.EOF ? 0 : rr;
+
 				nreadTotal += nread;
 			}
+
 			yield buf.subarray(0, nread);
 		} else {
 			if (this.headers.has("transfer-encoding")) {
@@ -167,19 +192,24 @@ export class ServerRequest {
 					if (Number.isNaN(chunkSize) || chunkSize < 0) {
 						throw new Error("Invalid chunk size");
 					}
+
 					while (chunkSize > 0) {
 						const data = new Uint8Array(chunkSize);
 
 						if ((await this.r.readFull(data)) === Deno.EOF) {
 							throw new UnexpectedEOFError();
 						}
+
 						yield data;
+
 						await this.r.readLine(); // Consume \r\n
 						line = await tp.readLine();
 
 						if (line === Deno.EOF) throw new UnexpectedEOFError();
+
 						chunkSize = parseInt(line, 16);
 					}
+
 					const entityHeaders = await tp.readMIMEHeader();
 
 					if (entityHeaders !== Deno.EOF) {
@@ -229,6 +259,7 @@ export class ServerRequest {
 				// Eagerly close on error.
 				this.conn.close();
 			} catch {}
+
 			err = e;
 		}
 		// Signal that this request has been processed and the next pipelined
@@ -257,11 +288,13 @@ function fixLength(req: ServerRequest): void {
 				req.headers.set("Content-Length", distinct[0]);
 			}
 		}
+
 		const c = req.headers.get("Content-Length");
 
 		if (req.method === "HEAD" && c && c !== "0") {
 			throw Error("http: method cannot contain a Content-Length");
 		}
+
 		if (c && req.headers.has("transfer-encoding")) {
 			// A sender MUST NOT send a Content-Length header field in any message
 			// that contains a Transfer-Encoding header field.
@@ -347,11 +380,15 @@ export async function readRequest(
 	if (headers === Deno.EOF) throw new UnexpectedEOFError();
 
 	const req = new ServerRequest();
+
 	req.conn = conn;
+
 	req.r = bufr;
 	[req.method, req.url, req.proto] = firstLine.split(" ", 3);
 	[req.protoMinor, req.protoMajor] = parseHTTPVersion(req.proto);
+
 	req.headers = headers;
+
 	fixLength(req);
 
 	return req;
@@ -364,6 +401,7 @@ export class Server implements AsyncIterable<ServerRequest> {
 
 	close(): void {
 		this.closing = true;
+
 		this.listener.close();
 	}
 
@@ -387,6 +425,7 @@ export class Server implements AsyncIterable<ServerRequest> {
 
 				break;
 			}
+
 			if (req === Deno.EOF) {
 				break;
 			}
@@ -450,6 +489,7 @@ export class Server implements AsyncIterable<ServerRequest> {
 
 	[Symbol.asyncIterator](): AsyncIterableIterator<ServerRequest> {
 		const mux: MuxAsyncIterator<ServerRequest> = new MuxAsyncIterator();
+
 		mux.add(this.acceptConnAndIterateHttpRequests(mux));
 
 		return mux.iterate();
@@ -458,6 +498,7 @@ export class Server implements AsyncIterable<ServerRequest> {
 
 interface ServerConfig {
 	port: number;
+
 	hostname?: string;
 }
 
@@ -474,6 +515,7 @@ interface ServerConfig {
 export function serve(addr: string | ServerConfig): Server {
 	if (typeof addr === "string") {
 		const [hostname, port] = addr.split(":");
+
 		addr = { hostname, port: Number(port) };
 	}
 
@@ -554,6 +596,8 @@ export async function listenAndServeTLS(
 
 export interface Response {
 	status?: number;
+
 	headers?: Headers;
+
 	body?: Uint8Array | Reader;
 }

@@ -17,13 +17,17 @@ type FileInfo = Deno.FileInfo;
 
 export interface ExpandGlobOptions extends GlobOptions {
 	root?: string;
+
 	exclude?: string[];
+
 	includeDirs?: boolean;
 }
 
 interface SplitPath {
 	segments: string[];
+
 	isAbsolute: boolean;
+
 	hasTrailingSep: boolean;
 	// Defined for any absolute Windows path.
 	winRoot?: string;
@@ -123,6 +127,7 @@ export async function* expandGlob(
 			} catch (error) {
 				throwUnlessNotFound(error);
 			}
+
 			return;
 		} else if (globSegment == "**") {
 			return yield* walk(walkInfo.filename, {
@@ -130,6 +135,7 @@ export async function* expandGlob(
 				skip: excludePatterns,
 			});
 		}
+
 		yield* walk(walkInfo.filename, {
 			maxDepth: 1,
 			match: [
@@ -154,6 +160,7 @@ export async function* expandGlob(
 				nextMatchMap.set(nextMatch.filename, nextMatch.info);
 			}
 		}
+
 		currentMatches = [...nextMatchMap].sort().map(
 			([filename, info]): WalkInfo => ({
 				filename,
@@ -161,16 +168,19 @@ export async function* expandGlob(
 			}),
 		);
 	}
+
 	if (hasTrailingSep) {
 		currentMatches = currentMatches.filter(({ info }): boolean =>
 			info.isDirectory(),
 		);
 	}
+
 	if (!includeDirs) {
 		currentMatches = currentMatches.filter(
 			({ info }): boolean => !info.isDirectory(),
 		);
 	}
+
 	yield* currentMatches;
 }
 
@@ -241,6 +251,7 @@ export function* expandGlobSync(
 			} catch (error) {
 				throwUnlessNotFound(error);
 			}
+
 			return;
 		} else if (globSegment == "**") {
 			return yield* walkSync(walkInfo.filename, {
@@ -248,6 +259,7 @@ export function* expandGlobSync(
 				skip: excludePatterns,
 			});
 		}
+
 		yield* walkSync(walkInfo.filename, {
 			maxDepth: 1,
 			match: [
@@ -272,6 +284,7 @@ export function* expandGlobSync(
 				nextMatchMap.set(nextMatch.filename, nextMatch.info);
 			}
 		}
+
 		currentMatches = [...nextMatchMap].sort().map(
 			([filename, info]): WalkInfo => ({
 				filename,
@@ -279,15 +292,18 @@ export function* expandGlobSync(
 			}),
 		);
 	}
+
 	if (hasTrailingSep) {
 		currentMatches = currentMatches.filter(({ info }): boolean =>
 			info.isDirectory(),
 		);
 	}
+
 	if (!includeDirs) {
 		currentMatches = currentMatches.filter(
 			({ info }): boolean => !info.isDirectory(),
 		);
 	}
+
 	yield* currentMatches;
 }

@@ -17,6 +17,7 @@ export function copyBytes(dst: Uint8Array, src: Uint8Array, off = 0): number {
 	if (src.byteLength > r) {
 		src = src.subarray(0, r);
 	}
+
 	dst.set(src, off);
 
 	return src.byteLength;
@@ -37,6 +38,7 @@ export async function tempFile(
 	dir: string,
 	opts: {
 		prefix?: string;
+
 		postfix?: string;
 	} = { prefix: "", postfix: "" },
 ): Promise<{ file: File; filepath: string }> {
@@ -45,6 +47,7 @@ export async function tempFile(
 	const filepath = path.resolve(
 		`${dir}/${opts.prefix || ""}${r}${opts.postfix || ""}`,
 	);
+
 	await mkdir(path.dirname(filepath), true);
 
 	const file = await open(filepath, "a");

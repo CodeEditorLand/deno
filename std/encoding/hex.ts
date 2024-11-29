@@ -30,6 +30,7 @@ function fromHexChar(byte: number): [number, boolean] {
 		case 65 <= byte && byte <= 70: // 'A' <= byte && byte <= 'F'
 			return [byte - 65 + 10, true];
 	}
+
 	return [0, false];
 }
 
@@ -56,11 +57,15 @@ export function encode(dst: Uint8Array, src: Uint8Array): number {
 	if (dst.length !== srcLength) {
 		throw new Error("Out of index.");
 	}
+
 	for (let i = 0; i < src.length; i++) {
 		const v = src[i];
+
 		dst[i * 2] = hextable[v >> 4];
+
 		dst[i * 2 + 1] = hextable[v & 0x0f];
 	}
+
 	return srcLength;
 }
 
@@ -70,6 +75,7 @@ export function encode(dst: Uint8Array, src: Uint8Array): number {
  */
 export function encodeToString(src: Uint8Array): string {
 	const dest = new Uint8Array(encodedLen(src.length));
+
 	encode(dest, src);
 
 	return new TextDecoder().decode(dest);
@@ -97,6 +103,7 @@ export function decode(
 		if (!aOK) {
 			return [i, errInvalidByte(src[i * 2])];
 		}
+
 		const [b, bOK] = fromHexChar(src[i * 2 + 1]);
 
 		if (!bOK) {
@@ -114,6 +121,7 @@ export function decode(
 		if (!ok) {
 			return [i, errInvalidByte(src[i * 2])];
 		}
+
 		return [i, errLength()];
 	}
 

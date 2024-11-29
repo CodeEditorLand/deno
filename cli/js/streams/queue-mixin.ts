@@ -20,6 +20,7 @@ export const queueTotalSize_ = Symbol("queueTotalSize_");
 
 export interface QueueElement<V> {
 	value: V;
+
 	size: number;
 }
 
@@ -31,7 +32,9 @@ export interface QueueContainer<V> {
 export interface ByteQueueContainer {
 	[queue_]: Queue<{
 		buffer: ArrayBufferLike;
+
 		byteOffset: number;
+
 		byteLength: number;
 	}>;
 	[queueTotalSize_]: number;
@@ -43,6 +46,7 @@ export function dequeueValue<V>(container: QueueContainer<V>): V {
 	const pair = container[queue_].shift()!;
 
 	const newTotalSize = container[queueTotalSize_] - pair.size;
+
 	container[queueTotalSize_] = Math.max(0, newTotalSize); // < 0 can occur due to rounding errors.
 	return pair.value;
 }
@@ -58,7 +62,9 @@ export function enqueueValueWithSize<V>(
 			"Chunk size must be a non-negative, finite numbers",
 		);
 	}
+
 	container[queue_].push({ value, size });
+
 	container[queueTotalSize_] += size;
 }
 

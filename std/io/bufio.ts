@@ -29,6 +29,7 @@ export class BufferFullError extends Error {
 
 export class UnexpectedEOFError extends Error {
 	name = "UnexpectedEOFError";
+
 	partial?: Uint8Array;
 
 	constructor() {
@@ -39,12 +40,14 @@ export class UnexpectedEOFError extends Error {
 /** Result type returned by of BufReader.readLine(). */
 export interface ReadLineResult {
 	line: Uint8Array;
+
 	more: boolean;
 }
 
 /** BufReader implements buffering for a Reader object. */
 export class BufReader implements Reader {
 	private buf!: Uint8Array;
+
 	private rd!: Reader; // Reader provided by caller.
 	private r = 0; // buf read position.
 	private w = 0; // buf write position.
@@ -61,6 +64,7 @@ export class BufReader implements Reader {
 		if (size < MIN_BUF_SIZE) {
 			size = MIN_BUF_SIZE;
 		}
+
 		this._reset(new Uint8Array(size), rd);
 	}
 
@@ -78,7 +82,9 @@ export class BufReader implements Reader {
 		// Slide existing data to beginning.
 		if (this.r > 0) {
 			this.buf.copyWithin(0, this.r, this.w);
+
 			this.w -= this.r;
+
 			this.r = 0;
 		}
 
@@ -95,7 +101,9 @@ export class BufReader implements Reader {
 
 				return;
 			}
+
 			assert(rr >= 0, "negative read");
+
 			this.w += rr;
 
 			if (rr > 0) {
@@ -117,7 +125,9 @@ export class BufReader implements Reader {
 
 	private _reset(buf: Uint8Array, rd: Reader): void {
 		this.buf = buf;
+
 		this.rd = rd;
+
 		this.eof = false;
 		// this.lastByte = -1;
 		// this.lastCharSize = -1;
@@ -141,27 +151,34 @@ export class BufReader implements Reader {
 				const rr = await this.rd.read(p);
 
 				const nread = rr === Deno.EOF ? 0 : rr;
+
 				assert(nread >= 0, "negative read");
 				// if (rr.nread > 0) {
 				//   this.lastByte = p[rr.nread - 1];
 				//   this.lastCharSize = -1;
 				// }
+
 				return rr;
 			}
 
 			// One read.
 			// Do not use this.fill, which will loop.
 			this.r = 0;
+
 			this.w = 0;
+
 			rr = await this.rd.read(this.buf);
 
 			if (rr === 0 || rr === Deno.EOF) return rr;
+
 			assert(rr >= 0, "negative read");
+
 			this.w += rr;
 		}
 
 		// copy as much as we can
 		const copied = copyBytes(p, this.buf.subarray(this.r, this.w), 0);
+
 		this.r += copied;
 		// this.lastByte = this.buf[this.r - 1];
 		// this.lastCharSize = -1;
@@ -197,6 +214,7 @@ export class BufReader implements Reader {
 						throw new UnexpectedEOFError();
 					}
 				}
+
 				bytesRead += rr;
 			} catch (err) {
 				err.partial = p.subarray(0, bytesRead);
@@ -204,6 +222,7 @@ export class BufReader implements Reader {
 				throw err;
 			}
 		}
+
 		return p;
 	}
 
@@ -211,9 +230,12 @@ export class BufReader implements Reader {
 	async readByte(): Promise<number | Deno.EOF> {
 		while (this.r === this.w) {
 			if (this.eof) return Deno.EOF;
+
 			await this._fill(); // buffer is empty.
 		}
+
 		const c = this.buf[this.r];
+
 		this.r++;
 		// this.lastByte = c;
 
@@ -269,6 +291,7 @@ export class BufReader implements Reader {
 			line = await this.readSlice(LF);
 		} catch (err) {
 			let { partial } = err;
+
 			assert(
 				partial instanceof Uint8Array,
 				"bufio: caught error from `readSlice()` without `partial` property",
@@ -292,7 +315,9 @@ export class BufReader implements Reader {
 					this.r > 0,
 					"bufio: tried to rewind past start of buffer",
 				);
+
 				this.r--;
+
 				partial = partial.subarray(0, partial.byteLength - 1);
 			}
 
@@ -313,8 +338,10 @@ export class BufReader implements Reader {
 			if (line.byteLength > 1 && line[line.byteLength - 2] === CR) {
 				drop = 2;
 			}
+
 			line = line.subarray(0, line.byteLength - drop);
 		}
+
 		return { line, more: false };
 	}
 
@@ -344,7 +371,9 @@ export class BufReader implements Reader {
 
 			if (i >= 0) {
 				i += s;
+
 				slice = this.buf.subarray(this.r, this.r + i + 1);
+
 				this.r += i + 1;
 
 				break;
@@ -355,7 +384,9 @@ export class BufReader implements Reader {
 				if (this.r === this.w) {
 					return Deno.EOF;
 				}
+
 				slice = this.buf.subarray(this.r, this.w);
+
 				this.r = this.w;
 
 				break;
@@ -416,6 +447,7 @@ export class BufReader implements Reader {
 
 				throw err;
 			}
+
 			avail = this.w - this.r;
 		}
 
@@ -440,7 +472,9 @@ export class BufReader implements Reader {
  */
 export class BufWriter implements Writer {
 	buf: Uint8Array;
+
 	n = 0;
+
 	err: Error | null = null;
 
 	/** return new BufWriter unless w is BufWriter */
@@ -455,6 +489,7 @@ export class BufWriter implements Writer {
 		if (size <= 0) {
 			size = DEFAULT_BUF_SIZE;
 		}
+
 		this.buf = new Uint8Array(size);
 	}
 
@@ -468,7 +503,9 @@ export class BufWriter implements Writer {
 	 */
 	reset(w: Writer): void {
 		this.err = null;
+
 		this.n = 0;
+
 		this.wr = w;
 	}
 
@@ -491,8 +528,10 @@ export class BufWriter implements Writer {
 		if (n < this.n) {
 			if (n > 0) {
 				this.buf.copyWithin(0, n, this.n);
+
 				this.n -= n;
 			}
+
 			this.err = new Error("Short write");
 
 			throw this.err;
@@ -538,15 +577,21 @@ export class BufWriter implements Writer {
 				}
 			} else {
 				n = copyBytes(this.buf, p, this.n);
+
 				this.n += n;
+
 				await this.flush();
 			}
+
 			nn += n;
+
 			p = p.subarray(n);
 		}
 
 		n = copyBytes(this.buf, p, this.n);
+
 		this.n += n;
+
 		nn += n;
 
 		return nn;

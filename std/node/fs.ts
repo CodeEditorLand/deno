@@ -13,6 +13,7 @@ type ReadFileCallback = (
 
 interface ReadFileOptions {
 	encoding?: string | null;
+
 	flag?: string;
 }
 
@@ -32,6 +33,7 @@ function getEncoding(
 				notImplemented();
 			}
 		}
+
 		return null;
 	}
 }
@@ -43,6 +45,7 @@ function maybeDecode(
 	if (encoding === "utf8") {
 		return new TextDecoder().decode(data);
 	}
+
 	return data;
 }
 

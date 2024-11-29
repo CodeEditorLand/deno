@@ -121,17 +121,29 @@ type ParserLabel = "typescript" | "babel" | "markdown" | "json";
 
 interface PrettierBuildInOptions {
 	printWidth: number;
+
 	tabWidth: number;
+
 	useTabs: boolean;
+
 	semi: boolean;
+
 	singleQuote: boolean;
+
 	quoteProps: string;
+
 	jsxSingleQuote: boolean;
+
 	jsxBracketSameLine: boolean;
+
 	trailingComma: string;
+
 	bracketSpacing: boolean;
+
 	arrowParens: string;
+
 	proseWrap: string;
+
 	endOfLine: string;
 }
 
@@ -211,6 +223,7 @@ async function formatFile(
 	if (prettierOpts.write) {
 		if (text !== formatted) {
 			console.log(`Formatting ${filename}`);
+
 			await writeFile(filename, fileUnit8);
 		}
 	} else {
@@ -257,9 +270,11 @@ async function checkSourceFiles(
 
 	if (results.every((result): boolean => result)) {
 		console.log("Every file is formatted");
+
 		exit(0);
 	} else {
 		console.log("Some files are not formatted");
+
 		exit(1);
 	}
 }
@@ -283,6 +298,7 @@ async function formatSourceFiles(
 	}
 
 	await Promise.all(formats);
+
 	exit(0);
 }
 
@@ -317,6 +333,7 @@ async function formatFromStdin(
 		parser,
 		prettierOpts,
 	);
+
 	await stdout.write(new TextEncoder().encode(formattedCode));
 }
 
@@ -420,6 +437,7 @@ async function resolveConfig(
 			} catch (err) {
 				throw generateError(err.message);
 			}
+
 			break;
 
 		case ".yml":
@@ -429,6 +447,7 @@ async function resolveConfig(
 			} catch (err) {
 				throw generateError(err.message);
 			}
+
 			break;
 
 		case ".toml":
@@ -437,6 +456,7 @@ async function resolveConfig(
 			} catch (err) {
 				throw generateError(err.message);
 			}
+
 			break;
 
 		case ".js":
@@ -519,6 +539,7 @@ async function main(opts): Promise<void> {
 
 	if (help) {
 		console.log(HELP_MESSAGE);
+
 		exit(0);
 	}
 
@@ -569,6 +590,7 @@ async function main(opts): Promise<void> {
 		}
 	} catch (e) {
 		console.error(e);
+
 		exit(1);
 	}
 }

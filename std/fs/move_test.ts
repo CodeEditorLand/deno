@@ -79,6 +79,7 @@ test(async function moveFileIfDestExists(): Promise<void> {
 
 	// make sure the test file have been created
 	assertEquals(new TextDecoder().decode(await Deno.readFile(srcFile)), "src");
+
 	assertEquals(
 		new TextDecoder().decode(await Deno.readFile(destFile)),
 		"dest",
@@ -105,6 +106,7 @@ test(async function moveFileIfDestExists(): Promise<void> {
 	);
 
 	assertEquals(await exists(srcFile), false);
+
 	assertEquals(
 		new TextDecoder().decode(await Deno.readFile(destFile)),
 		"src",
@@ -129,18 +131,23 @@ test(async function moveDirectory(): Promise<void> {
 	const srcContent = new TextEncoder().encode("src");
 
 	await Deno.mkdir(srcDir, true);
+
 	assertEquals(await exists(srcDir), true);
+
 	await Deno.writeFile(srcFile, srcContent);
 
 	await move(srcDir, destDir);
 
 	assertEquals(await exists(srcDir), false);
+
 	assertEquals(await exists(destDir), true);
+
 	assertEquals(await exists(destFile), true);
 
 	const destFileContent = new TextDecoder().decode(
 		await Deno.readFile(destFile),
 	);
+
 	assertEquals(destFileContent, "src");
 
 	await Deno.remove(destDir, { recursive: true });
@@ -164,8 +171,11 @@ test(
 			Deno.mkdir(srcDir, true),
 			Deno.mkdir(destDir, true),
 		]);
+
 		assertEquals(await exists(srcDir), true);
+
 		assertEquals(await exists(destDir), true);
+
 		await Promise.all([
 			Deno.writeFile(srcFile, srcContent),
 			Deno.writeFile(destFile, destContent),
@@ -174,12 +184,15 @@ test(
 		await move(srcDir, destDir, { overwrite: true });
 
 		assertEquals(await exists(srcDir), false);
+
 		assertEquals(await exists(destDir), true);
+
 		assertEquals(await exists(destFile), true);
 
 		const destFileContent = new TextDecoder().decode(
 			await Deno.readFile(destFile),
 		);
+
 		assertEquals(destFileContent, "src");
 
 		await Deno.remove(destDir, { recursive: true });
@@ -200,6 +213,7 @@ test(async function moveIntoSubDir(): Promise<void> {
 		Error,
 		`Cannot move '${srcDir}' to a subdirectory of itself, '${destDir}'.`,
 	);
+
 	await Deno.remove(srcDir, { recursive: true });
 });
 
@@ -264,14 +278,17 @@ test(function moveSyncFileIfDestExists(): void {
 
 	// make sure files exists
 	ensureFileSync(srcFile);
+
 	ensureFileSync(destFile);
 
 	// write file content
 	Deno.writeFileSync(srcFile, srcContent);
+
 	Deno.writeFileSync(destFile, destContent);
 
 	// make sure the test file have been created
 	assertEquals(new TextDecoder().decode(Deno.readFileSync(srcFile)), "src");
+
 	assertEquals(new TextDecoder().decode(Deno.readFileSync(destFile)), "dest");
 
 	// move it without override
@@ -295,10 +312,12 @@ test(function moveSyncFileIfDestExists(): void {
 	);
 
 	assertEquals(existsSync(srcFile), false);
+
 	assertEquals(new TextDecoder().decode(Deno.readFileSync(destFile)), "src");
 
 	// clean up
 	Deno.removeSync(srcDir, { recursive: true });
+
 	Deno.removeSync(destDir, { recursive: true });
 });
 
@@ -314,18 +333,23 @@ test(function moveSyncDirectory(): void {
 	const srcContent = new TextEncoder().encode("src");
 
 	Deno.mkdirSync(srcDir, true);
+
 	assertEquals(existsSync(srcDir), true);
+
 	Deno.writeFileSync(srcFile, srcContent);
 
 	moveSync(srcDir, destDir);
 
 	assertEquals(existsSync(srcDir), false);
+
 	assertEquals(existsSync(destDir), true);
+
 	assertEquals(existsSync(destFile), true);
 
 	const destFileContent = new TextDecoder().decode(
 		Deno.readFileSync(destFile),
 	);
+
 	assertEquals(destFileContent, "src");
 
 	Deno.removeSync(destDir, { recursive: true });
@@ -345,21 +369,29 @@ test(function moveSyncIfSrcAndDestDirectoryExistsAndOverwrite(): void {
 	const destContent = new TextEncoder().encode("dest");
 
 	Deno.mkdirSync(srcDir, true);
+
 	Deno.mkdirSync(destDir, true);
+
 	assertEquals(existsSync(srcDir), true);
+
 	assertEquals(existsSync(destDir), true);
+
 	Deno.writeFileSync(srcFile, srcContent);
+
 	Deno.writeFileSync(destFile, destContent);
 
 	moveSync(srcDir, destDir, { overwrite: true });
 
 	assertEquals(existsSync(srcDir), false);
+
 	assertEquals(existsSync(destDir), true);
+
 	assertEquals(existsSync(destFile), true);
 
 	const destFileContent = new TextDecoder().decode(
 		Deno.readFileSync(destFile),
 	);
+
 	assertEquals(destFileContent, "src");
 
 	Deno.removeSync(destDir, { recursive: true });
@@ -379,5 +411,6 @@ test(function moveSyncIntoSubDir(): void {
 		Error,
 		`Cannot move '${srcDir}' to a subdirectory of itself, '${destDir}'.`,
 	);
+
 	Deno.removeSync(srcDir, { recursive: true });
 });

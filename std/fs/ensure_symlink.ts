@@ -26,6 +26,7 @@ export async function ensureSymlink(src: string, dest: string): Promise<void> {
 				`Ensure path exists, expected 'symlink', got '${destFilePathType}'`,
 			);
 		}
+
 		return;
 	}
 
@@ -56,6 +57,7 @@ export function ensureSymlinkSync(src: string, dest: string): void {
 				`Ensure path exists, expected 'symlink', got '${destFilePathType}'`,
 			);
 		}
+
 		return;
 	}
 

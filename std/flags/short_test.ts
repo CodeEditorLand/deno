@@ -5,12 +5,15 @@ import { parse } from "./mod.ts";
 
 test(function numbericShortArgs(): void {
 	assertEquals(parse(["-n123"]), { n: 123, _: [] });
+
 	assertEquals(parse(["-123", "456"]), { 1: true, 2: true, 3: 456, _: [] });
 });
 
 test(function short(): void {
 	assertEquals(parse(["-b"]), { b: true, _: [] });
+
 	assertEquals(parse(["foo", "bar", "baz"]), { _: ["foo", "bar", "baz"] });
+
 	assertEquals(parse(["-cats"]), {
 		c: true,
 		a: true,
@@ -18,6 +21,7 @@ test(function short(): void {
 		s: true,
 		_: [],
 	});
+
 	assertEquals(parse(["-cats", "meow"]), {
 		c: true,
 		a: true,
@@ -25,7 +29,9 @@ test(function short(): void {
 		s: "meow",
 		_: [],
 	});
+
 	assertEquals(parse(["-h", "localhost"]), { h: "localhost", _: [] });
+
 	assertEquals(parse(["-h", "localhost", "-p", "555"]), {
 		h: "localhost",
 		p: 555,

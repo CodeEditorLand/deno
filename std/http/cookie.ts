@@ -11,15 +11,23 @@ export interface Cookies {
 
 export interface Cookie {
 	name: string;
+
 	value: string;
+
 	expires?: Date;
+
 	maxAge?: number;
 
 	domain?: string;
+
 	path?: string;
+
 	secure?: boolean;
+
 	httpOnly?: boolean;
+
 	sameSite?: SameSite;
+
 	unparsed?: string[];
 }
 
@@ -27,6 +35,7 @@ export type SameSite = "Strict" | "Lax";
 
 function toString(cookie: Cookie): string {
 	const out: string[] = [];
+
 	out.push(`${cookie.name}=${cookie.value}`);
 
 	// Fallback for invalid Set-Cookie
@@ -34,38 +43,51 @@ function toString(cookie: Cookie): string {
 	if (cookie.name.startsWith("__Secure")) {
 		cookie.secure = true;
 	}
+
 	if (cookie.name.startsWith("__Host")) {
 		cookie.path = "/";
+
 		cookie.secure = true;
+
 		delete cookie.domain;
 	}
 
 	if (cookie.secure) {
 		out.push("Secure");
 	}
+
 	if (cookie.httpOnly) {
 		out.push("HttpOnly");
 	}
+
 	if (Number.isInteger(cookie.maxAge!)) {
 		assert(cookie.maxAge! > 0, "Max-Age must be an integer superior to 0");
+
 		out.push(`Max-Age=${cookie.maxAge}`);
 	}
+
 	if (cookie.domain) {
 		out.push(`Domain=${cookie.domain}`);
 	}
+
 	if (cookie.sameSite) {
 		out.push(`SameSite=${cookie.sameSite}`);
 	}
+
 	if (cookie.path) {
 		out.push(`Path=${cookie.path}`);
 	}
+
 	if (cookie.expires) {
 		const dateString = toIMF(cookie.expires);
+
 		out.push(`Expires=${dateString}`);
 	}
+
 	if (cookie.unparsed) {
 		out.push(cookie.unparsed.join("; "));
 	}
+
 	return out.join("; ");
 }
 
@@ -83,10 +105,13 @@ export function getCookies(req: ServerRequest): Cookies {
 			const cookieVal = kv.split("=");
 
 			const key = cookieVal.shift()!.trim();
+
 			out[key] = cookieVal.join("=");
 		}
+
 		return out;
 	}
+
 	return {};
 }
 

@@ -7,10 +7,15 @@ test(function eventInitializedWithType(): void {
 	const event = new Event(type);
 
 	assertEquals(event.isTrusted, false);
+
 	assertEquals(event.target, null);
+
 	assertEquals(event.currentTarget, null);
+
 	assertEquals(event.type, "click");
+
 	assertEquals(event.bubbles, false);
+
 	assertEquals(event.cancelable, false);
 });
 
@@ -22,10 +27,15 @@ test(function eventInitializedWithTypeAndDict(): void {
 	const event = new Event(init, eventInit);
 
 	assertEquals(event.isTrusted, false);
+
 	assertEquals(event.target, null);
+
 	assertEquals(event.currentTarget, null);
+
 	assertEquals(event.type, "submit");
+
 	assertEquals(event.bubbles, true);
+
 	assertEquals(event.cancelable, true);
 });
 
@@ -45,7 +55,9 @@ test(function eventStopPropagationSuccess(): void {
 	const event = new Event(type);
 
 	assertEquals(event.cancelBubble, false);
+
 	event.stopPropagation();
+
 	assertEquals(event.cancelBubble, true);
 });
 
@@ -55,9 +67,13 @@ test(function eventStopImmediatePropagationSuccess(): void {
 	const event = new Event(type);
 
 	assertEquals(event.cancelBubble, false);
+
 	assertEquals(event.cancelBubbleImmediately, false);
+
 	event.stopImmediatePropagation();
+
 	assertEquals(event.cancelBubble, true);
+
 	assertEquals(event.cancelBubbleImmediately, true);
 });
 
@@ -67,14 +83,19 @@ test(function eventPreventDefaultSuccess(): void {
 	const event = new Event(type);
 
 	assertEquals(event.defaultPrevented, false);
+
 	event.preventDefault();
+
 	assertEquals(event.defaultPrevented, false);
 
 	const eventInit = { bubbles: true, cancelable: true } as EventInit;
 
 	const cancelableEvent = new Event(type, eventInit);
+
 	assertEquals(cancelableEvent.defaultPrevented, false);
+
 	cancelableEvent.preventDefault();
+
 	assertEquals(cancelableEvent.defaultPrevented, true);
 });
 
@@ -84,21 +105,30 @@ test(function eventInitializedWithNonStringType(): void {
 	const event = new Event(type);
 
 	assertEquals(event.isTrusted, false);
+
 	assertEquals(event.target, null);
+
 	assertEquals(event.currentTarget, null);
+
 	assertEquals(event.type, "undefined");
+
 	assertEquals(event.bubbles, false);
+
 	assertEquals(event.cancelable, false);
 });
 
 // ref https://github.com/web-platform-tests/wpt/blob/master/dom/events/Event-isTrusted.any.js
 test(function eventIsTrusted(): void {
 	const desc1 = Object.getOwnPropertyDescriptor(new Event("x"), "isTrusted");
+
 	assertNotEquals(desc1, undefined);
+
 	assertEquals(typeof desc1.get, "function");
 
 	const desc2 = Object.getOwnPropertyDescriptor(new Event("x"), "isTrusted");
+
 	assertNotEquals(desc2, undefined);
+
 	assertEquals(typeof desc2.get, "function");
 
 	assertEquals(desc1.get, desc2.get);

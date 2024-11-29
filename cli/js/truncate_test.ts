@@ -27,17 +27,27 @@ testPerm({ read: true, write: true }, function truncateSyncSuccess(): void {
 	const d = enc.encode("Hello");
 
 	const filename = Deno.makeTempDirSync() + "/test_truncateSync.txt";
+
 	Deno.writeFileSync(filename, d);
+
 	Deno.truncateSync(filename, 20);
 
 	let data = readDataSync(filename);
+
 	assertEquals(data.length, 20);
+
 	Deno.truncateSync(filename, 5);
+
 	data = readDataSync(filename);
+
 	assertEquals(data.length, 5);
+
 	Deno.truncateSync(filename, -5);
+
 	data = readDataSync(filename);
+
 	assertEquals(data.length, 0);
+
 	Deno.removeSync(filename);
 });
 
@@ -49,17 +59,27 @@ testPerm(
 		const d = enc.encode("Hello");
 
 		const filename = Deno.makeTempDirSync() + "/test_truncate.txt";
+
 		await Deno.writeFile(filename, d);
+
 		await Deno.truncate(filename, 20);
 
 		let data = await readData(filename);
+
 		assertEquals(data.length, 20);
+
 		await Deno.truncate(filename, 5);
+
 		data = await readData(filename);
+
 		assertEquals(data.length, 5);
+
 		await Deno.truncate(filename, -5);
+
 		data = await readData(filename);
+
 		assertEquals(data.length, 0);
+
 		await Deno.remove(filename);
 	},
 );
@@ -72,7 +92,9 @@ testPerm({ write: false }, function truncateSyncPerm(): void {
 	} catch (e) {
 		err = e;
 	}
+
 	assertEquals(err.kind, Deno.ErrorKind.PermissionDenied);
+
 	assertEquals(err.name, "PermissionDenied");
 });
 
@@ -84,6 +106,8 @@ testPerm({ write: false }, async function truncatePerm(): Promise<void> {
 	} catch (e) {
 		err = e;
 	}
+
 	assertEquals(err.kind, Deno.ErrorKind.PermissionDenied);
+
 	assertEquals(err.name, "PermissionDenied");
 });

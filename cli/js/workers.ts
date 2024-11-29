@@ -44,6 +44,7 @@ async function hostGetWorkerClosed(id: number): Promise<void> {
 
 function hostPostMessage(id: number, data: any): void {
 	const dataIntArray = encodeMessage(data);
+
 	sendSync(dispatch.OP_HOST_POST_MESSAGE, { id }, dataIntArray);
 }
 
@@ -62,6 +63,7 @@ export const onmessage: (e: { data: any }) => void = (): void => {};
 
 export function postMessage(data: any): void {
 	const dataIntArray = encodeMessage(data);
+
 	sendSync(dispatch.OP_WORKER_POST_MESSAGE, {}, dataIntArray);
 }
 
@@ -113,9 +115,13 @@ export async function workerMain(): Promise<void> {
 
 export interface Worker {
 	onerror?: () => void;
+
 	onmessage?: (e: { data: any }) => void;
+
 	onmessageerror?: () => void;
+
 	postMessage(data: any): void;
+
 	closed: Promise<void>;
 }
 
@@ -133,10 +139,15 @@ export interface DenoWorkerOptions extends WorkerOptions {
 
 export class WorkerImpl implements Worker {
 	private readonly id: number;
+
 	private isClosing = false;
+
 	private readonly isClosedPromise: Promise<void>;
+
 	public onerror?: () => void;
+
 	public onmessage?: (data: any) => void;
+
 	public onmessageerror?: () => void;
 
 	constructor(specifier: string, options?: DenoWorkerOptions) {
@@ -160,11 +171,13 @@ export class WorkerImpl implements Worker {
 					"No Blob associated with the given URL is found",
 				);
 			}
+
 			const blobBytes = blobBytesWeakMap.get(b!);
 
 			if (!blobBytes) {
 				throw new Error("Invalid Blob");
 			}
+
 			sourceCode = blobBytes!;
 		}
 
@@ -174,8 +187,11 @@ export class WorkerImpl implements Worker {
 			hasSourceCode,
 			sourceCode,
 		);
+
 		this.run();
+
 		this.isClosedPromise = hostGetWorkerClosed(this.id);
+
 		this.isClosedPromise.then((): void => {
 			this.isClosing = true;
 		});
@@ -201,6 +217,7 @@ export class WorkerImpl implements Worker {
 			// TODO(afinch7) stop this from eating messages before onmessage has been assigned
 			if (this.onmessage) {
 				const event = { data };
+
 				this.onmessage(event);
 			}
 		}

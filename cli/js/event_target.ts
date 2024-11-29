@@ -27,13 +27,18 @@ export const eventTargetHasActivationBehavior: unique symbol = Symbol();
 
 export class EventTarget implements domTypes.EventTarget {
 	public [domTypes.eventTargetHost]: domTypes.EventTarget | null = null;
+
 	public [domTypes.eventTargetListeners]: {
 		[type in string]: domTypes.EventListener[];
 	} = {};
+
 	public [domTypes.eventTargetMode] = "";
+
 	public [domTypes.eventTargetNodeType]: domTypes.NodeType =
 		domTypes.NodeType.DOCUMENT_FRAGMENT_NODE;
+
 	private [eventTargetAssignedSlot] = false;
+
 	private [eventTargetHasActivationBehavior] = false;
 
 	public addEventListener(
@@ -75,6 +80,7 @@ export class EventTarget implements domTypes.EventTarget {
 
 		// eslint-disable-next-line @typescript-eslint/no-this-alias
 		const eventTarget = this;
+
 		listeners[type].push({
 			callback,
 			options: normalizedOptions,
@@ -283,13 +289,16 @@ const eventTargetHelpers = {
 
 			for (
 				let i = eventImpl.path.length - 1;
+
 				i >= 0 && clearTargetsTupleIndex === -1;
+
 				i--
 			) {
 				if (eventImpl.path[i].target !== null) {
 					clearTargetsTupleIndex = i;
 				}
 			}
+
 			const clearTargetsTuple = eventImpl.path[clearTargetsTupleIndex];
 
 			clearTargets =
@@ -339,13 +348,18 @@ const eventTargetHelpers = {
 		eventImpl.eventPhase = domTypes.EventPhase.NONE;
 
 		eventImpl.currentTarget = null;
+
 		eventImpl.path = [];
+
 		eventImpl.dispatched = false;
+
 		eventImpl.cancelBubble = false;
+
 		eventImpl.cancelBubbleImmediately = false;
 
 		if (clearTargets) {
 			eventImpl.target = null;
+
 			eventImpl.relatedTarget = null;
 		}
 
@@ -416,11 +430,15 @@ const eventTargetHelpers = {
 
 			if (typeof listener.options === "boolean") {
 				capture = listener.options;
+
 				once = false;
+
 				passive = false;
 			} else {
 				capture = listener.options.capture;
+
 				once = listener.options.once;
+
 				passive = listener.options.passive;
 			}
 

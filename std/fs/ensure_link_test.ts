@@ -49,6 +49,7 @@ test(async function ensureLinkIfItExist(): Promise<void> {
 	const linkFile = path.join(testDir, "link.txt");
 
 	await Deno.mkdir(testDir, true);
+
 	await Deno.writeFile(testFile, new Uint8Array());
 
 	await ensureLink(testFile, linkFile);
@@ -58,6 +59,7 @@ test(async function ensureLinkIfItExist(): Promise<void> {
 	const linkStat = await Deno.lstat(linkFile);
 
 	assertEquals(srcStat.isFile(), true);
+
 	assertEquals(linkStat.isFile(), true);
 
 	// har link success. try to change one of them. they should be change both.
@@ -74,6 +76,7 @@ test(async function ensureLinkIfItExist(): Promise<void> {
 	);
 
 	assertEquals(testFileContent1, "123");
+
 	assertEquals(testFileContent1, linkFileContent1);
 
 	// let's change link file.
@@ -88,6 +91,7 @@ test(async function ensureLinkIfItExist(): Promise<void> {
 	);
 
 	assertEquals(testFileContent2, "abc");
+
 	assertEquals(testFileContent2, linkFileContent2);
 
 	await Deno.remove(testDir, { recursive: true });
@@ -101,6 +105,7 @@ test(function ensureLinkSyncIfItExist(): void {
 	const linkFile = path.join(testDir, "link.txt");
 
 	Deno.mkdirSync(testDir, true);
+
 	Deno.writeFileSync(testFile, new Uint8Array());
 
 	ensureLinkSync(testFile, linkFile);
@@ -110,6 +115,7 @@ test(function ensureLinkSyncIfItExist(): void {
 	const linkStat = Deno.lstatSync(linkFile);
 
 	assertEquals(srcStat.isFile(), true);
+
 	assertEquals(linkStat.isFile(), true);
 
 	// har link success. try to change one of them. they should be change both.
@@ -126,6 +132,7 @@ test(function ensureLinkSyncIfItExist(): void {
 	);
 
 	assertEquals(testFileContent1, "123");
+
 	assertEquals(testFileContent1, linkFileContent1);
 
 	// let's change link file.
@@ -140,6 +147,7 @@ test(function ensureLinkSyncIfItExist(): void {
 	);
 
 	assertEquals(testFileContent2, "abc");
+
 	assertEquals(testFileContent2, linkFileContent2);
 
 	Deno.removeSync(testDir, { recursive: true });
@@ -153,6 +161,7 @@ test(async function ensureLinkDirectoryIfItExist(): Promise<void> {
 	const testFile = path.join(testDir, "test.txt");
 
 	await Deno.mkdir(testDir, true);
+
 	await Deno.writeFile(testFile, new Uint8Array());
 
 	await assertThrowsAsync(
@@ -175,6 +184,7 @@ test(function ensureLinkSyncDirectoryIfItExist(): void {
 	const testFile = path.join(testDir, "test.txt");
 
 	Deno.mkdirSync(testDir, true);
+
 	Deno.writeFileSync(testFile, new Uint8Array());
 
 	assertThrows(

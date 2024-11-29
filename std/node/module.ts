@@ -52,6 +52,7 @@ function stat(filename: string): StatResult {
 
 		if (result !== undefined) return result;
 	}
+
 	try {
 		const info = Deno.statSync(filename);
 
@@ -64,6 +65,7 @@ function stat(filename: string): StatResult {
 		if (e.kind === Deno.ErrorKind.PermissionDenied) {
 			throw new Error("CJS loader requires --allow-read.");
 		}
+
 		return -1;
 	}
 }
@@ -80,31 +82,50 @@ class Module {
 	id: string;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	exports: any;
+
 	parent?: Module;
+
 	filename: string;
+
 	loaded: boolean;
+
 	children: Module[];
+
 	paths: string[];
+
 	path: string;
 
 	constructor(id = "", parent?: Module) {
 		this.id = id;
+
 		this.exports = {};
+
 		this.parent = parent;
+
 		updateChildren(parent, this, false);
+
 		this.filename = null;
+
 		this.loaded = false;
+
 		this.children = [];
+
 		this.paths = [];
+
 		this.path = path.dirname(id);
 	}
+
 	static builtinModules: string[] = [];
+
 	static _extensions: {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		[key: string]: (module: Module, filename: string) => any;
 	} = Object.create(null);
+
 	static _cache: { [key: string]: Module } = Object.create(null);
+
 	static _pathCache = Object.create(null);
+
 	static globalPaths: string[] = [];
 	// Proxy related code removed.
 	static wrapper = [
@@ -119,6 +140,7 @@ class Module {
 		if (id === "") {
 			throw new Error(`id '${id}' must be a non-empty string`);
 		}
+
 		requireDepth++;
 
 		try {
@@ -131,12 +153,15 @@ class Module {
 	// Given a file name, pass it to the proper extension handler.
 	load(filename: string): void {
 		assert(!this.loaded);
+
 		this.filename = filename;
+
 		this.paths = Module._nodeModulePaths(path.dirname(filename));
 
 		const extension = findLongestRegisteredExtension(filename);
 		// Removed ESM code
 		Module._extensions[extension](this, filename);
+
 		this.loaded = true;
 		// Removed ESM code
 	}
@@ -161,6 +186,7 @@ class Module {
 		if (requireDepth === 0) {
 			statCache = new Map();
 		}
+
 		const result = compiledWrapper.call(
 			thisValue,
 			exports,
@@ -173,6 +199,7 @@ class Module {
 		if (requireDepth === 0) {
 			statCache = null;
 		}
+
 		return result;
 	}
 
@@ -244,6 +271,7 @@ class Module {
 
 					for (let i = 0; i < options.paths.length; i++) {
 						const path = options.paths[i];
+
 						fakeParent.paths = Module._nodeModulePaths(path);
 
 						const lookupPaths = Module._resolveLookupPaths(
@@ -275,6 +303,7 @@ class Module {
 			for (let cursor = parent; cursor; cursor = cursor.parent) {
 				requireStack.push(cursor.filename || cursor.id);
 			}
+
 			let message = `Cannot find module '${request}'`;
 
 			if (requireStack.length > 0) {
@@ -283,6 +312,7 @@ class Module {
 					"\nRequire stack:\n- " +
 					requireStack.join("\n- ");
 			}
+
 			const err = new Error(message);
 			// @ts-ignore
 			err.code = "MODULE_NOT_FOUND";
@@ -291,6 +321,7 @@ class Module {
 
 			throw err;
 		}
+
 		return filename as string;
 	}
 
@@ -352,6 +383,7 @@ class Module {
 					// Try it with each of the extensions
 					if (exts === undefined)
 						exts = Object.keys(Module._extensions);
+
 					filename = tryExtensions(basePath, exts, isMain);
 				}
 			}
@@ -360,6 +392,7 @@ class Module {
 				// Directory.
 				// try it with each of the extensions at "index"
 				if (exts === undefined) exts = Object.keys(Module._extensions);
+
 				filename = tryPackage(basePath, exts, isMain, request);
 			}
 
@@ -404,6 +437,7 @@ class Module {
 
 					return cachedModule.exports;
 				}
+
 				delete relativeResolveCache[relResolveCacheIdentifier];
 			}
 		}
@@ -432,6 +466,7 @@ class Module {
 		if (isMain) {
 			// TODO: set process info
 			// process.mainModule = module;
+
 			module.id = ".";
 		}
 
@@ -446,6 +481,7 @@ class Module {
 		try {
 			// Source map code removed
 			module.load(filename);
+
 			threw = false;
 		} finally {
 			if (threw) {
@@ -491,6 +527,7 @@ class Module {
 
 			for (
 				let i = from.length - 1, p = 0, last = from.length;
+
 				i >= 0;
 				--i
 			) {
@@ -507,7 +544,9 @@ class Module {
 				) {
 					if (p !== nmLen)
 						paths.push(from.slice(0, last) + "\\node_modules");
+
 					last = i;
+
 					p = 0;
 				} else if (p !== -1) {
 					if (nmChars[p] === code) {
@@ -534,6 +573,7 @@ class Module {
 
 			for (
 				let i = from.length - 1, p = 0, last = from.length;
+
 				i >= 0;
 				--i
 			) {
@@ -542,7 +582,9 @@ class Module {
 				if (code === CHAR_FORWARD_SLASH) {
 					if (p !== nmLen)
 						paths.push(from.slice(0, last) + "/node_modules");
+
 					last = i;
+
 					p = 0;
 				} else if (p !== -1) {
 					if (nmChars[p] === code) {
@@ -587,6 +629,7 @@ class Module {
 		} else {
 			filepath = filename;
 		}
+
 		return createRequireFromPath(filepath);
 	}
 
@@ -601,6 +644,7 @@ class Module {
 
 		if (homeDir) {
 			paths.unshift(path.resolve(homeDir, ".node_libraries"));
+
 			paths.unshift(path.resolve(homeDir, ".node_modules"));
 		}
 
@@ -636,6 +680,7 @@ class Module {
 				throw e;
 			}
 		}
+
 		for (let n = 0; n < requests.length; n++) {
 			parent.require(requests[n]);
 		}
@@ -647,7 +692,9 @@ const nativeModulePolyfill = new Map<string, Module>();
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function createNativeModule(id: string, exports: any): Module {
 	const mod = new Module(id);
+
 	mod.exports = exports;
+
 	mod.loaded = true;
 
 	return mod;
@@ -686,6 +733,7 @@ const packageJsonCache = new Map<string, PackageInfo | null>();
 
 interface PackageInfo {
 	name?: string;
+
 	main?: string;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	exports?: any;
@@ -725,11 +773,13 @@ function readPackage(requestPath: string): PackageInfo | null {
 			exports: parsed.exports,
 			type: parsed.type,
 		};
+
 		packageJsonCache.set(jsonPath, filtered);
 
 		return filtered;
 	} catch (e) {
 		e.path = jsonPath;
+
 		e.message = "Error parsing " + jsonPath + ": " + e.message;
 
 		throw e;
@@ -758,6 +808,7 @@ function readPackageScope(
 				data: pjson,
 			};
 	}
+
 	return false;
 }
 
@@ -812,6 +863,7 @@ function tryPackage(
 			throw err;
 		}
 	}
+
 	return actual;
 }
 
@@ -836,6 +888,7 @@ function toRealPath(requestPath: string): string {
 			break;
 		}
 	}
+
 	return path.resolve(requestPath);
 }
 
@@ -852,6 +905,7 @@ function tryExtensions(
 			return filename;
 		}
 	}
+
 	return false;
 }
 
@@ -874,6 +928,7 @@ function findLongestRegisteredExtension(filename: string): string {
 
 		if (Module._extensions[currentExtension]) return currentExtension;
 	}
+
 	return ".js";
 }
 
@@ -896,6 +951,7 @@ function isConditionalDotExportSugar(exports: any, _basePath: string): boolean {
 
 		if (firstCheck) {
 			firstCheck = false;
+
 			isConditional = curIsConditional;
 		} else if (isConditional !== curIsConditional) {
 			throw new Error(
@@ -906,6 +962,7 @@ function isConditionalDotExportSugar(exports: any, _basePath: string): boolean {
 			);
 		}
 	}
+
 	return isConditional;
 }
 
@@ -1075,6 +1132,7 @@ function resolveExportsTarget(
 			}
 		}
 	}
+
 	let e: Error;
 
 	if (mappingKey !== ".") {
@@ -1113,6 +1171,7 @@ const CircularRequirePrototypeWarningProxy = new Proxy(
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		get(target, prop): any {
 			if (prop in target) return target[prop];
+
 			emitCircularRequireWarning(prop);
 
 			return undefined;
@@ -1121,6 +1180,7 @@ const CircularRequirePrototypeWarningProxy = new Proxy(
 		getOwnPropertyDescriptor(target, prop): PropertyDescriptor | undefined {
 			if (target.hasOwnProperty(prop))
 				return Object.getOwnPropertyDescriptor(target, prop);
+
 			emitCircularRequireWarning(prop);
 
 			return undefined;
@@ -1172,6 +1232,7 @@ function wrapSafe(filename_: string, content: string): RequireWrapper {
 	if (err) {
 		throw err;
 	}
+
 	return f;
 	// ESM code removed.
 }
@@ -1185,7 +1246,9 @@ Module._extensions[".js"] = (module: Module, filename: string): void => {
 			throw new Error("Importing ESM module");
 		}
 	}
+
 	const content = new TextDecoder().decode(Deno.readFileSync(filename));
+
 	module._compile(content, filename);
 };
 
@@ -1212,6 +1275,7 @@ function createRequireFromPath(filename: string): RequireFunction {
 	const proxyPath = trailingSlash ? path.join(filename, "noop.js") : filename;
 
 	const m = new Module(proxyPath);
+
 	m.filename = proxyPath;
 
 	m.paths = Module._nodeModulePaths(m.path);
@@ -1232,6 +1296,7 @@ interface RequireFunction extends Require {
 	resolve: RequireResolveFunction;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	extensions: { [key: string]: (module: Module, filename: string) => any };
+
 	cache: { [key: string]: Module };
 }
 
@@ -1272,6 +1337,7 @@ function stripBOM(content: string): string {
 	if (content.charCodeAt(0) === 0xfeff) {
 		content = content.slice(1);
 	}
+
 	return content;
 }
 
@@ -1301,7 +1367,9 @@ function getPathFromURLWin32(url: URL): string {
 			}
 		}
 	}
+
 	pathname = pathname.replace(forwardSlashRegEx, "\\");
+
 	pathname = decodeURIComponent(pathname);
 	// TODO: handle windows hostname case (needs bindings)
 	const letter = pathname.codePointAt(1) | 0x20;
@@ -1315,6 +1383,7 @@ function getPathFromURLWin32(url: URL): string {
 	) {
 		throw new Error("Invalid file URL path: must be absolute");
 	}
+
 	return pathname.slice(1);
 }
 
@@ -1322,6 +1391,7 @@ function getPathFromURLPosix(url: URL): string {
 	if (url.hostname !== "") {
 		throw new Error("Invalid file URL host");
 	}
+
 	const pathname = url.pathname;
 
 	for (let n = 0; n < pathname.length; n++) {
@@ -1335,6 +1405,7 @@ function getPathFromURLPosix(url: URL): string {
 			}
 		}
 	}
+
 	return decodeURIComponent(pathname);
 }
 
@@ -1342,9 +1413,11 @@ function fileURLToPath(path: string | URL): string {
 	if (typeof path === "string") {
 		path = new URL(path);
 	}
+
 	if (path.protocol !== "file:") {
 		throw new Error("Protocol has to be file://");
 	}
+
 	return isWindows ? getPathFromURLWin32(path) : getPathFromURLPosix(path);
 }
 
@@ -1384,6 +1457,7 @@ function pathToFileURL(filepath: string): URL {
 		resolved = resolved.replace(carriageReturnRegEx, "%0D");
 
 	if (resolved.includes("\t")) resolved = resolved.replace(tabRegEx, "%09");
+
 	outURL.pathname = resolved;
 
 	return outURL;

@@ -18,9 +18,13 @@ test(function padTest(): void {
 	const expected7 = "den...";
 
 	const expected8 = "...rex";
+
 	assertEquals(pad("deno", 6, { char: "*", side: "left" }), expected1);
+
 	assertEquals(pad("deno", 4, { char: "*", side: "left" }), expected2);
+
 	assertEquals(pad("deno", 6, { char: "*", side: "right" }), expected3);
+
 	assertEquals(
 		pad("denosorusrex", 4, {
 			char: "*",
@@ -29,6 +33,7 @@ test(function padTest(): void {
 		}),
 		expected4,
 	);
+
 	assertEquals(
 		pad("denosorusrex", 9, {
 			char: "*",
@@ -38,6 +43,7 @@ test(function padTest(): void {
 		}),
 		expected5,
 	);
+
 	assertEquals(
 		pad("denosorusrex", 8, {
 			char: "*",
@@ -47,6 +53,7 @@ test(function padTest(): void {
 		}),
 		expected6,
 	);
+
 	assertEquals(
 		pad("denosorusrex", 6, {
 			char: "*",
@@ -57,6 +64,7 @@ test(function padTest(): void {
 		}),
 		expected7,
 	);
+
 	assertEquals(
 		pad("denosorusrex", 6, {
 			char: "*",
@@ -67,6 +75,7 @@ test(function padTest(): void {
 		}),
 		expected8,
 	);
+
 	assertEquals(
 		pad("deno", 4, {
 			char: "*",

@@ -9,6 +9,7 @@ foo:
   baz: 1
   qux: ~
 `);
+
 console.log(result);
 
 const expected = '{ test: "toto", foo: { bar: true, baz: 1, qux: null } }';

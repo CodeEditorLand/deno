@@ -20,6 +20,7 @@ type ReadableStreamReader = domTypes.ReadableStreamReader;
 
 interface ReadableStreamController {
 	enqueue(chunk: string | ArrayBuffer): void;
+
 	close(): void;
 }
 
@@ -55,6 +56,7 @@ function validateBodyType(owner: Body, bodySource: BodySource): boolean {
 	} else if (!bodySource) {
 		return true; // null body is fine
 	}
+
 	throw new Error(
 		`Bad ${owner.constructor.name} body type: ${bodySource.constructor.name}`,
 	);
@@ -66,14 +68,17 @@ function concatenate(...arrays: Uint8Array[]): ArrayBuffer {
 	for (const arr of arrays) {
 		totalLength += arr.length;
 	}
+
 	const result = new Uint8Array(totalLength);
 
 	let offset = 0;
 
 	for (const arr of arrays) {
 		result.set(arr, offset);
+
 		offset += arr.length;
 	}
+
 	return result.buffer as ArrayBuffer;
 }
 
@@ -139,8 +144,11 @@ export class Body implements domTypes.Body {
 		readonly contentType: string,
 	) {
 		validateBodyType(this, _bodySource);
+
 		this._bodySource = _bodySource;
+
 		this.contentType = contentType;
+
 		this._stream = null;
 	}
 
@@ -153,15 +161,19 @@ export class Body implements domTypes.Body {
 			// @ts-ignore
 			this._stream = this._bodySource;
 		}
+
 		if (typeof this._bodySource === "string") {
 			const bodySource = this._bodySource;
+
 			this._stream = new ReadableStream({
 				start(controller: ReadableStreamController): void {
 					controller.enqueue(bodySource);
+
 					controller.close();
 				},
 			});
 		}
+
 		return this._stream;
 	}
 
@@ -169,6 +181,7 @@ export class Body implements domTypes.Body {
 		if (this.body && this.body.locked) {
 			return true;
 		}
+
 		return false;
 	}
 
@@ -218,6 +231,7 @@ export class Body implements domTypes.Body {
 				if (firstBoundaryIndex < 0) {
 					throw new TypeError("Invalid boundary");
 				}
+
 				const bodyPreambleTrimmed = bodyEpilogueTrimmed
 					.slice(firstBoundaryIndex + dashBoundary.length)
 					.replace(/^[\s\r\n\t]+/, ""); // remove transport-padding CRLF
@@ -231,6 +245,7 @@ export class Body implements domTypes.Body {
 				// but should be fine in our case since without headers
 				// we should just discard the part
 			}
+
 			for (const bodyPart of bodyParts) {
 				const headers = new Headers();
 
@@ -239,6 +254,7 @@ export class Body implements domTypes.Body {
 				if (headerOctetSeperatorIndex < 0) {
 					continue; // Skip unknown part
 				}
+
 				const headerText = bodyPart.slice(0, headerOctetSeperatorIndex);
 
 				const octets = bodyPart.slice(headerOctetSeperatorIndex + 4);
@@ -252,11 +268,14 @@ export class Body implements domTypes.Body {
 					if (sepIndex < 0) {
 						continue; // Skip this header
 					}
+
 					const key = rawHeader.slice(0, sepIndex);
 
 					const value = rawHeader.slice(sepIndex + 1);
+
 					headers.set(key, value);
 				}
+
 				if (!headers.has("content-disposition")) {
 					continue; // Skip unknown part
 				}
@@ -272,12 +291,14 @@ export class Body implements domTypes.Body {
 				if (!hasHeaderValueOf(contentDisposition, "form-data")) {
 					continue; // Skip, might not be form-data
 				}
+
 				const dispositionParams =
 					getHeaderValueParams(contentDisposition);
 
 				if (!dispositionParams.has("name")) {
 					continue; // Skip, unknown name
 				}
+
 				const dispositionName = dispositionParams.get("name")!;
 
 				if (dispositionParams.has("filename")) {
@@ -296,6 +317,7 @@ export class Body implements domTypes.Body {
 					formData.append(dispositionName, octets);
 				}
 			}
+
 			return formData;
 		} else if (
 			hasHeaderValueOf(
@@ -327,6 +349,7 @@ export class Body implements domTypes.Body {
 			} catch (e) {
 				throw new TypeError("Invalid form urlencoded format");
 			}
+
 			return formData;
 		} else {
 			throw new TypeError("Invalid form data");
@@ -382,6 +405,7 @@ export class Body implements domTypes.Body {
 		} else if (!this._bodySource) {
 			return new ArrayBuffer(0);
 		}
+
 		throw new Error(
 			`Body type not yet implemented: ${this._bodySource.constructor.name}`,
 		);

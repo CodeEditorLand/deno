@@ -27,5 +27,6 @@ test(async function catSmoke(): Promise<void> {
 	});
 
 	const s = await p.status();
+
 	assertEquals(s.code, 0);
 });

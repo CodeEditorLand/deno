@@ -9,6 +9,7 @@
  */
 export function writeFileStrSync(filename: string, content: string): void {
 	const encoder = new TextEncoder();
+
 	Deno.writeFileSync(filename, encoder.encode(content));
 }
 
@@ -24,5 +25,6 @@ export async function writeFileStr(
 	content: string,
 ): Promise<void> {
 	const encoder = new TextEncoder();
+
 	await Deno.writeFile(filename, encoder.encode(content));
 }

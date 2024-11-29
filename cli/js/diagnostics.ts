@@ -16,8 +16,11 @@ export enum DiagnosticCategory {
 
 export interface DiagnosticMessageChain {
 	message: string;
+
 	category: DiagnosticCategory;
+
 	code: number;
+
 	next?: DiagnosticMessageChain[];
 }
 
@@ -67,9 +70,13 @@ export interface Diagnostic {
 
 interface SourceInformation {
 	sourceLine: string;
+
 	lineNumber: number;
+
 	scriptResourceName: string;
+
 	startColumn: number;
+
 	endColumn: number;
 }
 
@@ -189,6 +196,7 @@ function parseDiagnostic(
 		message = messageText;
 	} else {
 		message = messageText.messageText;
+
 		messageChain = fromDiagnosticMessageChain([messageText])![0];
 	}
 
@@ -214,6 +222,7 @@ function parseRelatedInformation(
 	for (const item of relatedInformation) {
 		result.push(parseDiagnostic(item));
 	}
+
 	return result;
 }
 
@@ -231,7 +240,9 @@ export function fromTypeScriptDiagnostic(
 				sourceDiagnostic.relatedInformation,
 			);
 		}
+
 		items.push(item);
 	}
+
 	return { items };
 }

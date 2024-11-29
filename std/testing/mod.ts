@@ -15,6 +15,7 @@ export type TestFunction = () => void | Promise<void>;
 
 export interface TestDefinition {
 	fn: TestFunction;
+
 	name: string;
 }
 
@@ -67,6 +68,7 @@ function print(txt: string, newline = true): void {
 	if (newline) {
 		txt += "\n";
 	}
+
 	Deno.stdout.writeSync(encoder.encode(`${txt}`));
 }
 
@@ -125,15 +127,18 @@ export function test(
 		if (!fn) {
 			throw new Error("Missing test function");
 		}
+
 		name = t;
 	} else {
 		fn = typeof t === "function" ? t : t.fn;
+
 		name = t.name;
 	}
 
 	if (!name) {
 		throw new Error("Test function may not be anonymous");
 	}
+
 	if (filter(name)) {
 		candidates.push({ fn, name });
 	} else {
@@ -149,17 +154,25 @@ const RED_BG_FAIL = bgRed(" FAIL ");
 
 interface TestStats {
 	filtered: number;
+
 	ignored: number;
+
 	measured: number;
+
 	passed: number;
+
 	failed: number;
 }
 
 interface TestResult {
 	timeElapsed?: number;
+
 	name: string;
+
 	error?: Error;
+
 	ok: boolean;
+
 	printed: boolean;
 }
 
@@ -177,6 +190,7 @@ function createTestResults(tests: TestDefinition[]): TestResults {
 			i: number,
 		): TestResults => {
 			acc.keys.set(name, i);
+
 			acc.cases.set(i, {
 				name,
 				printed: false,
@@ -217,6 +231,7 @@ function report(result: TestResult): void {
 	} else {
 		print(`test ${result.name} ... unresolved`);
 	}
+
 	result.printed = true;
 }
 
@@ -224,6 +239,7 @@ function printFailedSummary(results: TestResults): void {
 	results.cases.forEach((v): void => {
 		if (!v.ok) {
 			console.error(`${RED_BG_FAIL} ${red(v.name)}`);
+
 			console.error(v.error);
 		}
 	});
@@ -263,6 +279,7 @@ function previousPrinted(name: string, results: TestResults): boolean {
 	if (curIndex === 0) {
 		return true;
 	}
+
 	return results.cases.get(curIndex - 1)!.printed;
 }
 
@@ -276,20 +293,26 @@ async function createTestCase(
 
 	try {
 		const start = performance.now();
+
 		await fn();
 
 		const end = performance.now();
+
 		stats.passed++;
+
 		result.ok = true;
+
 		result.timeElapsed = end - start;
 	} catch (err) {
 		stats.failed++;
+
 		result.error = err;
 
 		if (exitOnFail) {
 			throw err;
 		}
 	}
+
 	if (previousPrinted(name, results)) {
 		report(result);
 	}
@@ -330,8 +353,10 @@ async function runTestsSerial(
 		if (disableLog) {
 			print(`${yellow("RUNNING")} ${name}`, false);
 		}
+
 		try {
 			const start = performance.now();
+
 			await fn();
 
 			const end = performance.now();
@@ -340,7 +365,9 @@ async function runTestsSerial(
 				// Rewriting the current prompt line to erase `running ....`
 				print(CLEAR_LINE, false);
 			}
+
 			stats.passed++;
+
 			print(
 				GREEN_OK +
 					"     " +
@@ -348,9 +375,11 @@ async function runTestsSerial(
 					" " +
 					promptTestTime(end - start, true),
 			);
+
 			results.cases.forEach((v): void => {
 				if (v.name === name) {
 					v.ok = true;
+
 					v.printed = true;
 				}
 			});
@@ -358,13 +387,19 @@ async function runTestsSerial(
 			if (disableLog) {
 				print(CLEAR_LINE, false);
 			}
+
 			print(`${RED_FAILED} ${name}`);
+
 			print(err.stack);
+
 			stats.failed++;
+
 			results.cases.forEach((v): void => {
 				if (v.name === name) {
 					v.error = err;
+
 					v.ok = false;
+
 					v.printed = true;
 				}
 			});
@@ -379,9 +414,13 @@ async function runTestsSerial(
 /** Defines options for controlling execution details of a test suite. */
 export interface RunTestsOptions {
 	parallel?: boolean;
+
 	exitOnFail?: boolean;
+
 	only?: RegExp;
+
 	skip?: RegExp;
+
 	disableLog?: boolean;
 }
 
@@ -411,6 +450,7 @@ export async function runTests({
 	};
 
 	const results: TestResults = createTestResults(tests);
+
 	print(`running ${tests.length} tests`);
 
 	const start = performance.now();
@@ -418,19 +458,23 @@ export async function runTests({
 	if (Deno.args.includes("--quiet")) {
 		disableLog = true;
 	}
+
 	if (disableLog) {
 		disableConsole();
 	}
+
 	if (parallel) {
 		await runTestsParallel(stats, results, tests, exitOnFail);
 	} else {
 		await runTestsSerial(stats, results, tests, exitOnFail, disableLog);
 	}
+
 	const end = performance.now();
 
 	if (disableLog) {
 		enableConsole();
 	}
+
 	printResults(stats, results, parallel, exitOnFail, end - start);
 
 	if (stats.failed) {
@@ -438,7 +482,9 @@ export async function runTests({
 		// promise rejections being swallowed.
 		setTimeout((): void => {
 			console.error(`There were ${stats.failed} test failures.`);
+
 			printFailedSummary(results);
+
 			Deno.exit(1);
 		}, 0);
 	}

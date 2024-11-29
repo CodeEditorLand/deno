@@ -36,9 +36,12 @@ export interface GlobrexOptions {
 
 export interface GlobrexResult {
 	regex: RegExp;
+
 	path?: {
 		regex: RegExp;
+
 		segments: RegExp[];
+
 		globstar?: RegExp;
 	};
 }
@@ -83,7 +86,9 @@ export function globrex(
 
 	interface AddOptions {
 		split?: boolean;
+
 		last?: boolean;
+
 		only?: string;
 	}
 
@@ -105,8 +110,10 @@ export function globrex(
 				if (segment !== "") {
 					// change it 'includes'
 					if (!flags.includes("g")) segment = `^${segment}$`;
+
 					pathSegments.push(new RegExp(segment, flags));
 				}
+
 				segment = "";
 			} else {
 				segment += str;
@@ -118,6 +125,7 @@ export function globrex(
 
 	for (let i = 0; i < glob.length; i++) {
 		c = glob[i];
+
 		n = glob[i + 1];
 
 		if (["\\", "$", "^", ".", "="].includes(c)) {
@@ -140,6 +148,7 @@ export function globrex(
 
 				continue;
 			}
+
 			add(`\\${c}`);
 
 			continue;
@@ -158,8 +167,10 @@ export function globrex(
 				} else {
 					add(type as string);
 				}
+
 				continue;
 			}
+
 			add(`\\${c}`);
 
 			continue;
@@ -171,6 +182,7 @@ export function globrex(
 
 				continue;
 			}
+
 			add(`\\${c}`);
 
 			continue;
@@ -182,6 +194,7 @@ export function globrex(
 
 				continue;
 			}
+
 			add(`\\${c}`);
 
 			continue;
@@ -202,17 +215,22 @@ export function globrex(
 
 					continue;
 				}
+
 				if (n === "(") {
 					ext.push(c);
+
 					add("(?!");
+
 					i++;
 
 					continue;
 				}
+
 				add(`\\${c}`);
 
 				continue;
 			}
+
 			add(`\\${c}`);
 
 			continue;
@@ -225,8 +243,10 @@ export function globrex(
 				} else {
 					add(".");
 				}
+
 				continue;
 			}
+
 			add(`\\${c}`);
 
 			continue;
@@ -240,17 +260,23 @@ export function globrex(
 				while (glob[++i] !== ":") value += glob[i];
 
 				if (value === "alnum") add("(\\w|\\d)");
+
 				else if (value === "space") add("\\s");
+
 				else if (value === "digit") add("\\d");
+
 				i++; // skip last ]
 				continue;
 			}
+
 			if (extended) {
 				inRange = true;
+
 				add(c);
 
 				continue;
 			}
+
 			add(`\\${c}`);
 
 			continue;
@@ -259,10 +285,12 @@ export function globrex(
 		if (c === "]") {
 			if (extended) {
 				inRange = false;
+
 				add(c);
 
 				continue;
 			}
+
 			add(`\\${c}`);
 
 			continue;
@@ -271,10 +299,12 @@ export function globrex(
 		if (c === "{") {
 			if (extended) {
 				inGroup = true;
+
 				add("(");
 
 				continue;
 			}
+
 			add(`\\${c}`);
 
 			continue;
@@ -283,10 +313,12 @@ export function globrex(
 		if (c === "}") {
 			if (extended) {
 				inGroup = false;
+
 				add(")");
 
 				continue;
 			}
+
 			add(`\\${c}`);
 
 			continue;
@@ -298,6 +330,7 @@ export function globrex(
 
 				continue;
 			}
+
 			add(`\\${c}`);
 
 			continue;
@@ -317,8 +350,10 @@ export function globrex(
 
 			while (glob[i + 1] === "*") {
 				starCount++;
+
 				i++;
 			}
+
 			const nextChar = glob[i + 1];
 
 			if (!globstar) {
@@ -336,18 +371,22 @@ export function globrex(
 				if (isGlobstar) {
 					// it's a globstar, so match zero or more path segments
 					add(GLOBSTAR, { only: "regex" });
+
 					add(GLOBSTAR_SEGMENT, {
 						only: "path",
 						last: true,
 						split: true,
 					});
+
 					i++; // move over the "/"
 				} else {
 					// it's not a globstar, so only match one path segment
 					add(WILDCARD, { only: "regex" });
+
 					add(WILDCARD_SEGMENT, { only: "path" });
 				}
 			}
+
 			continue;
 		}
 
@@ -358,6 +397,7 @@ export function globrex(
 	// constrain the regular expression with ^ & $
 	if (!flags.includes("g")) {
 		regex = `^${regex}$`;
+
 		segment = `^${segment}$`;
 
 		if (filepath) pathRegexStr = `^${pathRegexStr}$`;
@@ -368,6 +408,7 @@ export function globrex(
 	// Push the last segment
 	if (filepath) {
 		pathSegments.push(new RegExp(segment, flags));
+
 		result.path = {
 			regex: new RegExp(pathRegexStr, flags),
 			segments: pathSegments,

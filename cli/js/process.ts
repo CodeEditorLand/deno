@@ -24,16 +24,23 @@ export type ProcessStdio = "inherit" | "piped" | "null";
 // See https://code.visualstudio.com/docs/editor/tasks-appendix#_schema-for-tasksjson
 export interface RunOptions {
 	args: string[];
+
 	cwd?: string;
+
 	env?: { [key: string]: string };
+
 	stdout?: ProcessStdio | number;
+
 	stderr?: ProcessStdio | number;
+
 	stdin?: ProcessStdio | number;
 }
 
 interface RunStatusResponse {
 	gotSignal: boolean;
+
 	exitCode: number;
+
 	exitSignal: number;
 }
 
@@ -64,14 +71,19 @@ export function kill(pid: number, signo: number): void {
 
 export class Process {
 	readonly rid: number;
+
 	readonly pid: number;
+
 	readonly stdin?: WriteCloser;
+
 	readonly stdout?: ReadCloser;
+
 	readonly stderr?: ReadCloser;
 
 	// @internal
 	constructor(res: RunResponse) {
 		this.rid = res.rid;
+
 		this.pid = res.pid;
 
 		if (res.stdinRid && res.stdinRid > 0) {
@@ -99,6 +111,7 @@ export class Process {
 		if (!this.stdout) {
 			throw new Error("Process.output: stdout is undefined");
 		}
+
 		try {
 			return await readAll(this.stdout);
 		} finally {
@@ -114,6 +127,7 @@ export class Process {
 		if (!this.stderr) {
 			throw new Error("Process.stderrOutput: stderr is undefined");
 		}
+
 		try {
 			return await readAll(this.stderr);
 		} finally {
@@ -132,7 +146,9 @@ export class Process {
 
 export interface ProcessStatus {
 	success: boolean;
+
 	code?: number;
+
 	signal?: number; // TODO: Make this a string, e.g. 'SIGTERM'.
 }
 
@@ -155,9 +171,13 @@ function isRid(arg: unknown): arg is number {
 
 interface RunResponse {
 	rid: number;
+
 	pid: number;
+
 	stdinRid: number | null;
+
 	stdoutRid: number | null;
+
 	stderrRid: number | null;
 }
 /**

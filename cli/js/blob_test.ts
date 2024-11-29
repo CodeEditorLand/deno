@@ -7,6 +7,7 @@ test(function blobString(): void {
 	const str = "Test";
 
 	const b2 = new Blob([b1, str]);
+
 	assertEquals(b2.size, b1.size + str.length);
 });
 
@@ -18,9 +19,11 @@ test(function blobBuffer(): void {
 	const f1 = new Float32Array(buffer);
 
 	const b1 = new Blob([buffer, u8]);
+
 	assertEquals(b1.size, 2 * u8.length);
 
 	const b2 = new Blob([b1, f1]);
+
 	assertEquals(b2.size, 3 * u8.length);
 });
 
@@ -28,17 +31,23 @@ test(function blobSlice(): void {
 	const blob = new Blob(["Deno", "Foo"]);
 
 	const b1 = blob.slice(0, 3, "Text/HTML");
+
 	assert(b1 instanceof Blob);
+
 	assertEquals(b1.size, 3);
+
 	assertEquals(b1.type, "text/html");
 
 	const b2 = blob.slice(-1, 3);
+
 	assertEquals(b2.size, 0);
 
 	const b3 = blob.slice(100, 3);
+
 	assertEquals(b3.size, 0);
 
 	const b4 = blob.slice(0, 10);
+
 	assertEquals(b4.size, blob.size);
 });
 
@@ -52,7 +61,9 @@ test(function blobShouldNotThrowError(): void {
 		};
 
 		const options2: object = Object.create(null);
+
 		new Blob(["Hello World"], options1);
+
 		new Blob(["Hello World"], options2);
 	} catch {
 		hasThrown = true;

@@ -18,6 +18,7 @@ export function symlinkSync(
 	if (build.os === "win" && type) {
 		return util.notImplemented();
 	}
+
 	sendSync(dispatch.OP_SYMLINK, { oldname, newname });
 }
 
@@ -35,5 +36,6 @@ export async function symlink(
 	if (build.os === "win" && type) {
 		return util.notImplemented();
 	}
+
 	await sendAsync(dispatch.OP_SYMLINK, { oldname, newname });
 }

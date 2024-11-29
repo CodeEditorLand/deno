@@ -85,6 +85,7 @@ export class SDReadableStream<OutputType>
 					"bytes streams cannot have a strategy with a `size` field",
 				);
 			}
+
 			const highWaterMark = shared.validateAndNormalizeHighWaterMark(
 				stratHWM === undefined ? 0 : stratHWM,
 			);
@@ -117,9 +118,11 @@ export class SDReadableStream<OutputType>
 		if (!rs.isReadableStream(this)) {
 			throw new TypeError();
 		}
+
 		if (options === undefined) {
 			options = {};
 		}
+
 		const { mode } = options;
 
 		if (mode === undefined) {
@@ -129,6 +132,7 @@ export class SDReadableStream<OutputType>
 				this as unknown as rs.SDReadableStream<ArrayBufferView>,
 			);
 		}
+
 		throw RangeError("mode option must be undefined or `byob`");
 	}
 
@@ -136,11 +140,13 @@ export class SDReadableStream<OutputType>
 		if (!rs.isReadableStream(this)) {
 			return Promise.reject(new TypeError());
 		}
+
 		if (rs.isReadableStreamLocked(this)) {
 			return Promise.reject(
 				new TypeError("Cannot cancel a locked stream"),
 			);
 		}
+
 		return rs.readableStreamCancel(this, reason);
 	}
 
@@ -158,23 +164,29 @@ export class SDReadableStream<OutputType>
     if (!rs.isReadableStream(this)) {
       throw new TypeError();
     }
+
     if (!ws.isWritableStream(writable)) {
       throw new TypeError("writable must be a WritableStream");
     }
+
     if (!rs.isReadableStream(readable)) {
       throw new TypeError("readable must be a ReadableStream");
     }
+
     if (options.signal !== undefined && !shared.isAbortSignal(options.signal)) {
       throw new TypeError("options.signal must be an AbortSignal instance");
     }
+
     if (rs.isReadableStreamLocked(this)) {
       throw new TypeError("Cannot pipeThrough on a locked stream");
     }
+
     if (ws.isWritableStreamLocked(writable)) {
       throw new TypeError("Cannot pipeThrough to a locked stream");
     }
 
     const pipeResult = pipeTo(this, writable, options);
+
     pipeResult.catch(() => {});
 
     return readable;
@@ -187,19 +199,23 @@ export class SDReadableStream<OutputType>
     if (!rs.isReadableStream(this)) {
       return Promise.reject(new TypeError());
     }
+
     if (!ws.isWritableStream(dest)) {
       return Promise.reject(
         new TypeError("destination must be a WritableStream")
       );
     }
+
     if (options.signal !== undefined && !shared.isAbortSignal(options.signal)) {
       return Promise.reject(
         new TypeError("options.signal must be an AbortSignal instance")
       );
     }
+
     if (rs.isReadableStreamLocked(this)) {
       return Promise.reject(new TypeError("Cannot pipe from a locked stream"));
     }
+
     if (ws.isWritableStreamLocked(dest)) {
       return Promise.reject(new TypeError("Cannot pipe to a locked stream"));
     }
@@ -219,6 +235,7 @@ export function createReadableStream<OutputType>(
 	if (highWaterMark === undefined) {
 		highWaterMark = 1;
 	}
+
 	if (sizeAlgorithm === undefined) {
 		sizeAlgorithm = (): number => 1;
 	}
@@ -227,11 +244,13 @@ export function createReadableStream<OutputType>(
 	const stream = Object.create(
 		SDReadableStream.prototype,
 	) as SDReadableStream<OutputType>;
+
 	rs.initializeReadableStream(stream);
 
 	const controller = Object.create(
 		ReadableStreamDefaultController.prototype,
 	) as ReadableStreamDefaultController<OutputType>;
+
 	rs.setUpReadableStreamDefaultController(
 		stream,
 		controller,
@@ -270,11 +289,13 @@ export function createReadableByteStream<OutputType>(
 	const stream = Object.create(
 		SDReadableStream.prototype,
 	) as SDReadableStream<OutputType>;
+
 	rs.initializeReadableStream(stream);
 
 	const controller = Object.create(
 		ReadableByteStreamController.prototype,
 	) as ReadableByteStreamController;
+
 	rs.setUpReadableByteStreamController(
 		stream as unknown as SDReadableStream<ArrayBufferView>,
 		controller,
@@ -330,6 +351,7 @@ export function readableStreamTee<OutputType>(
 							] as ReadableStreamDefaultController<OutputType>,
 						);
 					}
+
 					if (!canceled2) {
 						rs.readableStreamDefaultControllerClose(
 							branch2![
@@ -337,11 +359,14 @@ export function readableStreamTee<OutputType>(
 							] as ReadableStreamDefaultController<OutputType>,
 						);
 					}
+
 					closedOrErrored = true;
 				}
+
 				if (closedOrErrored) {
 					return;
 				}
+
 				const value1 = value;
 
 				let value2 = value;
@@ -354,10 +379,12 @@ export function readableStreamTee<OutputType>(
 						value1!,
 					);
 				}
+
 				if (!canceled2) {
 					if (cloneForBranch2) {
 						value2 = shared.cloneValue(value2);
 					}
+
 					rs.readableStreamDefaultControllerEnqueue(
 						branch2![
 							rs.readableStreamController_
@@ -370,6 +397,7 @@ export function readableStreamTee<OutputType>(
 
 	const cancel1Algorithm = (reason: shared.ErrorResult): Promise<void> => {
 		canceled1 = true;
+
 		reason1 = reason;
 
 		if (canceled2) {
@@ -377,13 +405,16 @@ export function readableStreamTee<OutputType>(
 				reason1,
 				reason2,
 			]);
+
 			cancelResolve(cancelResult);
 		}
+
 		return cancelPromise;
 	};
 
 	const cancel2Algorithm = (reason: shared.ErrorResult): Promise<void> => {
 		canceled2 = true;
+
 		reason2 = reason;
 
 		if (canceled1) {
@@ -391,17 +422,21 @@ export function readableStreamTee<OutputType>(
 				reason1,
 				reason2,
 			]);
+
 			cancelResolve(cancelResult);
 		}
+
 		return cancelPromise;
 	};
 
 	const startAlgorithm = (): undefined => undefined;
+
 	branch1 = createReadableStream(
 		startAlgorithm,
 		pullAlgorithm,
 		cancel1Algorithm,
 	);
+
 	branch2 = createReadableStream(
 		startAlgorithm,
 		pullAlgorithm,
@@ -416,12 +451,14 @@ export function readableStreamTee<OutputType>(
 				] as ReadableStreamDefaultController<OutputType>,
 				error,
 			);
+
 			rs.readableStreamDefaultControllerError(
 				branch2![
 					rs.readableStreamController_
 				] as ReadableStreamDefaultController<OutputType>,
 				error,
 			);
+
 			closedOrErrored = true;
 		}
 	});

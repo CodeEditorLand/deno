@@ -45,6 +45,7 @@ test(function resolve() {
 		const _p = p[0] as string[];
 
 		const actual = path.posix.resolve.apply(null, _p);
+
 		assertEquals(actual, p[1]);
 	});
 });
@@ -54,6 +55,7 @@ test(function resolveWin32() {
 		const _p = p[0] as string[];
 
 		const actual = path.win32.resolve.apply(null, _p);
+
 		assertEquals(actual, p[1]);
 	});
 });

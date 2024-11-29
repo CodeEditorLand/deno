@@ -24,7 +24,10 @@ test(function deepAssignTest(): void {
 		deno: { bar: { deno: ["is", "not", "node"] } },
 		reg: RegExp(/DENOWOWO/),
 	};
+
 	assert(date !== expected.foo.deno);
+
 	assert(reg !== expected.reg);
+
 	assertEquals(actual, expected);
 });

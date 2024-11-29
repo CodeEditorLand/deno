@@ -133,6 +133,7 @@ function getMethodCall(callSite: CallSite): string {
 				result += `${typeName}.`;
 			}
 		}
+
 		result += functionName;
 
 		if (methodName) {
@@ -144,6 +145,7 @@ function getMethodCall(callSite: CallSite): string {
 		if (typeName) {
 			result += `${typeName}.`;
 		}
+
 		if (methodName) {
 			result += methodName;
 		} else {
@@ -169,7 +171,9 @@ function getFileLocation(callSite: CallSite): string {
 
 	if (!fileName && callSite.isEval()) {
 		const evalOrigin = callSite.getEvalOrigin();
+
 		assert(evalOrigin != null);
+
 		result += `${evalOrigin}, `;
 	}
 
@@ -216,11 +220,13 @@ function callSiteToString(callSite: CallSite): string {
 	if (isAsync) {
 		result += "async ";
 	}
+
 	if (isPromiseAll) {
 		result += `Promise.all (index ${callSite.getPromiseIndex})`;
 
 		return result;
 	}
+
 	if (isMethodCall) {
 		result += getMethodCall(callSite);
 	} else if (isConstructor) {
@@ -271,6 +277,7 @@ function prepareStackTrace(
 						}),
 					);
 				}
+
 				return callSite;
 			})
 			.map((callSite): string => `    at ${callSiteToString(callSite)}`)

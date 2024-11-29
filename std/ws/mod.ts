@@ -29,6 +29,7 @@ export type WebSocketEvent =
 
 export interface WebSocketCloseEvent {
 	code: number;
+
 	reason?: string;
 }
 
@@ -61,11 +62,15 @@ export function append(a: Uint8Array, b: Uint8Array): Uint8Array {
 	if (a == null || !a.length) {
 		return b;
 	}
+
 	if (b == null || !b.length) {
 		return a;
 	}
+
 	const output = new Uint8Array(a.length + b.length);
+
 	output.set(a, 0);
+
 	output.set(b, a.length);
 
 	return output;
@@ -75,13 +80,17 @@ export class SocketClosedError extends Error {}
 
 export interface WebSocketFrame {
 	isLastFrame: boolean;
+
 	opcode: OpCode;
+
 	mask?: Uint8Array;
+
 	payload: Uint8Array;
 }
 
 export interface WebSocket {
 	readonly conn: Conn;
+
 	readonly isClosed: boolean;
 
 	receive(): AsyncIterableIterator<WebSocketEvent>;
@@ -119,6 +128,7 @@ export async function writeFrame(
 				frame.mask.byteLength,
 		);
 	}
+
 	if (payloadLength < 126) {
 		header = new Uint8Array([0x80 | frame.opcode, hasMask | payloadLength]);
 	} else if (payloadLength < 0xffff) {
@@ -135,14 +145,19 @@ export async function writeFrame(
 			...sliceLongToBytes(payloadLength),
 		]);
 	}
+
 	if (frame.mask) {
 		header = append(header, frame.mask);
 	}
+
 	unmask(frame.payload, frame.mask);
+
 	header = append(header, frame.payload);
 
 	const w = BufWriter.create(writer);
+
 	await w.write(header);
+
 	await w.flush();
 }
 
@@ -168,6 +183,7 @@ export async function readFrame(buf: BufReader): Promise<WebSocketFrame> {
 		default:
 			throw new Error("invalid signature");
 	}
+
 	const opcode = b & 0x0f;
 	// has_mask & payload
 	b = await buf.readByte();
@@ -182,11 +198,13 @@ export async function readFrame(buf: BufReader): Promise<WebSocketFrame> {
 		const l = await readShort(buf);
 
 		if (l === Deno.EOF) throw new UnexpectedEOFError();
+
 		payloadLength = l;
 	} else if (payloadLength === 127) {
 		const l = await readLong(buf);
 
 		if (l === Deno.EOF) throw new UnexpectedEOFError();
+
 		payloadLength = Number(l);
 	}
 	// mask
@@ -194,10 +212,12 @@ export async function readFrame(buf: BufReader): Promise<WebSocketFrame> {
 
 	if (hasMask) {
 		mask = new Uint8Array(4);
+
 		await buf.readFull(mask);
 	}
 	// payload
 	const payload = new Uint8Array(payloadLength);
+
 	await buf.readFull(payload);
 
 	return {
@@ -215,19 +235,25 @@ function createMask(): Uint8Array {
 
 class WebSocketImpl implements WebSocket {
 	private readonly mask?: Uint8Array;
+
 	private readonly bufReader: BufReader;
+
 	private readonly bufWriter: BufWriter;
 
 	constructor(
 		readonly conn: Conn,
 		opts: {
 			bufReader?: BufReader;
+
 			bufWriter?: BufWriter;
+
 			mask?: Uint8Array;
 		},
 	) {
 		this.mask = opts.mask;
+
 		this.bufReader = opts.bufReader || new BufReader(conn);
+
 		this.bufWriter = opts.bufWriter || new BufWriter(conn);
 	}
 
@@ -238,6 +264,7 @@ class WebSocketImpl implements WebSocket {
 
 		while (true) {
 			const frame = await readFrame(this.bufReader);
+
 			unmask(frame.payload, frame.mask);
 
 			switch (frame.opcode) {
@@ -245,6 +272,7 @@ class WebSocketImpl implements WebSocket {
 				case OpCode.BinaryFrame:
 				case OpCode.Continue:
 					frames.push(frame);
+
 					payloadsLength += frame.payload.length;
 
 					if (frame.isLastFrame) {
@@ -254,8 +282,10 @@ class WebSocketImpl implements WebSocket {
 
 						for (const frame of frames) {
 							concat.set(frame.payload, offs);
+
 							offs += frame.payload.length;
 						}
+
 						if (frames[0].opcode === OpCode.TextFrame) {
 							// text
 							yield decode(concat);
@@ -263,9 +293,12 @@ class WebSocketImpl implements WebSocket {
 							// binary
 							yield concat;
 						}
+
 						frames = [];
+
 						payloadsLength = 0;
 					}
+
 					break;
 
 				case OpCode.Close:
@@ -275,6 +308,7 @@ class WebSocketImpl implements WebSocket {
 					const reason = decode(
 						frame.payload.subarray(2, frame.payload.length),
 					);
+
 					await this.close(code, reason);
 
 					yield { code, reason };
@@ -309,12 +343,14 @@ class WebSocketImpl implements WebSocket {
 		if (this.isClosed) {
 			throw new SocketClosedError("socket has been closed");
 		}
+
 		const opcode =
 			typeof data === "string" ? OpCode.TextFrame : OpCode.BinaryFrame;
 
 		const payload = typeof data === "string" ? encode(data) : data;
 
 		const isLastFrame = true;
+
 		await writeFrame(
 			{
 				isLastFrame,
@@ -328,6 +364,7 @@ class WebSocketImpl implements WebSocket {
 
 	async ping(data: WebSocketMessage = ""): Promise<void> {
 		const payload = typeof data === "string" ? encode(data) : data;
+
 		await writeFrame(
 			{
 				isLastFrame: true,
@@ -353,12 +390,16 @@ class WebSocketImpl implements WebSocket {
 
 			if (reason) {
 				const reasonBytes = encode(reason);
+
 				payload = new Uint8Array(2 + reasonBytes.byteLength);
+
 				payload.set(header);
+
 				payload.set(reasonBytes, 2);
 			} else {
 				payload = new Uint8Array(header);
 			}
+
 			await writeFrame(
 				{
 					isLastFrame: true,
@@ -379,6 +420,7 @@ class WebSocketImpl implements WebSocket {
 		if (this.isClosed) {
 			return;
 		}
+
 		try {
 			this.conn.close();
 		} catch (e) {
@@ -396,6 +438,7 @@ export function acceptable(req: { headers: Headers }): boolean {
 	if (!upgrade || upgrade.toLowerCase() !== "websocket") {
 		return false;
 	}
+
 	const secKey = req.headers.get("sec-websocket-key");
 
 	return (
@@ -410,6 +453,7 @@ const kGUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 /** Create sec-websocket-accept header value with given nonce */
 export function createSecAccept(nonce: string): string {
 	const sha1 = new Sha1();
+
 	sha1.update(nonce + kGUID);
 
 	const bytes = sha1.digest();
@@ -420,8 +464,11 @@ export function createSecAccept(nonce: string): string {
 /** Upgrade given TCP connection into websocket connection */
 export async function acceptWebSocket(req: {
 	conn: Conn;
+
 	bufWriter: BufWriter;
+
 	bufReader: BufReader;
+
 	headers: Headers;
 }): Promise<WebSocket> {
 	const { conn, headers, bufReader, bufWriter } = req;
@@ -434,7 +481,9 @@ export async function acceptWebSocket(req: {
 		if (typeof secKey !== "string") {
 			throw new Error("sec-websocket-key is not provided");
 		}
+
 		const secAccept = createSecAccept(secKey);
+
 		await writeResponse(bufWriter, {
 			status: 101,
 			headers: new Headers({
@@ -446,6 +495,7 @@ export async function acceptWebSocket(req: {
 
 		return sock;
 	}
+
 	throw new Error("request is not acceptable");
 }
 
@@ -457,8 +507,10 @@ export function createSecKey(): string {
 
 	for (let i = 0; i < 16; i++) {
 		const j = Math.round(Math.random() * kSecChars.length);
+
 		key += kSecChars[j];
 	}
+
 	return btoa(key);
 }
 
@@ -475,9 +527,13 @@ async function handshake(
 	if (!headers.has("host")) {
 		headers.set("host", hostname);
 	}
+
 	headers.set("upgrade", "websocket");
+
 	headers.set("connection", "upgrade");
+
 	headers.set("sec-websocket-key", key);
+
 	headers.set("sec-websocket-version", "13");
 
 	let headerStr = `GET ${pathname}?${searchParams || ""} HTTP/1.1\r\n`;
@@ -485,9 +541,11 @@ async function handshake(
 	for (const [key, value] of headers) {
 		headerStr += `${key}: ${value}\r\n`;
 	}
+
 	headerStr += "\r\n";
 
 	await bufWriter.write(encode(headerStr));
+
 	await bufWriter.flush();
 
 	const tpReader = new TextProtoReader(bufReader);
@@ -497,6 +555,7 @@ async function handshake(
 	if (statusLine === Deno.EOF) {
 		throw new UnexpectedEOFError();
 	}
+
 	const m = statusLine.match(/^(?<version>\S+) (?<statusCode>\S+) /);
 
 	if (!m) {
@@ -547,13 +606,16 @@ export async function connectWebSocket(
 
 	if (url.protocol === "http:" || url.protocol === "ws:") {
 		const port = parseInt(url.port || "80");
+
 		conn = await Deno.dial({ hostname, port });
 	} else if (url.protocol === "https:" || url.protocol === "wss:") {
 		const port = parseInt(url.port || "443");
+
 		conn = await Deno.dialTLS({ hostname, port });
 	} else {
 		throw new Error("ws: unsupported protocol: " + url.protocol);
 	}
+
 	const bufWriter = new BufWriter(conn);
 
 	const bufReader = new BufReader(conn);
@@ -565,6 +627,7 @@ export async function connectWebSocket(
 
 		throw err;
 	}
+
 	return new WebSocketImpl(conn, {
 		bufWriter,
 		bufReader,

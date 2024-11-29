@@ -25,11 +25,13 @@ test(function consoleShouldBeANamespace(): void {
 	const prototype2 = Object.getPrototypeOf(prototype1);
 
 	assertEquals(Object.getOwnPropertyNames(prototype1).length, 0);
+
 	assertEquals(prototype2, Object.prototype);
 });
 
 test(function consoleHasRightInstance(): void {
 	assert(console instanceof Console);
+
 	assertEquals({} instanceof Console, false);
 });
 
@@ -40,16 +42,20 @@ test(function consoleTestAssertShouldNotThrowError(): void {
 
 	try {
 		console.assert(false);
+
 		hasThrown = false;
 	} catch {
 		hasThrown = true;
 	}
+
 	assertEquals(hasThrown, false);
 });
 
 test(function consoleTestStringifyComplexObjects(): void {
 	assertEquals(stringify("foo"), "foo");
+
 	assertEquals(stringify(["foo", "bar"]), `[ "foo", "bar" ]`);
+
 	assertEquals(stringify({ foo: "bar" }), `{ foo: "bar" }`);
 });
 
@@ -57,10 +63,13 @@ test(function consoleTestStringifyLongStrings(): void {
 	const veryLongString = "a".repeat(200);
 	// If we stringify an object containing the long string, it gets abbreviated.
 	let actual = stringify({ veryLongString });
+
 	assert(actual.includes("..."));
+
 	assert(actual.length < 200);
 	// However if we stringify the string itself, we get it exactly.
 	actual = stringify(veryLongString);
+
 	assertEquals(actual, veryLongString);
 });
 
@@ -68,11 +77,13 @@ test(function consoleTestStringifyLongStrings(): void {
 test(function consoleTestStringifyCircular(): void {
 	class Base {
 		a = 1;
+
 		m1() {}
 	}
 
 	class Extended extends Base {
 		b = 2;
+
 		m2() {}
 	}
 
@@ -110,19 +121,30 @@ test(function consoleTestStringifyCircular(): void {
 	const nestedObjExpected = `{ num, bool, str, method, asyncMethod, generatorMethod, un, nu, arrowFunc, extendedClass, nFunc, extendedCstr, o }`;
 
 	assertEquals(stringify(1), "1");
+
 	assertEquals(stringify(-0), "-0");
+
 	assertEquals(stringify(1n), "1n");
+
 	assertEquals(stringify("s"), "s");
+
 	assertEquals(stringify(false), "false");
+
 	assertEquals(stringify(new Number(1)), "[Number: 1]");
+
 	assertEquals(stringify(new Boolean(true)), "[Boolean: true]");
+
 	assertEquals(stringify(new String("deno")), `[String: "deno"]`);
+
 	assertEquals(stringify(/[0-9]*/), "/[0-9]*/");
+
 	assertEquals(
 		stringify(new Date("2018-12-10T02:26:59.002Z")),
 		"2018-12-10T02:26:59.002Z",
 	);
+
 	assertEquals(stringify(new Set([1, 2, 3])), "Set { 1, 2, 3 }");
+
 	assertEquals(
 		stringify(
 			new Map([
@@ -132,39 +154,55 @@ test(function consoleTestStringifyCircular(): void {
 		),
 		`Map { 1 => "one", 2 => "two" }`,
 	);
+
 	assertEquals(stringify(new WeakSet()), "WeakSet { [items unknown] }");
+
 	assertEquals(stringify(new WeakMap()), "WeakMap { [items unknown] }");
+
 	assertEquals(stringify(Symbol(1)), "Symbol(1)");
+
 	assertEquals(stringify(null), "null");
+
 	assertEquals(stringify(undefined), "undefined");
+
 	assertEquals(stringify(new Extended()), "Extended { a: 1, b: 2 }");
+
 	assertEquals(
 		stringify(function f(): void {}),
 		"[Function: f]",
 	);
+
 	assertEquals(
 		stringify(async function af(): Promise<void> {}),
 		"[AsyncFunction: af]",
 	);
+
 	assertEquals(
 		stringify(function* gf() {}),
 		"[GeneratorFunction: gf]",
 	);
+
 	assertEquals(
 		stringify(async function* agf() {}),
 		"[AsyncGeneratorFunction: agf]",
 	);
+
 	assertEquals(
 		stringify(new Uint8Array([1, 2, 3])),
 		"Uint8Array [ 1, 2, 3 ]",
 	);
+
 	assertEquals(stringify(Uint8Array.prototype), "TypedArray []");
+
 	assertEquals(
 		stringify({ a: { b: { c: { d: new Set([1]) } } } }),
 		"{ a: { b: { c: { d: [Set] } } } }",
 	);
+
 	assertEquals(stringify(nestedObj), nestedObjExpected);
+
 	assertEquals(stringify(JSON), "{}");
+
 	assertEquals(
 		stringify(console),
 		"{ printFunc, log, debug, info, dir, dirxml, warn, error, assert, count, countReset, table, time, timeLog, timeEnd, group, groupCollapsed, groupEnd, clear, trace, indentLevel }",
@@ -177,15 +215,19 @@ test(function consoleTestStringifyCircular(): void {
 test(function consoleTestStringifyWithDepth(): void {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const nestedObj: any = { a: { b: { c: { d: { e: { f: 42 } } } } } };
+
 	assertEquals(
 		stringifyArgs([nestedObj], { depth: 3 }),
 		"{ a: { b: { c: [Object] } } }",
 	);
+
 	assertEquals(
 		stringifyArgs([nestedObj], { depth: 4 }),
 		"{ a: { b: { c: { d: [Object] } } } }",
 	);
+
 	assertEquals(stringifyArgs([nestedObj], { depth: 0 }), "[Object]");
+
 	assertEquals(
 		stringifyArgs([nestedObj], { depth: null }),
 		"{ a: { b: { c: { d: [Object] } } } }",
@@ -226,22 +268,35 @@ test(function consoleTestWithCustomInspectorError(): void {
 	}
 
 	assertEquals(stringify(new B({ a: "a" })), "a");
+
 	assertEquals(stringify(B.prototype), "{}");
 });
 
 test(function consoleTestWithIntegerFormatSpecifier(): void {
 	assertEquals(stringify("%i"), "%i");
+
 	assertEquals(stringify("%i", 42.0), "42");
+
 	assertEquals(stringify("%i", 42), "42");
+
 	assertEquals(stringify("%i", "42"), "42");
+
 	assertEquals(stringify("%i", "42.0"), "42");
+
 	assertEquals(stringify("%i", 1.5), "1");
+
 	assertEquals(stringify("%i", -0.5), "0");
+
 	assertEquals(stringify("%i", ""), "NaN");
+
 	assertEquals(stringify("%i", Symbol()), "NaN");
+
 	assertEquals(stringify("%i %d", 42, 43), "42 43");
+
 	assertEquals(stringify("%d %i", 42), "42 %i");
+
 	assertEquals(stringify("%d", 12345678901234567890123), "1");
+
 	assertEquals(
 		stringify("%i", 12345678901234567890123n),
 		"12345678901234567890123n",
@@ -250,37 +305,61 @@ test(function consoleTestWithIntegerFormatSpecifier(): void {
 
 test(function consoleTestWithFloatFormatSpecifier(): void {
 	assertEquals(stringify("%f"), "%f");
+
 	assertEquals(stringify("%f", 42.0), "42");
+
 	assertEquals(stringify("%f", 42), "42");
+
 	assertEquals(stringify("%f", "42"), "42");
+
 	assertEquals(stringify("%f", "42.0"), "42");
+
 	assertEquals(stringify("%f", 1.5), "1.5");
+
 	assertEquals(stringify("%f", -0.5), "-0.5");
+
 	assertEquals(stringify("%f", Math.PI), "3.141592653589793");
+
 	assertEquals(stringify("%f", ""), "NaN");
+
 	assertEquals(stringify("%f", Symbol("foo")), "NaN");
+
 	assertEquals(stringify("%f", 5n), "5");
+
 	assertEquals(stringify("%f %f", 42, 43), "42 43");
+
 	assertEquals(stringify("%f %f", 42), "42 %f");
 });
 
 test(function consoleTestWithStringFormatSpecifier(): void {
 	assertEquals(stringify("%s"), "%s");
+
 	assertEquals(stringify("%s", undefined), "undefined");
+
 	assertEquals(stringify("%s", "foo"), "foo");
+
 	assertEquals(stringify("%s", 42), "42");
+
 	assertEquals(stringify("%s", "42"), "42");
+
 	assertEquals(stringify("%s %s", 42, 43), "42 43");
+
 	assertEquals(stringify("%s %s", 42), "42 %s");
+
 	assertEquals(stringify("%s", Symbol("foo")), "Symbol(foo)");
 });
 
 test(function consoleTestWithObjectFormatSpecifier(): void {
 	assertEquals(stringify("%o"), "%o");
+
 	assertEquals(stringify("%o", 42), "42");
+
 	assertEquals(stringify("%o", "foo"), "foo");
+
 	assertEquals(stringify("o: %o, a: %O", {}, []), "o: {}, a: []");
+
 	assertEquals(stringify("%o", { a: 42 }), "{ a: 42 }");
+
 	assertEquals(
 		stringify("%o", { a: { b: { c: { d: new Set([1]) } } } }),
 		"{ a: { b: { c: { d: [Set] } } } }",
@@ -289,17 +368,29 @@ test(function consoleTestWithObjectFormatSpecifier(): void {
 
 test(function consoleTestWithVariousOrInvalidFormatSpecifier(): void {
 	assertEquals(stringify("%s:%s"), "%s:%s");
+
 	assertEquals(stringify("%i:%i"), "%i:%i");
+
 	assertEquals(stringify("%d:%d"), "%d:%d");
+
 	assertEquals(stringify("%%s%s", "foo"), "%sfoo");
+
 	assertEquals(stringify("%s:%s", undefined), "undefined:%s");
+
 	assertEquals(stringify("%s:%s", "foo", "bar"), "foo:bar");
+
 	assertEquals(stringify("%s:%s", "foo", "bar", "baz"), "foo:bar baz");
+
 	assertEquals(stringify("%%%s%%", "hi"), "%hi%");
+
 	assertEquals(stringify("%d:%d", 12), "12:%d");
+
 	assertEquals(stringify("%i:%i", 12), "12:%i");
+
 	assertEquals(stringify("%f:%f", 12), "12:%f");
+
 	assertEquals(stringify("o: %o, a: %o", {}), "o: {}, a: %o");
+
 	assertEquals(stringify("abc%", 1), "abc% 1");
 });
 
@@ -323,9 +414,11 @@ test(function consoleTestError(): void {
 	class MyError extends Error {
 		constructor(errStr: string) {
 			super(errStr);
+
 			this.name = "MyError";
 		}
 	}
+
 	try {
 		throw new MyError("This is an error");
 	} catch (e) {
@@ -346,14 +439,20 @@ test(function consoleTestClear(): void {
 
 	stdout.write = async (u8: Uint8Array): Promise<number> => {
 		const tmp = new Uint8Array(buffer.length + u8.length);
+
 		tmp.set(buffer, 0);
+
 		tmp.set(u8, buffer.length);
+
 		buffer = tmp;
 
 		return await write(stdout.rid, u8);
 	};
+
 	console.clear();
+
 	stdout.write = stdoutWrite;
+
 	assertEquals(buffer, uint8);
 });
 
@@ -392,30 +491,49 @@ test(function consoleDetachedLog(): void {
 	const consoleGroupEnd = console.groupEnd;
 
 	const consoleClear = console.clear;
+
 	log("Hello world");
+
 	dir("Hello world");
+
 	dirxml("Hello world");
+
 	debug("Hello world");
+
 	info("Hello world");
+
 	warn("Hello world");
+
 	error("Hello world");
+
 	consoleAssert(true);
+
 	consoleCount("Hello world");
+
 	consoleCountReset("Hello world");
+
 	consoleTable({ test: "Hello world" });
+
 	consoleTime("Hello world");
+
 	consoleTimeLog("Hello world");
+
 	consoleTimeEnd("Hello world");
+
 	consoleGroup("Hello world");
+
 	consoleGroupEnd();
+
 	consoleClear();
 });
 
 class StringBuffer {
 	chunks: string[] = [];
+
 	add(x: string): void {
 		this.chunks.push(x);
 	}
+
 	toString(): string {
 		return this.chunks.join("");
 	}
@@ -441,10 +559,13 @@ function mockConsole(f: ConsoleExamineFunc): void {
 			const content = x + (printsNewLine ? "\n" : "");
 
 			const buf = isErr ? err : out;
+
 			buf.add(content);
+
 			both.add(content);
 		},
 	);
+
 	f(csl, out, err, both);
 }
 
@@ -452,12 +573,19 @@ function mockConsole(f: ConsoleExamineFunc): void {
 test(function consoleGroup(): void {
 	mockConsole((console, out): void => {
 		console.group("1");
+
 		console.log("2");
+
 		console.group("3");
+
 		console.log("4");
+
 		console.groupEnd();
+
 		console.groupEnd();
+
 		console.log("5");
+
 		console.log("6");
 
 		assertEquals(
@@ -477,17 +605,27 @@ test(function consoleGroup(): void {
 test(function consoleGroupWarn(): void {
 	mockConsole((console, _out, _err, both): void => {
 		console.warn("1");
+
 		console.group();
+
 		console.warn("2");
+
 		console.group();
+
 		console.warn("3");
+
 		console.groupEnd();
+
 		console.warn("4");
+
 		console.groupEnd();
+
 		console.warn("5");
 
 		console.warn("6");
+
 		console.warn("7");
+
 		assertEquals(
 			both.toString(),
 			`1
@@ -506,6 +644,7 @@ test(function consoleGroupWarn(): void {
 test(function consoleTable(): void {
 	mockConsole((console, out): void => {
 		console.table({ a: "test", b: 1 });
+
 		assertEquals(
 			out.toString(),
 			`┌─────────┬────────┐
@@ -517,8 +656,10 @@ test(function consoleTable(): void {
 `,
 		);
 	});
+
 	mockConsole((console, out): void => {
 		console.table({ a: { b: 10 }, b: { b: 20, c: 30 } }, ["c"]);
+
 		assertEquals(
 			out.toString(),
 			`┌─────────┬────┐
@@ -530,8 +671,10 @@ test(function consoleTable(): void {
 `,
 		);
 	});
+
 	mockConsole((console, out): void => {
 		console.table([1, 2, [3, [4]], [5, 6], [[7], [8]]]);
+
 		assertEquals(
 			out.toString(),
 			`┌─────────┬───────┬───────┬────────┐
@@ -546,8 +689,10 @@ test(function consoleTable(): void {
 `,
 		);
 	});
+
 	mockConsole((console, out): void => {
 		console.table(new Set([1, 2, 3, "test"]));
+
 		assertEquals(
 			out.toString(),
 			`┌───────────────────┬────────┐
@@ -561,6 +706,7 @@ test(function consoleTable(): void {
 `,
 		);
 	});
+
 	mockConsole((console, out): void => {
 		console.table(
 			new Map([
@@ -568,6 +714,7 @@ test(function consoleTable(): void {
 				[2, "two"],
 			]),
 		);
+
 		assertEquals(
 			out.toString(),
 			`┌───────────────────┬─────┬────────┐
@@ -579,6 +726,7 @@ test(function consoleTable(): void {
 `,
 		);
 	});
+
 	mockConsole((console, out): void => {
 		console.table({
 			a: true,
@@ -587,6 +735,7 @@ test(function consoleTable(): void {
 			g: new Set([1, 2, 3, "test"]),
 			h: new Map([[1, "one"]]),
 		});
+
 		assertEquals(
 			out.toString(),
 			`┌─────────┬───────────┬───────────────────┬────────┐
@@ -601,6 +750,7 @@ test(function consoleTable(): void {
 `,
 		);
 	});
+
 	mockConsole((console, out): void => {
 		console.table([
 			1,
@@ -609,6 +759,7 @@ test(function consoleTable(): void {
 			{ a: 10 },
 			["test", { b: 20, c: "test" }],
 		]);
+
 		assertEquals(
 			out.toString(),
 			`┌─────────┬────────┬──────────────────────┬────┬────────┐
@@ -623,8 +774,10 @@ test(function consoleTable(): void {
 `,
 		);
 	});
+
 	mockConsole((console, out): void => {
 		console.table([]);
+
 		assertEquals(
 			out.toString(),
 			`┌─────────┐
@@ -634,8 +787,10 @@ test(function consoleTable(): void {
 `,
 		);
 	});
+
 	mockConsole((console, out): void => {
 		console.table({});
+
 		assertEquals(
 			out.toString(),
 			`┌─────────┐
@@ -645,8 +800,10 @@ test(function consoleTable(): void {
 `,
 		);
 	});
+
 	mockConsole((console, out): void => {
 		console.table(new Set());
+
 		assertEquals(
 			out.toString(),
 			`┌───────────────────┐
@@ -656,8 +813,10 @@ test(function consoleTable(): void {
 `,
 		);
 	});
+
 	mockConsole((console, out): void => {
 		console.table(new Map());
+
 		assertEquals(
 			out.toString(),
 			`┌───────────────────┐
@@ -667,8 +826,10 @@ test(function consoleTable(): void {
 `,
 		);
 	});
+
 	mockConsole((console, out): void => {
 		console.table("test");
+
 		assertEquals(out.toString(), "test\n");
 	});
 });
@@ -679,15 +840,18 @@ test(function consoleLogShouldNotThrowError(): void {
 
 	try {
 		console.log(new Error("foo"));
+
 		result = 1;
 	} catch (e) {
 		result = 2;
 	}
+
 	assertEquals(result, 1);
 
 	// output errors to the console should not include "Uncaught"
 	mockConsole((console, out): void => {
 		console.log(new Error("foo"));
+
 		assertEquals(out.toString().includes("Uncaught"), false);
 	});
 });
@@ -696,10 +860,13 @@ test(function consoleLogShouldNotThrowError(): void {
 test(function consoleDir(): void {
 	mockConsole((console, out): void => {
 		console.dir("DIR");
+
 		assertEquals(out.toString(), "DIR\n");
 	});
+
 	mockConsole((console, out): void => {
 		console.dir("DIR", { indentLevel: 2 });
+
 		assertEquals(out.toString(), "  DIR\n");
 	});
 });
@@ -708,10 +875,13 @@ test(function consoleDir(): void {
 test(function consoleDirXml(): void {
 	mockConsole((console, out): void => {
 		console.dirxml("DIRXML");
+
 		assertEquals(out.toString(), "DIRXML\n");
 	});
+
 	mockConsole((console, out): void => {
 		console.dirxml("DIRXML", { indentLevel: 2 });
+
 		assertEquals(out.toString(), "  DIRXML\n");
 	});
 });
@@ -720,6 +890,7 @@ test(function consoleDirXml(): void {
 test(function consoleTrace(): void {
 	mockConsole((console, _out, err): void => {
 		console.trace("%s", "custom message");
+
 		assert(err.toString().includes("Trace: custom message"));
 	});
 });

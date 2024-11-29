@@ -9,11 +9,13 @@ test(function bytesfindIndex1(): void {
 		new Uint8Array([1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 3]),
 		new Uint8Array([0, 1, 2]),
 	);
+
 	assertEquals(i, 2);
 });
 
 test(function bytesfindIndex2(): void {
 	const i = findIndex(new Uint8Array([0, 0, 1]), new Uint8Array([0, 1]));
+
 	assertEquals(i, 1);
 });
 
@@ -22,21 +24,25 @@ test(function bytesfindLastIndex1(): void {
 		new Uint8Array([0, 1, 2, 0, 1, 2, 0, 1, 3]),
 		new Uint8Array([0, 1, 2]),
 	);
+
 	assertEquals(i, 3);
 });
 
 test(function bytesfindLastIndex2(): void {
 	const i = findLastIndex(new Uint8Array([0, 1, 1]), new Uint8Array([0, 1]));
+
 	assertEquals(i, 0);
 });
 
 test(function bytesBytesequal(): void {
 	const v = equal(new Uint8Array([0, 1, 2, 3]), new Uint8Array([0, 1, 2, 3]));
+
 	assertEquals(v, true);
 });
 
 test(function byteshasPrefix(): void {
 	const v = hasPrefix(new Uint8Array([0, 1, 2]), new Uint8Array([0, 1]));
+
 	assertEquals(v, true);
 });
 

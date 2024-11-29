@@ -17,5 +17,6 @@ test(async function textprotoAppend(): Promise<void> {
 	const u2 = enc.encode("World");
 
 	const joined = append(u1, u2);
+
 	assertEquals(dec.decode(joined), "Hello World");
 });

@@ -11,6 +11,7 @@ export async function ensureDir(dir: string): Promise<void> {
 	try {
 		// if dir exists
 		const stat = await Deno.stat(dir);
+
 		pathExists = true;
 
 		if (!stat.isDirectory()) {
@@ -37,6 +38,7 @@ export function ensureDirSync(dir: string): void {
 	try {
 		// if dir exists
 		const stat = Deno.statSync(dir);
+
 		pathExists = true;
 
 		if (!stat.isDirectory()) {

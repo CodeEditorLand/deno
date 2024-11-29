@@ -14,6 +14,7 @@ function convertLineEndingsToNative(s: string): string {
 	let collectionResult = collectSequenceNotCRLF(s, position);
 
 	let token = collectionResult.collected;
+
 	position = collectionResult.newPosition;
 
 	let result = token;
@@ -23,6 +24,7 @@ function convertLineEndingsToNative(s: string): string {
 
 		if (c == "\r") {
 			result += nativeLineEnd;
+
 			position++;
 
 			if (position < s.length && s.charAt(position) == "\n") {
@@ -30,12 +32,14 @@ function convertLineEndingsToNative(s: string): string {
 			}
 		} else if (c == "\n") {
 			position++;
+
 			result += nativeLineEnd;
 		}
 
 		collectionResult = collectSequenceNotCRLF(s, position);
 
 		token = collectionResult.collected;
+
 		position = collectionResult.newPosition;
 
 		result += token;
@@ -52,7 +56,9 @@ function collectSequenceNotCRLF(
 
 	for (
 		let c = s.charAt(position);
+
 		position < s.length && !(c == "\r" || c == "\n");
+
 		c = s.charAt(++position)
 	);
 
@@ -74,6 +80,7 @@ function toUint8Arrays(
 			if (doNormalizeLineEndingsToNative) {
 				str = convertLineEndingsToNative(element);
 			}
+
 			ret.push(enc.encode(str));
 			// eslint-disable-next-line @typescript-eslint/no-use-before-define
 		} else if (element instanceof DenoBlob) {
@@ -82,22 +89,27 @@ function toUint8Arrays(
 			ret.push(element);
 		} else if (element instanceof Uint16Array) {
 			const uint8 = new Uint8Array(element.buffer);
+
 			ret.push(uint8);
 		} else if (element instanceof Uint32Array) {
 			const uint8 = new Uint8Array(element.buffer);
+
 			ret.push(uint8);
 		} else if (ArrayBuffer.isView(element)) {
 			// Convert view to Uint8Array.
 			const uint8 = new Uint8Array(element.buffer);
+
 			ret.push(uint8);
 		} else if (element instanceof ArrayBuffer) {
 			// Create a new Uint8Array view for the given ArrayBuffer.
 			const uint8 = new Uint8Array(element);
+
 			ret.push(uint8);
 		} else {
 			ret.push(enc.encode(String(element)));
 		}
 	}
+
 	return ret;
 }
 
@@ -123,6 +135,7 @@ function processBlobParts(
 
 	for (const u8 of uint8Arrays) {
 		bytes.set(u8, courser);
+
 		courser += u8.byteLength;
 	}
 
@@ -135,7 +148,9 @@ export const blobBytesWeakMap = new WeakMap<domTypes.Blob, Uint8Array>();
 
 export class DenoBlob implements domTypes.Blob {
 	private readonly [bytesSymbol]: Uint8Array;
+
 	readonly size: number = 0;
+
 	readonly type: string = "";
 
 	/** A blob object represents a file-like object of immutable, raw data. */
@@ -176,11 +191,14 @@ export class DenoBlob implements domTypes.Blob {
 					break;
 				}
 			}
+
 			type = type.toLowerCase();
 		}
 		// Set Blob object's properties.
 		this[bytesSymbol] = bytes;
+
 		this.size = bytes.byteLength;
+
 		this.type = type;
 
 		// Register bytes for internal private use.

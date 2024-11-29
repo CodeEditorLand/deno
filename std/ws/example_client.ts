@@ -12,6 +12,7 @@ import {
 const endpoint = Deno.args[1] || "ws://127.0.0.1:8080";
 /** simple websocket cli */
 const sock = await connectWebSocket(endpoint);
+
 console.log(green("ws connected! (type 'close' to quit)"));
 (async function (): Promise<void> {
 	for await (const msg of sock.receive()) {
@@ -38,6 +39,7 @@ while (true) {
 
 		break;
 	}
+
 	if (line === "close") {
 		break;
 	} else if (line === "ping") {

@@ -14,11 +14,15 @@ const knownPermissions: Deno.PermissionName[] = [
 function genFunc(grant: Deno.PermissionName): () => Promise<void> {
 	const gen: () => Promise<void> = async function Granted(): Promise<void> {
 		const status0 = await Deno.permissions.query({ name: grant });
+
 		assert(status0 != null);
+
 		assertEquals(status0.state, "granted");
 
 		const status1 = await Deno.permissions.revoke({ name: grant });
+
 		assert(status1 != null);
+
 		assertEquals(status1.state, "prompt");
 	};
 	// Properly name these generated functions.

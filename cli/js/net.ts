@@ -13,6 +13,7 @@ export type Transport = "tcp";
 // and ListenOptions.
 export interface Addr {
 	transport: Transport;
+
 	address: string;
 }
 
@@ -94,6 +95,7 @@ export class ListenerImpl implements Listener {
 
 	close(): void {
 		this.closing = true;
+
 		close(this.rid);
 	}
 
@@ -108,6 +110,7 @@ export class ListenerImpl implements Listener {
 		if (this.closing) {
 			return { value: undefined, done: true };
 		}
+
 		return await this.accept()
 			.then((value) => ({ value, done: false }))
 			.catch((e) => {
@@ -117,6 +120,7 @@ export class ListenerImpl implements Listener {
 				if (e.message == "Listener has been closed") {
 					return { value: undefined, done: true };
 				}
+
 				throw e;
 			});
 	}
@@ -145,7 +149,9 @@ export interface Conn extends Reader, Writer, Closer {
 
 export interface ListenOptions {
 	port: number;
+
 	hostname?: string;
+
 	transport?: Transport;
 }
 
@@ -182,7 +188,9 @@ export function listen(options: ListenOptions): Listener {
 
 export interface DialOptions {
 	port: number;
+
 	hostname?: string;
+
 	transport?: Transport;
 }
 

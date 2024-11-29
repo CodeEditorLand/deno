@@ -8,7 +8,9 @@ test(function dottedAlias(): void {
 		default: { "a.b": 11 },
 		alias: { "a.b": "aa.bb" },
 	});
+
 	assertEquals(argv.a.b, 22);
+
 	assertEquals(argv.aa.bb, 22);
 });
 
@@ -17,11 +19,14 @@ test(function dottedDefault(): void {
 		default: { "a.b": 11 },
 		alias: { "a.b": "aa.bb" },
 	});
+
 	assertEquals(argv.a.b, 11);
+
 	assertEquals(argv.aa.bb, 11);
 });
 
 test(function dottedDefaultWithNoAlias(): void {
 	const argv = parse([], { default: { "a.b": 11 } });
+
 	assertEquals(argv.a.b, 11);
 });

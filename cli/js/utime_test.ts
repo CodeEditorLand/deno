@@ -11,6 +11,7 @@ testPerm({ read: true, write: true }, function utimeSyncFileSuccess(): void {
 	const testDir = Deno.makeTempDirSync();
 
 	const filename = testDir + "/file.txt";
+
 	Deno.writeFileSync(filename, new TextEncoder().encode("hello"), {
 		perm: 0o666,
 	});
@@ -18,10 +19,13 @@ testPerm({ read: true, write: true }, function utimeSyncFileSuccess(): void {
 	const atime = 1000;
 
 	const mtime = 50000;
+
 	Deno.utimeSync(filename, atime, mtime);
 
 	const fileInfo = Deno.statSync(filename);
+
 	assertFuzzyTimestampEquals(fileInfo.accessed, atime);
+
 	assertFuzzyTimestampEquals(fileInfo.modified, mtime);
 });
 
@@ -33,10 +37,13 @@ testPerm(
 		const atime = 1000;
 
 		const mtime = 50000;
+
 		Deno.utimeSync(testDir, atime, mtime);
 
 		const dirInfo = Deno.statSync(testDir);
+
 		assertFuzzyTimestampEquals(dirInfo.accessed, atime);
+
 		assertFuzzyTimestampEquals(dirInfo.modified, mtime);
 	},
 );
@@ -47,10 +54,13 @@ testPerm({ read: true, write: true }, function utimeSyncDateSuccess(): void {
 	const atime = 1000;
 
 	const mtime = 50000;
+
 	Deno.utimeSync(testDir, new Date(atime * 1000), new Date(mtime * 1000));
 
 	const dirInfo = Deno.statSync(testDir);
+
 	assertFuzzyTimestampEquals(dirInfo.accessed, atime);
+
 	assertFuzzyTimestampEquals(dirInfo.modified, mtime);
 });
 
@@ -64,10 +74,13 @@ testPerm(
 		const atime = 0x100000001;
 
 		const mtime = 0x100000002;
+
 		Deno.utimeSync(testDir, atime, mtime);
 
 		const dirInfo = Deno.statSync(testDir);
+
 		assertFuzzyTimestampEquals(dirInfo.accessed, atime);
+
 		assertFuzzyTimestampEquals(dirInfo.modified, mtime);
 	},
 );
@@ -83,9 +96,12 @@ testPerm({ read: true, write: true }, function utimeSyncNotFound(): void {
 		Deno.utimeSync("/baddir", atime, mtime);
 	} catch (e) {
 		caughtError = true;
+
 		assertEquals(e.kind, Deno.ErrorKind.NotFound);
+
 		assertEquals(e.name, "NotFound");
 	}
+
 	assert(caughtError);
 });
 
@@ -100,9 +116,12 @@ testPerm({ read: true, write: false }, function utimeSyncPerm(): void {
 		Deno.utimeSync("/some_dir", atime, mtime);
 	} catch (e) {
 		caughtError = true;
+
 		assertEquals(e.kind, Deno.ErrorKind.PermissionDenied);
+
 		assertEquals(e.name, "PermissionDenied");
 	}
+
 	assert(caughtError);
 });
 
@@ -112,6 +131,7 @@ testPerm(
 		const testDir = Deno.makeTempDirSync();
 
 		const filename = testDir + "/file.txt";
+
 		Deno.writeFileSync(filename, new TextEncoder().encode("hello"), {
 			perm: 0o666,
 		});
@@ -119,10 +139,13 @@ testPerm(
 		const atime = 1000;
 
 		const mtime = 50000;
+
 		await Deno.utime(filename, atime, mtime);
 
 		const fileInfo = Deno.statSync(filename);
+
 		assertFuzzyTimestampEquals(fileInfo.accessed, atime);
+
 		assertFuzzyTimestampEquals(fileInfo.modified, mtime);
 	},
 );
@@ -135,10 +158,13 @@ testPerm(
 		const atime = 1000;
 
 		const mtime = 50000;
+
 		await Deno.utime(testDir, atime, mtime);
 
 		const dirInfo = Deno.statSync(testDir);
+
 		assertFuzzyTimestampEquals(dirInfo.accessed, atime);
+
 		assertFuzzyTimestampEquals(dirInfo.modified, mtime);
 	},
 );
@@ -151,6 +177,7 @@ testPerm(
 		const atime = 1000;
 
 		const mtime = 50000;
+
 		await Deno.utime(
 			testDir,
 			new Date(atime * 1000),
@@ -158,7 +185,9 @@ testPerm(
 		);
 
 		const dirInfo = Deno.statSync(testDir);
+
 		assertFuzzyTimestampEquals(dirInfo.accessed, atime);
+
 		assertFuzzyTimestampEquals(dirInfo.modified, mtime);
 	},
 );
@@ -176,9 +205,12 @@ testPerm(
 			await Deno.utime("/baddir", atime, mtime);
 		} catch (e) {
 			caughtError = true;
+
 			assertEquals(e.kind, Deno.ErrorKind.NotFound);
+
 			assertEquals(e.name, "NotFound");
 		}
+
 		assert(caughtError);
 	},
 );
@@ -196,9 +228,12 @@ testPerm(
 			await Deno.utime("/some_dir", atime, mtime);
 		} catch (e) {
 			caughtError = true;
+
 			assertEquals(e.kind, Deno.ErrorKind.PermissionDenied);
+
 			assertEquals(e.name, "PermissionDenied");
 		}
+
 		assert(caughtError);
 	},
 );

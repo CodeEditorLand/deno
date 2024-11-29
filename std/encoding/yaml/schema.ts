@@ -21,7 +21,9 @@ function compileList(
 	for (const currentType of schema[name]) {
 		for (
 			let previousIndex = 0;
+
 			previousIndex < result.length;
+
 			previousIndex++
 		) {
 			const previousType = result[previousIndex];
@@ -57,6 +59,7 @@ function compileMap(...typesList: Type[][]): TypeMap {
 			}
 		}
 	}
+
 	return result;
 }
 
@@ -64,16 +67,22 @@ export class Schema implements SchemaDefinition {
 	public static SCHEMA_DEFAULT?: Schema;
 
 	public implicit: Type[];
+
 	public explicit: Type[];
+
 	public include: Schema[];
 
 	public compiledImplicit: Type[];
+
 	public compiledExplicit: Type[];
+
 	public compiledTypeMap: TypeMap;
 
 	constructor(definition: SchemaDefinition) {
 		this.explicit = definition.explicit || [];
+
 		this.implicit = definition.implicit || [];
+
 		this.include = definition.include || [];
 
 		for (const type of this.implicit) {
@@ -86,7 +95,9 @@ export class Schema implements SchemaDefinition {
 		}
 
 		this.compiledImplicit = compileList(this, "implicit", []);
+
 		this.compiledExplicit = compileList(this, "explicit", []);
+
 		this.compiledTypeMap = compileMap(
 			this.compiledImplicit,
 			this.compiledExplicit,
@@ -98,6 +109,8 @@ export class Schema implements SchemaDefinition {
 
 export interface SchemaDefinition {
 	implicit?: Any[];
+
 	explicit?: Type[];
+
 	include?: Schema[];
 }

@@ -7,12 +7,19 @@ import { window } from "./window.ts";
 
 interface URLParts {
 	protocol: string;
+
 	username: string;
+
 	password: string;
+
 	hostname: string;
+
 	port: string;
+
 	path: string;
+
 	query: string | null;
+
 	hash: string;
 }
 
@@ -65,6 +72,7 @@ function parse(url: string): URLParts | undefined {
 			};
 		}
 	}
+
 	return undefined;
 }
 
@@ -88,6 +96,7 @@ function isAbsolutePath(path: string): boolean {
 // Preserves repeating and trailing `/`s by design.
 function normalizePath(path: string): string {
 	const isAbsolute = isAbsolutePath(path);
+
 	path = path.replace(/^\//, "");
 
 	const pathSegments = path.split("/");
@@ -117,6 +126,7 @@ function normalizePath(path: string): string {
 	} else {
 		newPath = `/${newPath}`;
 	}
+
 	return newPath;
 }
 
@@ -127,6 +137,7 @@ function resolvePathFromBase(path: string, basePath: string): string {
 	if (isAbsolutePath(normalizedPath)) {
 		return normalizedPath;
 	}
+
 	const normalizedBasePath = normalizePath(basePath);
 
 	if (!isAbsolutePath(normalizedBasePath)) {
@@ -148,6 +159,7 @@ function resolvePathFromBase(path: string, basePath: string): string {
 
 export class URL {
 	private _parts: URLParts;
+
 	private _searchParams!: urlSearchParams.URLSearchParams;
 
 	[customInspect](): string {
@@ -178,12 +190,15 @@ export class URL {
 		for (const methodName of searchParamsMethods) {
 			/* eslint-disable @typescript-eslint/no-explicit-any */
 			const method: (...args: any[]) => any = searchParams[methodName];
+
 			searchParams[methodName] = (...args: unknown[]): any => {
 				method.apply(searchParams, args);
+
 				this.search = searchParams.toString();
 			};
 			/* eslint-enable */
 		}
+
 		this._searchParams = searchParams;
 
 		// convert to `any` that has avoided the private limit
@@ -219,7 +234,9 @@ export class URL {
 		value = String(value);
 
 		const url = new URL(`http://${value}`);
+
 		this._parts.hostname = url.hostname;
+
 		this._parts.port = url.port;
 	}
 
@@ -229,6 +246,7 @@ export class URL {
 
 	set hostname(value: string) {
 		value = String(value);
+
 		this._parts.hostname = encodeURIComponent(value);
 	}
 
@@ -243,6 +261,7 @@ export class URL {
 		if (this.host || this.protocol === "file:") {
 			slash = "//";
 		}
+
 		return `${this.protocol}${slash}${authentication}${this.host}${this.pathname}${this.search}${this.hash}`;
 	}
 
@@ -251,7 +270,9 @@ export class URL {
 
 		if (value !== this.href) {
 			const url = new URL(value);
+
 			this._parts = { ...url._parts };
+
 			this._updateSearchParams();
 		}
 	}
@@ -260,6 +281,7 @@ export class URL {
 		if (this.host) {
 			return `${this.protocol}//${this.host}`;
 		}
+
 		return "null";
 	}
 
@@ -269,6 +291,7 @@ export class URL {
 
 	set password(value: string) {
 		value = String(value);
+
 		this._parts.password = encodeURIComponent(value);
 	}
 
@@ -292,6 +315,7 @@ export class URL {
 
 	set port(value: string) {
 		const port = parseInt(String(value), 10);
+
 		this._parts.port = isNaN(port)
 			? ""
 			: Math.max(0, port % 2 ** 16).toString();
@@ -308,6 +332,7 @@ export class URL {
 			if (value.charAt(value.length - 1) === ":") {
 				value = value.slice(0, -1);
 			}
+
 			this._parts.protocol = encodeURIComponent(value);
 		}
 	}
@@ -334,6 +359,7 @@ export class URL {
 		}
 
 		this._parts.query = query;
+
 		this._updateSearchParams();
 	}
 
@@ -343,6 +369,7 @@ export class URL {
 
 	set username(value: string) {
 		value = String(value);
+
 		this._parts.username = encodeURIComponent(value);
 	}
 
@@ -383,6 +410,7 @@ export class URL {
 		} else {
 			throw new TypeError("URL requires a base URL.");
 		}
+
 		this._updateSearchParams();
 	}
 
@@ -399,6 +427,7 @@ export class URL {
 		const origin = window.location.origin || "http://deno-opaque-origin";
 
 		const key = `blob:${origin}/${generateUUID()}`;
+
 		blobURLMap.set(key, b);
 
 		return key;
@@ -412,6 +441,7 @@ export class URL {
 		} catch {
 			throw new TypeError("Provided URL string is not valid");
 		}
+
 		if (urlObject.protocol !== "blob:") {
 			return;
 		}

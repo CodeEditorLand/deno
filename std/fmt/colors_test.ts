@@ -19,9 +19,13 @@ test(function replacesCloseCharacters(): void {
 
 test(function enablingColors(): void {
 	assertEquals(c.getEnabled(), true);
+
 	c.setEnabled(false);
+
 	assertEquals(c.bgBlue(c.red("foo bar")), "foo bar");
+
 	c.setEnabled(true);
+
 	assertEquals(c.red("foo bar"), "[31mfoo bar[39m");
 });
 

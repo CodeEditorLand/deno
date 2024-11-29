@@ -13,6 +13,7 @@ export class YAMLError extends DenoError<typeof ErrorKind.Other> {
 		protected mark: Mark | string = "",
 	) {
 		super(ErrorKind.Other, `${message} ${mark}`);
+
 		this.name = this.constructor.name;
 	}
 

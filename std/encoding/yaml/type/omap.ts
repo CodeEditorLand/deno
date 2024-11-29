@@ -25,6 +25,7 @@ function resolveYamlOmap(data: Any): boolean {
 		for (pairKey in pair) {
 			if (_hasOwnProperty.call(pair, pairKey)) {
 				if (!pairHasKey) pairHasKey = true;
+
 				else return false;
 			}
 		}
@@ -32,6 +33,7 @@ function resolveYamlOmap(data: Any): boolean {
 		if (!pairHasKey) return false;
 
 		if (objectKeys.indexOf(pairKey) === -1) objectKeys.push(pairKey);
+
 		else return false;
 	}
 

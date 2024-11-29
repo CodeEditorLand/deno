@@ -1,7 +1,9 @@
 // Copyright 2018-2019 the Deno authors. All rights reserved. MIT license.
 interface Version {
 	deno: string;
+
 	v8: string;
+
 	typescript: string;
 }
 
@@ -21,7 +23,9 @@ export function setVersions(
 	tsVersion: string,
 ): void {
 	version.deno = denoVersion;
+
 	version.v8 = v8Version;
+
 	version.typescript = tsVersion;
 
 	Object.freeze(version);

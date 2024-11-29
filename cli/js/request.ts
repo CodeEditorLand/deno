@@ -30,6 +30,7 @@ function normalizeMethod(m: string): string {
 	) {
 		return u;
 	}
+
 	return m;
 }
 
@@ -40,8 +41,11 @@ function normalizeMethod(m: string): string {
  */
 export class Request extends body.Body implements domTypes.Request {
 	public method: string;
+
 	public url: string;
+
 	public credentials?: "omit" | "same-origin" | "include";
+
 	public headers: domTypes.Headers;
 
 	constructor(input: domTypes.RequestInfo, init?: domTypes.RequestInit) {
@@ -62,11 +66,13 @@ export class Request extends body.Body implements domTypes.Request {
 			if (input.bodyUsed) {
 				throw TypeError(body.BodyUsedError);
 			}
+
 			b = input._bodySource;
 		} else if (typeof input === "object" && "body" in input && input.body) {
 			if (input.bodyUsed) {
 				throw TypeError(body.BodyUsedError);
 			}
+
 			b = input.body;
 		} else {
 			b = "";
@@ -86,6 +92,7 @@ export class Request extends body.Body implements domTypes.Request {
 		const contentType = headers.get("content-type") || "";
 
 		super(b, contentType);
+
 		this.headers = headers;
 
 		// readonly attribute ByteString method;
@@ -106,16 +113,22 @@ export class Request extends body.Body implements domTypes.Request {
 		this.url = "";
 
 		// readonly attribute RequestCredentials credentials;
+
 		this.credentials = "omit";
 
 		if (input instanceof Request) {
 			if (input.bodyUsed) {
 				throw TypeError(body.BodyUsedError);
 			}
+
 			this.method = input.method;
+
 			this.url = input.url;
+
 			this.headers = new Headers(input.headers);
+
 			this.credentials = input.credentials;
+
 			this._stream = input._stream;
 		} else if (typeof input === "string") {
 			this.url = input;
@@ -152,7 +165,9 @@ export class Request extends body.Body implements domTypes.Request {
 
 		if (this._bodySource instanceof ReadableStream) {
 			const tees = (this._bodySource as domTypes.ReadableStream).tee();
+
 			this._stream = this._bodySource = tees[0];
+
 			body2 = tees[1];
 		}
 

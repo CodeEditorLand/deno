@@ -13,7 +13,10 @@ for await (const req of server) {
 		body,
 		headers: new Headers(),
 	};
+
 	res.headers.set("Date", new Date().toUTCString());
+
 	res.headers.set("Connection", "keep-alive");
+
 	req.respond(res).catch(() => {});
 }

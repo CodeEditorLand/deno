@@ -9,6 +9,7 @@ import { Logger } from "./logger.ts";
 
 export class LoggerConfig {
 	level?: string;
+
 	handlers?: string[];
 }
 
@@ -16,6 +17,7 @@ export interface LogConfig {
 	handlers?: {
 		[name: string]: BaseHandler;
 	};
+
 	loggers?: {
 		[name: string]: LoggerConfig;
 	};
@@ -56,6 +58,7 @@ export function getLogger(name?: string): Logger {
 
 	if (!state.loggers.has(name)) {
 		const logger = new Logger("NOTSET", []);
+
 		state.loggers.set(name, logger);
 
 		return logger;
@@ -89,6 +92,7 @@ export async function setup(config: LogConfig): Promise<void> {
 	state.handlers.forEach((handler): void => {
 		handler.destroy();
 	});
+
 	state.handlers.clear();
 
 	// setup handlers
@@ -96,7 +100,9 @@ export async function setup(config: LogConfig): Promise<void> {
 
 	for (const handlerName in handlers) {
 		const handler = handlers[handlerName];
+
 		await handler.setup();
+
 		state.handlers.set(handlerName, handler);
 	}
 
@@ -122,6 +128,7 @@ export async function setup(config: LogConfig): Promise<void> {
 		const levelName = loggerConfig.level || DEFAULT_LEVEL;
 
 		const logger = new Logger(levelName, handlers);
+
 		state.loggers.set(loggerName, logger);
 	}
 }

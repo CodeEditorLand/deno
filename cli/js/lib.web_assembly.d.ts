@@ -6,6 +6,7 @@
 declare namespace WebAssembly {
 	interface WebAssemblyInstantiatedSource {
 		module: Module;
+
 		instance: Instance;
 	}
 
@@ -56,11 +57,15 @@ declare namespace WebAssembly {
 
 	interface ModuleExportDescriptor {
 		name: string;
+
 		kind: ImportExportKind;
 	}
+
 	interface ModuleImportDescriptor {
 		module: string;
+
 		name: string;
+
 		kind: ImportExportKind;
 	}
 
@@ -94,6 +99,7 @@ declare namespace WebAssembly {
 
 	interface MemoryDescriptor {
 		initial: number;
+
 		maximum?: number;
 	}
 
@@ -112,7 +118,9 @@ declare namespace WebAssembly {
 
 	interface TableDescriptor {
 		element: TableKind;
+
 		initial: number;
+
 		maximum?: number;
 	}
 
@@ -135,6 +143,7 @@ declare namespace WebAssembly {
 
 	interface GlobalDescriptor {
 		value: string;
+
 		mutable?: boolean;
 	}
 

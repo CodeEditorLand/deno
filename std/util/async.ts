@@ -30,6 +30,7 @@ export function deferred<T>(): Deferred<T> {
 
 interface TaggedYieldedValue<T> {
 	iterator: AsyncIterableIterator<T>;
+
 	value: T;
 }
 
@@ -41,11 +42,14 @@ interface TaggedYieldedValue<T> {
  */
 export class MuxAsyncIterator<T> implements AsyncIterable<T> {
 	private iteratorCount = 0;
+
 	private yields: Array<TaggedYieldedValue<T>> = [];
+
 	private signal: Deferred<void> = deferred();
 
 	add(iterator: AsyncIterableIterator<T>): void {
 		++this.iteratorCount;
+
 		this.callIteratorNext(iterator);
 	}
 
@@ -59,6 +63,7 @@ export class MuxAsyncIterator<T> implements AsyncIterable<T> {
 		} else {
 			this.yields.push({ iterator, value });
 		}
+
 		this.signal.resolve();
 	}
 
@@ -72,11 +77,13 @@ export class MuxAsyncIterator<T> implements AsyncIterable<T> {
 				const { iterator, value } = this.yields[i];
 
 				yield value;
+
 				this.callIteratorNext(iterator);
 			}
 
 			// Clear the `yields` list and reset the `signal` promise.
 			this.yields.length = 0;
+
 			this.signal = deferred();
 		}
 	}
@@ -98,20 +105,25 @@ export async function collectUint8Arrays(
 
 	for await (const chunk of it) {
 		chunks.push(chunk);
+
 		length += chunk.length;
 	}
+
 	if (chunks.length === 1) {
 		// No need to copy.
 		return chunks[0];
 	}
+
 	const collected = new Uint8Array(length);
 
 	let offset = 0;
 
 	for (const chunk of chunks) {
 		collected.set(chunk, offset);
+
 		offset += chunk.length;
 	}
+
 	return collected;
 }
 

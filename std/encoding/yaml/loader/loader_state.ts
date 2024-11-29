@@ -11,6 +11,7 @@ import { Any, ArrayObject } from "../utils.ts";
 
 export interface LoaderStateOptions {
 	legacy?: boolean;
+
 	listener?: ((...args: Any[]) => void) | null;
 	/** string to be used as a file path in error/warning messages. */
 	filename?: string;
@@ -26,26 +27,45 @@ export type ResultType = [] | {} | string;
 
 export class LoaderState extends State {
 	public documents: Any[] = [];
+
 	public length: number;
+
 	public lineIndent = 0;
+
 	public lineStart = 0;
+
 	public position = 0;
+
 	public line = 0;
+
 	public filename?: string;
+
 	public onWarning?: (...args: Any[]) => void;
+
 	public legacy: boolean;
+
 	public json: boolean;
+
 	public listener?: ((...args: Any[]) => void) | null;
+
 	public implicitTypes: Type[];
+
 	public typeMap: TypeMap;
 
 	public version?: string | null;
+
 	public checkLineBreaks?: boolean;
+
 	public tagMap?: ArrayObject;
+
 	public anchorMap?: ArrayObject;
+
 	public tag?: string | null;
+
 	public anchor?: string | null;
+
 	public kind?: string | null;
+
 	public result: ResultType | null = "";
 
 	constructor(
@@ -60,13 +80,19 @@ export class LoaderState extends State {
 		}: LoaderStateOptions,
 	) {
 		super(schema);
+
 		this.filename = filename;
+
 		this.onWarning = onWarning;
+
 		this.legacy = legacy;
+
 		this.json = json;
+
 		this.listener = listener;
 
 		this.implicitTypes = (this.schema as Schema).compiledImplicit;
+
 		this.typeMap = (this.schema as Schema).compiledTypeMap;
 
 		this.length = input.length;

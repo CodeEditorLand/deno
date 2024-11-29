@@ -13,23 +13,37 @@ export type Optional<T> = { [K in keyof T]?: T[K] };
 
 export interface Options {
 	callToJSON: boolean;
+
 	escapeRegex: boolean;
+
 	escapeString: boolean;
+
 	indent: number;
+
 	maxDepth: number;
+
 	min: boolean;
+
 	printFunctionName: boolean;
 }
 
 export interface Config {
 	callToJSON: boolean;
+
 	escapeRegex: boolean;
+
 	escapeString: boolean;
+
 	indent: string;
+
 	maxDepth: number;
+
 	min: boolean;
+
 	printFunctionName: boolean;
+
 	spacingInner: string;
+
 	spacingOuter: string;
 }
 
@@ -64,7 +78,9 @@ const DEFAULT_OPTIONS: Options = {
 
 interface BasicValueOptions {
 	printFunctionName: boolean;
+
 	escapeRegex: boolean;
+
 	escapeString: boolean;
 }
 
@@ -111,6 +127,7 @@ function printFunction(val: () => void, printFunctionName: boolean): string {
 	if (!printFunctionName) {
 		return "[Function]";
 	}
+
 	return "[Function " + (val.name || "anonymous") + "]";
 }
 
@@ -134,9 +151,11 @@ function printBasicValue(
 	if (val === true || val === false) {
 		return String(val);
 	}
+
 	if (val === undefined) {
 		return "undefined";
 	}
+
 	if (val === null) {
 		return "null";
 	}
@@ -146,15 +165,19 @@ function printBasicValue(
 	if (typeOf === "number") {
 		return printNumber(val);
 	}
+
 	if (typeOf === "string") {
 		if (escapeString) {
 			return `"${val.replace(/"|\\/g, "\\$&")}"`;
 		}
+
 		return `"${val}"`;
 	}
+
 	if (typeOf === "function") {
 		return printFunction(val, printFunctionName);
 	}
+
 	if (typeOf === "symbol") {
 		return printSymbol(val);
 	}
@@ -164,24 +187,30 @@ function printBasicValue(
 	if (toStringed === "[object WeakMap]") {
 		return "WeakMap {}";
 	}
+
 	if (toStringed === "[object WeakSet]") {
 		return "WeakSet {}";
 	}
+
 	if (
 		toStringed === "[object Function]" ||
 		toStringed === "[object GeneratorFunction]"
 	) {
 		return printFunction(val, printFunctionName);
 	}
+
 	if (toStringed === "[object Symbol]") {
 		return printSymbol(val);
 	}
+
 	if (toStringed === "[object Date]") {
 		return isNaN(+val) ? "Date { NaN }" : toISOString.call(val);
 	}
+
 	if (toStringed === "[object Error]") {
 		return printError(val);
 	}
+
 	if (toStringed === "[object RegExp]") {
 		if (escapeRegex) {
 			// https://github.com/benjamingr/RegExp.escape/blob/master/polyfill.js
@@ -189,6 +218,7 @@ function printBasicValue(
 				.call(val)
 				.replace(/[\\^$*+?.()|[\]{}]/g, "\\$&");
 		}
+
 		return regExpToString.call(val);
 	}
 
@@ -447,7 +477,9 @@ function printComplexValue(
 	if (refs.indexOf(val) !== -1) {
 		return "[Circular]";
 	}
+
 	refs = refs.slice();
+
 	refs.push(val);
 
 	const hitMaxDepth = ++depth > config.maxDepth;
@@ -481,6 +513,7 @@ function printComplexValue(
 					) +
 					"]";
 	}
+
 	if (isToStringedArrayType(toStringed)) {
 		return hitMaxDepth
 			? `[${val.constructor.name}]`
@@ -496,6 +529,7 @@ function printComplexValue(
 					) +
 					"]";
 	}
+
 	if (toStringed === "[object Map]") {
 		return hitMaxDepth
 			? "[Map]"
@@ -511,6 +545,7 @@ function printComplexValue(
 					) +
 					"}";
 	}
+
 	if (toStringed === "[object Set]") {
 		return hitMaxDepth
 			? "[Set]"

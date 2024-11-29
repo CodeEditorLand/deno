@@ -15,10 +15,12 @@ async function startServer(): Promise<void> {
 	const r = new TextProtoReader(new BufReader(server.stdout!));
 
 	const s = await r.readLine();
+
 	assert(s !== Deno.EOF && s.includes("Racing server listening..."));
 }
 function killServer(): void {
 	server.close();
+
 	server.stdout!.close();
 }
 
@@ -56,14 +58,17 @@ test(async function serverPipelineRace(): Promise<void> {
 	const conn = await dial({ port: 4501 });
 
 	const r = new TextProtoReader(new BufReader(conn));
+
 	await conn.write(new TextEncoder().encode(input));
 
 	const outLines = output.split("\n");
 	// length - 1 to disregard last empty line
 	for (let i = 0; i < outLines.length - 1; i++) {
 		const s = await r.readLine();
+
 		assertEquals(s, outLines[i]);
 	}
+
 	killServer();
 });
 

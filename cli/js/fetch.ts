@@ -38,8 +38,11 @@ function hasHeaderValueOf(s: string, value: string): boolean {
 
 class Body implements domTypes.Body, domTypes.ReadableStream, io.ReadCloser {
 	private _bodyUsed = false;
+
 	private _bodyPromise: null | Promise<ArrayBuffer> = null;
+
 	private _data: ArrayBuffer | null = null;
+
 	readonly locked: boolean = false; // TODO
 	readonly body: null | Body = this;
 
@@ -57,11 +60,14 @@ class Body implements domTypes.Body, domTypes.ReadableStream, io.ReadCloser {
 			const nread = await buf.readFrom(this);
 
 			const ui8 = buf.bytes();
+
 			assert(ui8.byteLength === nread);
+
 			this._data = ui8.buffer.slice(
 				ui8.byteOffset,
 				ui8.byteOffset + nread,
 			) as ArrayBuffer;
+
 			assert(this._data.byteLength === nread);
 		} finally {
 			this.close();
@@ -134,6 +140,7 @@ class Body implements domTypes.Body, domTypes.ReadableStream, io.ReadCloser {
 				if (firstBoundaryIndex < 0) {
 					throw new TypeError("Invalid boundary");
 				}
+
 				const bodyPreambleTrimmed = bodyEpilogueTrimmed
 					.slice(firstBoundaryIndex + dashBoundary.length)
 					.replace(/^[\s\r\n\t]+/, ""); // remove transport-padding CRLF
@@ -147,6 +154,7 @@ class Body implements domTypes.Body, domTypes.ReadableStream, io.ReadCloser {
 				// but should be fine in our case since without headers
 				// we should just discard the part
 			}
+
 			for (const bodyPart of bodyParts) {
 				const headers = new Headers();
 
@@ -155,6 +163,7 @@ class Body implements domTypes.Body, domTypes.ReadableStream, io.ReadCloser {
 				if (headerOctetSeperatorIndex < 0) {
 					continue; // Skip unknown part
 				}
+
 				const headerText = bodyPart.slice(0, headerOctetSeperatorIndex);
 
 				const octets = bodyPart.slice(headerOctetSeperatorIndex + 4);
@@ -168,11 +177,14 @@ class Body implements domTypes.Body, domTypes.ReadableStream, io.ReadCloser {
 					if (sepIndex < 0) {
 						continue; // Skip this header
 					}
+
 					const key = rawHeader.slice(0, sepIndex);
 
 					const value = rawHeader.slice(sepIndex + 1);
+
 					headers.set(key, value);
 				}
+
 				if (!headers.has("content-disposition")) {
 					continue; // Skip unknown part
 				}
@@ -188,12 +200,14 @@ class Body implements domTypes.Body, domTypes.ReadableStream, io.ReadCloser {
 				if (!hasHeaderValueOf(contentDisposition, "form-data")) {
 					continue; // Skip, might not be form-data
 				}
+
 				const dispositionParams =
 					getHeaderValueParams(contentDisposition);
 
 				if (!dispositionParams.has("name")) {
 					continue; // Skip, unknown name
 				}
+
 				const dispositionName = dispositionParams.get("name")!;
 
 				if (dispositionParams.has("filename")) {
@@ -212,6 +226,7 @@ class Body implements domTypes.Body, domTypes.ReadableStream, io.ReadCloser {
 					formData.append(dispositionName, octets);
 				}
 			}
+
 			return formData;
 		} else if (
 			hasHeaderValueOf(
@@ -243,6 +258,7 @@ class Body implements domTypes.Body, domTypes.ReadableStream, io.ReadCloser {
 			} catch (e) {
 				throw new TypeError("Invalid form urlencoded format");
 			}
+
 			return formData;
 		} else {
 			throw new TypeError("Invalid form data");
@@ -298,8 +314,11 @@ class Body implements domTypes.Body, domTypes.ReadableStream, io.ReadCloser {
 export class Response implements domTypes.Response {
 	readonly type = "basic"; // TODO
 	readonly redirected: boolean;
+
 	headers: domTypes.Headers;
+
 	readonly trailer: Promise<domTypes.Headers>;
+
 	readonly body: Body;
 
 	constructor(
@@ -312,6 +331,7 @@ export class Response implements domTypes.Response {
 		body_: null | Body = null,
 	) {
 		this.trailer = createResolvable();
+
 		this.headers = new Headers(headersList);
 
 		const contentType = this.headers.get("content-type") || "";
@@ -383,8 +403,11 @@ export class Response implements domTypes.Response {
 
 interface FetchResponse {
 	bodyRid: number;
+
 	status: number;
+
 	statusText: string;
+
 	headers: Array<[string, string]>;
 }
 
@@ -463,24 +486,29 @@ export async function fetch(
 				if (!headers) {
 					headers = new Headers();
 				}
+
 				let contentType = "";
 
 				if (typeof init.body === "string") {
 					body = new TextEncoder().encode(init.body);
+
 					contentType = "text/plain;charset=UTF-8";
 				} else if (isTypedArray(init.body)) {
 					body = init.body;
 				} else if (init.body instanceof URLSearchParams) {
 					body = new TextEncoder().encode(init.body.toString());
+
 					contentType =
 						"application/x-www-form-urlencoded;charset=UTF-8";
 				} else if (init.body instanceof DenoBlob) {
 					body = init.body[blobBytesSymbol];
+
 					contentType = init.body.type;
 				} else {
 					// TODO: FormData, ReadableStream
 					notImplemented();
 				}
+
 				if (contentType && !headers.has("content-type")) {
 					headers.set("content-type", contentType);
 				}
@@ -488,7 +516,9 @@ export async function fetch(
 		}
 	} else {
 		url = input.url;
+
 		method = input.method;
+
 		headers = input.headers;
 
 		//@ts-ignore
@@ -525,6 +555,7 @@ export async function fetch(
 					if (redirectUrl == null) {
 						return response; // Unspecified
 					}
+
 					if (
 						!redirectUrl.startsWith("http://") &&
 						!redirectUrl.startsWith("https://")
@@ -535,8 +566,11 @@ export async function fetch(
 							url.split("//")[1].split("/")[0] +
 							redirectUrl; // TODO: handle relative redirection more gracefully
 					}
+
 					url = redirectUrl;
+
 					redirected = true;
+
 					remRedirectCount--;
 			}
 		} else {

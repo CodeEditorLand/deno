@@ -11,6 +11,7 @@ test(function multipartIsFormFile(): void {
 		}),
 		true,
 	);
+
 	assertEquals(
 		isFormFile({
 			filename: "foo",
@@ -28,5 +29,6 @@ test(function isFormFileShouldNotThrow(): void {
 		}),
 		true,
 	);
+
 	assertEquals(isFormFile(Object.create(null)), false);
 });

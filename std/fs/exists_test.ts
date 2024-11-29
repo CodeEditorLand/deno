@@ -11,6 +11,7 @@ test(async function existsFile(): Promise<void> {
 		await exists(path.join(testdataDir, "not_exist_file.ts")),
 		false,
 	);
+
 	assertEquals(await existsSync(path.join(testdataDir, "0.ts")), true);
 });
 
@@ -19,6 +20,7 @@ test(function existsFileSync(): void {
 		existsSync(path.join(testdataDir, "not_exist_file.ts")),
 		false,
 	);
+
 	assertEquals(existsSync(path.join(testdataDir, "0.ts")), true);
 });
 
@@ -27,6 +29,7 @@ test(async function existsDirectory(): Promise<void> {
 		await exists(path.join(testdataDir, "not_exist_directory")),
 		false,
 	);
+
 	assertEquals(existsSync(testdataDir), true);
 });
 
@@ -35,6 +38,7 @@ test(function existsDirectorySync(): void {
 		existsSync(path.join(testdataDir, "not_exist_directory")),
 		false,
 	);
+
 	assertEquals(existsSync(testdataDir), true);
 });
 
@@ -54,7 +58,9 @@ test(async function existsPermission(): Promise<void> {
 	interface Scenes {
 		read: boolean; // --allow-read
 		async: boolean;
+
 		output: string;
+
 		file: string; // target file to run
 	}
 
@@ -129,6 +135,7 @@ test(async function existsPermission(): Promise<void> {
 		args.push(
 			path.join(testdataDir, s.async ? "exists.ts" : "exists_sync.ts"),
 		);
+
 		args.push(s.file);
 
 		const { stdout } = Deno.run({

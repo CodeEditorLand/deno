@@ -45,11 +45,13 @@ export class ReadableStreamDefaultController<OutputType>
 		if (!rs.isReadableStreamDefaultController(this)) {
 			throw new TypeError();
 		}
+
 		if (!rs.readableStreamDefaultControllerCanCloseOrEnqueue(this)) {
 			throw new TypeError(
 				"Cannot close, the stream is already closing or not readable",
 			);
 		}
+
 		rs.readableStreamDefaultControllerClose(this);
 	}
 
@@ -57,11 +59,13 @@ export class ReadableStreamDefaultController<OutputType>
 		if (!rs.isReadableStreamDefaultController(this)) {
 			throw new TypeError();
 		}
+
 		if (!rs.readableStreamDefaultControllerCanCloseOrEnqueue(this)) {
 			throw new TypeError(
 				"Cannot enqueue, the stream is closing or not readable",
 			);
 		}
+
 		rs.readableStreamDefaultControllerEnqueue(this, chunk!);
 	}
 
@@ -69,6 +73,7 @@ export class ReadableStreamDefaultController<OutputType>
 		if (!rs.isReadableStreamDefaultController(this)) {
 			throw new TypeError();
 		}
+
 		rs.readableStreamDefaultControllerError(this, e);
 	}
 
@@ -76,6 +81,7 @@ export class ReadableStreamDefaultController<OutputType>
 		q.resetQueue(this);
 
 		const result = this[rs.cancelAlgorithm_](reason);
+
 		rs.readableStreamDefaultControllerClearAlgorithms(this);
 
 		return result;
@@ -91,10 +97,12 @@ export class ReadableStreamDefaultController<OutputType>
 
 			if (this[rs.closeRequested_] && this[q.queue_].length === 0) {
 				rs.readableStreamDefaultControllerClearAlgorithms(this);
+
 				rs.readableStreamClose(stream);
 			} else {
 				rs.readableStreamDefaultControllerCallPullIfNeeded(this);
 			}
+
 			return Promise.resolve(
 				rs.readableStreamCreateReadResult(chunk, false, forAuthorCode),
 			);
@@ -104,6 +112,7 @@ export class ReadableStreamDefaultController<OutputType>
 			stream,
 			forAuthorCode,
 		);
+
 		rs.readableStreamDefaultControllerCallPullIfNeeded(this);
 
 		return pendingPromise;
@@ -136,6 +145,7 @@ export function setUpReadableStreamDefaultControllerFromUnderlyingSource<
 		"cancel",
 		[],
 	);
+
 	rs.setUpReadableStreamDefaultController(
 		stream,
 		controller,

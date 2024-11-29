@@ -61,6 +61,7 @@ export function env(
 	if (key) {
 		return getEnv(key);
 	}
+
 	const env = sendSync(dispatch.OP_ENV);
 
 	return new Proxy(env, {
@@ -74,18 +75,30 @@ export function env(
 
 interface Start {
 	cwd: string;
+
 	pid: number;
+
 	argv: string[];
+
 	mainModule: string; // Absolute URL.
 	debugFlag: boolean;
+
 	depsFlag: boolean;
+
 	typesFlag: boolean;
+
 	versionFlag: boolean;
+
 	denoVersion: string;
+
 	v8Version: string;
+
 	tsVersion: string;
+
 	noColor: boolean;
+
 	os: OperatingSystem;
+
 	arch: Arch;
 }
 
@@ -116,7 +129,9 @@ export function start(preserveDenoNamespace = true, source?: string): Start {
 	// pid and noColor need to be set in the Deno module before it's set to be
 	// frozen.
 	util.immutableDefine(window.Deno, "pid", pid);
+
 	util.immutableDefine(window.Deno, "noColor", noColor);
+
 	Object.freeze(window.Deno);
 
 	if (preserveDenoNamespace) {
@@ -129,6 +144,7 @@ export function start(preserveDenoNamespace = true, source?: string): Start {
 	} else {
 		// Remove window.Deno
 		delete window.Deno;
+
 		assert(window.Deno === undefined);
 	}
 

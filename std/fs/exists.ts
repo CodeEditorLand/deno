@@ -31,6 +31,7 @@ export function existsSync(filePath: string): boolean {
 				return false;
 			}
 		}
+
 		throw err;
 	}
 }

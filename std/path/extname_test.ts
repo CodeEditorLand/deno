@@ -57,17 +57,25 @@ test(function extname() {
 		const input = p[0];
 
 		const expected = p[1];
+
 		assertEquals(expected, path.posix.extname(input));
 	});
 
 	// On *nix, backslash is a valid name component like any other character.
 	assertEquals(path.posix.extname(".\\"), "");
+
 	assertEquals(path.posix.extname("..\\"), ".\\");
+
 	assertEquals(path.posix.extname("file.ext\\"), ".ext\\");
+
 	assertEquals(path.posix.extname("file.ext\\\\"), ".ext\\\\");
+
 	assertEquals(path.posix.extname("file\\"), "");
+
 	assertEquals(path.posix.extname("file\\\\"), "");
+
 	assertEquals(path.posix.extname("file.\\"), ".\\");
+
 	assertEquals(path.posix.extname("file.\\\\"), ".\\\\");
 });
 
@@ -76,17 +84,26 @@ test(function extnameWin32() {
 		const input = p[0].replace(slashRE, "\\");
 
 		const expected = p[1];
+
 		assertEquals(expected, path.win32.extname(input));
+
 		assertEquals(expected, path.win32.extname("C:" + input));
 	});
 
 	// On Windows, backslash is a path separator.
 	assertEquals(path.win32.extname(".\\"), "");
+
 	assertEquals(path.win32.extname("..\\"), "");
+
 	assertEquals(path.win32.extname("file.ext\\"), ".ext");
+
 	assertEquals(path.win32.extname("file.ext\\\\"), ".ext");
+
 	assertEquals(path.win32.extname("file\\"), "");
+
 	assertEquals(path.win32.extname("file\\\\"), "");
+
 	assertEquals(path.win32.extname("file.\\"), ".");
+
 	assertEquals(path.win32.extname("file.\\\\"), ".");
 });

@@ -20,6 +20,7 @@ test(async function emptyDirIfItNotExist(): Promise<void> {
 	try {
 		// check the dir
 		const stat = await Deno.stat(testNestDir);
+
 		assertEquals(stat.isDirectory(), true);
 	} finally {
 		// remove the test dir
@@ -37,6 +38,7 @@ test(function emptyDirSyncIfItNotExist(): void {
 	try {
 		// check the dir
 		const stat = Deno.statSync(testNestDir);
+
 		assertEquals(stat.isDirectory(), true);
 	} finally {
 		// remove the test dir
@@ -57,9 +59,11 @@ test(async function emptyDirIfItExist(): Promise<void> {
 
 	// before empty: make sure file/directory exist
 	const beforeFileStat = await Deno.stat(testDirFile);
+
 	assertEquals(beforeFileStat.isFile(), true);
 
 	const beforeDirStat = await Deno.stat(testNestDir);
+
 	assertEquals(beforeDirStat.isDirectory(), true);
 
 	await emptyDir(testDir);
@@ -68,6 +72,7 @@ test(async function emptyDirIfItExist(): Promise<void> {
 	try {
 		// test dir still there
 		const stat = await Deno.stat(testDir);
+
 		assertEquals(stat.isDirectory(), true);
 
 		// nest directory have been remove
@@ -98,9 +103,11 @@ test(function emptyDirSyncIfItExist(): void {
 
 	// before empty: make sure file/directory exist
 	const beforeFileStat = Deno.statSync(testDirFile);
+
 	assertEquals(beforeFileStat.isFile(), true);
 
 	const beforeDirStat = Deno.statSync(testNestDir);
+
 	assertEquals(beforeDirStat.isDirectory(), true);
 
 	emptyDirSync(testDir);
@@ -109,6 +116,7 @@ test(function emptyDirSyncIfItExist(): void {
 	try {
 		// test dir still there
 		const stat = Deno.statSync(testDir);
+
 		assertEquals(stat.isDirectory(), true);
 
 		// nest directory have been remove

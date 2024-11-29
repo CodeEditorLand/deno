@@ -5,7 +5,9 @@ test(function addEventListenerTest(): void {
 	const document = new EventTarget();
 
 	assertEquals(document.addEventListener("x", null, false), undefined);
+
 	assertEquals(document.addEventListener("x", null, true), undefined);
+
 	assertEquals(document.addEventListener("x", null), undefined);
 });
 
@@ -24,13 +26,17 @@ test(function constructedEventTargetCanBeUsedAsExpected(): void {
 	target.addEventListener("foo", listener);
 
 	target.dispatchEvent(event);
+
 	assertEquals(callCount, 1);
 
 	target.dispatchEvent(event);
+
 	assertEquals(callCount, 2);
 
 	target.removeEventListener("foo", listener);
+
 	target.dispatchEvent(event);
+
 	assertEquals(callCount, 2);
 });
 
@@ -46,6 +52,7 @@ test(function anEventTargetCanBeSubclassed(): void {
 	}
 
 	const target = new NicerEventTarget();
+
 	new Event("foo", { bubbles: true, cancelable: false });
 
 	let callCount = 0;
@@ -55,16 +62,21 @@ test(function anEventTargetCanBeSubclassed(): void {
 	};
 
 	target.on("foo", listener);
+
 	assertEquals(callCount, 0);
 
 	target.off("foo", listener);
+
 	assertEquals(callCount, 0);
 });
 
 test(function removingNullEventListenerShouldSucceed(): void {
 	const document = new EventTarget();
+
 	assertEquals(document.removeEventListener("x", null, false), undefined);
+
 	assertEquals(document.removeEventListener("x", null, true), undefined);
+
 	assertEquals(document.removeEventListener("x", null), undefined);
 });
 
@@ -83,18 +95,23 @@ test(function constructedEventTargetUseObjectPrototype(): void {
 	target.addEventListener("toString", listener);
 
 	target.dispatchEvent(event);
+
 	assertEquals(callCount, 1);
 
 	target.dispatchEvent(event);
+
 	assertEquals(callCount, 2);
 
 	target.removeEventListener("toString", listener);
+
 	target.dispatchEvent(event);
+
 	assertEquals(callCount, 2);
 });
 
 test(function toStringShouldBeWebCompatible(): void {
 	const target = new EventTarget();
+
 	assertEquals(target.toString(), "[object EventTarget]");
 });
 
@@ -110,7 +127,9 @@ test(function dispatchEventShouldNotThrowError(): void {
 		});
 
 		const listener = (): void => {};
+
 		target.addEventListener("hasOwnProperty", listener);
+
 		target.dispatchEvent(event);
 	} catch {
 		hasThrown = true;
@@ -132,18 +151,30 @@ test(function eventTargetThisShouldDefaultToWindow(): void {
 	};
 
 	addEventListener("hello", listener);
+
 	window.dispatchEvent(event);
+
 	assertEquals(n, 2);
+
 	n = 1;
+
 	removeEventListener("hello", listener);
+
 	window.dispatchEvent(event);
+
 	assertEquals(n, 1);
 
 	window.addEventListener("hello", listener);
+
 	dispatchEvent(event);
+
 	assertEquals(n, 2);
+
 	n = 1;
+
 	window.removeEventListener("hello", listener);
+
 	dispatchEvent(event);
+
 	assertEquals(n, 1);
 });

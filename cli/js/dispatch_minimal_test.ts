@@ -16,6 +16,7 @@ const readErrorStackPattern = new RegExp(
 
 test(async function sendAsyncStackTrace(): Promise<void> {
 	const buf = new Uint8Array(10);
+
 	await Deno.read(10, "nonexistent.txt", buf)
 		.then(unreachable)
 		.catch((error): void => {
@@ -39,7 +40,10 @@ test(async function malformedMinimalControlBuffer(): Promise<void> {
 	const result = buf32[2];
 
 	const message = new TextDecoder().decode(res.slice(12));
+
 	assert(arg < 0);
+
 	assertEquals(result, Deno.ErrorKind.InvalidInput);
+
 	assertEquals(message, "Unparsable control buffer");
 });

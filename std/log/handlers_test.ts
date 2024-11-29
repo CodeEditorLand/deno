@@ -52,6 +52,7 @@ test(function simpleHandler(): void {
 
 		for (const levelName in LogLevel) {
 			const level = getLevelByName(levelName);
+
 			handler.handle({
 				msg: `${levelName.toLowerCase()}-test`,
 				args: [],
@@ -62,7 +63,9 @@ test(function simpleHandler(): void {
 		}
 
 		assertEquals(handler.level, testCase);
+
 		assertEquals(handler.levelName, testLevel);
+
 		assertEquals(handler.messages, messages);
 	}
 });

@@ -28,6 +28,7 @@ ARGS:
                   ${DIR_GLOBS.map((s: string): string => `${join("<dir>", s)}`)
 						.join(`
                   `)}
+
                 Defaults to "." when none are provided.
 
 Note that modules can refer to file paths or URLs. File paths support glob
@@ -119,7 +120,9 @@ export async function* findTestModules(
 
 export interface RunTestModulesOptions extends RunTestsOptions {
 	include?: string[];
+
 	exclude?: string[];
+
 	allowNone?: boolean;
 }
 
@@ -187,6 +190,7 @@ export async function runTestModules({
 
 	for await (const testModule of findTestModules(include, exclude)) {
 		testModules.push(testModule);
+
 		moduleCount++;
 	}
 
@@ -198,6 +202,7 @@ export async function runTestModules({
 		} else if (!disableLog) {
 			console.log(noneFoundMessage);
 		}
+
 		return;
 	}
 
@@ -215,6 +220,7 @@ export async function runTestModules({
 	const testFilePath = join(root, ".deno.test.ts");
 
 	const data = new TextEncoder().encode(testFile);
+
 	await Deno.writeFile(testFilePath, data);
 
 	// Import temporary test file and delete it immediately after importing so it's not cluttering disk.
@@ -307,6 +313,7 @@ async function main(): Promise<void> {
 		if (!disableLog) {
 			console.error(error.message);
 		}
+
 		exit(1);
 	}
 }

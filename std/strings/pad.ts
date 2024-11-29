@@ -70,10 +70,12 @@ export function pad(
 			if (opts.strictChar) {
 				toDrop += opts.strictChar.length;
 			}
+
 			out = `${addChar}${out.slice(toDrop, outL)}`;
 		} else {
 			out = `${out.substring(0, strLen - addChar.length)}${addChar}`;
 		}
 	}
+
 	return out;
 }

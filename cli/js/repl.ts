@@ -86,6 +86,7 @@ function evaluate(code: string): boolean {
 
 	if (!errInfo) {
 		lastEvalResult = result;
+
 		replLog(result);
 	} else if (errInfo.isCompileError && isRecoverableError(errInfo.thrown)) {
 		// Recoverable compiler error
@@ -97,17 +98,20 @@ function evaluate(code: string): boolean {
 			const formattedError = formatError(
 				core.errorToJSON(errInfo.thrown as Error),
 			);
+
 			replError(formattedError);
 		} else {
 			replError("Thrown:", errInfo.thrown);
 		}
 	}
+
 	return true;
 }
 
 // @internal
 export async function replLoop(): Promise<void> {
 	const { console } = window;
+
 	Object.defineProperties(window, replCommands);
 
 	const historyFile = "deno_history.txt";
@@ -119,6 +123,7 @@ export async function replLoop(): Promise<void> {
 		try {
 			close(rid); // close signals Drop on REPL and saves history.
 		} catch {}
+
 		exit(exitCode);
 	};
 
@@ -133,6 +138,7 @@ export async function replLoop(): Promise<void> {
 				enumerable: true,
 				configurable: true,
 			});
+
 			console.log("Last evaluation result is no longer saved to _.");
 		},
 	});
@@ -148,6 +154,7 @@ export async function replLoop(): Promise<void> {
 				enumerable: true,
 				configurable: true,
 			});
+
 			console.log("Last thrown error is no longer saved to _error.");
 		},
 	});
@@ -170,6 +177,7 @@ export async function replLoop(): Promise<void> {
 					// e.g. this happens when we have deno.close(3).
 					// We want to display the problem.
 					const formattedError = formatError(core.errorToJSON(err));
+
 					replError(formattedError);
 				}
 				// Quit REPL anyways.
@@ -193,7 +201,9 @@ export async function replLoop(): Promise<void> {
 					// e.g. this happens when we have deno.close(3).
 					// We want to display the problem.
 					const formattedError = formatError(core.errorToJSON(err));
+
 					replError(formattedError);
+
 					quitRepl(1);
 				}
 			}

@@ -6,18 +6,22 @@ type Reader = Deno.Reader;
 /** Reader utility for strings */
 export class StringReader implements Reader {
 	private offs = 0;
+
 	private buf = new Uint8Array(encode(this.s));
 
 	constructor(private readonly s: string) {}
 
 	async read(p: Uint8Array): Promise<number | Deno.EOF> {
 		const n = Math.min(p.byteLength, this.buf.byteLength - this.offs);
+
 		p.set(this.buf.slice(this.offs, this.offs + n));
+
 		this.offs += n;
 
 		if (n === 0) {
 			return Deno.EOF;
 		}
+
 		return n;
 	}
 }
@@ -25,6 +29,7 @@ export class StringReader implements Reader {
 /** Reader utility for combining multiple readers */
 export class MultiReader implements Reader {
 	private readonly readers: Reader[];
+
 	private currentIndex = 0;
 
 	constructor(...readers: Reader[]) {
@@ -43,6 +48,7 @@ export class MultiReader implements Reader {
 
 			return 0;
 		}
+
 		return result;
 	}
 }

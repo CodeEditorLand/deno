@@ -32,6 +32,7 @@ export function isInteger(value: number): boolean {
 		// covers NaN, +Infinity and -Infinity
 		return false;
 	}
+
 	const absValue = Math.abs(value);
 
 	return Math.floor(absValue) === absValue;
@@ -42,6 +43,7 @@ export function isFiniteNonNegativeNumber(value: unknown): boolean {
 		// covers NaN, +Infinity and -Infinity
 		return false;
 	}
+
 	return value >= 0;
 }
 
@@ -49,6 +51,7 @@ export function isAbortSignal(signal: any): signal is AbortSignal {
 	if (typeof signal !== "object" || signal === null) {
 		return false;
 	}
+
 	try {
 		// TODO
 		// calling signal.aborted() probably isn't the right way to perform this test
@@ -73,6 +76,7 @@ export function invokeOrNoop<O extends object, P extends keyof O>(
 	if (method === undefined) {
 		return undefined;
 	}
+
 	return Function.prototype.apply.call(method, o, args);
 }
 
@@ -118,11 +122,13 @@ function supportsSharedArrayBuffer(): boolean {
 	if (sharedArrayBufferSupported_ === undefined) {
 		try {
 			new SharedArrayBuffer(16);
+
 			sharedArrayBufferSupported_ = true;
 		} catch (e) {
 			sharedArrayBufferSupported_ = false;
 		}
 	}
+
 	return sharedArrayBufferSupported_;
 }
 
@@ -147,21 +153,26 @@ export function cloneValue(value: any): any {
 			if (objectCloneMemo.has(value)) {
 				return objectCloneMemo.get(value);
 			}
+
 			if (value === null) {
 				return value;
 			}
+
 			if (value instanceof Date) {
 				return new Date(value.valueOf());
 			}
+
 			if (value instanceof RegExp) {
 				return new RegExp(value);
 			}
+
 			if (
 				supportsSharedArrayBuffer() &&
 				value instanceof SharedArrayBuffer
 			) {
 				return value;
 			}
+
 			if (value instanceof ArrayBuffer) {
 				const cloned = cloneArrayBuffer(
 					value,
@@ -169,10 +180,12 @@ export function cloneValue(value: any): any {
 					value.byteLength,
 					ArrayBuffer,
 				);
+
 				objectCloneMemo.set(value, cloned);
 
 				return cloned;
 			}
+
 			if (ArrayBuffer.isView(value)) {
 				const clonedBuffer = cloneValue(
 					value.buffer,
@@ -187,22 +200,29 @@ export function cloneValue(value: any): any {
 				} else {
 					length = (value as Uint8Array).length;
 				}
+
 				return new (value.constructor as DataViewConstructor)(
 					clonedBuffer,
 					value.byteOffset,
 					length,
 				);
 			}
+
 			if (value instanceof Map) {
 				const clonedMap = new Map();
+
 				objectCloneMemo.set(value, clonedMap);
+
 				value.forEach((v, k) => clonedMap.set(k, cloneValue(v)));
 
 				return clonedMap;
 			}
+
 			if (value instanceof Set) {
 				const clonedSet = new Map();
+
 				objectCloneMemo.set(value, clonedSet);
+
 				value.forEach((v, k) => clonedSet.set(k, cloneValue(v)));
 
 				return clonedSet;
@@ -210,6 +230,7 @@ export function cloneValue(value: any): any {
 
 			// generic object
 			const clonedObj = {} as any;
+
 			objectCloneMemo.set(value, clonedObj);
 
 			const sourceKeys = Object.getOwnPropertyNames(value);
@@ -217,8 +238,10 @@ export function cloneValue(value: any): any {
 			for (const key of sourceKeys) {
 				clonedObj[key] = cloneValue(value[key]);
 			}
+
 			return clonedObj;
 		}
+
 		case "symbol":
 		case "function":
 		default:
@@ -255,9 +278,11 @@ export function createAlgorithmFromUnderlyingMethod<
 	if (method === undefined) {
 		return (): any => Promise.resolve(undefined);
 	}
+
 	if (typeof method !== "function") {
 		throw new TypeError(`Field "${methodName}" is not a function.`);
 	}
+
 	return function (...fnArgs: any[]): any {
 		return promiseCall(method, obj, fnArgs.concat(extraArgs));
 	};
@@ -279,6 +304,7 @@ export function validateAndNormalizeHighWaterMark(hwm: unknown): number {
 			"highWaterMark must be a valid, non-negative integer.",
 		);
 	}
+
 	return highWaterMark;
 }
 
@@ -288,10 +314,12 @@ export function makeSizeAlgorithmFromSizeFunction<T>(
 	if (typeof sizeFn !== "function" && typeof sizeFn !== "undefined") {
 		throw new TypeError("size function must be undefined or a function");
 	}
+
 	return function (chunk: T): number {
 		if (typeof sizeFn === "function") {
 			return sizeFn(chunk);
 		}
+
 		return 1;
 	};
 }
@@ -306,8 +334,11 @@ export const enum ControlledPromiseState {
 
 export interface ControlledPromise<V> {
 	resolve(value?: V): void;
+
 	reject(error: ErrorResult): void;
+
 	promise: Promise<V>;
+
 	state: ControlledPromiseState;
 }
 
@@ -315,13 +346,17 @@ export function createControlledPromise<V>(): ControlledPromise<V> {
 	const conProm = {
 		state: ControlledPromiseState.Pending,
 	} as ControlledPromise<V>;
+
 	conProm.promise = new Promise<V>(function (resolve, reject) {
 		conProm.resolve = function (v?: V): void {
 			conProm.state = ControlledPromiseState.Resolved;
+
 			resolve(v);
 		};
+
 		conProm.reject = function (e?: ErrorResult): void {
 			conProm.state = ControlledPromiseState.Rejected;
+
 			reject(e);
 		};
 	});

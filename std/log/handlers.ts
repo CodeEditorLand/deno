@@ -16,12 +16,14 @@ interface HandlerOptions {
 
 export class BaseHandler {
 	level: number;
+
 	levelName: string;
 
 	formatter: string | FormatterFunction;
 
 	constructor(levelName: string, options: HandlerOptions = {}) {
 		this.level = getLevelByName(levelName);
+
 		this.levelName = levelName;
 
 		this.formatter = options.formatter || DEFAULT_FORMATTER;
@@ -53,7 +55,9 @@ export class BaseHandler {
 	}
 
 	log(_msg: string): void {}
+
 	async setup(): Promise<void> {}
+
 	async destroy(): Promise<void> {}
 }
 
@@ -96,6 +100,7 @@ export class ConsoleHandler extends BaseHandler {
 
 export abstract class WriterHandler extends BaseHandler {
 	protected _writer!: Writer;
+
 	private _encoder = new TextEncoder();
 
 	log(msg: string): void {
@@ -109,16 +114,19 @@ interface FileHandlerOptions extends HandlerOptions {
 
 export class FileHandler extends WriterHandler {
 	private _file!: File;
+
 	private _filename: string;
 
 	constructor(levelName: string, options: FileHandlerOptions) {
 		super(levelName, options);
+
 		this._filename = options.filename;
 	}
 
 	async setup(): Promise<void> {
 		// open file in append mode - write only
 		this._file = await open(this._filename, "a");
+
 		this._writer = this._file;
 	}
 

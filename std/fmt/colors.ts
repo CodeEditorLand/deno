@@ -15,7 +15,9 @@ const { noColor } = Deno;
 
 interface Code {
 	open: string;
+
 	close: string;
+
 	regexp: RegExp;
 }
 

@@ -89,14 +89,23 @@ function checkParseFormat(path: any, paths: any): void {
 		const element = p[0];
 
 		const output = path.parse(element);
+
 		assertEquals(typeof output.root, "string");
+
 		assertEquals(typeof output.dir, "string");
+
 		assertEquals(typeof output.base, "string");
+
 		assertEquals(typeof output.ext, "string");
+
 		assertEquals(typeof output.name, "string");
+
 		assertEquals(path.format(output), element);
+
 		assertEquals(output.rooroot, undefined);
+
 		assertEquals(output.dir, output.dir ? path.dirname(element) : "");
+
 		assertEquals(output.base, path.basename(element));
 	});
 }
@@ -108,6 +117,7 @@ function checkSpecialCaseParseFormat(path: any, testCases: any): void {
 		const expect = testCase[1];
 
 		const output = path.parse(element);
+
 		Object.keys(expect).forEach(function (key) {
 			assertEquals(output[key], expect[key]);
 		});
@@ -122,6 +132,7 @@ function checkFormat(path: any, testCases: unknown[][]): void {
 
 test(function parseWin32() {
 	checkParseFormat(path.win32, winPaths);
+
 	checkSpecialCaseParseFormat(path.win32, winSpecialCaseParseTests);
 });
 
@@ -174,6 +185,7 @@ test(function parseTrailingWin32() {
 		const actual = path.win32.parse(p[0] as string);
 
 		const expected = p[1];
+
 		assertEquals(actual, expected);
 	});
 });
@@ -183,6 +195,7 @@ test(function parseTrailing() {
 		const actual = path.posix.parse(p[0] as string);
 
 		const expected = p[1];
+
 		assertEquals(actual, expected);
 	});
 });

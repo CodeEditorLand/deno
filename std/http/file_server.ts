@@ -18,8 +18,11 @@ const { ErrorKind, DenoError, args, stat, readDir, open, exit } = Deno;
 
 interface EntryInfo {
 	mode: string;
+
 	size: string;
+
 	url: string;
+
 	name: string;
 }
 
@@ -27,11 +30,13 @@ interface FileServerArgs {
 	_: string[];
 	// -p --port
 	p: number;
+
 	port: number;
 	// --cors
 	cors: boolean;
 	// -h --help
 	h: boolean;
+
 	help: boolean;
 }
 
@@ -59,6 +64,7 @@ OPTIONS:
   -h, --help          Prints help information
   -p, --port <PORT>   Set port
   --cors              Enable CORS via the "Access-Control-Allow-Origin" header`);
+
 	exit();
 }
 
@@ -68,18 +74,22 @@ function modeToString(isDir: boolean, maybeMode: number | null): string {
 	if (maybeMode === null) {
 		return "(unknown mode)";
 	}
+
 	const mode = maybeMode!.toString(8);
 
 	if (mode.length < 3) {
 		return "(unknown mode)";
 	}
+
 	let output = "";
+
 	mode.split("")
 		.reverse()
 		.slice(0, 3)
 		.forEach((v): void => {
 			output = modeMap[+v] + output;
 		});
+
 	output = `(${isDir ? "d" : "-"}${output})`;
 
 	return output;
@@ -98,7 +108,9 @@ function fileLenToString(len: number): string {
 		if (suffixIndex >= suffix.length - 1) {
 			break;
 		}
+
 		base *= multiplier;
+
 		suffixIndex++;
 	}
 
@@ -115,7 +127,9 @@ async function serveFile(
 	]);
 
 	const headers = new Headers();
+
 	headers.set("content-length", fileInfo.len.toString());
+
 	headers.set("content-type", "text/plain; charset=utf-8");
 
 	const res = {
@@ -153,6 +167,7 @@ async function serveDir(
 		try {
 			mode = (await stat(filePath)).mode;
 		} catch (e) {}
+
 		listEntry.push({
 			mode: modeToString(fileInfo.isDirectory(), mode),
 			size: fileInfo.isFile() ? fileLenToString(fileInfo.len) : "",
@@ -160,6 +175,7 @@ async function serveDir(
 			url: fileUrl,
 		});
 	}
+
 	listEntry.sort((a, b) =>
 		a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1,
 	);
@@ -169,6 +185,7 @@ async function serveDir(
 	const page = encoder.encode(dirViewerTemplate(formattedDirUrl, listEntry));
 
 	const headers = new Headers();
+
 	headers.set("content-type", "text/html");
 
 	const res = {
@@ -202,6 +219,7 @@ function serverLog(req: ServerRequest, res: Response): void {
 	const dateFmt = `[${d.slice(0, 10)} ${d.slice(11, 19)}]`;
 
 	const s = `${dateFmt} "${req.method} ${req.url} ${req.proto}" ${res.status}`;
+
 	console.log(s);
 }
 
@@ -209,7 +227,9 @@ function setCORS(res: Response): void {
 	if (!res.headers) {
 		res.headers = new Headers();
 	}
+
 	res.headers!.append("access-control-allow-origin", "*");
+
 	res.headers!.append(
 		"access-control-allow-headers",
 		"Origin, X-Requested-With, Content-Type, Accept, Range",
@@ -242,35 +262,49 @@ function dirViewerTemplate(dirname: string, entries: EntryInfo[]): string {
 						main {
 							max-width: 960px;
 						}
+
 						body {
 							padding-left: 32px;
+
 							padding-right: 32px;
 						}
 					}
 					@media (min-width: 600px) {
 						main {
 							padding-left: 24px;
+
 							padding-right: 24px;
 						}
 					}
+
 					body {
 						background: var(--background-color);
+
 						color: var(--color);
+
 						font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+
 						font-weight: 400;
+
 						line-height: 1.43;
+
 						font-size: 0.875rem;
 					}
+
 					a {
 						color: #2196f3;
+
 						text-decoration: none;
 					}
+
 					a:hover {
 						text-decoration: underline;
 					}
+
 					table th {
 						text-align: left;
 					}
+
 					table td {
 						padding: 12px 24px 0 0;
 					}
@@ -314,9 +348,12 @@ function html(strings: TemplateStringsArray, ...values: unknown[]): string {
 		if (v instanceof Array) {
 			v = v.join("");
 		}
+
 		const s = strings[i] + v;
+
 		html += s;
 	}
+
 	html += strings[l];
 
 	return html;
@@ -341,12 +378,15 @@ listenAndServe(addr, async (req): Promise<void> => {
 		}
 	} catch (e) {
 		console.error(e.message);
+
 		response = await serveFallback(req, e);
 	} finally {
 		if (CORSEnabled) {
 			setCORS(response);
 		}
+
 		serverLog(req, response);
+
 		req.respond(response);
 	}
 });

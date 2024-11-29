@@ -25,12 +25,15 @@ async function expandGlobArray(
 	for await (const { filename } of expandGlob(globString, options)) {
 		paths.push(filename);
 	}
+
 	paths.sort();
 
 	const pathsSync = [...expandGlobSync(globString, options)].map(
 		({ filename }): string => filename,
 	);
+
 	pathsSync.sort();
+
 	assertEquals(paths, pathsSync);
 
 	const root = normalize(options.root || cwd());
@@ -38,9 +41,11 @@ async function expandGlobArray(
 	for (const path of paths) {
 		assert(path.startsWith(root));
 	}
+
 	const relativePaths = paths.map(
 		(path: string): string => relative(root, path) || ".",
 	);
+
 	relativePaths.sort();
 
 	return relativePaths;
@@ -60,6 +65,7 @@ const EG_OPTIONS: ExpandGlobOptions = {
 
 test(async function expandGlobWildcard(): Promise<void> {
 	const options = EG_OPTIONS;
+
 	assertEquals(await expandGlobArray("*", options), [
 		"abc",
 		"abcdef",
@@ -70,11 +76,13 @@ test(async function expandGlobWildcard(): Promise<void> {
 
 test(async function expandGlobTrailingSeparator(): Promise<void> {
 	const options = EG_OPTIONS;
+
 	assertEquals(await expandGlobArray("*/", options), ["subdir"]);
 });
 
 test(async function expandGlobParent(): Promise<void> {
 	const options = EG_OPTIONS;
+
 	assertEquals(await expandGlobArray("subdir/../*", options), [
 		"abc",
 		"abcdef",
@@ -85,26 +93,33 @@ test(async function expandGlobParent(): Promise<void> {
 
 test(async function expandGlobExt(): Promise<void> {
 	const options = { ...EG_OPTIONS, extended: true };
+
 	assertEquals(await expandGlobArray("abc?(def|ghi)", options), [
 		"abc",
 		"abcdef",
 	]);
+
 	assertEquals(await expandGlobArray("abc*(def|ghi)", options), [
 		"abc",
 		"abcdef",
 		"abcdefghi",
 	]);
+
 	assertEquals(await expandGlobArray("abc+(def|ghi)", options), [
 		"abcdef",
 		"abcdefghi",
 	]);
+
 	assertEquals(await expandGlobArray("abc@(def|ghi)", options), ["abcdef"]);
+
 	assertEquals(await expandGlobArray("abc{def,ghi}", options), ["abcdef"]);
+
 	assertEquals(await expandGlobArray("abc!(def|ghi)", options), ["abc"]);
 });
 
 test(async function expandGlobGlobstar(): Promise<void> {
 	const options = { ...EG_OPTIONS, globstar: true };
+
 	assertEquals(
 		await expandGlobArray(joinGlobs(["**", "abc"], options), options),
 		["abc", join("subdir", "abc")],
@@ -113,6 +128,7 @@ test(async function expandGlobGlobstar(): Promise<void> {
 
 test(async function expandGlobGlobstarParent(): Promise<void> {
 	const options = { ...EG_OPTIONS, globstar: true };
+
 	assertEquals(
 		await expandGlobArray(
 			joinGlobs(["subdir", "**", ".."], options),
@@ -124,6 +140,7 @@ test(async function expandGlobGlobstarParent(): Promise<void> {
 
 test(async function expandGlobIncludeDirs(): Promise<void> {
 	const options = { ...EG_OPTIONS, includeDirs: false };
+
 	assertEquals(await expandGlobArray("subdir", options), []);
 });
 
@@ -136,8 +153,11 @@ test(async function expandGlobPermError(): Promise<void> {
 		stdout: "piped",
 		stderr: "piped",
 	});
+
 	assertEquals(await p.status(), { code: 1, success: false });
+
 	assertEquals(decode(await p.output()), "");
+
 	assertStrContains(
 		decode(await p.stderrOutput()),
 		"Uncaught PermissionDenied",

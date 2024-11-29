@@ -18,6 +18,7 @@ function str(buf: Uint8Array): string {
 export class ProtocolError extends Error {
 	constructor(msg: string) {
 		super(msg);
+
 		this.name = "ProtocolError";
 	}
 }
@@ -27,7 +28,9 @@ export function append(a: Uint8Array, b: Uint8Array): Uint8Array {
 		return b;
 	} else {
 		const output = new Uint8Array(a.length + b.length);
+
 		output.set(a, 0);
+
 		output.set(b, a.length);
 
 		return output;
@@ -108,6 +111,7 @@ export class TextProtoReader {
 					`malformed MIME header line: ${str(kv)}`,
 				);
 			}
+
 			let endKey = i;
 
 			while (endKey > 0 && kv[endKey - 1] == charCode(" ")) {
@@ -135,6 +139,7 @@ export class TextProtoReader {
 			) {
 				i++;
 			}
+
 			const value = str(kv.subarray(i));
 
 			// In case of invalid header we swallow the error
@@ -165,6 +170,7 @@ export class TextProtoReader {
 				if (this.skipSpace(l) === 0) {
 					return new Uint8Array(0);
 				}
+
 				return l;
 			}
 
@@ -175,6 +181,7 @@ export class TextProtoReader {
 				break;
 			}
 		}
+
 		return line;
 	}
 
@@ -185,8 +192,10 @@ export class TextProtoReader {
 			if (l[i] === charCode(" ") || l[i] === charCode("\t")) {
 				continue;
 			}
+
 			n++;
 		}
+
 		return n;
 	}
 }

@@ -11,6 +11,7 @@ test(function booleanAndAliasIsNotUnknown(): void {
 
 		return false;
 	}
+
 	const aliased = ["-h", "true", "--derp", "true"];
 
 	const regular = ["--herp", "true", "-d", "true"];
@@ -20,7 +21,9 @@ test(function booleanAndAliasIsNotUnknown(): void {
 		boolean: "h",
 		unknown: unknownFn,
 	};
+
 	parse(aliased, opts);
+
 	parse(regular, opts);
 
 	assertEquals(unknown, ["--derp", "-d"]);
@@ -34,11 +37,14 @@ test(function flagBooleanTrueAnyDoubleHyphenArgumentIsNotUnknown(): void {
 
 		return false;
 	}
+
 	const argv = parse(["--honk", "--tacos=good", "cow", "-p", "55"], {
 		boolean: true,
 		unknown: unknownFn,
 	});
+
 	assertEquals(unknown, ["--tacos=good", "cow", "-p"]);
+
 	assertEquals(argv, {
 		honk: true,
 		_: [],
@@ -53,6 +59,7 @@ test(function stringAndAliasIsNotUnkown(): void {
 
 		return false;
 	}
+
 	const aliased = ["-h", "hello", "--derp", "goodbye"];
 
 	const regular = ["--herp", "hello", "-d", "moon"];
@@ -62,7 +69,9 @@ test(function stringAndAliasIsNotUnkown(): void {
 		string: "h",
 		unknown: unknownFn,
 	};
+
 	parse(aliased, opts);
+
 	parse(regular, opts);
 
 	assertEquals(unknown, ["--derp", "-d"]);
@@ -76,6 +85,7 @@ test(function defaultAndAliasIsNotUnknown(): void {
 
 		return false;
 	}
+
 	const aliased = ["-h", "hello"];
 
 	const regular = ["--herp", "hello"];
@@ -85,7 +95,9 @@ test(function defaultAndAliasIsNotUnknown(): void {
 		alias: { h: "herp" },
 		unknown: unknownFn,
 	};
+
 	parse(aliased, opts);
+
 	parse(regular, opts);
 
 	assertEquals(unknown, []);
@@ -99,6 +111,7 @@ test(function valueFollowingDoubleHyphenIsNotUnknown(): void {
 
 		return false;
 	}
+
 	const aliased = ["--bad", "--", "good", "arg"];
 
 	const opts = {
@@ -109,6 +122,7 @@ test(function valueFollowingDoubleHyphenIsNotUnknown(): void {
 	const argv = parse(aliased, opts);
 
 	assertEquals(unknown, ["--bad"]);
+
 	assertEquals(argv, {
 		"--": ["good", "arg"],
 		_: [],

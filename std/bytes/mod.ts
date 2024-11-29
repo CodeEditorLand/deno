@@ -19,12 +19,15 @@ export function findIndex(a: Uint8Array, pat: Uint8Array): number {
 			if (a[j] !== pat[j - pin]) {
 				break;
 			}
+
 			matched++;
 		}
+
 		if (matched === pat.length) {
 			return pin;
 		}
 	}
+
 	return -1;
 }
 
@@ -46,12 +49,15 @@ export function findLastIndex(a: Uint8Array, pat: Uint8Array): number {
 			if (a[j] !== pat[pat.length - 1 - (pin - j)]) {
 				break;
 			}
+
 			matched++;
 		}
+
 		if (matched === pat.length) {
 			return pin - pat.length + 1;
 		}
 	}
+
 	return -1;
 }
 
@@ -62,6 +68,7 @@ export function equal(a: Uint8Array, match: Uint8Array): boolean {
 	for (let i = 0; i < match.length; i++) {
 		if (a[i] !== match[i]) return false;
 	}
+
 	return true;
 }
 
@@ -70,6 +77,7 @@ export function hasPrefix(a: Uint8Array, prefix: Uint8Array): boolean {
 	for (let i = 0, max = prefix.length; i < max; i++) {
 		if (a[i] !== prefix[i]) return false;
 	}
+
 	return true;
 }
 

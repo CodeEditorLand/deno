@@ -22,11 +22,17 @@ interface CallSite {
 	getColumnNumber(): number | null;
 
 	getEvalOrigin(): string | null;
+
 	isToplevel(): boolean;
+
 	isEval(): boolean;
+
 	isNative(): boolean;
+
 	isConstructor(): boolean;
+
 	isAsync(): boolean;
+
 	isPromiseAll(): boolean;
 
 	getPromiseIndex(): number | null;
@@ -94,6 +100,7 @@ test(function prepareStackTrace(): void {
 	const MockError = {} as any;
 
 	setPrepareStackTrace(MockError);
+
 	assert(typeof MockError.prepareStackTrace === "function");
 
 	const prepareStackTrace: (
@@ -104,7 +111,9 @@ test(function prepareStackTrace(): void {
 	const result = prepareStackTrace(new Error("foo"), [
 		getMockCallSite("CLI_SNAPSHOT.js", 23, 0),
 	]);
+
 	assert(result.startsWith("Error: foo\n"));
+
 	assert(result.includes(".ts:"), "should remap to something in 'js/'");
 });
 
@@ -114,7 +123,10 @@ test(function applySourceMap(): void {
 		line: 23,
 		column: 0,
 	});
+
 	assert(result.filename.endsWith(".ts"));
+
 	assert(result.line != null);
+
 	assert(result.column != null);
 });

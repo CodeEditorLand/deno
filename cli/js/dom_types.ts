@@ -48,7 +48,9 @@ export type FormDataEntryValue = DomFile | string;
 
 export interface DomIterable<K, V> {
 	keys(): IterableIterator<K>;
+
 	values(): IterableIterator<V>;
+
 	entries(): IterableIterator<[K, V]>;
 	[Symbol.iterator](): IterableIterator<[K, V]>;
 
@@ -62,6 +64,7 @@ type EndingType = "transparent" | "native";
 
 export interface BlobPropertyBag {
 	type?: string;
+
 	ending?: EndingType;
 }
 
@@ -89,12 +92,15 @@ export interface EventTarget {
 	[eventTargetListeners]: { [type in string]: EventListener[] };
 	[eventTargetMode]: string;
 	[eventTargetNodeType]: NodeType;
+
 	addEventListener(
 		type: string,
 		callback: (event: Event) => void | null,
 		options?: boolean | AddEventListenerOptions,
 	): void;
+
 	dispatchEvent(event: Event): boolean;
+
 	removeEventListener(
 		type: string,
 		callback?: (event: Event) => void | null,
@@ -104,7 +110,9 @@ export interface EventTarget {
 
 export interface ProgressEventInit extends EventInit {
 	lengthComputable?: boolean;
+
 	loaded?: number;
+
 	total?: number;
 }
 
@@ -157,13 +165,17 @@ export interface URLSearchParams extends DomIterable<string, string> {
 
 export interface EventListener {
 	handleEvent(event: Event): void;
+
 	readonly callback: (event: Event) => void | null;
+
 	readonly options: boolean | AddEventListenerOptions;
 }
 
 export interface EventInit {
 	bubbles?: boolean;
+
 	cancelable?: boolean;
+
 	composed?: boolean;
 }
 
@@ -180,45 +192,67 @@ export enum EventPhase {
 
 export interface EventPath {
 	item: EventTarget;
+
 	itemInShadowTree: boolean;
+
 	relatedTarget: EventTarget | null;
+
 	rootOfClosedTree: boolean;
+
 	slotInClosedTree: boolean;
+
 	target: EventTarget | null;
+
 	touchTargetList: EventTarget[];
 }
 
 export interface Event {
 	readonly type: string;
+
 	target: EventTarget | null;
+
 	currentTarget: EventTarget | null;
+
 	composedPath(): EventPath[];
 
 	eventPhase: number;
 
 	stopPropagation(): void;
+
 	stopImmediatePropagation(): void;
 
 	readonly bubbles: boolean;
+
 	readonly cancelable: boolean;
+
 	preventDefault(): void;
+
 	readonly defaultPrevented: boolean;
+
 	readonly composed: boolean;
 
 	isTrusted: boolean;
+
 	readonly timeStamp: Date;
 
 	dispatched: boolean;
+
 	readonly initialized: boolean;
+
 	inPassiveListener: boolean;
+
 	cancelBubble: boolean;
+
 	cancelBubbleImmediately: boolean;
+
 	path: EventPath[];
+
 	relatedTarget: EventTarget | null;
 }
 
 export interface CustomEvent extends Event {
 	readonly detail: any;
+
 	initCustomEvent(
 		type: string,
 		bubbles?: boolean,
@@ -229,6 +263,7 @@ export interface CustomEvent extends Event {
 
 export interface DomFile extends Blob {
 	readonly lastModified: number;
+
 	readonly name: string;
 }
 
@@ -238,6 +273,7 @@ export interface DomFileConstructor {
 		filename: string,
 		options?: FilePropertyBag,
 	): DomFile;
+
 	prototype: DomFile;
 }
 
@@ -247,7 +283,9 @@ export interface FilePropertyBag extends BlobPropertyBag {
 
 interface ProgressEvent extends Event {
 	readonly lengthComputable: boolean;
+
 	readonly loaded: number;
+
 	readonly total: number;
 }
 
@@ -257,27 +295,33 @@ export interface EventListenerOptions {
 
 export interface AddEventListenerOptions extends EventListenerOptions {
 	once: boolean;
+
 	passive: boolean;
 }
 
 export interface AbortSignal extends EventTarget {
 	readonly aborted: boolean;
+
 	onabort: ((this: AbortSignal, ev: ProgressEvent) => any) | null;
+
 	addEventListener<K extends keyof AbortSignalEventMap>(
 		type: K,
 		listener: (this: AbortSignal, ev: AbortSignalEventMap[K]) => any,
 		options?: boolean | AddEventListenerOptions,
 	): void;
+
 	addEventListener(
 		type: string,
 		listener: EventListener,
 		options?: boolean | AddEventListenerOptions,
 	): void;
+
 	removeEventListener<K extends keyof AbortSignalEventMap>(
 		type: K,
 		listener: (this: AbortSignal, ev: AbortSignalEventMap[K]) => any,
 		options?: boolean | EventListenerOptions,
 	): void;
+
 	removeEventListener(
 		type: string,
 		listener: EventListener,
@@ -287,11 +331,13 @@ export interface AbortSignal extends EventTarget {
 
 export interface FormData extends DomIterable<string, FormDataEntryValue> {
 	append(name: string, value: string | Blob, fileName?: string): void;
+
 	delete(name: string): void;
 
 	get(name: string): FormDataEntryValue | null;
 
 	getAll(name: string): FormDataEntryValue[];
+
 	has(name: string): boolean;
 
 	set(name: string, value: string | Blob, fileName?: string): void;
@@ -299,6 +345,7 @@ export interface FormData extends DomIterable<string, FormDataEntryValue> {
 
 export interface FormDataConstructor {
 	new (): FormData;
+
 	prototype: FormData;
 }
 
@@ -347,30 +394,41 @@ export interface Body {
 
 export interface ReadableStream {
 	readonly locked: boolean;
+
 	cancel(reason?: any): Promise<void>;
 
 	getReader(): ReadableStreamReader;
+
 	tee(): ReadableStream[];
 }
 
 export interface UnderlyingSource<R = any> {
 	cancel?: ReadableStreamErrorCallback;
+
 	pull?: ReadableStreamDefaultControllerCallback<R>;
+
 	start?: ReadableStreamDefaultControllerCallback<R>;
+
 	type?: undefined;
 }
 
 export interface UnderlyingByteSource {
 	autoAllocateChunkSize?: number;
+
 	cancel?: ReadableStreamErrorCallback;
+
 	pull?: ReadableByteStreamControllerCallback;
+
 	start?: ReadableByteStreamControllerCallback;
+
 	type: "bytes";
 }
 
 export interface ReadableStreamReader {
 	cancel(reason?: any): Promise<void>;
+
 	read(): Promise<any>;
+
 	releaseLock(): void;
 }
 
@@ -388,22 +446,31 @@ export interface ReadableStreamDefaultControllerCallback<R> {
 
 export interface ReadableStreamDefaultController<R = any> {
 	readonly desiredSize: number | null;
+
 	close(): void;
+
 	enqueue(chunk: R): void;
+
 	error(error?: any): void;
 }
 
 export interface ReadableByteStreamController {
 	readonly byobRequest: ReadableStreamBYOBRequest | undefined;
+
 	readonly desiredSize: number | null;
+
 	close(): void;
+
 	enqueue(chunk: ArrayBufferView): void;
+
 	error(error?: any): void;
 }
 
 export interface ReadableStreamBYOBRequest {
 	readonly view: ArrayBufferView;
+
 	respond(bytesWritten: number): void;
+
 	respondWithNewView(view: ArrayBufferView): void;
 }
 /* TODO reenable these interfaces.  These are needed to enable WritableStreams in js/streams/
@@ -464,6 +531,7 @@ export interface WritableStreamDefaultController {
 */
 export interface QueuingStrategy<T = any> {
 	highWaterMark?: number;
+
 	size?: QueuingStrategySizeCallback<T>;
 }
 
@@ -516,6 +584,7 @@ export interface Headers extends DomIterable<string, string> {
 
 export interface HeadersConstructor {
 	new (init?: HeadersInit): Headers;
+
 	prototype: Headers;
 }
 
@@ -558,28 +627,43 @@ type ResponseType =
 
 export interface RequestInit {
 	body?: BodyInit | null;
+
 	cache?: RequestCache;
+
 	credentials?: RequestCredentials;
+
 	headers?: HeadersInit;
+
 	integrity?: string;
+
 	keepalive?: boolean;
+
 	method?: string;
+
 	mode?: RequestMode;
+
 	redirect?: RequestRedirect;
+
 	referrer?: string;
+
 	referrerPolicy?: ReferrerPolicy;
+
 	signal?: AbortSignal | null;
+
 	window?: any;
 }
 
 export interface ResponseInit {
 	headers?: HeadersInit;
+
 	status?: number;
+
 	statusText?: string;
 }
 
 export interface RequestConstructor {
 	new (input: RequestInfo, init?: RequestInit): Request;
+
 	prototype: Request;
 }
 
@@ -654,6 +738,7 @@ export interface Request extends Body {
 	readonly signal?: AbortSignal;
 	/** Returns the URL of request as a string. */
 	readonly url: string;
+
 	clone(): Request;
 }
 
@@ -674,6 +759,7 @@ export interface Response extends Body {
 	 * for `200`).
 	 */
 	readonly statusText: string;
+
 	readonly trailer: Promise<Headers>;
 	/** Contains the type of the response (e.g., `basic`, `cors`). */
 	readonly type: ResponseType;

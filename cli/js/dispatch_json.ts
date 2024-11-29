@@ -9,12 +9,15 @@ type Ok = any;
 
 interface JsonError {
 	kind: ErrorKind;
+
 	message: string;
 }
 
 interface JsonResponse {
 	ok?: Ok;
+
 	err?: JsonError;
+
 	promiseId?: number; // Only present in async messages.
 }
 
@@ -42,6 +45,7 @@ function unwrapResponse(res: JsonResponse): Ok {
 	if (res.err != null) {
 		throw new DenoError(res.err!.kind, res.err!.message);
 	}
+
 	util.assert(res.ok != null);
 
 	return res.ok;
@@ -49,11 +53,15 @@ function unwrapResponse(res: JsonResponse): Ok {
 
 export function asyncMsgFromRust(opId: number, resUi8: Uint8Array): void {
 	const res = decode(resUi8);
+
 	util.assert(res.promiseId != null);
 
 	const promise = promiseTable.get(res.promiseId!);
+
 	util.assert(promise != null);
+
 	promiseTable.delete(res.promiseId!);
+
 	promise.resolve(res);
 }
 
@@ -65,9 +73,11 @@ export function sendSync(
 	const argsUi8 = encode(args);
 
 	const resUi8 = core.dispatch(opId, argsUi8, zeroCopy);
+
 	util.assert(resUi8 != null);
 
 	const res = decode(resUi8!);
+
 	util.assert(res.promiseId == null);
 
 	return unwrapResponse(res);
@@ -79,6 +89,7 @@ export async function sendAsync(
 	zeroCopy?: Uint8Array,
 ): Promise<Ok> {
 	const promiseId = nextPromiseId();
+
 	args = Object.assign(args, { promiseId });
 
 	const promise = util.createResolvable<Ok>();
@@ -90,6 +101,7 @@ export async function sendAsync(
 	if (buf) {
 		// Sync result.
 		const res = decode(buf);
+
 		promise.resolve(res);
 	} else {
 		// Async result.

@@ -9,10 +9,15 @@ const { console } = window;
 
 interface Timer {
 	id: number;
+
 	callback: () => void;
+
 	delay: number;
+
 	due: number;
+
 	repeat: boolean;
+
 	scheduled: boolean;
 }
 
@@ -30,6 +35,7 @@ const dueTree = new RBTree<DueNode>((a, b) => a.due - b.due);
 
 function clearGlobalTimeout(): void {
 	globalTimeoutDue = null;
+
 	sendSync(dispatch.OP_GLOBAL_TIMER_STOP);
 }
 
@@ -46,11 +52,15 @@ async function setGlobalTimeout(due: number, now: number): Promise<void> {
 	// relative time value. On the Rust side we'll turn that into an absolute
 	// value again.
 	const timeout = due - now;
+
 	assert(timeout >= 0);
 	// Send message to the backend.
 	globalTimeoutDue = due;
+
 	pendingEvents++;
+
 	await sendAsync(dispatch.OP_GLOBAL_TIMER, { timeout });
+
 	pendingEvents--;
 	// eslint-disable-next-line @typescript-eslint/no-use-before-define
 	fireTimers();
@@ -66,6 +76,7 @@ function setOrClearGlobalTimeout(due: number | null, now: number): void {
 
 function schedule(timer: Timer, now: number): void {
 	assert(!timer.scheduled);
+
 	assert(now <= timer.due);
 	// There are more timers pending firing.
 	// We must ensure new timer scheduled after them.
@@ -84,10 +95,12 @@ function schedule(timer: Timer, now: number): void {
 
 	if (dueNode === null) {
 		dueTree.insert(maybeNewDueNode);
+
 		dueNode = maybeNewDueNode;
 	}
 	// Append the newly scheduled timer to the list and mark it as scheduled.
 	dueNode!.timers.push(timer);
+
 	timer.scheduled = true;
 	// If the new timer is scheduled to fire before any timer that existed before,
 	// update the global timeout to reflect this.
@@ -107,6 +120,7 @@ function unschedule(timer: Timer): void {
 
 		return;
 	}
+
 	if ((index = pendingFireTimers.indexOf(timer)) >= 0) {
 		pendingFireTimers.splice(index);
 
@@ -117,6 +131,7 @@ function unschedule(timer: Timer): void {
 	if (!timer.scheduled) {
 		return;
 	}
+
 	const searchKey = { due: timer.due, timers: [] };
 	// Find the list of timers that will fire at point-in-time `due`.
 	const list = dueTree.find(searchKey)!.timers;
@@ -124,6 +139,7 @@ function unschedule(timer: Timer): void {
 	if (list.length === 1) {
 		// Time timer is the only one in the list. Remove the entire list.
 		assert(list[0] === timer);
+
 		dueTree.remove(searchKey);
 		// If the unscheduled timer was 'next up', find when the next timer that
 		// still exists is due, and update the global alarm accordingly.
@@ -136,7 +152,9 @@ function unschedule(timer: Timer): void {
 		// Multiple timers that are due at the same point in time.
 		// Remove this timer from the list.
 		const index = list.indexOf(timer);
+
 		assert(index > -1);
+
 		list.splice(index, 1);
 	}
 }
@@ -155,12 +173,15 @@ function fire(timer: Timer): void {
 		// Interval timer: compute when timer was supposed to fire next.
 		// However make sure to never schedule the next interval in the past.
 		const now = Date.now();
+
 		timer.due = Math.max(now, timer.due + timer.delay);
+
 		schedule(timer, now);
 	}
 	// Call the user callback. Intermediate assignment is to avoid leaking `this`
 	// to it, while also keeping the stack trace neat when it shows up in there.
 	const callback = timer.callback;
+
 	callback();
 }
 
@@ -184,6 +205,7 @@ function fireTimers(): void {
 			pendingFireTimers.push(timer);
 		}
 	}
+
 	if (pendingFireTimers.length > 0) {
 		hasPendingFireTimers = true;
 		// Fire the list of pending timers as a chain of microtasks.
@@ -202,8 +224,10 @@ function firePendingTimers(): void {
 
 		for (const newTimer of pendingScheduleTimers) {
 			newTimer.due = Math.max(newTimer.due, now);
+
 			schedule(newTimer, now);
 		}
+
 		pendingScheduleTimers = [];
 		// Reschedule for next round of timeout.
 		const nextDueNode = dueTree.min();
@@ -252,8 +276,10 @@ function setTimer(
 				" a 32-bit signed integer." +
 				"\nTimeout duration was set to 1.",
 		);
+
 		delay = 1;
 	}
+
 	delay = Math.max(0, delay | 0);
 
 	// Create a new, unscheduled timer object.
@@ -312,6 +338,7 @@ function clearTimer(id: number): void {
 	}
 	// Unschedule the timer if it is currently scheduled, and forget about it.
 	unschedule(timer);
+
 	idMap.delete(timer.id);
 }
 
@@ -321,6 +348,7 @@ export function clearTimeout(id = 0): void {
 	if (id === 0) {
 		return;
 	}
+
 	clearTimer(id);
 }
 
@@ -330,5 +358,6 @@ export function clearInterval(id = 0): void {
 	if (id === 0) {
 		return;
 	}
+
 	clearTimer(id);
 }

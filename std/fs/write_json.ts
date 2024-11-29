@@ -4,6 +4,7 @@ type Replacer = (key: string, value: any) => any;
 
 export interface WriteJsonOptions {
 	spaces?: number | string;
+
 	replacer?: Array<number | string> | Replacer;
 }
 
