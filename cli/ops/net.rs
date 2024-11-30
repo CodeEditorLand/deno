@@ -31,8 +31,11 @@ use crate::{
 
 pub fn init(i:&mut Isolate, s:&ThreadSafeState) {
 	i.register_op("accept", s.core_op(json_op(s.stateful_op(op_accept))));
+
 	i.register_op("dial", s.core_op(json_op(s.stateful_op(op_dial))));
+
 	i.register_op("shutdown", s.core_op(json_op(s.stateful_op(op_shutdown))));
+
 	i.register_op("listen", s.core_op(json_op(s.stateful_op(op_listen))));
 }
 
@@ -59,14 +62,17 @@ impl Future for Accept {
 
 	fn poll(self: Pin<&mut Self>, cx:&mut Context) -> Poll<Self::Output> {
 		let inner = self.get_mut();
+
 		if inner.accept_state == AcceptState::Done {
 			panic!("poll Accept after it's done");
 		}
 
 		let mut table = inner.state.lock_resource_table();
+
 		let listener_resource =
 			table.get_mut::<TcpListenerResource>(inner.rid).ok_or_else(|| {
 				let e = std::io::Error::new(std::io::ErrorKind::Other, "Listener has been closed");
+
 				ErrBox::from(e)
 			})?;
 
@@ -76,17 +82,23 @@ impl Future for Accept {
 		match listener.poll_next_unpin(cx) {
 			Poll::Ready(Some(Ok(stream))) => {
 				listener_resource.untrack_task();
+
 				inner.accept_state = AcceptState::Done;
+
 				let addr = stream.peer_addr().unwrap();
+
 				Poll::Ready(Ok((stream, addr)))
 			},
 			Poll::Pending => {
 				listener_resource.track_task(cx)?;
+
 				Poll::Pending
 			},
 			Poll::Ready(Some(Err(e))) => {
 				listener_resource.untrack_task();
+
 				inner.accept_state = AcceptState::Done;
+
 				Poll::Ready(Err(e))
 			},
 			_ => unreachable!(),
@@ -105,9 +117,13 @@ fn op_accept(
 	_zero_copy:Option<PinnedBuf>,
 ) -> Result<JsonOp, ErrBox> {
 	let args:AcceptArgs = serde_json::from_value(args)?;
+
 	let rid = args.rid as u32;
+
 	let state_ = state.clone();
+
 	let table = state.lock_resource_table();
+
 	table.get::<TcpListenerResource>(rid).ok_or_else(bad_resource)?;
 
 	let op = accept(state, rid)
@@ -116,12 +132,16 @@ fn op_accept(
 				Ok(v) => v,
 				Err(e) => return futures::future::err(ErrBox::from(e)),
 			};
+
 			let remote_addr = match tcp_stream.peer_addr() {
 				Ok(v) => v,
 				Err(e) => return futures::future::err(ErrBox::from(e)),
 			};
+
 			let mut table = state_.lock_resource_table();
+
 			let rid = table.add("tcpStream", Box::new(StreamResource::TcpStream(tcp_stream)));
+
 			futures::future::ok((rid, local_addr, remote_addr))
 		})
 		.map_err(ErrBox::from)
@@ -149,8 +169,10 @@ fn op_dial(
 	_zero_copy:Option<PinnedBuf>,
 ) -> Result<JsonOp, ErrBox> {
 	let args:DialArgs = serde_json::from_value(args)?;
+
 	assert_eq!(args.transport, "tcp"); // TODO Support others.
 	let state_ = state.clone();
+
 	state.check_net(&args.hostname, args.port)?;
 
 	let op = resolve_addr(&args.hostname, args.port).and_then(move |addr| {
@@ -161,12 +183,16 @@ fn op_dial(
 					Ok(v) => v,
 					Err(e) => return futures::future::err(ErrBox::from(e)),
 				};
+
 				let remote_addr = match tcp_stream.peer_addr() {
 					Ok(v) => v,
 					Err(e) => return futures::future::err(ErrBox::from(e)),
 				};
+
 				let mut table = state_.lock_resource_table();
+
 				let rid = table.add("tcpStream", Box::new(StreamResource::TcpStream(tcp_stream)));
+
 				futures::future::ok((rid, local_addr, remote_addr))
 			})
 			.map_err(ErrBox::from)
@@ -196,6 +222,7 @@ fn op_shutdown(
 	let args:ShutdownArgs = serde_json::from_value(args)?;
 
 	let rid = args.rid as u32;
+
 	let how = args.how;
 
 	let shutdown_mode = match how {
@@ -205,7 +232,9 @@ fn op_shutdown(
 	};
 
 	let mut table = state.lock_resource_table();
+
 	let resource = table.get_mut::<StreamResource>(rid).ok_or_else(bad_resource)?;
+
 	match resource {
 		StreamResource::TcpStream(ref mut stream) => {
 			TcpStream::shutdown(stream, shutdown_mode).map_err(ErrBox::from)?;
@@ -249,12 +278,16 @@ impl TcpListenerResource {
 		if self.waker.is_some() {
 			let e =
 				std::io::Error::new(std::io::ErrorKind::Other, "Another accept task is ongoing");
+
 			return Err(ErrBox::from(e));
 		}
 
 		let waker = futures::task::AtomicWaker::new();
+
 		waker.register(cx.waker());
+
 		self.waker.replace(waker);
+
 		Ok(())
 	}
 
@@ -280,18 +313,26 @@ fn op_listen(
 	_zero_copy:Option<PinnedBuf>,
 ) -> Result<JsonOp, ErrBox> {
 	let args:ListenArgs = serde_json::from_value(args)?;
+
 	assert_eq!(args.transport, "tcp");
 
 	state.check_net(&args.hostname, args.port)?;
 
 	let addr = futures::executor::block_on(resolve_addr(&args.hostname, args.port))?;
+
 	let listener = TcpListener::bind(&addr)?;
+
 	let local_addr = listener.local_addr()?;
+
 	let local_addr_str = local_addr.to_string();
+
 	let listener_resource =
 		TcpListenerResource { listener:listener.incoming(), waker:None, local_addr };
+
 	let mut table = state.lock_resource_table();
+
 	let rid = table.add("tcpListener", Box::new(listener_resource));
+
 	debug!("New listener {} {}", rid, local_addr_str);
 
 	Ok(JsonOp::Sync(json!({

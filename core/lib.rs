@@ -33,8 +33,11 @@ pub use crate::{
 
 pub fn v8_version() -> &'static str {
 	use std::ffi::CStr;
+
 	let version = unsafe { libdeno::deno_v8_version() };
+
 	let c_str = unsafe { CStr::from_ptr(version) };
+
 	c_str.to_str().unwrap()
 }
 

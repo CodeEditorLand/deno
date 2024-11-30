@@ -48,6 +48,7 @@ mod gn {
 			// output directory but some tests depend on artifacts
 			// being in a specific directory relative to the main build output
 			let gn_out_path = root.join(format!("target/{}", gn_mode.clone()));
+
 			let gn_out_dir = normalize_path(&gn_out_path);
 
 			// Tell Cargo when to re-run this file. We do this first, so these directives
@@ -79,18 +80,26 @@ mod gn {
 		pub fn run(&self, gn_target:&str) {
 			if !self.gn_out_path.join("build.ninja").exists() {
 				let mut cmd = Command::new("python");
+
 				cmd.env("DENO_BUILD_PATH", &self.gn_out_dir);
+
 				cmd.env("DENO_BUILD_MODE", &self.gn_mode);
+
 				cmd.env("DEPOT_TOOLS_WIN_TOOLCHAIN", "0");
+
 				cmd.arg("./tools/setup.py");
+
 				if env::var_os("DENO_NO_BINARY_DOWNLOAD").is_some() {
 					cmd.arg("--no-binary-download");
 				}
+
 				let status = cmd.status().expect("setup.py failed");
+
 				assert!(status.success());
 			}
 
 			let mut ninja = Command::new("third_party/depot_tools/ninja");
+
 			let ninja = if !cfg!(target_os = "windows") {
 				&mut ninja
 			} else {
@@ -105,14 +114,17 @@ mod gn {
 				.into_iter()
 				.map(|p| self.root.join(p).into_os_string().into_string().unwrap())
 				.collect();
+
 				let orig_path =
 					String::from(";") + &env::var_os("PATH").unwrap().into_string().unwrap();
+
 				let path = self
 					.root
 					.join("third_party/python_packages/pywin32_system32")
 					.into_os_string()
 					.into_string()
 					.unwrap();
+
 				ninja
 					.env("PYTHONPATH", python_path.join(";"))
 					.env("PATH", path + &orig_path)
@@ -125,6 +137,7 @@ mod gn {
 				.arg(&self.gn_out_dir)
 				.status()
 				.expect("ninja failed");
+
 			assert!(status.success());
 		}
 	}

@@ -25,7 +25,9 @@ use crate::{
 
 pub fn init(i:&mut Isolate, s:&ThreadSafeState) {
 	i.register_op("open", s.core_op(json_op(s.stateful_op(op_open))));
+
 	i.register_op("close", s.core_op(json_op(s.stateful_op(op_close))));
+
 	i.register_op("seek", s.core_op(json_op(s.stateful_op(op_seek))));
 }
 
@@ -43,9 +45,13 @@ fn op_open(
 	_zero_copy:Option<PinnedBuf>,
 ) -> Result<JsonOp, ErrBox> {
 	let args:OpenArgs = serde_json::from_value(args)?;
+
 	let (filename, filename_) = deno_fs::resolve_from_cwd(&args.filename)?;
+
 	let mode = args.mode.as_ref();
+
 	let state_ = state.clone();
+
 	let mut open_options = tokio::fs::OpenOptions::new();
 
 	match mode {
@@ -87,23 +93,28 @@ fn op_open(
 		},
 		&_ => {
 			state.check_read(&filename_)?;
+
 			state.check_write(&filename_)?;
 		},
 	}
 
 	let is_sync = args.promise_id.is_none();
+
 	let op = futures::compat::Compat01As03::new(tokio::prelude::Future::map_err(
 		open_options.open(filename),
 		ErrBox::from,
 	))
 	.and_then(move |fs_file| {
 		let mut table = state_.lock_resource_table();
+
 		let rid = table.add("fsFile", Box::new(StreamResource::FsFile(fs_file)));
+
 		futures::future::ok(json!(rid))
 	});
 
 	if is_sync {
 		let buf = futures::executor::block_on(op)?;
+
 		Ok(JsonOp::Sync(buf))
 	} else {
 		Ok(JsonOp::Async(op.boxed()))
@@ -123,7 +134,9 @@ fn op_close(
 	let args:CloseArgs = serde_json::from_value(args)?;
 
 	let mut table = state.lock_resource_table();
+
 	table.close(args.rid as u32).ok_or_else(bad_resource)?;
+
 	Ok(JsonOp::Sync(json!({})))
 }
 
@@ -138,7 +151,9 @@ impl Future for SeekFuture {
 
 	fn poll(self: Pin<&mut Self>, _cx:&mut Context) -> Poll<Self::Output> {
 		let inner = self.get_mut();
+
 		let mut table = inner.state.lock_resource_table();
+
 		let resource = table.get_mut::<StreamResource>(inner.rid).ok_or_else(bad_resource)?;
 
 		let tokio_file = match resource {
@@ -171,8 +186,11 @@ fn op_seek(
 	_zero_copy:Option<PinnedBuf>,
 ) -> Result<JsonOp, ErrBox> {
 	let args:SeekArgs = serde_json::from_value(args)?;
+
 	let rid = args.rid as u32;
+
 	let offset = args.offset;
+
 	let whence = args.whence as u32;
 	// Translate seek mode to Rust repr.
 	let seek_from = match whence {
@@ -190,8 +208,10 @@ fn op_seek(
 	let fut = SeekFuture { state:state.clone(), seek_from, rid };
 
 	let op = fut.and_then(move |_| futures::future::ok(json!({})));
+
 	if args.promise_id.is_none() {
 		let buf = futures::executor::block_on(op)?;
+
 		Ok(JsonOp::Sync(buf))
 	} else {
 		Ok(JsonOp::Async(op.boxed()))

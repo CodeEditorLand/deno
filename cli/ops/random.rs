@@ -18,9 +18,11 @@ fn op_get_random_values(
 
 	if let Some(ref seeded_rng) = state.seeded_rng {
 		let mut rng = seeded_rng.lock().unwrap();
+
 		rng.fill(&mut zero_copy.unwrap()[..]);
 	} else {
 		let mut rng = thread_rng();
+
 		rng.fill(&mut zero_copy.unwrap()[..]);
 	}
 

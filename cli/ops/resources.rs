@@ -14,6 +14,8 @@ fn op_resources(
 	_zero_copy:Option<PinnedBuf>,
 ) -> Result<JsonOp, ErrBox> {
 	let resource_table = state.lock_resource_table();
+
 	let serialized_resources = resource_table.entries();
+
 	Ok(JsonOp::Sync(json!(serialized_resources)))
 }

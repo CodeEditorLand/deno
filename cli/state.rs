@@ -81,22 +81,28 @@ impl ThreadSafeState {
 
 		move |control:&[u8], zero_copy:Option<PinnedBuf>| -> CoreOp {
 			let bytes_sent_control = control.len();
+
 			let bytes_sent_zero_copy = zero_copy.as_ref().map(|b| b.len()).unwrap_or(0);
 
 			let op = dispatcher(control, zero_copy);
+
 			state.metrics_op_dispatched(bytes_sent_control, bytes_sent_zero_copy);
 
 			match op {
 				Op::Sync(buf) => {
 					state.metrics_op_completed(buf.len());
+
 					Op::Sync(buf)
 				},
 				Op::Async(fut) => {
 					let state = state.clone();
+
 					let result_fut = fut.map_ok(move |buf:Buf| {
 						state.clone().metrics_op_completed(buf.len());
+
 						buf
 					});
+
 					Op::Async(result_fut.boxed())
 				},
 			}
@@ -147,11 +153,13 @@ impl Loader for ThreadSafeState {
 		if !is_main {
 			if let Some(import_map) = &self.import_map {
 				let result = import_map.resolve(specifier, referrer)?;
+
 				if let Some(r) = result {
 					return Ok(r);
 				}
 			}
 		}
+
 		let module_specifier = ModuleSpecifier::resolve_import(specifier, referrer)?;
 
 		if is_dyn_import {
@@ -168,7 +176,9 @@ impl Loader for ThreadSafeState {
 		maybe_referrer:Option<ModuleSpecifier>,
 	) -> Pin<Box<deno::SourceCodeInfoFuture>> {
 		self.metrics.resolve_count.fetch_add(1, Ordering::SeqCst);
+
 		let module_url_specified = module_specifier.to_string();
+
 		let fut = self
 			.global_state
 			.fetch_compiled_module(module_specifier, maybe_referrer)
@@ -189,8 +199,11 @@ impl Loader for ThreadSafeState {
 impl ThreadSafeState {
 	pub fn create_channels() -> (WorkerChannels, WorkerChannels) {
 		let (in_tx, in_rx) = mpsc::channel::<Buf>(1);
+
 		let (out_tx, out_rx) = mpsc::channel::<Buf>(1);
+
 		let internal_channels = WorkerChannels { sender:out_tx, receiver:in_rx };
+
 		let external_channels = WorkerChannels { sender:in_tx, receiver:out_rx };
 		(internal_channels, external_channels)
 	}
@@ -214,6 +227,7 @@ impl ThreadSafeState {
 		};
 
 		let modules = Arc::new(Mutex::new(deno::Modules::new()));
+
 		let permissions = if let Some(perm) = shared_permissions {
 			perm
 		} else {
@@ -242,8 +256,11 @@ impl ThreadSafeState {
 
 	pub fn add_child_worker(&self, worker:Worker) -> u32 {
 		let worker_id = self.next_worker_id.fetch_add(1, Ordering::Relaxed) as u32;
+
 		let mut workers_tl = self.workers.lock().unwrap();
+
 		workers_tl.insert(worker_id, worker);
+
 		worker_id
 	}
 
@@ -280,14 +297,18 @@ impl ThreadSafeState {
 
 	pub fn check_dyn_import(self: &Self, module_specifier:&ModuleSpecifier) -> Result<(), ErrBox> {
 		let u = module_specifier.as_url();
+
 		match u.scheme() {
 			"http" | "https" => {
 				self.check_net_url(u)?;
+
 				Ok(())
 			},
 			"file" => {
 				let filename = u.to_file_path().unwrap().into_os_string().into_string().unwrap();
+
 				self.check_read(&filename)?;
+
 				Ok(())
 			},
 			_ => Err(permission_denied()),
@@ -301,6 +322,7 @@ impl ThreadSafeState {
 		} else {
 			let module_specifier =
 				ModuleSpecifier::resolve_url_or_path(&argv[0]).expect("Invalid entry module");
+
 			Some(module_specifier)
 		};
 
@@ -316,12 +338,15 @@ impl ThreadSafeState {
 
 	pub fn metrics_op_dispatched(&self, bytes_sent_control:usize, bytes_sent_data:usize) {
 		self.metrics.ops_dispatched.fetch_add(1, Ordering::SeqCst);
+
 		self.metrics.bytes_sent_control.fetch_add(bytes_sent_control, Ordering::SeqCst);
+
 		self.metrics.bytes_sent_data.fetch_add(bytes_sent_data, Ordering::SeqCst);
 	}
 
 	pub fn metrics_op_completed(&self, bytes_received:usize) {
 		self.metrics.ops_completed.fetch_add(1, Ordering::SeqCst);
+
 		self.metrics.bytes_received.fetch_add(bytes_received, Ordering::SeqCst);
 	}
 }
@@ -329,7 +354,9 @@ impl ThreadSafeState {
 #[test]
 fn thread_safe() {
 	fn f<S:Send + Sync>(_:S) {}
+
 	let (int, _) = ThreadSafeState::create_channels();
+
 	f(ThreadSafeState::mock(
 		vec![String::from("./deno"), String::from("hello.js")],
 		int,

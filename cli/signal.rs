@@ -6,7 +6,9 @@ pub fn kill(pid:i32, signo:i32) -> Result<(), ErrBox> {
 		sys::signal::{kill as unix_kill, Signal},
 		unistd::Pid,
 	};
+
 	let sig = Signal::from_c_int(signo)?;
+
 	unix_kill(Pid::from_raw(pid), Option::Some(sig)).map_err(ErrBox::from)
 }
 

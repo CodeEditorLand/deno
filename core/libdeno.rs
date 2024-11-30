@@ -93,6 +93,7 @@ impl Drop for PinnedBuf {
 	fn drop(&mut self) {
 		unsafe {
 			let raw = &mut *(self as *mut PinnedBuf as *mut PinnedBufRaw);
+
 			deno_pinned_buf_delete(raw);
 		}
 	}
@@ -223,23 +224,36 @@ extern {}
 
 extern {
 	pub fn deno_init();
+
 	pub fn deno_v8_version() -> *const c_char;
+
 	pub fn deno_set_v8_flags(argc:*mut c_int, argv:*mut *mut c_char);
+
 	pub fn deno_new(config:deno_config) -> *const isolate;
+
 	pub fn deno_delete(i:*const isolate);
+
 	pub fn deno_last_exception(i:*const isolate) -> *const c_char;
+
 	pub fn deno_check_promise_errors(i:*const isolate);
+
 	pub fn deno_lock(i:*const isolate);
+
 	pub fn deno_unlock(i:*const isolate);
+
 	pub fn deno_throw_exception(i:*const isolate, text:*const c_char);
+
 	pub fn deno_respond(i:*const isolate, user_data:*const c_void, op_id:OpId, buf:deno_buf);
+
 	pub fn deno_pinned_buf_delete(buf:&mut deno_pinned_buf);
+
 	pub fn deno_execute(
 		i:*const isolate,
 		user_data:*const c_void,
 		js_filename:*const c_char,
 		js_source:*const c_char,
 	);
+
 	pub fn deno_terminate_execution(i:*const isolate);
 	#[allow(dead_code)]
 	pub fn deno_run_microtasks(i:*const isolate, user_data:*const c_void);

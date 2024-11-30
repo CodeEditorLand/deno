@@ -26,58 +26,72 @@ pub fn use_color() -> bool { !(*NO_COLOR) }
 
 pub fn red_bold(s:String) -> impl fmt::Display {
 	let mut style = Style::new();
+
 	if use_color() {
 		style = style.bold().fg(Red);
 	}
+
 	style.paint(s)
 }
 
 pub fn italic_bold(s:String) -> impl fmt::Display {
 	let mut style = Style::new();
+
 	if use_color() {
 		style = style.italic().bold();
 	}
+
 	style.paint(s)
 }
 
 pub fn black_on_white(s:String) -> impl fmt::Display {
 	let mut style = Style::new();
+
 	if use_color() {
 		style = style.on(White).fg(Black);
 	}
+
 	style.paint(s)
 }
 
 pub fn yellow(s:String) -> impl fmt::Display {
 	let mut style = Style::new();
+
 	if use_color() {
 		// matches TypeScript's ForegroundColorEscapeSequences.Yellow
 		style = style.fg(Fixed(11));
 	}
+
 	style.paint(s)
 }
 
 pub fn cyan(s:String) -> impl fmt::Display {
 	let mut style = Style::new();
+
 	if use_color() {
 		// matches TypeScript's ForegroundColorEscapeSequences.Cyan
 		style = style.fg(Fixed(14));
 	}
+
 	style.paint(s)
 }
 
 pub fn red(s:String) -> impl fmt::Display {
 	let mut style = Style::new();
+
 	if use_color() {
 		style = style.fg(Red);
 	}
+
 	style.paint(s)
 }
 
 pub fn bold(s:String) -> impl fmt::Display {
 	let mut style = Style::new();
+
 	if use_color() {
 		style = style.bold();
 	}
+
 	style.paint(s)
 }

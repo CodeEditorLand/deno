@@ -18,6 +18,7 @@ where
 	F: Future<Output = Result<(), ()>> + Send + 'static, {
 	// tokio::runtime::current_thread::run(future)
 	let rt = create_threadpool_runtime().expect("Unable to create Tokio runtime");
+
 	rt.block_on_all(future.boxed().compat()).unwrap();
 }
 

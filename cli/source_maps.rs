@@ -10,6 +10,7 @@ use source_map_mappings::{parse_mappings, Bias, Mappings};
 pub trait SourceMapGetter {
 	/// Returns the raw source map file.
 	fn get_source_map(&self, script_name:&str) -> Option<Vec<u8>>;
+
 	fn get_source_line(&self, script_name:&str, line:usize) -> Option<String>;
 }
 
@@ -38,7 +39,9 @@ impl SourceMap {
 								if !map["sources"].is_array() {
 									return None;
 								}
+
 								let sources_val = map["sources"].as_array().unwrap();
+
 								let mut sources = Vec::<String>::new();
 
 								for source_val in sources_val {
@@ -87,8 +90,10 @@ pub fn apply_source_map<G:SourceMapGetter>(v8_exception:&V8Exception, getter:&G)
 	let mut mappings_map:CachedMaps = HashMap::new();
 
 	let mut frames = Vec::<StackFrame>::new();
+
 	for frame in &v8_exception.frames {
 		let f = frame_apply_source_map(&frame, &mut mappings_map, getter);
+
 		frames.push(f);
 	}
 
@@ -186,6 +191,7 @@ pub fn get_orig_position<G:SourceMapGetter>(
 	getter:&G,
 ) -> (String, i64, i64) {
 	let maybe_sm = get_mappings(&script_name, mappings_map, getter);
+
 	let default_pos = (script_name, line, column);
 
 	match maybe_sm {
@@ -246,6 +252,7 @@ mod tests {
 				},
 				_ => return None,
 			};
+
 			Some(s.as_bytes().to_owned())
 		}
 
@@ -262,6 +269,7 @@ mod tests {
 				},
 				_ => return None,
 			};
+
 			if s.len() > line { Some(s[line].to_string()) } else { None }
 		}
 	}
@@ -312,8 +320,11 @@ mod tests {
 	#[test]
 	fn v8_exception_apply_source_map_1() {
 		let e = error1();
+
 		let getter = MockSourceMapGetter {};
+
 		let actual = apply_source_map(&e, &getter);
+
 		let expected = V8Exception {
 			message:"Error: foo bar".to_string(),
 			source_line:None,
@@ -354,6 +365,7 @@ mod tests {
 				},
 			],
 		};
+
 		assert_eq!(actual, expected);
 	}
 
@@ -379,11 +391,15 @@ mod tests {
 				is_wasm:false,
 			}],
 		};
+
 		let getter = MockSourceMapGetter {};
+
 		let actual = apply_source_map(&e, &getter);
+
 		assert_eq!(actual.message, "TypeError: baz");
 		// Because this is accessing the live bundle, this test might be more fragile
 		assert_eq!(actual.frames.len(), 1);
+
 		assert!(actual.frames[0].script_name.ends_with("/window.ts"));
 	}
 
@@ -401,20 +417,30 @@ mod tests {
 			end_column:None,
 			frames:vec![],
 		};
+
 		let getter = MockSourceMapGetter {};
+
 		let actual = apply_source_map(&e, &getter);
+
 		assert_eq!(actual.source_line, Some("console.log('foo');".to_string()));
 	}
 
 	#[test]
 	fn source_map_from_json() {
 		let json = r#"{"version":3,"file":"error_001.js","sourceRoot":"","sources":["file:///Users/rld/src/deno/tests/error_001.ts"],"names":[],"mappings":"AAAA,SAAS,GAAG;IACV,MAAM,KAAK,CAAC,KAAK,CAAC,CAAC;AACrB,CAAC;AAED,SAAS,GAAG;IACV,GAAG,EAAE,CAAC;AACR,CAAC;AAED,GAAG,EAAE,CAAC"}"#;
+
 		let sm = SourceMap::from_json(json).unwrap();
+
 		assert_eq!(sm.sources.len(), 1);
+
 		assert_eq!(sm.sources[0], "file:///Users/rld/src/deno/tests/error_001.ts");
+
 		let mapping = sm.mappings.original_location_for(1, 10, Bias::default()).unwrap();
+
 		assert_eq!(mapping.generated_line, 1);
+
 		assert_eq!(mapping.generated_column, 10);
+
 		assert_eq!(
 			mapping.original,
 			Some(source_map_mappings::OriginalLocation {

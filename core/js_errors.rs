@@ -51,24 +51,31 @@ impl StackFrame {
 		if !v.is_object() {
 			return None;
 		}
+
 		let obj = v.as_object().unwrap();
 
 		let line_v = &obj["line"];
+
 		if !line_v.is_u64() {
 			return None;
 		}
+
 		let line = line_v.as_u64().unwrap() as i64;
 
 		let column_v = &obj["column"];
+
 		if !column_v.is_u64() {
 			return None;
 		}
+
 		let column = column_v.as_u64().unwrap() as i64;
 
 		let script_name_v = &obj["scriptName"];
+
 		if !script_name_v.is_string() {
 			return None;
 		}
+
 		let script_name = String::from(script_name_v.as_str().unwrap());
 
 		// Optional fields. See EncodeExceptionAsJSON() in libdeno.
@@ -77,6 +84,7 @@ impl StackFrame {
 		let mut function_name = String::from(""); // default
 		if obj.contains_key("functionName") {
 			let function_name_v = &obj["functionName"];
+
 			if function_name_v.is_string() {
 				function_name = String::from(function_name_v.as_str().unwrap());
 			}
@@ -85,6 +93,7 @@ impl StackFrame {
 		let mut is_eval = false; // default
 		if obj.contains_key("isEval") {
 			let is_eval_v = &obj["isEval"];
+
 			if is_eval_v.is_boolean() {
 				is_eval = is_eval_v.as_bool().unwrap();
 			}
@@ -93,6 +102,7 @@ impl StackFrame {
 		let mut is_constructor = false; // default
 		if obj.contains_key("isConstructor") {
 			let is_constructor_v = &obj["isConstructor"];
+
 			if is_constructor_v.is_boolean() {
 				is_constructor = is_constructor_v.as_bool().unwrap();
 			}
@@ -101,6 +111,7 @@ impl StackFrame {
 		let mut is_wasm = false; // default
 		if obj.contains_key("isWasm") {
 			let is_wasm_v = &obj["isWasm"];
+
 			if is_wasm_v.is_boolean() {
 				is_wasm = is_wasm_v.as_bool().unwrap();
 			}
@@ -123,10 +134,13 @@ impl V8Exception {
 	/// V8.
 	pub fn from_json(json_str:&str) -> Option<Self> {
 		let v = serde_json::from_str::<serde_json::Value>(json_str);
+
 		if v.is_err() {
 			return None;
 		}
+
 		let v = v.unwrap();
+
 		Self::from_json_value(v)
 	}
 
@@ -134,31 +148,44 @@ impl V8Exception {
 		if !v.is_object() {
 			return None;
 		}
+
 		let obj = v.as_object().unwrap();
 
 		let message_v = &obj["message"];
+
 		if !message_v.is_string() {
 			return None;
 		}
+
 		let message = String::from(message_v.as_str().unwrap());
 
 		let source_line = obj.get("sourceLine").and_then(|v| v.as_str().map(String::from));
+
 		let script_resource_name =
 			obj.get("scriptResourceName").and_then(|v| v.as_str().map(String::from));
+
 		let line_number = obj.get("lineNumber").and_then(Value::as_i64);
+
 		let start_position = obj.get("startPosition").and_then(Value::as_i64);
+
 		let end_position = obj.get("endPosition").and_then(Value::as_i64);
+
 		let error_level = obj.get("errorLevel").and_then(Value::as_i64);
+
 		let start_column = obj.get("startColumn").and_then(Value::as_i64);
+
 		let end_column = obj.get("endColumn").and_then(Value::as_i64);
 
 		let frames_v = &obj["frames"];
+
 		if !frames_v.is_array() {
 			return None;
 		}
+
 		let frame_values = frames_v.as_array().unwrap();
 
 		let mut frames = Vec::<StackFrame>::new();
+
 		for frame_v in frame_values {
 			match StackFrame::from_json_value(frame_v) {
 				None => return None,
@@ -184,6 +211,7 @@ impl V8Exception {
 impl CoreJSError {
 	pub fn from_v8_exception(v8_exception:V8Exception) -> ErrBox {
 		let error = Self(v8_exception);
+
 		ErrBox::from(error)
 	}
 }
@@ -191,7 +219,9 @@ impl CoreJSError {
 fn format_source_loc(script_name:&str, line:i64, column:i64) -> String {
 	// TODO match this style with how typescript displays errors.
 	let line = line + 1;
+
 	let column = column + 1;
+
 	format!("{}:{}:{}", script_name, line, column)
 }
 
@@ -212,19 +242,26 @@ impl fmt::Display for CoreJSError {
 	fn fmt(&self, f:&mut fmt::Formatter) -> fmt::Result {
 		if self.0.script_resource_name.is_some() {
 			let script_resource_name = self.0.script_resource_name.as_ref().unwrap();
+
 			if self.0.line_number.is_some() && self.0.start_column.is_some() {
 				assert!(self.0.line_number.is_some());
+
 				assert!(self.0.start_column.is_some());
+
 				let source_loc = format_source_loc(
 					script_resource_name,
 					self.0.line_number.unwrap() - 1,
 					self.0.start_column.unwrap() - 1,
 				);
+
 				write!(f, "{}", source_loc)?;
 			}
+
 			if self.0.source_line.is_some() {
 				write!(f, "\n{}\n", self.0.source_line.as_ref().unwrap())?;
+
 				let mut s = String::new();
+
 				for i in 0..self.0.end_column.unwrap() {
 					if i >= self.0.start_column.unwrap() {
 						s.push('^');
@@ -232,6 +269,7 @@ impl fmt::Display for CoreJSError {
 						s.push(' ');
 					}
 				}
+
 				writeln!(f, "{}", s)?;
 			}
 		}
@@ -241,6 +279,7 @@ impl fmt::Display for CoreJSError {
 		for frame in &self.0.frames {
 			write!(f, "\n{}", format_stack_frame(frame))?;
 		}
+
 		Ok(())
 	}
 }
@@ -308,7 +347,9 @@ mod tests {
       }"#,
 		)
 		.unwrap();
+
 		let r = StackFrame::from_json_value(&v);
+
 		assert_eq!(
 			r,
 			Some(StackFrame {
@@ -333,11 +374,17 @@ mod tests {
       }"#,
 		)
 		.unwrap();
+
 		let r = StackFrame::from_json_value(&v);
+
 		assert!(r.is_some());
+
 		let f = r.unwrap();
+
 		assert_eq!(f.line, 1);
+
 		assert_eq!(f.column, 10);
+
 		assert_eq!(f.script_name, "/Users/rld/src/deno/tests/error_001.ts");
 	}
 
@@ -366,10 +413,15 @@ mod tests {
           }
         ]}"#,
 		);
+
 		assert!(r.is_some());
+
 		let e = r.unwrap();
+
 		assert_eq!(e.message, "Uncaught Error: bad");
+
 		assert_eq!(e.frames.len(), 2);
+
 		assert_eq!(
 			e.frames[0],
 			StackFrame {
@@ -394,25 +446,39 @@ mod tests {
 			 "functionName\":\"\",\"scriptName\":\"a.js\",\"isEval\":false,\"isConstructor\":\
 			 false,\"isWasm\":false}]}",
 		);
+
 		assert!(r.is_some());
+
 		let e = r.unwrap();
+
 		assert_eq!(e.message, "Error: boo");
+
 		assert_eq!(e.source_line, Some("throw Error('boo');".to_string()));
+
 		assert_eq!(e.script_resource_name, Some("a.js".to_string()));
+
 		assert_eq!(e.line_number, Some(3));
+
 		assert_eq!(e.start_position, Some(8));
+
 		assert_eq!(e.end_position, Some(9));
+
 		assert_eq!(e.error_level, Some(8));
+
 		assert_eq!(e.start_column, Some(6));
+
 		assert_eq!(e.end_column, Some(7));
+
 		assert_eq!(e.frames.len(), 1);
 	}
 
 	#[test]
 	fn js_error_to_string() {
 		let e = CoreJSError(error1());
+
 		let expected = "Error: foo bar\n    at foo (foo_bar.ts:5:17)\n    at qat \
 		                (bar_baz.ts:6:21)\n    at deno_main.js:2:2";
+
 		assert_eq!(expected, &e.to_string());
 	}
 }

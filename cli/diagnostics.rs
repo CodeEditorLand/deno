@@ -21,10 +21,13 @@ impl Diagnostic {
 		if !v.is_object() {
 			return None;
 		}
+
 		let obj = v.as_object().unwrap();
 
 		let mut items = Vec::<DiagnosticItem>::new();
+
 		let items_v = &obj["items"];
+
 		if items_v.is_array() {
 			let items_values = items_v.as_array().unwrap();
 
@@ -39,7 +42,9 @@ impl Diagnostic {
 	pub fn from_emit_result(json_str:&str) -> Option<Self> {
 		let v = serde_json::from_str::<serde_json::Value>(json_str)
 			.expect("Error decoding JSON string.");
+
 		let diagnostics_o = v.get("diagnostics");
+
 		if let Some(diagnostics_v) = diagnostics_o {
 			return Self::from_json_value(diagnostics_v);
 		}
@@ -51,11 +56,14 @@ impl Diagnostic {
 impl fmt::Display for Diagnostic {
 	fn fmt(&self, f:&mut fmt::Formatter) -> fmt::Result {
 		let mut i = 0;
+
 		for item in &self.items {
 			if i > 0 {
 				writeln!(f)?;
 			}
+
 			write!(f, "{}", item.to_string())?;
+
 			i += 1;
 		}
 
@@ -117,30 +125,41 @@ impl DiagnosticItem {
 
 		// required attributes
 		let message = obj.get("message").and_then(|v| v.as_str().map(String::from)).unwrap();
+
 		let category =
 			DiagnosticCategory::from(obj.get("category").and_then(Value::as_i64).unwrap());
+
 		let code = obj.get("code").and_then(Value::as_i64).unwrap();
 
 		// optional attributes
 		let source_line = obj.get("sourceLine").and_then(|v| v.as_str().map(String::from));
+
 		let script_resource_name =
 			obj.get("scriptResourceName").and_then(|v| v.as_str().map(String::from));
+
 		let line_number = obj.get("lineNumber").and_then(Value::as_i64);
+
 		let start_position = obj.get("startPosition").and_then(Value::as_i64);
+
 		let end_position = obj.get("endPosition").and_then(Value::as_i64);
+
 		let start_column = obj.get("startColumn").and_then(Value::as_i64);
+
 		let end_column = obj.get("endColumn").and_then(Value::as_i64);
 
 		let message_chain_v = obj.get("messageChain");
+
 		let message_chain = match message_chain_v {
 			Some(v) => DiagnosticMessageChain::from_json_value(v),
 			_ => None,
 		};
 
 		let related_information_v = obj.get("relatedInformation");
+
 		let related_information = match related_information_v {
 			Some(r) => {
 				let mut related_information = Vec::<DiagnosticItem>::new();
+
 				let related_info_values = r.as_array().unwrap();
 
 				for related_info_v in related_info_values {
@@ -188,11 +207,13 @@ impl DisplayFormatter for DiagnosticItem {
 
 	fn format_message(&self, level:usize) -> String {
 		debug!("format_message");
+
 		if self.message_chain.is_none() {
 			return format!("{:indent$}{}", "", self.message, indent = level);
 		}
 
 		let mut s = self.message_chain.clone().unwrap().format_message(level);
+
 		s.pop();
 
 		s
@@ -204,9 +225,12 @@ impl DisplayFormatter for DiagnosticItem {
 		}
 
 		let mut s = String::new();
+
 		let related_information = self.related_information.clone().unwrap();
+
 		for related_diagnostic in related_information {
 			let rd = &related_diagnostic;
+
 			s.push_str(&format!(
 				"\n{}\n\n    ► {}{}\n",
 				rd.format_message(2),
@@ -266,12 +290,16 @@ pub struct DiagnosticMessageChain {
 impl DiagnosticMessageChain {
 	fn from_value(v:&serde_json::Value) -> Self {
 		let obj = v.as_object().unwrap();
+
 		let message = obj.get("message").and_then(|v| v.as_str().map(String::from)).unwrap();
+
 		let code = obj.get("code").and_then(Value::as_i64).unwrap();
+
 		let category =
 			DiagnosticCategory::from(obj.get("category").and_then(Value::as_i64).unwrap());
 
 		let next_v = obj.get("next");
+
 		let next = match next_v {
 			Some(n) => DiagnosticMessageChain::from_next_array(n),
 			_ => None,
@@ -307,10 +335,14 @@ impl DiagnosticMessageChain {
 		let mut s = String::new();
 
 		s.push_str(&std::iter::repeat(" ").take(level * 2).collect::<String>());
+
 		s.push_str(&self.message);
+
 		s.push('\n');
+
 		if self.next.is_some() {
 			let arr = self.next.clone().unwrap();
+
 			for dm in arr {
 				s.push_str(&dm.format_message(level + 1));
 			}
@@ -347,6 +379,7 @@ impl From<i64> for DiagnosticCategory {
 #[cfg(test)]
 mod tests {
 	use super::*;
+
 	use crate::colors::strip_ansi_codes;
 
 	fn diagnostic1() -> Diagnostic {
@@ -469,7 +502,9 @@ mod tests {
         ]
       }"#,
     ).unwrap();
+
 		let r = Diagnostic::from_json_value(&v);
+
 		let expected = Some(Diagnostic {
 			items:vec![DiagnosticItem {
 				message:"Type \'{ a(): { b: number; }; }\' is not assignable to type \'{ a(): { \
@@ -500,6 +535,7 @@ mod tests {
 				end_column:Some(1),
 			}],
 		});
+
 		assert_eq!(expected, r);
 	}
 
@@ -519,6 +555,7 @@ mod tests {
       }
     }"#,
 		);
+
 		let expected = Some(Diagnostic {
 			items:vec![DiagnosticItem {
 				message:"foo bar".to_string(),
@@ -535,18 +572,21 @@ mod tests {
 				end_column:None,
 			}],
 		});
+
 		assert_eq!(expected, r);
 	}
 
 	#[test]
 	fn from_emit_result_none() {
 		let r = &r#"{"emitSkipped":false}"#;
+
 		assert!(Diagnostic::from_emit_result(r).is_none());
 	}
 
 	#[test]
 	fn diagnostic_to_string1() {
 		let d = diagnostic1();
+
 		let expected = "error TS2322: Type \'(o: T) => { v: any; f: (x: B) => string; }[]\' is \
 		                not assignable to type \'(r: B) => Value<B>[]\'.\n  Types of parameters \
 		                \'o\' and \'r\' are incompatible.\n    Type \'B\' is not assignable to \
@@ -555,16 +595,19 @@ mod tests {
 		                which is declared here on type \'SettingsInterface<B>\'\n\n    ► \
 		                deno/tests/complex_diagnostics.ts:7:3\n\n    7   values?: (r: T) => \
 		                Array<Value<T>>;\n        ~~~~~~\n\n";
+
 		assert_eq!(expected, strip_ansi_codes(&d.to_string()));
 	}
 
 	#[test]
 	fn diagnostic_to_string2() {
 		let d = diagnostic2();
+
 		let expected =
 			"error TS2322: Example 1\n\n► deno/tests/complex_diagnostics.ts:19:3\n\n19   values: \
 			 o => [\n     ~~~~~~\n\nerror TS2000: Example 2\n\n► /foo/bar.ts:129:3\n\n129   \
 			 values: undefined,\n      ~~~~~~\n\n\nFound 2 errors.\n";
+
 		assert_eq!(expected, strip_ansi_codes(&d.to_string()));
 	}
 }

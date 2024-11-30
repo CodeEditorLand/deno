@@ -13,16 +13,23 @@ use crate::{
 /// generate to conform its display to other diagnostic like items
 pub trait DisplayFormatter {
 	fn format_category_and_code(&self) -> String;
+
 	fn format_message(&self, level:usize) -> String;
+
 	fn format_related_info(&self) -> String;
+
 	fn format_source_line(&self, level:usize) -> String;
+
 	fn format_source_name(&self) -> String;
 }
 
 fn format_source_name(script_name:String, line:i64, column:i64) -> String {
 	let script_name_c = colors::cyan(script_name);
+
 	let line_c = colors::yellow((1 + line).to_string());
+
 	let column_c = colors::yellow((1 + column).to_string());
+
 	format!("{}:{}:{}", script_name_c, line_c, column_c,)
 }
 
@@ -37,7 +44,9 @@ pub fn format_maybe_source_name(
 	}
 
 	assert!(line.is_some());
+
 	assert!(column.is_some());
+
 	format_source_name(script_name.unwrap(), line.unwrap(), column.unwrap())
 }
 
@@ -63,19 +72,28 @@ pub fn format_maybe_source_line(
 	}
 
 	assert!(start_column.is_some());
+
 	assert!(end_column.is_some());
+
 	let line = (1 + line_number.unwrap()).to_string();
+
 	let line_color = colors::black_on_white(line.to_string());
+
 	let line_len = line.clone().len();
+
 	let line_padding =
 		colors::black_on_white(format!("{:indent$}", "", indent = line_len)).to_string();
+
 	let mut s = String::new();
+
 	let start_column = start_column.unwrap();
+
 	let end_column = end_column.unwrap();
 	// TypeScript uses `~` always, but V8 would utilise `^` always, even when
 	// doing ranges, so here, if we only have one marker (very common with V8
 	// errors) we will use `^` instead.
 	let underline_char = if (end_column - start_column) <= 1 { '^' } else { '~' };
+
 	for i in 0..end_column {
 		if i >= start_column {
 			s.push(underline_char);
@@ -83,6 +101,7 @@ pub fn format_maybe_source_line(
 			s.push(' ');
 		}
 	}
+
 	let color_underline =
 		if is_error { colors::red(s).to_string() } else { colors::cyan(s).to_string() };
 
@@ -97,12 +116,14 @@ pub fn format_maybe_source_line(
 /// Format a message to preface with `error: ` with ansi codes for red.
 pub fn format_error_message(msg:String) -> String {
 	let preamble = colors::red("error:".to_string());
+
 	format!("{} {}", preamble, msg)
 }
 
 fn format_stack_frame(frame:&StackFrame) -> String {
 	// Note when we print to string, we change from 0-indexed to 1-indexed.
 	let function_name = colors::italic_bold(frame.function_name.clone());
+
 	let source_loc = format_source_name(frame.script_name.clone(), frame.line, frame.column);
 
 	if !frame.function_name.is_empty() {
@@ -123,6 +144,7 @@ impl JSError {
 
 	pub fn from_json(json_str:&str, source_map_getter:&impl SourceMapGetter) -> ErrBox {
 		let unmapped_exception = V8Exception::from_json(json_str).unwrap();
+
 		Self::from_v8_exception(unmapped_exception, source_map_getter)
 	}
 
@@ -131,7 +153,9 @@ impl JSError {
 		source_map_getter:&impl SourceMapGetter,
 	) -> ErrBox {
 		let mapped_exception = apply_source_map(&unmapped_exception, source_map_getter);
+
 		let js_error = Self(mapped_exception);
+
 		ErrBox::from(js_error)
 	}
 }
@@ -158,6 +182,7 @@ impl DisplayFormatter for JSError {
 
 	fn format_source_name(&self) -> String {
 		let e = &self.0;
+
 		if e.script_resource_name.is_none() {
 			return "".to_string();
 		}
@@ -182,6 +207,7 @@ impl fmt::Display for JSError {
 		for frame in &self.0.frames {
 			write!(f, "\n{}", format_stack_frame(&frame))?;
 		}
+
 		Ok(())
 	}
 }
@@ -191,6 +217,7 @@ impl Error for JSError {}
 #[cfg(test)]
 mod tests {
 	use super::*;
+
 	use crate::colors::strip_ansi_codes;
 
 	fn error1() -> V8Exception {
@@ -239,12 +266,14 @@ mod tests {
 	#[test]
 	fn js_error_to_string() {
 		let e = error1();
+
 		assert_eq!("error: Error: foo bar\n    at foo (foo_bar.ts:5:17)\n    at qat (bar_baz.ts:6:21)\n    at deno_main.js:2:2", strip_ansi_codes(&JSError(e).to_string()));
 	}
 
 	#[test]
 	fn test_format_none_source_name() {
 		let actual = format_maybe_source_name(None, None, None);
+
 		assert_eq!(actual, "");
 	}
 
@@ -252,12 +281,14 @@ mod tests {
 	fn test_format_some_source_name() {
 		let actual =
 			format_maybe_source_name(Some("file://foo/bar.ts".to_string()), Some(1), Some(2));
+
 		assert_eq!(strip_ansi_codes(&actual), "file://foo/bar.ts:2:3");
 	}
 
 	#[test]
 	fn test_format_none_source_line() {
 		let actual = format_maybe_source_line(None, None, None, None, false, 0);
+
 		assert_eq!(actual, "");
 	}
 
@@ -271,12 +302,14 @@ mod tests {
 			true,
 			0,
 		);
+
 		assert_eq!(strip_ansi_codes(&actual), "\n\n9 console.log(\'foo\');\n          ~~~\n");
 	}
 
 	#[test]
 	fn test_format_error_message() {
 		let actual = format_error_message("foo".to_string());
+
 		assert_eq!(strip_ansi_codes(&actual), "error: foo");
 	}
 }

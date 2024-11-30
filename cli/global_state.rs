@@ -61,6 +61,7 @@ impl Deref for ThreadSafeGlobalState {
 impl ThreadSafeGlobalState {
 	pub fn new(flags:flags::DenoFlags, progress:Progress) -> Result<Self, ErrBox> {
 		let custom_root = env::var("DENO_DIR").map(String::into).ok();
+
 		let dir = deno_dir::DenoDir::new(custom_root)?;
 
 		let file_fetcher = SourceFileFetcher::new(
@@ -83,6 +84,7 @@ impl ThreadSafeGlobalState {
 			None
 		} else {
 			let root_specifier = flags.argv[1].clone();
+
 			Some(ModuleSpecifier::resolve_url_or_path(&root_specifier)?)
 		};
 
@@ -117,6 +119,7 @@ impl ThreadSafeGlobalState {
 		maybe_referrer:Option<ModuleSpecifier>,
 	) -> impl Future<Output = Result<CompiledModule, ErrBox>> {
 		let state1 = self.clone();
+
 		let state2 = self.clone();
 
 		let source_file =
@@ -124,6 +127,7 @@ impl ThreadSafeGlobalState {
 
 		async move {
 			let out = source_file.await?;
+
 			let compiled_module = match out.media_type {
 				msg::MediaType::Unknown => state1.js_compiler.compile_async(&out),
 				msg::MediaType::Json => state1.json_compiler.compile_async(&out),
@@ -143,6 +147,7 @@ impl ThreadSafeGlobalState {
 
 			if let Some(ref lockfile) = state2.lockfile {
 				let mut g = lockfile.lock().unwrap();
+
 				if state2.flags.lock_write {
 					g.insert(&compiled_module);
 				} else {
@@ -150,15 +155,18 @@ impl ThreadSafeGlobalState {
 						Err(e) => return Err(ErrBox::from(e)),
 						Ok(v) => v,
 					};
+
 					if !check {
 						eprintln!(
 							"Subresource integrity check failed --lock={}\n{}",
 							g.filename, compiled_module.name
 						);
+
 						std::process::exit(10);
 					}
 				}
 			}
+
 			Ok(compiled_module)
 		}
 	}
@@ -191,14 +199,18 @@ impl ThreadSafeGlobalState {
 
 	pub fn check_dyn_import(self: &Self, module_specifier:&ModuleSpecifier) -> Result<(), ErrBox> {
 		let u = module_specifier.as_url();
+
 		match u.scheme() {
 			"http" | "https" => {
 				self.check_net_url(u)?;
+
 				Ok(())
 			},
 			"file" => {
 				let filename = u.to_file_path().unwrap().into_os_string().into_string().unwrap();
+
 				self.check_read(&filename)?;
+
 				Ok(())
 			},
 			_ => Err(permission_denied()),
@@ -218,6 +230,7 @@ impl ThreadSafeGlobalState {
 #[test]
 fn thread_safe() {
 	fn f<S:Send + Sync>(_:S) {}
+
 	f(ThreadSafeGlobalState::mock(vec![
 		String::from("./deno"),
 		String::from("hello.js"),

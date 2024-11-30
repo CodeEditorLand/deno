@@ -20,7 +20,9 @@ use crate::{deno_error, deno_error::DenoError, version};
 /// proxies and doesn't follow redirects.
 pub fn get_client() -> Client {
 	let mut headers = HeaderMap::new();
+
 	headers.insert(USER_AGENT, format!("Deno/{}", version::DENO).parse().unwrap());
+
 	Client::builder()
 		.redirect(RedirectPolicy::none())
 		.default_headers(headers)
@@ -47,7 +49,9 @@ fn resolve_url_from_location(base_url:&Url, location:&str) -> Url {
 		let base_url_path_str = base_url.path().to_owned();
 		// Pop last part or url (after last slash)
 		let segs:Vec<&str> = base_url_path_str.rsplitn(2, '/').collect();
+
 		let new_path = format!("{}/{}", segs.last().unwrap_or(&""), location);
+
 		base_url.join(&new_path).expect("provided redirect url should be a valid url")
 	}
 }
@@ -68,6 +72,7 @@ pub fn fetch_string_once(url:&Url) -> impl Future<Output = Result<FetchOnceResul
 	type FetchAttempt = (Option<String>, Option<String>, Option<FetchOnceResult>);
 
 	let url = url.clone();
+
 	let client = get_client();
 
 	futures::compat::Compat01As03::new(client.get(url.clone()).send())
@@ -141,6 +146,7 @@ pub fn fetch_string_once(url:&Url) -> impl Future<Output = Result<FetchOnceResul
 #[cfg(test)]
 mod tests {
 	use super::*;
+
 	use crate::tokio_util;
 
 	#[test]
@@ -153,7 +159,9 @@ mod tests {
 			match result {
 				Ok(FetchOnceResult::Code(code, maybe_content_type)) => {
 					assert!(!code.is_empty());
+
 					assert_eq!(maybe_content_type, Some("application/json".to_string()));
+
 					futures::future::ok(())
 				},
 				_ => panic!(),
@@ -161,6 +169,7 @@ mod tests {
 		});
 
 		tokio_util::run(fut);
+
 		drop(http_server_guard);
 	}
 
@@ -171,10 +180,12 @@ mod tests {
 		let url = Url::parse("http://127.0.0.1:4546/cli/tests/fixture.json").unwrap();
 		// Dns resolver substitutes `127.0.0.1` with `localhost`
 		let target_url = Url::parse("http://localhost:4545/cli/tests/fixture.json").unwrap();
+
 		let fut = fetch_string_once(&url).then(move |result| {
 			match result {
 				Ok(FetchOnceResult::Redirect(url)) => {
 					assert_eq!(url, target_url);
+
 					futures::future::ok(())
 				},
 				_ => panic!(),
@@ -182,44 +193,58 @@ mod tests {
 		});
 
 		tokio_util::run(fut);
+
 		drop(http_server_guard);
 	}
 
 	#[test]
 	fn test_resolve_url_from_location_full_1() {
 		let url = "http://deno.land".parse::<Url>().unwrap();
+
 		let new_uri = resolve_url_from_location(&url, "http://golang.org");
+
 		assert_eq!(new_uri.host_str().unwrap(), "golang.org");
 	}
 
 	#[test]
 	fn test_resolve_url_from_location_full_2() {
 		let url = "https://deno.land".parse::<Url>().unwrap();
+
 		let new_uri = resolve_url_from_location(&url, "https://golang.org");
+
 		assert_eq!(new_uri.host_str().unwrap(), "golang.org");
 	}
 
 	#[test]
 	fn test_resolve_url_from_location_relative_1() {
 		let url = "http://deno.land/x".parse::<Url>().unwrap();
+
 		let new_uri = resolve_url_from_location(&url, "//rust-lang.org/en-US");
+
 		assert_eq!(new_uri.host_str().unwrap(), "rust-lang.org");
+
 		assert_eq!(new_uri.path(), "/en-US");
 	}
 
 	#[test]
 	fn test_resolve_url_from_location_relative_2() {
 		let url = "http://deno.land/x".parse::<Url>().unwrap();
+
 		let new_uri = resolve_url_from_location(&url, "/y");
+
 		assert_eq!(new_uri.host_str().unwrap(), "deno.land");
+
 		assert_eq!(new_uri.path(), "/y");
 	}
 
 	#[test]
 	fn test_resolve_url_from_location_relative_3() {
 		let url = "http://deno.land/x".parse::<Url>().unwrap();
+
 		let new_uri = resolve_url_from_location(&url, "z");
+
 		assert_eq!(new_uri.host_str().unwrap(), "deno.land");
+
 		assert_eq!(new_uri.path(), "/z");
 	}
 }

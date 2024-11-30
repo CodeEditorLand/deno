@@ -80,6 +80,7 @@ impl log::Log for Logger {
 
 			if let Some(line_no) = record.line() {
 				target.push_str(":");
+
 				target.push_str(&line_no.to_string());
 			}
 
@@ -98,9 +99,11 @@ fn create_worker_and_state(flags:DenoFlags) -> (Worker, ThreadSafeGlobalState) {
 	let shell = Arc::new(Mutex::new(Shell::new()));
 
 	let progress = Progress::new();
+
 	progress.set_callback(move |_done, _completed, _total, status, msg| {
 		if !status.is_empty() {
 			let mut s = shell.lock().unwrap();
+
 			s.status(status, msg).expect("shell problem");
 		}
 	});
@@ -110,6 +113,7 @@ fn create_worker_and_state(flags:DenoFlags) -> (Worker, ThreadSafeGlobalState) {
 		.unwrap();
 
 	let (int, ext) = ThreadSafeState::create_channels();
+
 	let state = ThreadSafeState::new(
 		global_state.clone(),
 		None,
@@ -123,9 +127,13 @@ fn create_worker_and_state(flags:DenoFlags) -> (Worker, ThreadSafeGlobalState) {
 	let state_ = state.clone();
 	{
 		let mut resource_table = state_.lock_resource_table();
+
 		let (stdin, stdout, stderr) = get_stdio();
+
 		resource_table.add("stdin", Box::new(stdin));
+
 		resource_table.add("stdout", Box::new(stdout));
+
 		resource_table.add("stderr", Box::new(stderr));
 	}
 
@@ -136,6 +144,7 @@ fn create_worker_and_state(flags:DenoFlags) -> (Worker, ThreadSafeGlobalState) {
 
 fn types_command() {
 	let content = crate::js::get_asset("lib.deno_runtime.d.ts").unwrap();
+
 	println!("{}", content);
 }
 
@@ -143,11 +152,13 @@ fn print_cache_info(worker:Worker) {
 	let state = &worker.state.global_state;
 
 	println!("{} {:?}", colors::bold("DENO_DIR location:".to_string()), state.dir.root);
+
 	println!(
 		"{} {:?}",
 		colors::bold("Remote modules cache:".to_string()),
 		state.dir.deps_cache.location
 	);
+
 	println!(
 		"{} {:?}",
 		colors::bold("TypeScript compiler cache:".to_string()),
@@ -157,17 +168,22 @@ fn print_cache_info(worker:Worker) {
 
 async fn print_file_info(worker:Worker, module_specifier:ModuleSpecifier) {
 	let global_state_ = &worker.state.global_state;
+
 	let state_ = &worker.state;
 
 	let maybe_source_file = global_state_
 		.file_fetcher
 		.fetch_source_file_async(&module_specifier, None)
 		.await;
+
 	if let Err(err) = maybe_source_file {
 		println!("{}", err);
+
 		return;
 	}
+
 	let out = maybe_source_file.unwrap();
+
 	println!("{} {}", colors::bold("local:".to_string()), out.filename.to_str().unwrap());
 
 	println!(
@@ -177,12 +193,17 @@ async fn print_file_info(worker:Worker, module_specifier:ModuleSpecifier) {
 	);
 
 	let maybe_compiled = global_state_.clone().fetch_compiled_module(&module_specifier, None).await;
+
 	if let Err(e) = maybe_compiled {
 		debug!("compiler error exiting!");
+
 		eprintln!("\n{}", e.to_string());
+
 		std::process::exit(1);
 	}
+
 	let compiled = maybe_compiled.unwrap();
+
 	if out.media_type == msg::MediaType::TypeScript
 		|| (out.media_type == msg::MediaType::JavaScript && global_state_.ts_compiler.compile_js)
 	{
@@ -203,6 +224,7 @@ async fn print_file_info(worker:Worker, module_specifier:ModuleSpecifier) {
 
 	if let Some(deps) = state_.modules.lock().unwrap().deps(&compiled.name) {
 		println!("{}{}", colors::bold("deps:\n".to_string()), deps.name);
+
 		if let Some(ref depsdeps) = deps.deps {
 			for d in depsdeps {
 				println!("{}", d);
@@ -215,6 +237,7 @@ async fn print_file_info(worker:Worker, module_specifier:ModuleSpecifier) {
 
 fn info_command(flags:DenoFlags) {
 	let argv_len = flags.argv.len();
+
 	let (mut worker, state) = create_worker_and_state(flags);
 
 	// If it was just "deno info" print location of caches and exit
@@ -226,16 +249,22 @@ fn info_command(flags:DenoFlags) {
 
 	// Setup runtime.
 	js_check(worker.execute("denoMain()"));
+
 	debug!("main_module {}", main_module);
 
 	let main_future = async move {
 		let main_result = worker.execute_mod_async(&main_module, None, true).await;
+
 		if let Err(e) = main_result {
 			print_err_and_exit(e);
 		}
+
 		print_file_info(worker.clone(), main_module.clone()).await;
+
 		let result = worker.await;
+
 		js_check(result);
+
 		Ok(())
 	};
 
@@ -249,11 +278,14 @@ fn fetch_command(flags:DenoFlags) {
 
 	// Setup runtime.
 	js_check(worker.execute("denoMain()"));
+
 	debug!("main_module {}", main_module);
 
 	let main_future = async move {
 		let result = worker.execute_mod_async(&main_module, None, true).await;
+
 		js_check(result);
+
 		Ok(())
 	};
 
@@ -262,23 +294,32 @@ fn fetch_command(flags:DenoFlags) {
 
 fn eval_command(flags:DenoFlags) {
 	let ts_source = flags.argv[1].clone();
+
 	let (mut worker, _state) = create_worker_and_state(flags);
 	// Force TypeScript compile.
 	let main_module = ModuleSpecifier::resolve_url_or_path("./__$deno$eval.ts").unwrap();
 
 	js_check(worker.execute("denoMain()"));
+
 	debug!("main_module {}", &main_module);
 
 	let main_future = async move {
 		let exec_result = worker.execute_mod_async(&main_module, Some(ts_source), false).await;
+
 		if let Err(e) = exec_result {
 			print_err_and_exit(e);
 		}
+
 		js_check(worker.execute("window.dispatchEvent(new Event('load'))"));
+
 		let mut worker_ = worker.clone();
+
 		let result = worker.await;
+
 		js_check(result);
+
 		js_check(worker_.execute("window.dispatchEvent(new Event('unload'))"));
+
 		Ok(())
 	};
 
@@ -287,7 +328,9 @@ fn eval_command(flags:DenoFlags) {
 
 fn bundle_command(flags:DenoFlags) {
 	let out_file = flags.bundle_output.clone();
+
 	let (worker, state) = create_worker_and_state(flags);
+
 	let main_module = state.main_module.as_ref().unwrap().clone();
 
 	debug!(">>>>> bundle_async START");
@@ -295,19 +338,27 @@ fn bundle_command(flags:DenoFlags) {
 	// properly
 	let main_future = async move {
 		let result = worker.await;
+
 		js_check(result);
+
 		let bundle_result = state
 			.ts_compiler
 			.bundle_async(state.clone(), main_module.to_string(), out_file)
 			.await;
+
 		if let Err(err) = bundle_result {
 			debug!("diagnostics returned, exiting!");
+
 			eprintln!("");
+
 			print_err_and_exit(err);
 		}
+
 		debug!(">>>>> bundle_async END");
+
 		Ok(())
 	};
+
 	tokio_util::run(main_future);
 }
 
@@ -315,51 +366,68 @@ fn run_repl(flags:DenoFlags) {
 	let (mut worker, _state) = create_worker_and_state(flags);
 	// Setup runtime.
 	js_check(worker.execute("denoMain()"));
+
 	let main_future = async move {
 		let result = worker.await;
+
 		js_check(result);
+
 		Ok(())
 	};
+
 	tokio_util::run(main_future);
 }
 
 fn run_script(flags:DenoFlags) {
 	let use_current_thread = flags.current_thread;
+
 	let (mut worker, state) = create_worker_and_state(flags);
 
 	let maybe_main_module = state.main_module.as_ref();
+
 	if maybe_main_module.is_none() {
 		print_msg_and_exit("Please provide a name to the main script to run.");
 	}
+
 	let main_module = maybe_main_module.unwrap().clone();
 	// Normal situation of executing a module.
 
 	// Setup runtime.
 	js_check(worker.execute("denoMain()"));
+
 	debug!("main_module {}", main_module);
 
 	let mut worker_ = worker.clone();
 
 	let main_future = async move {
 		let mod_result = worker.execute_mod_async(&main_module, None, false).await;
+
 		if let Err(err) = mod_result {
 			print_err_and_exit(err);
 		}
+
 		if state.flags.lock_write {
 			if let Some(ref lockfile) = state.lockfile {
 				let g = lockfile.lock().unwrap();
+
 				if let Err(e) = g.write() {
 					print_err_and_exit(ErrBox::from(e));
 				}
 			} else {
 				eprintln!("--lock flag must be specified when using --lock-write");
+
 				std::process::exit(11);
 			}
 		}
+
 		js_check(worker.execute("window.dispatchEvent(new Event('load'))"));
+
 		let result = worker.await;
+
 		js_check(result);
+
 		js_check(worker_.execute("window.dispatchEvent(new Event('unload'))"));
+
 		Ok(())
 	};
 
@@ -375,12 +443,16 @@ pub fn main() {
 	ansi_term::enable_ansi_support().ok(); // For Windows 10
 
 	log::set_logger(&LOGGER).unwrap();
+
 	let args:Vec<String> = env::args().collect();
+
 	let flags = flags::flags_from_vec(args);
 
 	if let Some(ref v8_flags) = flags.v8_flags {
 		let mut v8_flags_ = v8_flags.clone();
+
 		v8_flags_.insert(0, "UNUSED_BUT_NECESSARY_ARG0".to_string());
+
 		v8_set_flags(v8_flags_);
 	}
 
@@ -388,6 +460,7 @@ pub fn main() {
 		Some(level) => level,
 		None => Level::Warn,
 	};
+
 	log::set_max_level(log_level.to_level_filter());
 
 	match flags.subcommand {

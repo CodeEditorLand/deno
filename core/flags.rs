@@ -21,6 +21,7 @@ pub fn v8_set_flags(args:Vec<String>) -> Vec<String> {
 		.iter()
 		.map(|arg| CString::new(arg.as_str()).unwrap().into_bytes_with_nul())
 		.collect::<Vec<_>>();
+
 	let mut c_argv = raw_argv
 		.iter_mut()
 		.map(|arg| arg.as_mut_ptr() as *mut c_char)
@@ -39,7 +40,9 @@ pub fn v8_set_flags(args:Vec<String>) -> Vec<String> {
 		.iter()
 		.map(|ptr| unsafe {
 			let cstr = CStr::from_ptr(*ptr as *const c_char);
+
 			let slice = cstr.to_str().unwrap();
+
 			slice.to_string()
 		})
 		.collect()

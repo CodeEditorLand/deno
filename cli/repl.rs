@@ -49,11 +49,13 @@ impl Repl {
 		let mut repl = Self { editor:Editor::<()>::new(), history_file };
 
 		repl.load_history();
+
 		repl
 	}
 
 	fn load_history(&mut self) {
 		debug!("Loading REPL history: {:?}", self.history_file);
+
 		self
       .editor
       .load_history(&self.history_file.to_str().unwrap())
@@ -66,11 +68,13 @@ impl Repl {
 
 	fn save_history(&mut self) -> Result<(), ErrBox> {
 		fs::create_dir_all(self.history_file.parent().unwrap())?;
+
 		self.editor
 			.save_history(&self.history_file.to_str().unwrap())
 			.map(|_| debug!("Saved REPL history to: {:?}", self.history_file))
 			.map_err(|e| {
 				eprintln!("Unable to save REPL history: {:?} {}", self.history_file, e);
+
 				ErrBox::from(e)
 			})
 	}
@@ -80,6 +84,7 @@ impl Repl {
 			.readline(&prompt)
 			.map(|line| {
 				self.editor.add_history_entry(line.clone());
+
 				line
 			})
 			.map_err(ErrBox::from)
@@ -93,6 +98,8 @@ impl Drop for Repl {
 
 pub fn history_path(dir:&DenoDir, history_file:&str) -> PathBuf {
 	let mut p:PathBuf = dir.root.clone();
+
 	p.push(history_file);
+
 	p
 }

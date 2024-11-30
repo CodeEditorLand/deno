@@ -31,6 +31,7 @@ pub fn op_fetch(
 	data:Option<PinnedBuf>,
 ) -> Result<JsonOp, ErrBox> {
 	let args:FetchArgs = serde_json::from_value(args)?;
+
 	let url = args.url;
 
 	let client = get_client();
@@ -41,6 +42,7 @@ pub fn op_fetch(
 	};
 
 	let url_ = url::Url::parse(&url).map_err(ErrBox::from)?;
+
 	state.check_net_url(&url_)?;
 
 	let mut request = client.request(method, url_);
@@ -51,23 +53,33 @@ pub fn op_fetch(
 
 	for (key, value) in args.headers {
 		let name = HeaderName::from_bytes(key.as_bytes()).unwrap();
+
 		let v = HeaderValue::from_str(&value).unwrap();
+
 		request = request.header(name, v);
 	}
+
 	debug!("Before fetch {}", url);
+
 	let state_ = state.clone();
+
 	let future = futures::compat::Compat01As03::new(request.send())
 		.map_err(ErrBox::from)
 		.and_then(move |res| {
 			debug!("Fetch response {}", url);
+
 			let status = res.status();
+
 			let mut res_headers = Vec::new();
+
 			for (key, val) in res.headers().iter() {
 				res_headers.push((key.to_string(), val.to_str().unwrap().to_owned()));
 			}
 
 			let body = HttpBody::from(res.into_body());
+
 			let mut table = state_.lock_resource_table();
+
 			let rid = table.add("httpBody", Box::new(StreamResource::HttpBody(Box::new(body))));
 
 			let json_res = json!({

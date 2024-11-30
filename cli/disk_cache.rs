@@ -24,17 +24,20 @@ impl DiskCache {
 		let mut out = PathBuf::new();
 
 		let scheme = url.scheme();
+
 		out.push(scheme);
 
 		match scheme {
 			"http" | "https" => {
 				let host = url.host_str().unwrap();
+
 				let host_port = match url.port() {
 					// Windows doesn't support ":" in filenames, so we represent port using a
 					// special string.
 					Some(port) => format!("{}_PORT{}", host, port),
 					None => host.to_string(),
 				};
+
 				out.push(host_port);
 
 				for path_seg in url.path_segments().unwrap() {
@@ -43,6 +46,7 @@ impl DiskCache {
 			},
 			"file" => {
 				let path = url.to_file_path().unwrap();
+
 				let mut path_components = path.components();
 
 				if cfg!(target_os = "windows") {
@@ -53,6 +57,7 @@ impl DiskCache {
 						match prefix_component.kind() {
 							Prefix::Disk(disk_byte) | Prefix::VerbatimDisk(disk_byte) => {
 								let disk = (disk_byte as char).to_string();
+
 								out.push(disk);
 							},
 							_ => unreachable!(),
@@ -62,6 +67,7 @@ impl DiskCache {
 
 				// Must be relative, so strip forward slash
 				let mut remaining_components = path_components.as_path();
+
 				if let Ok(stripped) = remaining_components.strip_prefix("/") {
 					remaining_components = stripped;
 				};
@@ -83,7 +89,9 @@ impl DiskCache {
 			None => base.with_extension(extension),
 			Some(ext) => {
 				let original_extension = OsStr::to_str(ext).unwrap();
+
 				let final_extension = format!("{}.{}", original_extension, extension);
+
 				base.with_extension(final_extension)
 			},
 		}
@@ -91,20 +99,24 @@ impl DiskCache {
 
 	pub fn get(self: &Self, filename:&Path) -> std::io::Result<Vec<u8>> {
 		let path = self.location.join(filename);
+
 		fs::read(&path)
 	}
 
 	pub fn set(self: &Self, filename:&Path, data:&[u8]) -> std::io::Result<()> {
 		let path = self.location.join(filename);
+
 		match path.parent() {
 			Some(ref parent) => fs::create_dir_all(parent),
 			None => Ok(()),
 		}?;
+
 		deno_fs::write_file(&path, data, 0o666)
 	}
 
 	pub fn remove(self: &Self, filename:&Path) -> std::io::Result<()> {
 		let path = self.location.join(filename);
+
 		fs::remove_file(path)
 	}
 }
@@ -146,6 +158,7 @@ mod tests {
 
 		for test_case in &test_cases {
 			let cache_filename = cache.get_cache_filename(&Url::parse(test_case.0).unwrap());
+
 			assert_eq!(cache_filename, PathBuf::from(test_case.1));
 		}
 	}

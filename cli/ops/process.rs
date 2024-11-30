@@ -27,7 +27,9 @@ use crate::{deno_error::bad_resource, ops::json_op, signal::kill, state::ThreadS
 
 pub fn init(i:&mut Isolate, s:&ThreadSafeState) {
 	i.register_op("run", s.core_op(json_op(s.stateful_op(op_run))));
+
 	i.register_op("run_status", s.core_op(json_op(s.stateful_op(op_run_status))));
+
 	i.register_op("kill", s.core_op(json_op(s.stateful_op(op_kill))));
 }
 
@@ -41,8 +43,11 @@ impl Future for CloneFileFuture {
 
 	fn poll(self: Pin<&mut Self>, _cx:&mut Context) -> Poll<Self::Output> {
 		let inner = self.get_mut();
+
 		let mut table = inner.state.lock_resource_table();
+
 		let repr = table.get_mut::<StreamResource>(inner.rid).ok_or_else(bad_resource)?;
+
 		match repr {
 			StreamResource::FsFile(ref mut file) => {
 				match file.poll_try_clone().map_err(ErrBox::from) {
@@ -97,42 +102,54 @@ fn op_run(
 	let run_args:RunArgs = serde_json::from_value(args)?;
 
 	state.check_run()?;
+
 	let state_ = state.clone();
 
 	let args = run_args.args;
+
 	let env = run_args.env;
+
 	let cwd = run_args.cwd;
 
 	let mut c = Command::new(args.get(0).unwrap());
 	(1..args.len()).for_each(|i| {
 		let arg = args.get(i).unwrap();
+
 		c.arg(arg);
 	});
+
 	cwd.map(|d| c.current_dir(d));
+
 	for (key, value) in &env {
 		c.env(key, value);
 	}
 
 	// TODO: make this work with other resources, eg. sockets
 	let stdin_rid = run_args.stdin_rid;
+
 	if stdin_rid > 0 {
 		let file = clone_file(stdin_rid, &state_)?;
+
 		c.stdin(file);
 	} else {
 		c.stdin(subprocess_stdio_map(run_args.stdin.as_ref()));
 	}
 
 	let stdout_rid = run_args.stdout_rid;
+
 	if stdout_rid > 0 {
 		let file = clone_file(stdout_rid, &state_)?;
+
 		c.stdout(file);
 	} else {
 		c.stdout(subprocess_stdio_map(run_args.stdout.as_ref()));
 	}
 
 	let stderr_rid = run_args.stderr_rid;
+
 	if stderr_rid > 0 {
 		let file = clone_file(stderr_rid, &state_)?;
+
 		c.stderr(file);
 	} else {
 		c.stderr(subprocess_stdio_map(run_args.stderr.as_ref()));
@@ -140,6 +157,7 @@ fn op_run(
 
 	// Spawn the command.
 	let mut child = c.spawn_async().map_err(ErrBox::from)?;
+
 	let pid = child.id();
 
 	let mut table = state_.lock_resource_table();
@@ -147,6 +165,7 @@ fn op_run(
 	let stdin_rid = match child.stdin().take() {
 		Some(child_stdin) => {
 			let rid = table.add("childStdin", Box::new(StreamResource::ChildStdin(child_stdin)));
+
 			Some(rid)
 		},
 		None => None,
@@ -155,6 +174,7 @@ fn op_run(
 	let stdout_rid = match child.stdout().take() {
 		Some(child_stdout) => {
 			let rid = table.add("childStdout", Box::new(StreamResource::ChildStdout(child_stdout)));
+
 			Some(rid)
 		},
 		None => None,
@@ -163,12 +183,14 @@ fn op_run(
 	let stderr_rid = match child.stderr().take() {
 		Some(child_stderr) => {
 			let rid = table.add("childStderr", Box::new(StreamResource::ChildStderr(child_stderr)));
+
 			Some(rid)
 		},
 		None => None,
 	};
 
 	let child_resource = ChildResource { child:futures::compat::Compat01As03::new(child) };
+
 	let child_rid = table.add("child", Box::new(child_resource));
 
 	Ok(JsonOp::Sync(json!({
@@ -190,9 +212,13 @@ impl Future for ChildStatus {
 
 	fn poll(self: Pin<&mut Self>, cx:&mut Context) -> Poll<Self::Output> {
 		let inner = self.get_mut();
+
 		let mut table = inner.state.lock_resource_table();
+
 		let child_resource = table.get_mut::<ChildResource>(inner.rid).ok_or_else(bad_resource)?;
+
 		let child = &mut child_resource.child;
+
 		child.map_err(ErrBox::from).poll_unpin(cx)
 	}
 }
@@ -209,6 +235,7 @@ fn op_run_status(
 	_zero_copy:Option<PinnedBuf>,
 ) -> Result<JsonOp, ErrBox> {
 	let args:RunStatusArgs = serde_json::from_value(args)?;
+
 	let rid = args.rid as u32;
 
 	state.check_run()?;
@@ -224,6 +251,7 @@ fn op_run_status(
 		let signal = None;
 
 		code.or(signal).expect("Should have either an exit code or a signal.");
+
 		let got_signal = signal.is_some();
 
 		futures::future::ok(json!({
@@ -234,6 +262,7 @@ fn op_run_status(
 	});
 
 	let pool = futures::executor::ThreadPool::new().unwrap();
+
 	let handle = pool.spawn_with_handle(future).unwrap();
 
 	Ok(JsonOp::Async(handle.boxed()))
@@ -253,6 +282,8 @@ fn op_kill(
 	state.check_run()?;
 
 	let args:KillArgs = serde_json::from_value(args)?;
+
 	kill(args.pid, args.signo)?;
+
 	Ok(JsonOp::Sync(json!({})))
 }

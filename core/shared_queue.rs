@@ -38,23 +38,33 @@ pub struct SharedQueue {
 impl SharedQueue {
 	pub fn new(len:usize) -> Self {
 		let mut bytes = Vec::new();
+
 		bytes.resize(HEAD_INIT + len, 0);
+
 		let mut q = Self { bytes };
+
 		q.reset();
+
 		q
 	}
 
 	pub fn as_deno_buf(&self) -> deno_buf {
 		let ptr = self.bytes.as_ptr();
+
 		let len = self.bytes.len();
+
 		unsafe { deno_buf::from_raw_parts(ptr, len) }
 	}
 
 	fn reset(&mut self) {
 		debug!("rust:shared_queue:reset");
+
 		let s:&mut [u32] = self.as_u32_slice_mut();
+
 		s[INDEX_NUM_RECORDS] = 0;
+
 		s[INDEX_NUM_SHIFTED_OFF] = 0;
+
 		s[INDEX_HEAD] = HEAD_INIT as u32;
 	}
 
@@ -64,6 +74,7 @@ impl SharedQueue {
 		assert_eq!((p as usize) % std::mem::align_of::<u32>(), 0);
 		#[allow(clippy::cast_ptr_alignment)]
 		let p32 = p as *const u32;
+
 		unsafe { std::slice::from_raw_parts(p32, self.bytes.len() / 4) }
 	}
 
@@ -73,6 +84,7 @@ impl SharedQueue {
 		assert_eq!((p as usize) % std::mem::align_of::<u32>(), 0);
 		#[allow(clippy::cast_ptr_alignment)]
 		let p32 = p as *mut u32;
+
 		unsafe { std::slice::from_raw_parts_mut(p32, self.bytes.len() / 4) }
 	}
 
@@ -83,22 +95,27 @@ impl SharedQueue {
 
 	fn num_records(&self) -> usize {
 		let s = self.as_u32_slice();
+
 		s[INDEX_NUM_RECORDS] as usize
 	}
 
 	fn head(&self) -> usize {
 		let s = self.as_u32_slice();
+
 		s[INDEX_HEAD] as usize
 	}
 
 	fn num_shifted_off(&self) -> usize {
 		let s = self.as_u32_slice();
+
 		s[INDEX_NUM_SHIFTED_OFF] as usize
 	}
 
 	fn set_meta(&mut self, index:usize, end:usize, op_id:OpId) {
 		let s = self.as_u32_slice_mut();
+
 		s[INDEX_OFFSETS + 2 * index] = end as u32;
+
 		s[INDEX_OFFSETS + 2 * index + 1] = op_id;
 	}
 
@@ -106,8 +123,11 @@ impl SharedQueue {
 	fn get_meta(&self, index:usize) -> Option<(OpId, usize)> {
 		if index < self.num_records() {
 			let s = self.as_u32_slice();
+
 			let end = s[INDEX_OFFSETS + 2 * index] as usize;
+
 			let op_id = s[INDEX_OFFSETS + 2 * index + 1];
+
 			Some((op_id, end))
 		} else {
 			None
@@ -121,6 +141,7 @@ impl SharedQueue {
 				HEAD_INIT
 			} else {
 				let s = self.as_u32_slice();
+
 				s[INDEX_OFFSETS + 2 * (index - 1)] as usize
 			})
 		} else {
@@ -132,27 +153,34 @@ impl SharedQueue {
 	#[cfg(test)]
 	pub fn shift(&mut self) -> Option<(OpId, &[u8])> {
 		let u32_slice = self.as_u32_slice();
+
 		let i = u32_slice[INDEX_NUM_SHIFTED_OFF] as usize;
+
 		if self.size() == 0 {
 			assert_eq!(i, 0);
+
 			return None;
 		}
 
 		let off = self.get_offset(i).unwrap();
+
 		let (op_id, end) = self.get_meta(i).unwrap();
 
 		if self.size() > 1 {
 			let u32_slice = self.as_u32_slice_mut();
+
 			u32_slice[INDEX_NUM_SHIFTED_OFF] += 1;
 		} else {
 			self.reset();
 		}
+
 		println!(
 			"rust:shared_queue:shift: num_records={}, num_shifted_off={}, head={}",
 			self.num_records(),
 			self.num_shifted_off(),
 			self.head()
 		);
+
 		Some((op_id, &self.bytes[off..end]))
 	}
 
@@ -160,7 +188,9 @@ impl SharedQueue {
 	/// that `record`'s length is divisible by 4.
 	pub fn push(&mut self, op_id:OpId, record:&[u8]) -> bool {
 		let off = self.head();
+
 		let end = off + record.len();
+
 		debug!(
 			"rust:shared_queue:pre-push: op={}, off={}, end={}, len={}",
 			op_id,
@@ -168,24 +198,36 @@ impl SharedQueue {
 			end,
 			record.len()
 		);
+
 		assert_eq!(record.len() % 4, 0);
+
 		let index = self.num_records();
+
 		if end > self.bytes.len() || index >= MAX_RECORDS {
 			debug!("WARNING the sharedQueue overflowed");
+
 			return false;
 		}
+
 		self.set_meta(index, end, op_id);
+
 		assert_eq!(end - off, record.len());
+
 		self.bytes[off..end].copy_from_slice(record);
+
 		let u32_slice = self.as_u32_slice_mut();
+
 		u32_slice[INDEX_NUM_RECORDS] += 1;
+
 		u32_slice[INDEX_HEAD] = end as u32;
+
 		debug!(
 			"rust:shared_queue:push: num_records={}, num_shifted_off={}, head={}",
 			self.num_records(),
 			self.num_shifted_off(),
 			self.head()
 		);
+
 		true
 	}
 }
@@ -193,6 +235,7 @@ impl SharedQueue {
 #[cfg(test)]
 mod tests {
 	use super::*;
+
 	use crate::ops::Buf;
 
 	#[test]
@@ -200,79 +243,113 @@ mod tests {
 		let mut q = SharedQueue::new(RECOMMENDED_SIZE);
 
 		let h = q.head();
+
 		assert!(h > 0);
 
 		let r = vec![1u8, 2, 3, 4].into_boxed_slice();
+
 		let len = r.len() + h;
+
 		assert!(q.push(0, &r));
+
 		assert_eq!(q.head(), len);
 
 		let r = vec![5, 6, 7, 8].into_boxed_slice();
+
 		assert!(q.push(0, &r));
 
 		let r = vec![9, 10, 11, 12].into_boxed_slice();
+
 		assert!(q.push(0, &r));
+
 		assert_eq!(q.num_records(), 3);
+
 		assert_eq!(q.size(), 3);
 
 		let (_op_id, r) = q.shift().unwrap();
+
 		assert_eq!(r, vec![1, 2, 3, 4].as_slice());
+
 		assert_eq!(q.num_records(), 3);
+
 		assert_eq!(q.size(), 2);
 
 		let (_op_id, r) = q.shift().unwrap();
+
 		assert_eq!(r, vec![5, 6, 7, 8].as_slice());
+
 		assert_eq!(q.num_records(), 3);
+
 		assert_eq!(q.size(), 1);
 
 		let (_op_id, r) = q.shift().unwrap();
+
 		assert_eq!(r, vec![9, 10, 11, 12].as_slice());
+
 		assert_eq!(q.num_records(), 0);
+
 		assert_eq!(q.size(), 0);
 
 		assert!(q.shift().is_none());
+
 		assert!(q.shift().is_none());
 
 		assert_eq!(q.num_records(), 0);
+
 		assert_eq!(q.size(), 0);
 	}
 
 	fn alloc_buf(byte_length:usize) -> Buf {
 		let mut v = Vec::new();
+
 		v.resize(byte_length, 0);
+
 		v.into_boxed_slice()
 	}
 
 	#[test]
 	fn overflow() {
 		let mut q = SharedQueue::new(RECOMMENDED_SIZE);
+
 		assert!(q.push(0, &alloc_buf(RECOMMENDED_SIZE - 4)));
+
 		assert_eq!(q.size(), 1);
+
 		assert!(!q.push(0, &alloc_buf(8)));
+
 		assert_eq!(q.size(), 1);
+
 		assert!(q.push(0, &alloc_buf(4)));
+
 		assert_eq!(q.size(), 2);
 
 		let (_op_id, buf) = q.shift().unwrap();
+
 		assert_eq!(buf.len(), RECOMMENDED_SIZE - 4);
+
 		assert_eq!(q.size(), 1);
 
 		assert!(!q.push(0, &alloc_buf(4)));
 
 		let (_op_id, buf) = q.shift().unwrap();
+
 		assert_eq!(buf.len(), 4);
+
 		assert_eq!(q.size(), 0);
 	}
 
 	#[test]
 	fn full_records() {
 		let mut q = SharedQueue::new(RECOMMENDED_SIZE);
+
 		for _ in 0..MAX_RECORDS {
 			assert!(q.push(0, &alloc_buf(4)))
 		}
+
 		assert_eq!(q.push(0, &alloc_buf(4)), false);
 		// Even if we shift one off, we still cannot push a new record.
 		let _ignored = q.shift().unwrap();
+
 		assert_eq!(q.push(0, &alloc_buf(4)), false);
 	}
 

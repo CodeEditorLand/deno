@@ -25,7 +25,9 @@ pub fn json_op(d:Dispatcher) -> impl Fn(&mut TSState, &[u8]) -> CoreOp {
 		};
 
 		let x = serde_json::to_string(&response).unwrap();
+
 		let vec = x.into_bytes();
+
 		Op::Sync(vec.into_boxed_slice())
 	}
 }
@@ -40,17 +42,23 @@ struct ReadFile {
 
 pub fn read_file(_s:&mut TSState, v:Value) -> Result<Value, ErrBox> {
 	let v:ReadFile = serde_json::from_value(v)?;
+
 	let (module_name, source_code) = if v.file_name.starts_with("$asset$/") {
 		let asset = v.file_name.replace("$asset$/", "");
+
 		let source_code = crate::get_asset2(&asset)?.to_string();
 		(asset, source_code)
 	} else {
 		assert!(!v.file_name.starts_with("$assets$"), "you meant $asset$");
+
 		let module_specifier = ModuleSpecifier::resolve_url_or_path(&v.file_name)?;
+
 		let path = module_specifier.as_url().to_file_path().unwrap();
+
 		println!("cargo:rerun-if-changed={}", path.display());
 		(module_specifier.as_str().to_string(), std::fs::read_to_string(&path)?)
 	};
+
 	Ok(json!({
 	  "moduleName": module_name,
 	  "sourceCode": source_code,
@@ -67,15 +75,19 @@ struct WriteFile {
 
 pub fn write_file(s:&mut TSState, v:Value) -> Result<Value, ErrBox> {
 	let v:WriteFile = serde_json::from_value(v)?;
+
 	let module_specifier = ModuleSpecifier::resolve_url_or_path(&v.file_name)?;
+
 	if s.bundle {
 		std::fs::write(&v.file_name, &v.data)?;
 	}
+
 	s.written_files.push(WrittenFile {
 		url:module_specifier.as_str().to_string(),
 		module_name:v.module_name,
 		source_code:v.data,
 	});
+
 	Ok(json!(true))
 }
 
@@ -88,16 +100,21 @@ struct ResolveModuleNames {
 
 pub fn resolve_module_names(_s:&mut TSState, v:Value) -> Result<Value, ErrBox> {
 	let v:ResolveModuleNames = serde_json::from_value(v).unwrap();
+
 	let mut resolved = Vec::<String>::new();
+
 	let referrer = ModuleSpecifier::resolve_url_or_path(&v.containing_file)?;
+
 	for specifier in v.module_names {
 		if specifier.starts_with("$asset$/") {
 			resolved.push(specifier.clone());
 		} else {
 			let ms = ModuleSpecifier::resolve_import(&specifier, referrer.as_str())?;
+
 			resolved.push(ms.as_str().to_string());
 		}
 	}
+
 	Ok(json!(resolved))
 }
 
@@ -109,7 +126,9 @@ struct Exit {
 
 pub fn exit(s:&mut TSState, v:Value) -> Result<Value, ErrBox> {
 	let v:Exit = serde_json::from_value(v)?;
+
 	s.exit_code = v.code;
+
 	std::process::exit(v.code)
 }
 
@@ -123,6 +142,8 @@ pub struct EmitResult {
 
 pub fn set_emit_result(s:&mut TSState, v:Value) -> Result<Value, ErrBox> {
 	let v:EmitResult = serde_json::from_value(v)?;
+
 	s.emit_result = Some(v);
+
 	Ok(json!(true))
 }

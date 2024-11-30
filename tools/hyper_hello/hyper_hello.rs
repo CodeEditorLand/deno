@@ -18,6 +18,7 @@ static PHRASE:&[u8] = b"Hello World!";
 
 fn main() {
 	let mut port:u16 = 4544;
+
 	if let Some(custom_port) = env::args().nth(1) {
 		port = custom_port.parse::<u16>().unwrap();
 	}

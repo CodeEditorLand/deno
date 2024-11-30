@@ -20,11 +20,13 @@ pub struct DenoError {
 
 pub fn print_msg_and_exit(msg:&str) {
 	eprintln!("{}", msg);
+
 	std::process::exit(1);
 }
 
 pub fn print_err_and_exit(err:ErrBox) {
 	eprintln!("{}", err.to_string());
+
 	std::process::exit(1);
 }
 
@@ -116,6 +118,7 @@ impl GetErrorKind for ImportMapError {
 impl GetErrorKind for ModuleResolutionError {
 	fn kind(&self) -> ErrorKind {
 		use ModuleResolutionError::*;
+
 		match self {
 			InvalidUrl(ref err) | InvalidBaseUrl(ref err) => err.kind(),
 			InvalidPath(_) => ErrorKind::InvalidPath,
@@ -127,6 +130,7 @@ impl GetErrorKind for ModuleResolutionError {
 impl GetErrorKind for VarError {
 	fn kind(&self) -> ErrorKind {
 		use VarError::*;
+
 		match self {
 			NotPresent => ErrorKind::NotFound,
 			NotUnicode(..) => ErrorKind::InvalidData,
@@ -137,6 +141,7 @@ impl GetErrorKind for VarError {
 impl GetErrorKind for io::Error {
 	fn kind(&self) -> ErrorKind {
 		use io::ErrorKind::*;
+
 		match self.kind() {
 			NotFound => ErrorKind::NotFound,
 			PermissionDenied => ErrorKind::PermissionDenied,
@@ -171,6 +176,7 @@ impl GetErrorKind for uri::InvalidUri {
 impl GetErrorKind for url::ParseError {
 	fn kind(&self) -> ErrorKind {
 		use url::ParseError::*;
+
 		match self {
 			EmptyHost => ErrorKind::EmptyHost,
 			IdnaError => ErrorKind::IdnaError,
@@ -218,6 +224,7 @@ impl GetErrorKind for reqwest::Error {
 impl GetErrorKind for ReadlineError {
 	fn kind(&self) -> ErrorKind {
 		use ReadlineError::*;
+
 		match self {
 			Io(err) => GetErrorKind::kind(err),
 			Eof => ErrorKind::UnexpectedEof,
@@ -232,6 +239,7 @@ impl GetErrorKind for ReadlineError {
 impl GetErrorKind for serde_json::error::Error {
 	fn kind(&self) -> ErrorKind {
 		use serde_json::error::*;
+
 		match self.classify() {
 			Category::Io => ErrorKind::InvalidInput,
 			Category::Syntax => ErrorKind::InvalidInput,
@@ -244,6 +252,7 @@ impl GetErrorKind for serde_json::error::Error {
 #[cfg(unix)]
 mod unix {
 	pub use nix::Error;
+
 	use nix::{errno::Errno::*, Error::Sys};
 
 	use super::{ErrorKind, GetErrorKind};
@@ -264,6 +273,7 @@ mod unix {
 impl GetErrorKind for DlopenError {
 	fn kind(&self) -> ErrorKind {
 		use dlopen::Error::*;
+
 		match self {
 			NullCharacter(_) => ErrorKind::Other,
 			OpeningLibraryError(e) => GetErrorKind::kind(e),
@@ -313,6 +323,7 @@ mod tests {
 	use deno::{ErrBox, StackFrame, V8Exception};
 
 	use super::*;
+
 	use crate::{
 		colors::strip_ansi_codes,
 		diagnostics::{Diagnostic, DiagnosticCategory, DiagnosticItem},
@@ -407,21 +418,27 @@ mod tests {
 	#[test]
 	fn test_simple_error() {
 		let err = ErrBox::from(DenoError::new(ErrorKind::NoError, "foo".to_string()));
+
 		assert_eq!(err.kind(), ErrorKind::NoError);
+
 		assert_eq!(err.to_string(), "foo");
 	}
 
 	#[test]
 	fn test_io_error() {
 		let err = ErrBox::from(io_error());
+
 		assert_eq!(err.kind(), ErrorKind::NotFound);
+
 		assert_eq!(err.to_string(), "entity not found");
 	}
 
 	#[test]
 	fn test_url_error() {
 		let err = ErrBox::from(url_error());
+
 		assert_eq!(err.kind(), ErrorKind::EmptyHost);
+
 		assert_eq!(err.to_string(), "empty host");
 	}
 
@@ -430,7 +447,9 @@ mod tests {
 	#[test]
 	fn test_diagnostic() {
 		let err = ErrBox::from(diagnostic());
+
 		assert_eq!(err.kind(), ErrorKind::Diagnostic);
+
 		assert_eq!(
 			strip_ansi_codes(&err.to_string()),
 			"error TS2322: Example 1\n\n► deno/tests/complex_diagnostics.ts:19:3\n\n19   values: \
@@ -442,63 +461,81 @@ mod tests {
 	#[test]
 	fn test_js_error() {
 		let err = ErrBox::from(js_error());
+
 		assert_eq!(err.kind(), ErrorKind::JSError);
+
 		assert_eq!(strip_ansi_codes(&err.to_string()), "error: Error: foo bar\n    at foo (foo_bar.ts:5:17)\n    at qat (bar_baz.ts:6:21)\n    at deno_main.js:2:2");
 	}
 
 	#[test]
 	fn test_import_map_error() {
 		let err = ErrBox::from(import_map_error());
+
 		assert_eq!(err.kind(), ErrorKind::ImportMapError);
+
 		assert_eq!(err.to_string(), "an import map error");
 	}
 
 	#[test]
 	fn test_bad_resource() {
 		let err = bad_resource();
+
 		assert_eq!(err.kind(), ErrorKind::BadResource);
+
 		assert_eq!(err.to_string(), "bad resource id");
 	}
 
 	#[test]
 	fn test_permission_denied() {
 		let err = permission_denied();
+
 		assert_eq!(err.kind(), ErrorKind::PermissionDenied);
+
 		assert_eq!(err.to_string(), "permission denied");
 	}
 
 	#[test]
 	fn test_permission_denied_msg() {
 		let err = permission_denied_msg("run again with the --allow-net flag".to_string());
+
 		assert_eq!(err.kind(), ErrorKind::PermissionDenied);
+
 		assert_eq!(err.to_string(), "run again with the --allow-net flag");
 	}
 
 	#[test]
 	fn test_op_not_implemented() {
 		let err = op_not_implemented();
+
 		assert_eq!(err.kind(), ErrorKind::OpNotAvailable);
+
 		assert_eq!(err.to_string(), "op not implemented");
 	}
 
 	#[test]
 	fn test_no_buffer_specified() {
 		let err = no_buffer_specified();
+
 		assert_eq!(err.kind(), ErrorKind::InvalidInput);
+
 		assert_eq!(err.to_string(), "no buffer specified");
 	}
 
 	#[test]
 	fn test_no_async_support() {
 		let err = no_async_support();
+
 		assert_eq!(err.kind(), ErrorKind::NoAsyncSupport);
+
 		assert_eq!(err.to_string(), "op doesn't support async calls");
 	}
 
 	#[test]
 	fn test_no_sync_support() {
 		let err = no_sync_support();
+
 		assert_eq!(err.kind(), ErrorKind::NoSyncSupport);
+
 		assert_eq!(err.to_string(), "op doesn't support sync calls");
 	}
 }

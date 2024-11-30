@@ -51,6 +51,7 @@ impl WasmCompiler {
 	/// compiler's runtime.
 	fn setup_worker(global_state:ThreadSafeGlobalState) -> Worker {
 		let (int, ext) = ThreadSafeState::create_channels();
+
 		let worker_state = ThreadSafeState::new(global_state.clone(), None, None, true, int)
 			.expect("Unable to create worker state");
 
@@ -63,9 +64,13 @@ impl WasmCompiler {
 			worker_state,
 			ext,
 		);
+
 		worker.execute("denoMain('WASM')").unwrap();
+
 		worker.execute("workerMain()").unwrap();
+
 		worker.execute("wasmCompilerMain()").unwrap();
+
 		worker
 	}
 
@@ -75,16 +80,23 @@ impl WasmCompiler {
 		source_file:&SourceFile,
 	) -> Pin<Box<CompiledModuleFuture>> {
 		let cache = self.cache.clone();
+
 		let maybe_cached = { cache.lock().unwrap().get(&source_file.url).cloned() };
+
 		if let Some(m) = maybe_cached {
 			return futures::future::ok(m.clone()).boxed();
 		}
+
 		let cache_ = self.cache.clone();
 
 		debug!(">>>>> wasm_compile_async START");
+
 		let base64_data = base64::encode(&source_file.source_code);
+
 		let worker = WasmCompiler::setup_worker(global_state.clone());
+
 		let worker_ = worker.clone();
+
 		let url = source_file.url.clone();
 
 		let fut = worker
@@ -96,36 +108,49 @@ impl WasmCompiler {
 				if let Err(err) = result {
 					// TODO(ry) Need to forward the error instead of exiting.
 					eprintln!("{}", err.to_string());
+
 					std::process::exit(1);
 				}
+
 				debug!("Sent message to worker");
+
 				worker_.get_message()
 			})
 			.map_err(|_| panic!("not handled"))
 			.and_then(move |maybe_msg:Option<Buf>| {
 				debug!("Received message from worker");
+
 				let json_msg = maybe_msg.unwrap();
+
 				let module_info:WasmModuleInfo = serde_json::from_slice(&json_msg).unwrap();
+
 				debug!("WASM module info: {:#?}", &module_info);
+
 				let code = wrap_wasm_code(
 					&base64_data,
 					&module_info.import_list,
 					&module_info.export_list,
 				);
+
 				debug!("Generated code: {}", &code);
+
 				let module = CompiledModule { code, name:url.to_string() };
 				{
 					cache_.lock().unwrap().insert(url.clone(), module.clone());
 				}
+
 				debug!("<<<<< wasm_compile_async END");
+
 				futures::future::ok(module)
 			});
+
 		fut.boxed()
 	}
 }
 
 fn build_single_import(index:usize, origin:&str) -> String {
 	let origin_json = serde_json::to_string(origin).unwrap();
+
 	format!(
 		r#"import * as m{} from {};
 importObject[{}] = m{};
@@ -136,9 +161,11 @@ importObject[{}] = m{};
 
 fn build_imports(imports:&[String]) -> String {
 	let mut code = String::from("");
+
 	for (index, origin) in imports.iter().enumerate() {
 		code.push_str(&build_single_import(index, origin));
 	}
+
 	code
 }
 
@@ -148,15 +175,19 @@ fn build_single_export(name:&str) -> String {
 
 fn build_exports(exports:&[String]) -> String {
 	let mut code = String::from("");
+
 	for e in exports {
 		code.push_str(&build_single_export(e));
 	}
+
 	code
 }
 
 fn wrap_wasm_code(base64_data:&str, imports:&[String], exports:&[String]) -> String {
 	let imports_code = build_imports(imports);
+
 	let exports_code = build_exports(exports);
+
 	String::from(WASM_WRAP)
 		.replace("//IMPORTS\n", &imports_code)
 		.replace("//EXPORTS\n", &exports_code)

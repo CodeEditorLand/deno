@@ -55,15 +55,19 @@ lazy_static! {
 
 pub fn init(i:&mut Isolate, s:&ThreadSafeState) {
 	i.register_op("read", s.core_op(minimal_op(s.stateful_minimal_op(op_read))));
+
 	i.register_op("write", s.core_op(minimal_op(s.stateful_minimal_op(op_write))));
 }
 
 pub fn get_stdio() -> (StreamResource, StreamResource, StreamResource) {
 	let stdin = StreamResource::Stdin(tokio::io::stdin());
+
 	let stdout = StreamResource::Stdout({
 		let stdout = STDOUT_HANDLE.try_clone().expect("Unable to clone stdout handle");
+
 		tokio::fs::File::from_std(stdout)
 	});
+
 	let stderr = StreamResource::Stderr(tokio::io::stderr());
 
 	(stdin, stdout, stderr)
@@ -102,6 +106,7 @@ impl DenoAsyncRead for StreamResource {
 		buf:&mut [u8],
 	) -> Poll<Result<usize, ErrBox>> {
 		let inner = self.get_mut();
+
 		let mut f:Box<dyn AsyncRead + Unpin> = match inner {
 			StreamResource::FsFile(f) => Box::new(AsyncRead01CompatExt::compat(f)),
 			StreamResource::Stdin(f) => Box::new(AsyncRead01CompatExt::compat(f)),
@@ -162,19 +167,24 @@ where
 
 	fn poll(self: Pin<&mut Self>, cx:&mut Context) -> Poll<Self::Output> {
 		let inner = self.get_mut();
+
 		if inner.io_state == IoState::Done {
 			panic!("poll a Read after it's done");
 		}
 
 		let mut table = inner.state.lock_resource_table();
+
 		let resource = table.get_mut::<StreamResource>(inner.rid).ok_or_else(bad_resource)?;
+
 		let nread =
 			match DenoAsyncRead::poll_read(Pin::new(resource), cx, &mut inner.buf.as_mut()[..]) {
 				Poll::Ready(Ok(v)) => v,
 				Poll::Ready(Err(err)) => return Poll::Ready(Err(err)),
 				Poll::Pending => return Poll::Pending,
 			};
+
 		inner.io_state = IoState::Done;
+
 		Poll::Ready(Ok(nread as i32))
 	}
 }
@@ -185,6 +195,7 @@ pub fn op_read(
 	zero_copy:Option<PinnedBuf>,
 ) -> Pin<Box<MinimalOp>> {
 	debug!("read rid={}", rid);
+
 	let zero_copy = match zero_copy {
 		None => return futures::future::err(deno_error::no_buffer_specified()).boxed(),
 		Some(buf) => buf,
@@ -206,6 +217,7 @@ pub trait DenoAsyncWrite {
 impl DenoAsyncWrite for StreamResource {
 	fn poll_write(self: Pin<&mut Self>, cx:&mut Context, buf:&[u8]) -> Poll<Result<usize, ErrBox>> {
 		let inner = self.get_mut();
+
 		let mut f:Box<dyn AsyncWrite + Unpin> = match inner {
 			StreamResource::FsFile(f) => Box::new(AsyncWrite01CompatExt::compat(f)),
 			StreamResource::Stdout(f) => Box::new(AsyncWrite01CompatExt::compat(f)),
@@ -262,19 +274,24 @@ where
 
 	fn poll(self: Pin<&mut Self>, cx:&mut Context) -> Poll<Self::Output> {
 		let inner = self.get_mut();
+
 		if inner.io_state == IoState::Done {
 			panic!("poll a Read after it's done");
 		}
 
 		let mut table = inner.state.lock_resource_table();
+
 		let resource = table.get_mut::<StreamResource>(inner.rid).ok_or_else(bad_resource)?;
+
 		let nwritten = match DenoAsyncWrite::poll_write(Pin::new(resource), cx, inner.buf.as_ref())
 		{
 			Poll::Ready(Ok(v)) => v,
 			Poll::Ready(Err(err)) => return Poll::Ready(Err(err)),
 			Poll::Pending => return Poll::Pending,
 		};
+
 		inner.io_state = IoState::Done;
+
 		Poll::Ready(Ok(nwritten as i32))
 	}
 }
@@ -285,6 +302,7 @@ pub fn op_write(
 	zero_copy:Option<PinnedBuf>,
 ) -> Pin<Box<MinimalOp>> {
 	debug!("write rid={}", rid);
+
 	let zero_copy = match zero_copy {
 		None => return futures::future::err(deno_error::no_buffer_specified()).boxed(),
 		Some(buf) => buf,

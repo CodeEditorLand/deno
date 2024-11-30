@@ -18,7 +18,9 @@ impl dyn AnyError {
 	pub fn downcast_ref<T:AnyError>(&self) -> Option<&T> {
 		if Any::type_id(self) == TypeId::of::<T>() {
 			let target = self as *const Self as *const T;
+
 			let target = unsafe { &*target };
+
 			Some(target)
 		} else {
 			None
@@ -30,7 +32,9 @@ impl ErrBox {
 	pub fn downcast<T:AnyError>(self) -> Result<T, Self> {
 		if Any::type_id(&*self.0) == TypeId::of::<T>() {
 			let target = Box::into_raw(self.0) as *mut T;
+
 			let target = unsafe { Box::from_raw(target) };
+
 			Ok(*target)
 		} else {
 			Err(self)

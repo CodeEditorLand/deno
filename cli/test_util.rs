@@ -18,17 +18,22 @@ pub fn root_path() -> PathBuf { PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR")
 
 pub fn target_dir() -> PathBuf {
 	let current_exe = std::env::current_exe().unwrap();
+
 	let target_dir = current_exe.parent().unwrap().parent().unwrap();
+
 	println!("target_dir {}", target_dir.display());
+
 	target_dir.into()
 }
 
 pub fn deno_exe_path() -> PathBuf {
 	// Something like /Users/rld/src/deno/target/debug/deps/deno
 	let mut p = target_dir().join("deno");
+
 	if cfg!(windows) {
 		p.set_extension("exe");
 	}
+
 	p
 }
 
@@ -59,6 +64,7 @@ pub fn http_server<'a>() -> HttpServerGuard<'a> {
 	let g = GUARD.lock().unwrap();
 
 	println!("tools/http_server.py starting...");
+
 	let mut child = Command::new("python")
 		.current_dir(root_path())
 		.args(&["-u", "tools/http_server.py"])
@@ -67,9 +73,13 @@ pub fn http_server<'a>() -> HttpServerGuard<'a> {
 		.expect("failed to execute child");
 
 	let stdout = child.stdout.as_mut().unwrap();
+
 	use std::io::{BufRead, BufReader};
+
 	let mut lines = BufReader::new(stdout).lines();
+
 	let line = lines.next().unwrap().unwrap();
+
 	assert!(line.starts_with("ready"));
 
 	HttpServerGuard { child, g }

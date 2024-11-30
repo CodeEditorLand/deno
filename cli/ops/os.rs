@@ -25,13 +25,21 @@ static BUILD_ARCH:&str = "x64";
 
 pub fn init(i:&mut Isolate, s:&ThreadSafeState) {
 	i.register_op("exit", s.core_op(json_op(s.stateful_op(op_exit))));
+
 	i.register_op("is_tty", s.core_op(json_op(s.stateful_op(op_is_tty))));
+
 	i.register_op("env", s.core_op(json_op(s.stateful_op(op_env))));
+
 	i.register_op("exec_path", s.core_op(json_op(s.stateful_op(op_exec_path))));
+
 	i.register_op("set_env", s.core_op(json_op(s.stateful_op(op_set_env))));
+
 	i.register_op("get_env", s.core_op(json_op(s.stateful_op(op_get_env))));
+
 	i.register_op("get_dir", s.core_op(json_op(s.stateful_op(op_get_dir))));
+
 	i.register_op("hostname", s.core_op(json_op(s.stateful_op(op_hostname))));
+
 	i.register_op("start", s.core_op(json_op(s.stateful_op(op_start))));
 }
 
@@ -69,6 +77,7 @@ fn op_get_dir(
 	_zero_copy:Option<PinnedBuf>,
 ) -> Result<JsonOp, ErrBox> {
 	state.check_env()?;
+
 	let args:GetDirArgs = serde_json::from_value(args)?;
 
 	let path = match args.name.as_str() {
@@ -112,11 +121,14 @@ fn op_exec_path(
 	_zero_copy:Option<PinnedBuf>,
 ) -> Result<JsonOp, ErrBox> {
 	state.check_env()?;
+
 	let current_exe = env::current_exe().unwrap();
 	// Now apply URL parser to current exe to get fully resolved path, otherwise
 	// we might get `./` and `../` bits in `exec_path`
 	let exe_url = Url::from_file_path(current_exe).unwrap();
+
 	let path = exe_url.to_file_path().unwrap();
+
 	Ok(JsonOp::Sync(json!(path)))
 }
 
@@ -132,8 +144,11 @@ fn op_set_env(
 	_zero_copy:Option<PinnedBuf>,
 ) -> Result<JsonOp, ErrBox> {
 	let args:SetEnv = serde_json::from_value(args)?;
+
 	state.check_env()?;
+
 	env::set_var(args.key, args.value);
+
 	Ok(JsonOp::Sync(json!({})))
 }
 
@@ -143,7 +158,9 @@ fn op_env(
 	_zero_copy:Option<PinnedBuf>,
 ) -> Result<JsonOp, ErrBox> {
 	state.check_env()?;
+
 	let v = env::vars().collect::<HashMap<String, String>>();
+
 	Ok(JsonOp::Sync(json!(v)))
 }
 
@@ -158,11 +175,14 @@ fn op_get_env(
 	_zero_copy:Option<PinnedBuf>,
 ) -> Result<JsonOp, ErrBox> {
 	let args:GetEnv = serde_json::from_value(args)?;
+
 	state.check_env()?;
+
 	let r = match env::var(args.key) {
 		Err(env::VarError::NotPresent) => json!([]),
 		v => json!([v?]),
 	};
+
 	Ok(JsonOp::Sync(r))
 }
 
@@ -177,6 +197,7 @@ fn op_exit(
 	_zero_copy:Option<PinnedBuf>,
 ) -> Result<JsonOp, ErrBox> {
 	let args:Exit = serde_json::from_value(args)?;
+
 	std::process::exit(args.code)
 }
 
@@ -198,6 +219,8 @@ fn op_hostname(
 	_zero_copy:Option<PinnedBuf>,
 ) -> Result<JsonOp, ErrBox> {
 	state.check_env()?;
+
 	let hostname = sys_info::hostname().unwrap_or_else(|_| "".to_owned());
+
 	Ok(JsonOp::Sync(json!(hostname)))
 }

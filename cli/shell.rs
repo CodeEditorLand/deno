@@ -118,6 +118,7 @@ impl Shell {
 				if self.needs_clear {
 					self.err_erase_line();
 				}
+
 				self.err.print(status, message, color, justified)
 			},
 		}
@@ -150,6 +151,7 @@ impl Shell {
 		if self.needs_clear {
 			self.err_erase_line();
 		}
+
 		self.err.as_write()
 	}
 
@@ -157,6 +159,7 @@ impl Shell {
 	pub fn err_erase_line(&mut self) {
 		if let ShellOut::Stream { tty: true, .. } = self.err {
 			imp::err_erase_line(self);
+
 			self.needs_clear = false;
 		}
 	}
@@ -246,6 +249,7 @@ impl Shell {
 			*color_choice = cfg;
 			*stream = StandardStream::stderr(cfg.to_termcolor_color_choice());
 		}
+
 		Ok(())
 	}
 
@@ -277,10 +281,13 @@ impl Shell {
 		{
 			if let ShellOut::Stream { stream, .. } = &mut self.err {
 				::fwdansi::write_ansi(stream, message)?;
+
 				return Ok(());
 			}
 		}
+
 		self.err().write_all(message)?;
+
 		Ok(())
 	}
 }
@@ -303,13 +310,17 @@ impl ShellOut {
 		match *self {
 			ShellOut::Stream { ref mut stream, .. } => {
 				stream.reset()?;
+
 				stream.set_color(ColorSpec::new().set_bold(true).set_fg(Some(color)))?;
+
 				if justified {
 					write!(stream, "{:>12}", status)?;
 				} else {
 					write!(stream, "{}", status)?;
 				}
+
 				stream.reset()?;
+
 				match message {
 					Some(message) => writeln!(stream, " {}", message)?,
 					None => write!(stream, " ")?,
@@ -327,6 +338,7 @@ impl ShellOut {
 			    * }
 			    */
 		}
+
 		Ok(())
 	}
 
@@ -367,9 +379,11 @@ mod imp {
 	pub fn stderr_width() -> Option<usize> {
 		unsafe {
 			let mut winsize:libc::winsize = mem::zeroed();
+
 			if libc::ioctl(libc::STDERR_FILENO, libc::TIOCGWINSZ, &mut winsize) < 0 {
 				return None;
 			}
+
 			if winsize.ws_col > 0 { Some(winsize.ws_col as usize) } else { None }
 		}
 	}
@@ -400,7 +414,9 @@ mod imp {
 	pub fn stderr_width() -> Option<usize> {
 		unsafe {
 			let stdout = GetStdHandle(STD_ERROR_HANDLE);
+
 			let mut csbi:CONSOLE_SCREEN_BUFFER_INFO = mem::zeroed();
+
 			if GetConsoleScreenBufferInfo(stdout, &mut csbi) != 0 {
 				return Some((csbi.srWindow.Right - csbi.srWindow.Left) as usize);
 			}
@@ -417,13 +433,17 @@ mod imp {
 				0,
 				ptr::null_mut(),
 			);
+
 			if h == INVALID_HANDLE_VALUE {
 				return None;
 			}
 
 			let mut csbi:CONSOLE_SCREEN_BUFFER_INFO = mem::zeroed();
+
 			let rc = GetConsoleScreenBufferInfo(h, &mut csbi);
+
 			CloseHandle(h);
+
 			if rc != 0 {
 				let width = (csbi.srWindow.Right - csbi.srWindow.Left) as usize;
 				// Unfortunately cygwin/mintty does not set the size of the
@@ -436,6 +456,7 @@ mod imp {
 				// GetConsoleScreenBufferInfo returns accurate information.
 				return Some(cmp::min(60, width));
 			}
+
 			None
 		}
 	}
@@ -445,6 +466,7 @@ mod imp {
 fn default_err_erase_line(shell:&mut Shell) {
 	if let Some(max_width) = imp::stderr_width() {
 		let blank = " ".repeat(max_width);
+
 		drop(write!(shell.err.as_write(), "{}\r", blank));
 	}
 }

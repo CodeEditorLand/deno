@@ -34,6 +34,7 @@ impl fmt::Display for ModuleResolutionError {
 					"relative import path \"{}\" not prefixed with / or ./ or ../",
 					specifier
 				);
+
 				let msg = if let Some(referrer) = maybe_referrer {
 					format!("{} Imported from \"{}\"", msg, referrer)
 				} else {
@@ -77,6 +78,7 @@ impl ModuleSpecifier {
 					|| specifier.starts_with("../")) =>
 			{
 				let maybe_referrer = if base.is_empty() { None } else { Some(base.to_string()) };
+
 				return Err(ImportPrefixMissing(specifier.to_string(), maybe_referrer));
 			},
 
@@ -91,10 +93,12 @@ impl ModuleSpecifier {
 					// Otherwise, later joining in Url would be interpreted in
 					// the parent directory (appending trailing slash does not work)
 					let path = current_dir().unwrap().join(base);
+
 					Url::from_file_path(path).unwrap()
 				} else {
 					Url::parse(base).map_err(InvalidBaseUrl)?
 				};
+
 				base.join(&specifier).map_err(InvalidUrl)?
 			},
 
@@ -134,6 +138,7 @@ impl ModuleSpecifier {
 	/// working directory.
 	fn resolve_path(path_str:&str) -> Result<ModuleSpecifier, ModuleResolutionError> {
 		let path = current_dir().unwrap().join(path_str);
+
 		Url::from_file_path(path.clone())
 			.map(ModuleSpecifier)
 			.map_err(|()| ModuleResolutionError::InvalidPath(path))
@@ -151,6 +156,7 @@ impl ModuleSpecifier {
 	/// while no schemes with a one-letter name actually exist.
 	fn specifier_has_uri_scheme(specifier:&str) -> bool {
 		let mut chars = specifier.chars();
+
 		let mut len = 0usize;
 		// THe first character must be a letter.
 		match chars.next() {
@@ -254,6 +260,7 @@ mod tests {
 
 		for (specifier, base, expected_url) in tests {
 			let url = ModuleSpecifier::resolve_import(specifier, base).unwrap().to_string();
+
 			assert_eq!(url, expected_url);
 		}
 	}
@@ -261,6 +268,7 @@ mod tests {
 	#[test]
 	fn test_resolve_import_error() {
 		use url::ParseError::*;
+
 		use ModuleResolutionError::*;
 
 		let tests = vec![
@@ -319,6 +327,7 @@ mod tests {
 
 		for (specifier, base, expected_err) in tests {
 			let err = ModuleSpecifier::resolve_import(specifier, base).unwrap_err();
+
 			assert_eq!(err, expected_err);
 		}
 	}
@@ -339,11 +348,13 @@ mod tests {
 
 		// The local path tests assume that the cwd is the deno repo root.
 		let cwd = current_dir().unwrap();
+
 		let cwd_str = cwd.to_str().unwrap();
 
 		if cfg!(target_os = "windows") {
 			// Absolute local path.
 			let expected_url = "file:///C:/deno/tests/006_url_imports.ts";
+
 			tests.extend(vec![
 				(r"C:/deno/tests/006_url_imports.ts", expected_url.to_string()),
 				(r"C:\deno\tests\006_url_imports.ts", expected_url.to_string()),
@@ -357,6 +368,7 @@ mod tests {
 			// Rooted local path without drive letter.
 			let expected_url =
 				format!("file:///{}:/deno/tests/006_url_imports.ts", cwd_str.get(..1).unwrap(),);
+
 			tests.extend(vec![
 				(r"/deno/tests/006_url_imports.ts", expected_url.to_string()),
 				(r"\deno\tests\006_url_imports.ts", expected_url.to_string()),
@@ -365,6 +377,7 @@ mod tests {
 			// Relative local path.
 			let expected_url =
 				format!("file:///{}/tests/006_url_imports.ts", cwd_str.replace("\\", "/"));
+
 			tests.extend(vec![
 				(r"tests/006_url_imports.ts", expected_url.to_string()),
 				(r"tests\006_url_imports.ts", expected_url.to_string()),
@@ -374,6 +387,7 @@ mod tests {
 
 			// UNC network path.
 			let expected_url = "file://server/share/deno/cool";
+
 			tests.extend(vec![
 				(r"\\server\share\deno\cool", expected_url.to_string()),
 				(r"\\server/share/deno/cool", expected_url.to_string()),
@@ -383,6 +397,7 @@ mod tests {
 		} else {
 			// Absolute local path.
 			let expected_url = "file:///deno/tests/006_url_imports.ts";
+
 			tests.extend(vec![
 				("/deno/tests/006_url_imports.ts", expected_url.to_string()),
 				("//deno/tests/006_url_imports.ts", expected_url.to_string()),
@@ -390,6 +405,7 @@ mod tests {
 
 			// Relative local path.
 			let expected_url = format!("file://{}/tests/006_url_imports.ts", cwd_str);
+
 			tests.extend(vec![
 				("tests/006_url_imports.ts", expected_url.to_string()),
 				("./tests/006_url_imports.ts", expected_url.to_string()),
@@ -398,6 +414,7 @@ mod tests {
 
 		for (specifier, expected_url) in tests {
 			let url = ModuleSpecifier::resolve_url_or_path(specifier).unwrap().to_string();
+
 			assert_eq!(url, expected_url);
 		}
 	}
@@ -405,19 +422,23 @@ mod tests {
 	#[test]
 	fn test_resolve_url_or_path_error() {
 		use url::ParseError::*;
+
 		use ModuleResolutionError::*;
 
 		let mut tests = vec![
 			("https://eggplant:b/c", InvalidUrl(InvalidPort)),
 			("https://:8080/a/b/c", InvalidUrl(EmptyHost)),
 		];
+
 		if cfg!(target_os = "windows") {
 			let p = r"\\.\c:/stuff/deno/script.ts";
+
 			tests.push((p, InvalidPath(PathBuf::from(p))));
 		}
 
 		for (specifier, expected_err) in tests {
 			let err = ModuleSpecifier::resolve_url_or_path(specifier).unwrap_err();
+
 			assert_eq!(err, expected_err);
 		}
 	}
@@ -448,6 +469,7 @@ mod tests {
 
 		for (specifier, expected) in tests {
 			let result = ModuleSpecifier::specifier_has_uri_scheme(specifier);
+
 			assert_eq!(result, expected);
 		}
 	}

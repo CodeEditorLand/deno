@@ -12,7 +12,9 @@ use crate::{ops::json_op, state::ThreadSafeState};
 
 pub fn init(i:&mut Isolate, s:&ThreadSafeState) {
 	i.register_op("global_timer_stop", s.core_op(json_op(s.stateful_op(op_global_timer_stop))));
+
 	i.register_op("global_timer", s.core_op(json_op(s.stateful_op(op_global_timer))));
+
 	i.register_op("now", s.core_op(json_op(s.stateful_op(op_now))));
 }
 
@@ -22,8 +24,11 @@ fn op_global_timer_stop(
 	_zero_copy:Option<PinnedBuf>,
 ) -> Result<JsonOp, ErrBox> {
 	let state = state;
+
 	let mut t = state.global_timer.lock().unwrap();
+
 	t.cancel();
+
 	Ok(JsonOp::Sync(json!({})))
 }
 
@@ -38,11 +43,15 @@ fn op_global_timer(
 	_zero_copy:Option<PinnedBuf>,
 ) -> Result<JsonOp, ErrBox> {
 	let args:GlobalTimerArgs = serde_json::from_value(args)?;
+
 	let val = args.timeout;
 
 	let state = state;
+
 	let mut t = state.global_timer.lock().unwrap();
+
 	let deadline = Instant::now() + Duration::from_millis(val);
+
 	let f = t.new_timeout(deadline).then(move |_| futures::future::ok(json!({})));
 
 	Ok(JsonOp::Async(f.boxed()))
@@ -58,7 +67,9 @@ fn op_now(
 	_zero_copy:Option<PinnedBuf>,
 ) -> Result<JsonOp, ErrBox> {
 	let seconds = state.start_time.elapsed().as_secs();
+
 	let mut subsec_nanos = state.start_time.elapsed().subsec_nanos();
+
 	let reduced_time_precision = 2_000_000; // 2ms in nanoseconds
 	let permissions = state.permissions.lock().unwrap();
 

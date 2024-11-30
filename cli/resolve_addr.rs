@@ -34,11 +34,14 @@ impl Future for ResolveAddrFuture {
 		// Then we remove the brackets.
 		let addr = if addr.starts_with('[') && addr.ends_with(']') {
 			let l = addr.len() - 1;
+
 			addr.get(1..l).unwrap()
 		} else {
 			addr
 		};
+
 		let addr_port_pair = (addr, inner.port);
+
 		let r = addr_port_pair.to_socket_addrs().map_err(ErrBox::from);
 
 		Poll::Ready(r.and_then(|mut iter| {
@@ -61,21 +64,27 @@ mod tests {
 	#[test]
 	fn resolve_addr1() {
 		let expected = SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 80));
+
 		let actual = block_on(resolve_addr("127.0.0.1", 80)).unwrap();
+
 		assert_eq!(actual, expected);
 	}
 
 	#[test]
 	fn resolve_addr2() {
 		let expected = SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::new(0, 0, 0, 0), 80));
+
 		let actual = block_on(resolve_addr("", 80)).unwrap();
+
 		assert_eq!(actual, expected);
 	}
 
 	#[test]
 	fn resolve_addr3() {
 		let expected = SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::new(192, 0, 2, 1), 25));
+
 		let actual = block_on(resolve_addr("192.0.2.1", 25)).unwrap();
+
 		assert_eq!(actual, expected);
 	}
 
@@ -87,7 +96,9 @@ mod tests {
 			0,
 			0,
 		));
+
 		let actual = block_on(resolve_addr("[2001:db8::1]", 8080)).unwrap();
+
 		assert_eq!(actual, expected);
 	}
 }

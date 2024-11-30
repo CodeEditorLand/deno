@@ -11,7 +11,9 @@ use crate::{
 
 pub fn init(i:&mut Isolate, s:&ThreadSafeState) {
 	i.register_op("cache", s.core_op(json_op(s.stateful_op(op_cache))));
+
 	i.register_op("fetch_source_files", s.core_op(json_op(s.stateful_op(op_fetch_source_files))));
+
 	i.register_op("fetch_asset", s.core_op(json_op(s.stateful_op(op_fetch_asset))));
 }
 
@@ -69,12 +71,15 @@ fn op_fetch_source_files(
 	};
 
 	let mut futures = vec![];
+
 	for specifier in &args.specifiers {
 		let resolved_specifier = state.resolve(specifier, &referrer, false, is_dyn_import)?;
+
 		let fut = state
 			.global_state
 			.file_fetcher
 			.fetch_source_file_async(&resolved_specifier, ref_specifier.clone());
+
 		futures.push(fut);
 	}
 
@@ -100,9 +105,11 @@ fn op_fetch_source_files(
 								}),
 						);
 					}
+
 					futures::future::Either::Right(futures::future::ok((file, None)))
 				})
 				.collect();
+
 			try_join_all(v)
 		})
 		.and_then(move |files_with_code| {
@@ -139,6 +146,7 @@ fn op_fetch_asset(
 	_zero_copy:Option<PinnedBuf>,
 ) -> Result<JsonOp, ErrBox> {
 	let args:FetchAssetArgs = serde_json::from_value(args)?;
+
 	if let Some(source_code) = crate::js::get_asset(&args.name) {
 		Ok(JsonOp::Sync(json!(source_code)))
 	} else {

@@ -38,25 +38,32 @@ impl AsyncRead for HttpBody {
 		buf:&mut [u8],
 	) -> Poll<Result<usize, io::Error>> {
 		let mut inner = self.get_mut();
+
 		if let Some(chunk) = inner.chunk.take() {
 			debug!("HttpBody Fake Read buf {} chunk {} pos {}", buf.len(), chunk.len(), inner.pos);
+
 			let n = min(buf.len(), chunk.len() - inner.pos);
 			{
 				let rest = &chunk[inner.pos..];
+
 				buf[..n].clone_from_slice(&rest[..n]);
 			}
+
 			inner.pos += n;
+
 			if inner.pos == chunk.len() {
 				inner.pos = 0;
 			} else {
 				inner.chunk = Some(chunk);
 			}
+
 			return Poll::Ready(Ok(n));
 		} else {
 			assert_eq!(inner.pos, 0);
 		}
 
 		let p = inner.decoder.poll_next_unpin(cx);
+
 		match p {
 			Poll::Ready(Some(Err(e))) => {
 				Poll::Ready(Err(
@@ -71,12 +78,17 @@ impl AsyncRead for HttpBody {
 					chunk.len(),
 					inner.pos
 				);
+
 				let n = min(buf.len(), chunk.len());
+
 				buf[..n].clone_from_slice(&chunk[..n]);
+
 				if buf.len() < chunk.len() {
 					inner.pos = n;
+
 					inner.chunk = Some(chunk);
 				}
+
 				Poll::Ready(Ok(n))
 			},
 			Poll::Ready(None) => Poll::Ready(Ok(0)),

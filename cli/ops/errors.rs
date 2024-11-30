@@ -13,6 +13,7 @@ use crate::{
 
 pub fn init(i:&mut Isolate, s:&ThreadSafeState) {
 	i.register_op("apply_source_map", s.core_op(json_op(s.stateful_op(op_apply_source_map))));
+
 	i.register_op("format_error", s.core_op(json_op(s.stateful_op(op_format_error))));
 }
 
@@ -27,6 +28,7 @@ fn op_format_error(
 	_zero_copy:Option<PinnedBuf>,
 ) -> Result<JsonOp, ErrBox> {
 	let args:FormatErrorArgs = serde_json::from_value(args)?;
+
 	let error = JSError::from_json(&args.error, &state.global_state.ts_compiler);
 
 	Ok(JsonOp::Sync(json!({
@@ -49,6 +51,7 @@ fn op_apply_source_map(
 	let args:ApplySourceMap = serde_json::from_value(args)?;
 
 	let mut mappings_map:CachedMaps = HashMap::new();
+
 	let (orig_filename, orig_line, orig_column) = get_orig_position(
 		args.filename,
 		args.line.into(),

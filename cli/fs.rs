@@ -46,6 +46,7 @@ pub fn write_file_2<T:AsRef<[u8]>>(
 #[cfg(any(unix))]
 fn set_permissions(file:&mut File, perm:u32) -> std::io::Result<()> {
 	debug!("set file perm to {}", perm);
+
 	file.set_permissions(PermissionsExt::from_mode(perm & 0o777))
 }
 #[cfg(not(any(unix)))]
@@ -60,18 +61,24 @@ pub fn make_temp_dir(
 	suffix:Option<&str>,
 ) -> std::io::Result<PathBuf> {
 	let prefix_ = prefix.unwrap_or("");
+
 	let suffix_ = suffix.unwrap_or("");
+
 	let mut buf:PathBuf = match dir {
 		Some(ref p) => p.to_path_buf(),
 		None => std::env::temp_dir(),
 	}
 	.join("_");
+
 	let mut rng = rand::thread_rng();
+
 	loop {
 		let unique = rng.gen::<u32>();
+
 		buf.set_file_name(format!("{}{:08x}{}", prefix_, unique, suffix_));
 		// TODO: on posix, set mode flags to 0o700.
 		let r = create_dir(buf.as_path());
+
 		match r {
 			Err(ref e) if e.kind() == ErrorKind::AlreadyExists => continue,
 			Ok(_) => return Ok(buf),
@@ -82,15 +89,20 @@ pub fn make_temp_dir(
 
 pub fn mkdir(path:&Path, perm:u32, recursive:bool) -> std::io::Result<()> {
 	debug!("mkdir -p {}", path.display());
+
 	let mut builder = DirBuilder::new();
+
 	builder.recursive(recursive);
+
 	set_dir_permission(&mut builder, perm);
+
 	builder.create(path)
 }
 
 #[cfg(any(unix))]
 fn set_dir_permission(builder:&mut DirBuilder, perm:u32) {
 	debug!("set dir perm to {}", perm);
+
 	builder.mode(perm & 0o777);
 }
 
@@ -101,6 +113,7 @@ fn set_dir_permission(_builder:&mut DirBuilder, _perm:u32) {
 
 pub fn normalize_path(path:&Path) -> String {
 	let s = String::from(path.to_str().unwrap());
+
 	if cfg!(windows) {
 		// TODO This isn't correct. Probbly should iterate over components.
 		s.replace("\\", "/")
@@ -112,7 +125,9 @@ pub fn normalize_path(path:&Path) -> String {
 #[cfg(unix)]
 pub fn chown(path:&str, uid:u32, gid:u32) -> Result<(), ErrBox> {
 	let nix_uid = Uid::from_raw(uid);
+
 	let nix_gid = Gid::from_raw(gid);
+
 	unix_chown(path, Option::Some(nix_uid), Option::Some(nix_gid)).map_err(ErrBox::from)
 }
 
@@ -130,6 +145,7 @@ pub fn resolve_from_cwd(path:&str) -> Result<(PathBuf, String), ErrBox> {
 		candidate_path.to_owned()
 	} else {
 		let cwd = std::env::current_dir().unwrap();
+
 		cwd.join(path)
 	};
 
@@ -143,8 +159,10 @@ pub fn resolve_from_cwd(path:&str) -> Result<(PathBuf, String), ErrBox> {
 	// We just want to normalize the path...
 	// This only works on absolute paths - not worth extracting as a public utility.
 	let resolved_url = Url::from_file_path(resolved_path).expect("Path should be absolute");
+
 	let normalized_url =
 		Url::parse(resolved_url.as_str()).expect("String from a URL should parse to a URL");
+
 	let normalized_path = normalized_url
 		.to_file_path()
 		.expect("URL from a path should contain a valid path");
@@ -161,18 +179,21 @@ mod tests {
 	#[test]
 	fn resolve_from_cwd_child() {
 		let cwd = std::env::current_dir().unwrap();
+
 		assert_eq!(resolve_from_cwd("a").unwrap().0, cwd.join("a"));
 	}
 
 	#[test]
 	fn resolve_from_cwd_dot() {
 		let cwd = std::env::current_dir().unwrap();
+
 		assert_eq!(resolve_from_cwd(".").unwrap().0, cwd);
 	}
 
 	#[test]
 	fn resolve_from_cwd_parent() {
 		let cwd = std::env::current_dir().unwrap();
+
 		assert_eq!(resolve_from_cwd("a/..").unwrap().0, cwd);
 	}
 
@@ -181,6 +202,7 @@ mod tests {
 	#[test]
 	fn resolve_from_cwd_absolute() {
 		let expected = Path::new("/a");
+
 		assert_eq!(resolve_from_cwd("/a").unwrap().0, expected);
 	}
 }

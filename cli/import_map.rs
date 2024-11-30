@@ -37,7 +37,9 @@ pub struct ImportMap {
 impl ImportMap {
 	pub fn load(file_path:&str) -> Result<Self, ErrBox> {
 		let file_url = ModuleSpecifier::resolve_url_or_path(file_path)?.to_string();
+
 		let resolved_path = std::env::current_dir().unwrap().join(file_path);
+
 		debug!("Attempt to load import map: {}", resolved_path.to_str().unwrap());
 
 		// Load the contents of import map
@@ -78,6 +80,7 @@ impl ImportMap {
 				}
 
 				let imports_map = imports_map.as_object().unwrap();
+
 				ImportMap::parse_specifier_map(imports_map, base_url)
 			},
 			None => IndexMap::new(),
@@ -90,6 +93,7 @@ impl ImportMap {
 				}
 
 				let scope_map = scope_map.as_object().unwrap();
+
 				ImportMap::parse_scope_map(scope_map, base_url)?
 			},
 			None => IndexMap::new(),
@@ -109,7 +113,9 @@ impl ImportMap {
 		if specifier.starts_with('/') || specifier.starts_with("./") || specifier.starts_with("../")
 		{
 			let base_url = Url::parse(base).unwrap();
+
 			let url = base_url.join(specifier).unwrap();
+
 			return Some(url);
 		}
 
@@ -158,12 +164,14 @@ impl ImportMap {
 			};
 
 			let url_string = url.to_string();
+
 			if specifier_key.ends_with('/') && !url_string.ends_with('/') {
 				eprintln!(
 					"Invalid target address {:?} for package specifier {:?}.Package address \
 					 targets must end with \"/\".",
 					url_string, specifier_key
 				);
+
 				continue;
 			}
 
@@ -217,6 +225,7 @@ impl ImportMap {
 				"normalized specifier {:?}; {:?}",
 				normalized_specifier_key, normalized_address_array
 			);
+
 			normalized_map.insert(normalized_specifier_key, normalized_address_array);
 		}
 
@@ -263,8 +272,10 @@ impl ImportMap {
 							"Invalid scope {:?}. Scope URLs must have a valid fetch scheme.",
 							url.to_string()
 						);
+
 						continue;
 					}
+
 					url.to_string()
 				},
 				_ => continue,
@@ -337,7 +348,9 @@ impl ImportMap {
 				)));
 			} else if address_vec.len() == 1 {
 				let address = address_vec.first().unwrap();
+
 				debug!("Specifier {:?} was mapped to {:?}.", normalized_specifier, address);
+
 				return Ok(Some(address.clone()));
 			} else {
 				return Err(ImportMapError::new("Multi-address mappings are not yet supported"));
@@ -358,14 +371,17 @@ impl ImportMap {
 					)));
 				} else if address_vec.len() == 1 {
 					let address = address_vec.first().unwrap();
+
 					let after_prefix = &normalized_specifier[specifier_key.len()..];
 
 					let base_url = address.as_url();
+
 					if let Ok(url) = base_url.join(after_prefix) {
 						debug!(
 							"Specifier {:?} was mapped to {:?} (via prefix specifier key {:?}).",
 							normalized_specifier, url, address
 						);
+
 						return Ok(Some(ModuleSpecifier::from(url)));
 					}
 
@@ -397,6 +413,7 @@ impl ImportMap {
 		referrer:&str,
 	) -> Result<Option<ModuleSpecifier>, ImportMapError> {
 		let resolved_url:Option<Url> = ImportMap::try_url_like_specifier(specifier, referrer);
+
 		let normalized_specifier = match &resolved_url {
 			Some(url) => url.to_string(),
 			None => specifier.to_string(),
@@ -439,6 +456,7 @@ mod tests {
 	#[test]
 	fn load_nonexistent() {
 		let file_path = "nonexistent_import_map.json";
+
 		assert!(ImportMap::load(file_path).is_err());
 	}
 
@@ -482,7 +500,9 @@ mod tests {
         "fizz": null
       }
     }"#;
+
 		let result = ImportMap::from_json("https://deno.land", json_map);
+
 		assert!(result.is_ok());
 	}
 
@@ -497,16 +517,20 @@ mod tests {
         "/foo": "/slash"
       }
     }"#;
+
 		let import_map =
 			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
+
 		assert_eq!(
 			import_map.imports.get("https://base.example/path1/path2/foo").unwrap()[0],
 			"https://base.example/dotslash".to_string()
 		);
+
 		assert_eq!(
 			import_map.imports.get("https://base.example/path1/foo").unwrap()[0],
 			"https://base.example/dotdotslash".to_string()
 		);
+
 		assert_eq!(
 			import_map.imports.get("https://base.example/foo").unwrap()[0],
 			"https://base.example/slash".to_string()
@@ -520,16 +544,20 @@ mod tests {
         "/": "/slash/"
       }
     }"#;
+
 		let import_map =
 			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
+
 		assert_eq!(
 			import_map.imports.get("https://base.example/path1/path2/").unwrap()[0],
 			"https://base.example/dotslash/".to_string()
 		);
+
 		assert_eq!(
 			import_map.imports.get("https://base.example/path1/").unwrap()[0],
 			"https://base.example/dotdotslash/".to_string()
 		);
+
 		assert_eq!(
 			import_map.imports.get("https://base.example/").unwrap()[0],
 			"https://base.example/slash/".to_string()
@@ -547,32 +575,40 @@ mod tests {
         "%2E%2E%2F": "/dotDotSlash3"
       }
     }"#;
+
 		let import_map =
 			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
+
 		assert_eq!(
 			import_map.imports.get("%2E/").unwrap()[0],
 			"https://base.example/dotSlash1/".to_string()
 		);
+
 		assert_eq!(
 			import_map.imports.get("%2E%2E/").unwrap()[0],
 			"https://base.example/dotDotSlash1/".to_string()
 		);
+
 		assert_eq!(
 			import_map.imports.get(".%2F").unwrap()[0],
 			"https://base.example/dotSlash2".to_string()
 		);
+
 		assert_eq!(
 			import_map.imports.get("..%2F").unwrap()[0],
 			"https://base.example/dotDotSlash2".to_string()
 		);
+
 		assert_eq!(
 			import_map.imports.get("%2F").unwrap()[0],
 			"https://base.example/slash2".to_string()
 		);
+
 		assert_eq!(
 			import_map.imports.get("%2E%2F").unwrap()[0],
 			"https://base.example/dotSlash3".to_string()
 		);
+
 		assert_eq!(
 			import_map.imports.get("%2E%2E%2F").unwrap()[0],
 			"https://base.example/dotDotSlash3".to_string()
@@ -599,48 +635,60 @@ mod tests {
         "wss:bad": "/wss"
       }
     }"#;
+
 		let import_map =
 			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
+
 		assert_eq!(
 			import_map.imports.get("http://good/").unwrap()[0],
 			"https://base.example/http/".to_string()
 		);
+
 		assert_eq!(
 			import_map.imports.get("https://good/").unwrap()[0],
 			"https://base.example/https/".to_string()
 		);
+
 		assert_eq!(
 			import_map.imports.get("file:///good").unwrap()[0],
 			"https://base.example/file".to_string()
 		);
+
 		assert_eq!(
 			import_map.imports.get("http://good/").unwrap()[0],
 			"https://base.example/http/".to_string()
 		);
+
 		assert_eq!(
 			import_map.imports.get("import:bad").unwrap()[0],
 			"https://base.example/import".to_string()
 		);
+
 		assert_eq!(
 			import_map.imports.get("mailto:bad").unwrap()[0],
 			"https://base.example/mailto".to_string()
 		);
+
 		assert_eq!(
 			import_map.imports.get("javascript:bad").unwrap()[0],
 			"https://base.example/javascript".to_string()
 		);
+
 		assert_eq!(
 			import_map.imports.get("wss:bad").unwrap()[0],
 			"https://base.example/wss".to_string()
 		);
+
 		assert_eq!(
 			import_map.imports.get("about:bad").unwrap()[0],
 			"https://base.example/about".to_string()
 		);
+
 		assert_eq!(
 			import_map.imports.get("blob:bad").unwrap()[0],
 			"https://base.example/blob".to_string()
 		);
+
 		assert_eq!(
 			import_map.imports.get("data:bad").unwrap()[0],
 			"https://base.example/data".to_string()
@@ -659,36 +707,45 @@ mod tests {
         "https://example.com/%41": "/noPercentDecoding"
       }
     }"#;
+
 		let import_map =
 			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
+
 		assert_eq!(
 			import_map.imports.get("https://ex ample.org/").unwrap()[0],
 			"https://base.example/unparseable1/".to_string()
 		);
+
 		assert_eq!(
 			import_map.imports.get("https://example.com:demo").unwrap()[0],
 			"https://base.example/unparseable2".to_string()
 		);
+
 		assert_eq!(
 			import_map.imports.get("http://[www.example.com]/").unwrap()[0],
 			"https://base.example/unparseable3/".to_string()
 		);
+
 		assert_eq!(
 			import_map.imports.get("https://example.org/").unwrap()[0],
 			"https://base.example/invalidButParseable1/".to_string()
 		);
+
 		assert_eq!(
 			import_map.imports.get("https://example.com///").unwrap()[0],
 			"https://base.example/invalidButParseable2/".to_string()
 		);
+
 		assert_eq!(
 			import_map.imports.get("https://example.net/").unwrap()[0],
 			"https://base.example/prettyNormal/".to_string()
 		);
+
 		assert_eq!(
 			import_map.imports.get("https://example.com/").unwrap()[0],
 			"https://base.example/percentDecoding/".to_string()
 		);
+
 		assert_eq!(
 			import_map.imports.get("https://example.com/%41").unwrap()[0],
 			"https://base.example/noPercentDecoding".to_string()
@@ -703,8 +760,10 @@ mod tests {
         "foo": {}
       }
     }"#;
+
 		let import_map =
 			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
+
 		assert!(import_map.scopes.contains_key("https://base.example/path1/path2/foo"));
 
 		// Should work with ./, ../, and / prefixes..
@@ -715,10 +774,14 @@ mod tests {
         "/foo": {}
       }
     }"#;
+
 		let import_map =
 			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
+
 		assert!(import_map.scopes.contains_key("https://base.example/path1/path2/foo"));
+
 		assert!(import_map.scopes.contains_key("https://base.example/path1/foo"));
+
 		assert!(import_map.scopes.contains_key("https://base.example/foo"));
 
 		// Should work with /s, ?s, and #s..
@@ -727,8 +790,10 @@ mod tests {
         "foo/bar?baz#qux": {}
       }
     }"#;
+
 		let import_map =
 			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
+
 		assert!(
 			import_map
 				.scopes
@@ -741,8 +806,10 @@ mod tests {
         "": {}
       }
     }"#;
+
 		let import_map =
 			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
+
 		assert!(import_map.scopes.contains_key("https://base.example/path1/path2/path3"));
 
 		// Should work with / suffixes..
@@ -755,12 +822,18 @@ mod tests {
         "/foo//": {}
       }
     }"#;
+
 		let import_map =
 			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
+
 		assert!(import_map.scopes.contains_key("https://base.example/path1/path2/foo/"));
+
 		assert!(import_map.scopes.contains_key("https://base.example/path1/path2/foo/"));
+
 		assert!(import_map.scopes.contains_key("https://base.example/path1/foo/"));
+
 		assert!(import_map.scopes.contains_key("https://base.example/foo/"));
+
 		assert!(import_map.scopes.contains_key("https://base.example/foo//"));
 
 		// Should deduplicate based on URL parsing rules..
@@ -771,9 +844,12 @@ mod tests {
         "foo\\\\": {}
       }
     }"#;
+
 		let import_map =
 			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
+
 		assert!(import_map.scopes.contains_key("https://base.example/path1/path2/foo//"));
+
 		assert_eq!(import_map.scopes.len(), 1);
 	}
 
@@ -796,11 +872,16 @@ mod tests {
         "wss:bad": {}
       }
     }"#;
+
 		let import_map =
 			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
+
 		assert!(import_map.scopes.contains_key("http://good/"));
+
 		assert!(import_map.scopes.contains_key("https://good/"));
+
 		assert!(import_map.scopes.contains_key("file:///good"));
+
 		assert_eq!(import_map.scopes.len(), 3);
 
 		// Should parse absolute URL scope keys, ignoring unparseable ones..
@@ -816,14 +897,20 @@ mod tests {
         "https://example.com/%41": {}
       }
     }"#;
+
 		let import_map =
 			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
 		// tricky case! remember we have a base URL
 		assert!(import_map.scopes.contains_key("https://base.example/path1/path2/example.org"));
+
 		assert!(import_map.scopes.contains_key("https://example.com///"));
+
 		assert!(import_map.scopes.contains_key("https://example.net/"));
+
 		assert!(import_map.scopes.contains_key("https://example.com/foo/"));
+
 		assert!(import_map.scopes.contains_key("https://example.com/%41"));
+
 		assert_eq!(import_map.scopes.len(), 5);
 	}
 
@@ -837,6 +924,7 @@ mod tests {
         "slash": "/foo"
        }
     }"#;
+
 		let import_map =
 			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
 
@@ -844,10 +932,12 @@ mod tests {
 			import_map.imports.get("dotSlash").unwrap(),
 			&vec!["https://base.example/path1/path2/foo".to_string()]
 		);
+
 		assert_eq!(
 			import_map.imports.get("dotDotSlash").unwrap(),
 			&vec!["https://base.example/path1/foo".to_string()]
 		);
+
 		assert_eq!(
 			import_map.imports.get("slash").unwrap(),
 			&vec!["https://base.example/foo".to_string()]
@@ -861,6 +951,7 @@ mod tests {
         "slash": "/"
        }
     }"#;
+
 		let import_map =
 			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
 
@@ -868,10 +959,12 @@ mod tests {
 			import_map.imports.get("dotSlash").unwrap(),
 			&vec!["https://base.example/path1/path2/".to_string()]
 		);
+
 		assert_eq!(
 			import_map.imports.get("dotDotSlash").unwrap(),
 			&vec!["https://base.example/path1/".to_string()]
 		);
+
 		assert_eq!(
 			import_map.imports.get("slash").unwrap(),
 			&vec!["https://base.example/".to_string()]
@@ -889,15 +982,22 @@ mod tests {
         "dotDotSlash3": "%2E%2E%2F"
       }
     }"#;
+
 		let import_map =
 			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
 
 		assert!(import_map.imports.get("dotSlash1").unwrap().is_empty());
+
 		assert!(import_map.imports.get("dotDotSlash1").unwrap().is_empty());
+
 		assert!(import_map.imports.get("dotSlash2").unwrap().is_empty());
+
 		assert!(import_map.imports.get("dotDotSlash2").unwrap().is_empty());
+
 		assert!(import_map.imports.get("slash2").unwrap().is_empty());
+
 		assert!(import_map.imports.get("dotSlash3").unwrap().is_empty());
+
 		assert!(import_map.imports.get("dotDotSlash3").unwrap().is_empty());
 	}
 
@@ -920,21 +1020,32 @@ mod tests {
         "wss": "wss:bad"
       }
     }"#;
+
 		let import_map =
 			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
 
 		assert_eq!(import_map.imports.get("file").unwrap(), &vec!["file:///good".to_string()]);
+
 		assert_eq!(import_map.imports.get("http").unwrap(), &vec!["http://good/".to_string()]);
+
 		assert_eq!(import_map.imports.get("https").unwrap(), &vec!["https://good/".to_string()]);
 
 		assert!(import_map.imports.get("about").unwrap().is_empty());
+
 		assert!(import_map.imports.get("blob").unwrap().is_empty());
+
 		assert!(import_map.imports.get("data").unwrap().is_empty());
+
 		assert!(import_map.imports.get("filesystem").unwrap().is_empty());
+
 		assert!(import_map.imports.get("ftp").unwrap().is_empty());
+
 		assert!(import_map.imports.get("import").unwrap().is_empty());
+
 		assert!(import_map.imports.get("mailto").unwrap().is_empty());
+
 		assert!(import_map.imports.get("javascript").unwrap().is_empty());
+
 		assert!(import_map.imports.get("wss").unwrap().is_empty());
 	}
 
@@ -957,21 +1068,32 @@ mod tests {
         "wss": ["wss:bad"]
       }
     }"#;
+
 		let import_map =
 			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
 
 		assert_eq!(import_map.imports.get("file").unwrap(), &vec!["file:///good".to_string()]);
+
 		assert_eq!(import_map.imports.get("http").unwrap(), &vec!["http://good/".to_string()]);
+
 		assert_eq!(import_map.imports.get("https").unwrap(), &vec!["https://good/".to_string()]);
 
 		assert!(import_map.imports.get("about").unwrap().is_empty());
+
 		assert!(import_map.imports.get("blob").unwrap().is_empty());
+
 		assert!(import_map.imports.get("data").unwrap().is_empty());
+
 		assert!(import_map.imports.get("filesystem").unwrap().is_empty());
+
 		assert!(import_map.imports.get("ftp").unwrap().is_empty());
+
 		assert!(import_map.imports.get("import").unwrap().is_empty());
+
 		assert!(import_map.imports.get("mailto").unwrap().is_empty());
+
 		assert!(import_map.imports.get("javascript").unwrap().is_empty());
+
 		assert!(import_map.imports.get("wss").unwrap().is_empty());
 	}
 
@@ -990,6 +1112,7 @@ mod tests {
         "noPercentDecoding": "https://example.com/%41"
       }
     }"#;
+
 		let import_map =
 			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
 
@@ -997,25 +1120,31 @@ mod tests {
 			import_map.imports.get("invalidButParseable1").unwrap(),
 			&vec!["https://example.org/".to_string()]
 		);
+
 		assert_eq!(
 			import_map.imports.get("invalidButParseable2").unwrap(),
 			&vec!["https://example.com///".to_string()]
 		);
+
 		assert_eq!(
 			import_map.imports.get("prettyNormal").unwrap(),
 			&vec!["https://example.net/".to_string()]
 		);
+
 		assert_eq!(
 			import_map.imports.get("percentDecoding").unwrap(),
 			&vec!["https://example.com/".to_string()]
 		);
+
 		assert_eq!(
 			import_map.imports.get("noPercentDecoding").unwrap(),
 			&vec!["https://example.com/%41".to_string()]
 		);
 
 		assert!(import_map.imports.get("unparseable1").unwrap().is_empty());
+
 		assert!(import_map.imports.get("unparseable2").unwrap().is_empty());
+
 		assert!(import_map.imports.get("unparseable3").unwrap().is_empty());
 	}
 
@@ -1034,6 +1163,7 @@ mod tests {
         "noPercentDecoding": ["https://example.com/%41"]
       }
     }"#;
+
 		let import_map =
 			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
 
@@ -1041,25 +1171,31 @@ mod tests {
 			import_map.imports.get("invalidButParseable1").unwrap(),
 			&vec!["https://example.org/".to_string()]
 		);
+
 		assert_eq!(
 			import_map.imports.get("invalidButParseable2").unwrap(),
 			&vec!["https://example.com///".to_string()]
 		);
+
 		assert_eq!(
 			import_map.imports.get("prettyNormal").unwrap(),
 			&vec!["https://example.net/".to_string()]
 		);
+
 		assert_eq!(
 			import_map.imports.get("percentDecoding").unwrap(),
 			&vec!["https://example.com/".to_string()]
 		);
+
 		assert_eq!(
 			import_map.imports.get("noPercentDecoding").unwrap(),
 			&vec!["https://example.com/%41".to_string()]
 		);
 
 		assert!(import_map.imports.get("unparseable1").unwrap().is_empty());
+
 		assert!(import_map.imports.get("unparseable2").unwrap().is_empty());
+
 		assert!(import_map.imports.get("unparseable3").unwrap().is_empty());
 	}
 
@@ -1071,6 +1207,7 @@ mod tests {
         "trailer/": "/notrailer"
       }
     }"#;
+
 		let import_map =
 			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
 
@@ -1086,6 +1223,7 @@ mod tests {
         "trailer/": ["/notrailer"]
       }
     }"#;
+
 		let import_map =
 			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
 
@@ -1101,6 +1239,7 @@ mod tests {
         "trailer/": ["/atrailer/", "/notrailer"]
       }
     }"#;
+
 		let import_map =
 			ImportMap::from_json("https://base.example/path1/path2/path3", json_map).unwrap();
 
@@ -1120,6 +1259,7 @@ mod tests {
 				"foo": bad
 			  }
 			});
+
 			let import_map = ImportMap::from_json(
 				"https://base.example/path1/path2/path3",
 				&json_map.to_string(),
@@ -1140,25 +1280,31 @@ mod tests {
 
 	fn assert_resolve(result:Result<Option<ModuleSpecifier>, ImportMapError>, expected_url:&str) {
 		let maybe_url = result.unwrap_or_else(|err| panic!("ImportMap::resolve failed: {:?}", err));
+
 		let resolved_url = maybe_url.unwrap_or_else(|| panic!("Unexpected None resolved URL"));
+
 		assert_eq!(resolved_url, expected_url.to_string());
 	}
 
 	#[test]
 	fn resolve_unmapped_relative_specifiers() {
 		let referrer_url = "https://example.com/js/script.ts";
+
 		let import_map = get_empty_import_map();
 
 		// Should resolve ./ specifiers as URLs.
 		assert_resolve(import_map.resolve("./foo", referrer_url), "https://example.com/js/foo");
+
 		assert_resolve(
 			import_map.resolve("./foo/bar", referrer_url),
 			"https://example.com/js/foo/bar",
 		);
+
 		assert_resolve(
 			import_map.resolve("./foo/../bar", referrer_url),
 			"https://example.com/js/bar",
 		);
+
 		assert_resolve(
 			import_map.resolve("./foo/../../bar", referrer_url),
 			"https://example.com/bar",
@@ -1166,10 +1312,12 @@ mod tests {
 
 		// Should resolve ../ specifiers as URLs.
 		assert_resolve(import_map.resolve("../foo", referrer_url), "https://example.com/foo");
+
 		assert_resolve(
 			import_map.resolve("../foo/bar", referrer_url),
 			"https://example.com/foo/bar",
 		);
+
 		assert_resolve(
 			import_map.resolve("../../../foo/bar", referrer_url),
 			"https://example.com/foo/bar",
@@ -1179,15 +1327,19 @@ mod tests {
 	#[test]
 	fn resolve_unmapped_absolute_specifiers() {
 		let referrer_url = "https://example.com/js/script.ts";
+
 		let import_map = get_empty_import_map();
 
 		// Should resolve / specifiers as URLs.
 		assert_resolve(import_map.resolve("/foo", referrer_url), "https://example.com/foo");
+
 		assert_resolve(import_map.resolve("/foo/bar", referrer_url), "https://example.com/foo/bar");
+
 		assert_resolve(
 			import_map.resolve("../../foo/bar", referrer_url),
 			"https://example.com/foo/bar",
 		);
+
 		assert_resolve(
 			import_map.resolve("/../foo/../bar", referrer_url),
 			"https://example.com/bar",
@@ -1198,14 +1350,17 @@ mod tests {
 			import_map.resolve("https://example.net", referrer_url),
 			"https://example.net/",
 		);
+
 		assert_resolve(
 			import_map.resolve("https://ex%41mple.com/", referrer_url),
 			"https://example.com/",
 		);
+
 		assert_resolve(
 			import_map.resolve("https:example.org", referrer_url),
 			"https://example.org/",
 		);
+
 		assert_resolve(
 			import_map.resolve("https://///example.com///", referrer_url),
 			"https://example.com///",
@@ -1215,32 +1370,47 @@ mod tests {
 	#[test]
 	fn resolve_unmapped_bad_specifiers() {
 		let referrer_url = "https://example.com/js/script.ts";
+
 		let import_map = get_empty_import_map();
 
 		// Should fail for absolute non-fetch-scheme URLs.
 		assert!(import_map.resolve("about:good", referrer_url).is_err());
+
 		assert!(import_map.resolve("mailto:bad", referrer_url).is_err());
+
 		assert!(import_map.resolve("import:bad", referrer_url).is_err());
+
 		assert!(import_map.resolve("javascript:bad", referrer_url).is_err());
+
 		assert!(import_map.resolve("wss:bad", referrer_url).is_err());
 
 		// Should fail for string not parseable as absolute URLs and not starting with
 		// ./, ../ or /.
 		assert!(import_map.resolve("foo", referrer_url).is_err());
+
 		assert!(import_map.resolve("\\foo", referrer_url).is_err());
+
 		assert!(import_map.resolve(":foo", referrer_url).is_err());
+
 		assert!(import_map.resolve("@foo", referrer_url).is_err());
+
 		assert!(import_map.resolve("%2E/foo", referrer_url).is_err());
+
 		assert!(import_map.resolve("%2E%2Efoo", referrer_url).is_err());
+
 		assert!(import_map.resolve(".%2Efoo", referrer_url).is_err());
+
 		assert!(import_map.resolve("https://ex ample.org", referrer_url).is_err());
+
 		assert!(import_map.resolve("https://example.org:deno", referrer_url).is_err());
+
 		assert!(import_map.resolve("https://[example.org]", referrer_url).is_err());
 	}
 
 	#[test]
 	fn resolve_imports_mapped() {
 		let base_url = "https://example.com/app/main.ts";
+
 		let referrer_url = "https://example.com/js/script.ts";
 
 		// Should fail when mapping is to an empty array.
@@ -1250,15 +1420,18 @@ mod tests {
       "lodash": []
     }
   }"#;
+
 		let import_map = ImportMap::from_json(base_url, json_map).unwrap();
 
 		assert!(import_map.resolve("moment", referrer_url).is_err());
+
 		assert!(import_map.resolve("lodash", referrer_url).is_err());
 	}
 
 	#[test]
 	fn resolve_imports_package_like_modules() {
 		let base_url = "https://example.com/app/main.ts";
+
 		let referrer_url = "https://example.com/js/script.ts";
 
 		let json_map = r#"{
@@ -1272,6 +1445,7 @@ mod tests {
       "nowhere/": []
     }
   }"#;
+
 		let import_map = ImportMap::from_json(base_url, json_map).unwrap();
 
 		// Should work for package main modules.
@@ -1279,10 +1453,12 @@ mod tests {
 			import_map.resolve("moment", referrer_url),
 			"https://example.com/deps/moment/src/moment.js",
 		);
+
 		assert_resolve(
 			import_map.resolve("lodash-dot", referrer_url),
 			"https://example.com/app/deps/lodash-es/lodash.js",
 		);
+
 		assert_resolve(
 			import_map.resolve("lodash-dotdot", referrer_url),
 			"https://example.com/deps/lodash-es/lodash.js",
@@ -1293,10 +1469,12 @@ mod tests {
 			import_map.resolve("moment/foo", referrer_url),
 			"https://example.com/deps/moment/src/foo",
 		);
+
 		assert_resolve(
 			import_map.resolve("lodash-dot/foo", referrer_url),
 			"https://example.com/app/deps/lodash-es/foo",
 		);
+
 		assert_resolve(
 			import_map.resolve("lodash-dotdot/foo", referrer_url),
 			"https://example.com/deps/lodash-es/foo",
@@ -1310,6 +1488,7 @@ mod tests {
 
 		// Should fail for package modules that are not declared.
 		assert!(import_map.resolve("underscore/", referrer_url).is_err());
+
 		assert!(import_map.resolve("underscore/foo", referrer_url).is_err());
 
 		// Should fail for package submodules that map to nowhere.
@@ -1319,6 +1498,7 @@ mod tests {
 	#[test]
 	fn resolve_imports_tricky_specifiers() {
 		let base_url = "https://example.com/app/main.ts";
+
 		let referrer_url = "https://example.com/js/script.ts";
 
 		let json_map = r#"{
@@ -1332,6 +1512,7 @@ mod tests {
       "%2F": "/lib/percent2f.mjs"
     }
   }"#;
+
 		let import_map = ImportMap::from_json(base_url, json_map).unwrap();
 
 		// Should work for explicitly-mapped specifiers that happen to have a slash.
@@ -1342,18 +1523,22 @@ mod tests {
 
 		// Should work when the specifier has punctuation.
 		assert_resolve(import_map.resolve(".", referrer_url), "https://example.com/lib/dot.mjs");
+
 		assert_resolve(
 			import_map.resolve("..", referrer_url),
 			"https://example.com/lib/dotdot.mjs",
 		);
+
 		assert_resolve(
 			import_map.resolve("..\\\\", referrer_url),
 			"https://example.com/lib/dotdotbackslash.mjs",
 		);
+
 		assert_resolve(
 			import_map.resolve("%2E", referrer_url),
 			"https://example.com/lib/percent2e.mjs",
 		);
+
 		assert_resolve(
 			import_map.resolve("%2F", referrer_url),
 			"https://example.com/lib/percent2f.mjs",
@@ -1367,6 +1552,7 @@ mod tests {
 	#[test]
 	fn resolve_imports_url_like_specifier() {
 		let base_url = "https://example.com/app/main.ts";
+
 		let referrer_url = "https://example.com/js/script.ts";
 
 		let json_map = r#"{
@@ -1385,6 +1571,7 @@ mod tests {
       "../test": "/lib/test2.mjs"
     }
   }"#;
+
 		let import_map = ImportMap::from_json(base_url, json_map).unwrap();
 
 		// Should remap to other URLs.
@@ -1392,26 +1579,32 @@ mod tests {
 			import_map.resolve("https://example.com/lib/foo.mjs", referrer_url),
 			"https://example.com/app/more/bar.mjs",
 		);
+
 		assert_resolve(
 			import_map.resolve("https://///example.com/lib/foo.mjs", referrer_url),
 			"https://example.com/app/more/bar.mjs",
 		);
+
 		assert_resolve(
 			import_map.resolve("/lib/foo.mjs", referrer_url),
 			"https://example.com/app/more/bar.mjs",
 		);
+
 		assert_resolve(
 			import_map.resolve("https://example.com/app/dotrelative/foo.mjs", referrer_url),
 			"https://example.com/lib/dot.mjs",
 		);
+
 		assert_resolve(
 			import_map.resolve("../app/dotrelative/foo.mjs", referrer_url),
 			"https://example.com/lib/dot.mjs",
 		);
+
 		assert_resolve(
 			import_map.resolve("https://example.com/dotdotrelative/foo.mjs", referrer_url),
 			"https://example.com/lib/dotdot.mjs",
 		);
+
 		assert_resolve(
 			import_map.resolve("../dotdotrelative/foo.mjs", referrer_url),
 			"https://example.com/lib/dotdot.mjs",
@@ -1419,14 +1612,19 @@ mod tests {
 
 		// Should fail for URLs that remap to empty arrays.
 		assert!(import_map.resolve("https://example.com/lib/no.mjs", referrer_url).is_err());
+
 		assert!(import_map.resolve("/lib/no.mjs", referrer_url).is_err());
+
 		assert!(import_map.resolve("../lib/no.mjs", referrer_url).is_err());
+
 		assert!(
 			import_map
 				.resolve("https://example.com/app/dotrelative/no.mjs", referrer_url)
 				.is_err()
 		);
+
 		assert!(import_map.resolve("/app/dotrelative/no.mjs", referrer_url).is_err());
+
 		assert!(import_map.resolve("../app/dotrelative/no.mjs", referrer_url).is_err());
 
 		// Should remap URLs that are just composed from / and ..
@@ -1434,22 +1632,27 @@ mod tests {
 			import_map.resolve("https://example.com/", referrer_url),
 			"https://example.com/lib/slash-only/",
 		);
+
 		assert_resolve(
 			import_map.resolve("/", referrer_url),
 			"https://example.com/lib/slash-only/",
 		);
+
 		assert_resolve(
 			import_map.resolve("../", referrer_url),
 			"https://example.com/lib/slash-only/",
 		);
+
 		assert_resolve(
 			import_map.resolve("https://example.com/app/", referrer_url),
 			"https://example.com/lib/dotslash-only/",
 		);
+
 		assert_resolve(
 			import_map.resolve("/app/", referrer_url),
 			"https://example.com/lib/dotslash-only/",
 		);
+
 		assert_resolve(
 			import_map.resolve("../app/", referrer_url),
 			"https://example.com/lib/dotslash-only/",
@@ -1460,6 +1663,7 @@ mod tests {
 			import_map.resolve("/test/foo.mjs", referrer_url),
 			"https://example.com/lib/url-trailing-slash/foo.mjs",
 		);
+
 		assert_resolve(
 			import_map.resolve("https://example.com/app/test/foo.mjs", referrer_url),
 			"https://example.com/lib/url-trailing-slash-dot/foo.mjs",
@@ -1479,6 +1683,7 @@ mod tests {
 	#[test]
 	fn resolve_imports_overlapping_entities_with_trailing_slashes() {
 		let base_url = "https://example.com/app/main.ts";
+
 		let referrer_url = "https://example.com/js/script.ts";
 
 		// Should favor the most-specific key (no empty arrays).
@@ -1491,12 +1696,17 @@ mod tests {
         "a/b/": "/4/"
       }
     }"#;
+
 			let import_map = ImportMap::from_json(base_url, json_map).unwrap();
 
 			assert_resolve(import_map.resolve("a", referrer_url), "https://example.com/1");
+
 			assert_resolve(import_map.resolve("a/", referrer_url), "https://example.com/2/");
+
 			assert_resolve(import_map.resolve("a/b", referrer_url), "https://example.com/3");
+
 			assert_resolve(import_map.resolve("a/b/", referrer_url), "https://example.com/4/");
+
 			assert_resolve(import_map.resolve("a/b/c", referrer_url), "https://example.com/4/c");
 		}
 
@@ -1511,14 +1721,21 @@ mod tests {
         "a/b/": "/4/"
       }
     }"#;
+
 			let import_map = ImportMap::from_json(base_url, json_map).unwrap();
 
 			assert!(import_map.resolve("a", referrer_url).is_err());
+
 			assert!(import_map.resolve("a/", referrer_url).is_err());
+
 			assert!(import_map.resolve("a/x", referrer_url).is_err());
+
 			assert_resolve(import_map.resolve("a/b", referrer_url), "https://example.com/3");
+
 			assert_resolve(import_map.resolve("a/b/", referrer_url), "https://example.com/4/");
+
 			assert_resolve(import_map.resolve("a/b/c", referrer_url), "https://example.com/4/c");
+
 			assert!(import_map.resolve("a/x/c", referrer_url).is_err());
 		}
 	}
@@ -1526,6 +1743,7 @@ mod tests {
 	#[test]
 	fn resolve_scopes_map_to_empty_array() {
 		let base_url = "https://example.com/app/main.ts";
+
 		let referrer_url = "https://example.com/js";
 
 		let json_map = r#"{
@@ -1536,9 +1754,11 @@ mod tests {
       }
     }
   }"#;
+
 		let import_map = ImportMap::from_json(base_url, json_map).unwrap();
 
 		assert!(import_map.resolve("moment", referrer_url).is_err());
+
 		assert!(import_map.resolve("lodash", referrer_url).is_err());
 	}
 
@@ -1558,29 +1778,37 @@ mod tests {
       }
     }
   }"#;
+
 		let import_map = ImportMap::from_json(base_url, json_map).unwrap();
 
 		let js_non_dir = "https://example.com/js";
+
 		let js_in_dir = "https://example.com/js/app.mjs";
+
 		let with_js_prefix = "https://example.com/jsiscool";
 
 		assert_resolve(
 			import_map.resolve("moment", js_non_dir),
 			"https://example.com/only-triggered-by-exact/moment",
 		);
+
 		assert_resolve(
 			import_map.resolve("moment/foo", js_non_dir),
 			"https://example.com/only-triggered-by-exact/moment/foo",
 		);
+
 		assert_resolve(
 			import_map.resolve("moment", js_in_dir),
 			"https://example.com/triggered-by-any-subpath/moment",
 		);
+
 		assert_resolve(
 			import_map.resolve("moment/foo", js_in_dir),
 			"https://example.com/triggered-by-any-subpath/moment/foo",
 		);
+
 		assert!(import_map.resolve("moment", with_js_prefix).is_err());
+
 		assert!(import_map.resolve("moment/foo", with_js_prefix).is_err());
 	}
 
@@ -1596,24 +1824,32 @@ mod tests {
       }
     }
   }"#;
+
 		let import_map = ImportMap::from_json(base_url, json_map).unwrap();
 
 		// Should match correctly when only an exact match is in the map.
 		let js_non_dir = "https://example.com/js";
+
 		let js_in_dir = "https://example.com/js/app.mjs";
+
 		let with_js_prefix = "https://example.com/jsiscool";
 
 		assert_resolve(
 			import_map.resolve("moment", js_non_dir),
 			"https://example.com/only-triggered-by-exact/moment",
 		);
+
 		assert_resolve(
 			import_map.resolve("moment/foo", js_non_dir),
 			"https://example.com/only-triggered-by-exact/moment/foo",
 		);
+
 		assert!(import_map.resolve("moment", js_in_dir).is_err());
+
 		assert!(import_map.resolve("moment/foo", js_in_dir).is_err());
+
 		assert!(import_map.resolve("moment", with_js_prefix).is_err());
+
 		assert!(import_map.resolve("moment/foo", with_js_prefix).is_err());
 	}
 
@@ -1629,24 +1865,32 @@ mod tests {
       }
     }
   }"#;
+
 		let import_map = ImportMap::from_json(base_url, json_map).unwrap();
 
 		// Should match correctly when only a prefix match is in the map.
 		let js_non_dir = "https://example.com/js";
+
 		let js_in_dir = "https://example.com/js/app.mjs";
+
 		let with_js_prefix = "https://example.com/jsiscool";
 
 		assert!(import_map.resolve("moment", js_non_dir).is_err());
+
 		assert!(import_map.resolve("moment/foo", js_non_dir).is_err());
+
 		assert_resolve(
 			import_map.resolve("moment", js_in_dir),
 			"https://example.com/triggered-by-any-subpath/moment",
 		);
+
 		assert_resolve(
 			import_map.resolve("moment/foo", js_in_dir),
 			"https://example.com/triggered-by-any-subpath/moment/foo",
 		);
+
 		assert!(import_map.resolve("moment", with_js_prefix).is_err());
+
 		assert!(import_map.resolve("moment/foo", with_js_prefix).is_err());
 	}
 
@@ -1676,10 +1920,12 @@ mod tests {
       }
     }
   }"#;
+
 		let import_map = ImportMap::from_json(base_url, json_map).unwrap();
 
 		// Should match correctly when only a prefix match is in the map.
 		let js_in_dir = "https://example.com/js/app.mjs";
+
 		let top_level = "https://example.com/app.mjs";
 
 		// Should resolve scoped.
@@ -1687,14 +1933,17 @@ mod tests {
 			import_map.resolve("lodash-dot", js_in_dir),
 			"https://example.com/app/node_modules_2/lodash-es/lodash.js",
 		);
+
 		assert_resolve(
 			import_map.resolve("lodash-dotdot", js_in_dir),
 			"https://example.com/node_modules_2/lodash-es/lodash.js",
 		);
+
 		assert_resolve(
 			import_map.resolve("lodash-dot/foo", js_in_dir),
 			"https://example.com/app/node_modules_2/lodash-es/foo",
 		);
+
 		assert_resolve(
 			import_map.resolve("lodash-dotdot/foo", js_in_dir),
 			"https://example.com/node_modules_2/lodash-es/foo",
@@ -1705,10 +1954,12 @@ mod tests {
 			import_map.resolve("moment", top_level),
 			"https://example.com/node_modules_3/moment/src/moment.js",
 		);
+
 		assert_resolve(
 			import_map.resolve("moment", js_in_dir),
 			"https://example.com/node_modules_3/moment/src/moment.js",
 		);
+
 		assert_resolve(
 			import_map.resolve("vue", js_in_dir),
 			"https://example.com/node_modules_3/vue/dist/vue.runtime.esm.js",
@@ -1719,22 +1970,27 @@ mod tests {
 			import_map.resolve("moment/foo", top_level),
 			"https://example.com/node_modules/moment/src/foo",
 		);
+
 		assert_resolve(
 			import_map.resolve("moment/foo", js_in_dir),
 			"https://example.com/node_modules/moment/src/foo",
 		);
+
 		assert_resolve(
 			import_map.resolve("lodash-dot", top_level),
 			"https://example.com/app/node_modules/lodash-es/lodash.js",
 		);
+
 		assert_resolve(
 			import_map.resolve("lodash-dotdot", top_level),
 			"https://example.com/node_modules/lodash-es/lodash.js",
 		);
+
 		assert_resolve(
 			import_map.resolve("lodash-dot/foo", top_level),
 			"https://example.com/app/node_modules/lodash-es/foo",
 		);
+
 		assert_resolve(
 			import_map.resolve("lodash-dotdot/foo", top_level),
 			"https://example.com/node_modules/lodash-es/foo",
@@ -1742,6 +1998,7 @@ mod tests {
 
 		// Should still fail for package-like specifiers that are not declared.
 		assert!(import_map.resolve("underscore/", js_in_dir).is_err());
+
 		assert!(import_map.resolve("underscore/foo", js_in_dir).is_err());
 	}
 
@@ -1765,25 +2022,34 @@ mod tests {
       }
     }
   }"#;
+
 		let import_map = ImportMap::from_json(base_url, json_map).unwrap();
 
 		let scope_1_url = "https://example.com/scope1/foo.mjs";
+
 		let scope_2_url = "https://example.com/scope2/foo.mjs";
+
 		let scope_3_url = "https://example.com/scope2/scope3/foo.mjs";
 
 		// Should fall back to "imports" when none match.
 		assert_resolve(import_map.resolve("a", scope_1_url), "https://example.com/a-1.mjs");
+
 		assert_resolve(import_map.resolve("b", scope_1_url), "https://example.com/b-1.mjs");
+
 		assert_resolve(import_map.resolve("c", scope_1_url), "https://example.com/c-1.mjs");
 
 		// Should use a direct scope override.
 		assert_resolve(import_map.resolve("a", scope_2_url), "https://example.com/a-2.mjs");
+
 		assert_resolve(import_map.resolve("b", scope_2_url), "https://example.com/b-1.mjs");
+
 		assert_resolve(import_map.resolve("c", scope_2_url), "https://example.com/c-1.mjs");
 
 		// Should use an indirect scope override.
 		assert_resolve(import_map.resolve("a", scope_3_url), "https://example.com/a-2.mjs");
+
 		assert_resolve(import_map.resolve("b", scope_3_url), "https://example.com/b-3.mjs");
+
 		assert_resolve(import_map.resolve("c", scope_3_url), "https://example.com/c-1.mjs");
 	}
 
@@ -1810,16 +2076,21 @@ mod tests {
       }
     }
   }"#;
+
 		let import_map = ImportMap::from_json(base_url, json_map).unwrap();
+
 		let in_same_dir_as_map = "https://example.com/app/foo.mjs";
+
 		let in_dir_above_map = "https://example.com/foo.mjs";
 
 		// Should resolve an empty string scope using the import map URL.
 		assert_resolve(import_map.resolve("a", base_url), "https://example.com/a-empty-string.mjs");
+
 		assert_resolve(import_map.resolve("a", in_same_dir_as_map), "https://example.com/a-1.mjs");
 
 		// Should resolve a ./ scope using the import map URL's directory.
 		assert_resolve(import_map.resolve("b", base_url), "https://example.com/b-dot-slash.mjs");
+
 		assert_resolve(
 			import_map.resolve("b", in_same_dir_as_map),
 			"https://example.com/b-dot-slash.mjs",
@@ -1830,10 +2101,12 @@ mod tests {
 			import_map.resolve("c", base_url),
 			"https://example.com/c-dot-dot-slash.mjs",
 		);
+
 		assert_resolve(
 			import_map.resolve("c", in_same_dir_as_map),
 			"https://example.com/c-dot-dot-slash.mjs",
 		);
+
 		assert_resolve(
 			import_map.resolve("c", in_dir_above_map),
 			"https://example.com/c-dot-dot-slash.mjs",
@@ -1859,12 +2132,14 @@ mod tests {
         "std:none": "./none.mjs"
       }
     }"#;
+
 		let import_map = ImportMap::from_json(base_url, json_map).unwrap();
 
 		assert_resolve(
 			import_map.resolve("std:blank", base_url),
 			"https://example.com/app/blank.mjs",
 		);
+
 		assert_resolve(
 			import_map.resolve("std:none", base_url),
 			"https://example.com/app/none.mjs",

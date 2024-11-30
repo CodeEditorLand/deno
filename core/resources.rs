@@ -44,14 +44,19 @@ impl ResourceTable {
 	// TODO: resource id allocation should probably be randomized for security.
 	fn next_rid(&mut self) -> ResourceId {
 		let next_rid = self.next_id;
+
 		self.next_id += 1;
+
 		next_rid as ResourceId
 	}
 
 	pub fn add(&mut self, name:&str, resource:Box<dyn Resource>) -> ResourceId {
 		let rid = self.next_rid();
+
 		let r = self.map.insert(rid, (name.to_string(), resource));
+
 		assert!(r.is_none());
+
 		rid
 	}
 

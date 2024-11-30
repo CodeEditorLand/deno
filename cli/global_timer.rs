@@ -33,13 +33,16 @@ impl GlobalTimer {
 		if self.tx.is_some() {
 			self.cancel();
 		}
+
 		assert!(self.tx.is_none());
 
 		let (tx, rx) = oneshot::channel();
+
 		self.tx = Some(tx);
 
 		let delay = futures::compat::Compat01As03::new(Delay::new(deadline))
 			.map_err(|err| panic!("Unexpected error in timeout {:?}", err));
+
 		let rx = rx.map_err(|err| panic!("Unexpected error in receiving channel {:?}", err));
 
 		futures::future::select(delay, rx).then(|_| futures::future::ok(()))

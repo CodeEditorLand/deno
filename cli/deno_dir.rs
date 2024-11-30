@@ -21,6 +21,7 @@ impl DenoDir {
 	pub fn new(custom_root:Option<PathBuf>) -> std::io::Result<Self> {
 		// Only setup once.
 		let home_dir = dirs::home_dir().expect("Could not get home directory.");
+
 		let fallback = home_dir.join(".deno");
 		// We use the OS cache dir because all files deno writes are cache files
 		// Once that changes we need to start using different roots if DENO_DIR
@@ -28,7 +29,9 @@ impl DenoDir {
 		let default = dirs::cache_dir().map(|d| d.join("deno")).unwrap_or(fallback);
 
 		let root:PathBuf = custom_root.unwrap_or(default);
+
 		let deps_path = root.join("deps");
+
 		let gen_path = root.join("gen");
 
 		let deno_dir = Self {
