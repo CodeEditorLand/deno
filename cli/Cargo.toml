@@ -3,7 +3,7 @@
 [package]
 name = "deno_cli"
 version = "0.26.0"
-license = "MIT"
+license-file = "LICENSE"
 authors = ["the Deno authors"]
 edition = "2018"
 description = "Provides the deno executable"

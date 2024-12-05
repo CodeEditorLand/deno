@@ -1,7 +1,7 @@
 [package]
 name = "deno_typescript"
 version = "0.26.0"
-license = "MIT"
+license-file = "LICENSE"
 description = "To compile TypeScript to a snapshot during build.rs"
 repository = "https://github.com/denoland/deno"
 authors = ["the Deno authors"]
