@@ -15,7 +15,7 @@ use futures::{
 };
 use tokio::{
 	self,
-	net::{tcp::Incoming, TcpListener, TcpStream},
+	net::{TcpListener, TcpStream, tcp::Incoming},
 };
 
 use super::{

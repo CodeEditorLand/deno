@@ -145,9 +145,7 @@ function testImplicitResolving(state: DumperState, str: string): boolean {
 
 	for (
 		let index = 0, length = state.implicitTypes.length;
-
 		index < length;
-
 		index += 1
 	) {
 		type = state.implicitTypes[index];
@@ -639,9 +637,7 @@ function writeFlowMapping(
 
 	for (
 		let index = 0, length = objectKeyList.length;
-
 		index < length;
-
 		index += 1
 	) {
 		pairBuffer = state.condenseFlow ? '"' : "";
@@ -709,9 +705,7 @@ function writeBlockMapping(
 
 	for (
 		let index = 0, length = objectKeyList.length;
-
 		index < length;
-
 		index += 1
 	) {
 		pairBuffer = "";
@@ -945,9 +939,7 @@ function inspectNode(
 			if (Array.isArray(object)) {
 				for (
 					let idx = 0, length = object.length;
-
 					idx < length;
-
 					idx += 1
 				) {
 					inspectNode(object[idx], objects, duplicatesIndexes);
@@ -957,9 +949,7 @@ function inspectNode(
 
 				for (
 					let idx = 0, length = objectKeyList.length;
-
 					idx < length;
-
 					idx += 1
 				) {
 					inspectNode(

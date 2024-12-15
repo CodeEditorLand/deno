@@ -582,7 +582,6 @@ mod tests {
 	use futures::{future::FutureExt, stream::StreamExt};
 
 	use super::*;
-
 	use crate::isolate::{js_check, tests::*};
 
 	struct MockLoader {

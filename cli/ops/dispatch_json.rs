@@ -4,8 +4,8 @@ use std::{future::Future, pin::Pin};
 use deno::*;
 use futures::{future::FutureExt, task::SpawnExt};
 pub use serde_derive::Deserialize;
-use serde_json::json;
 pub use serde_json::Value;
+use serde_json::json;
 
 pub type AsyncJsonOp = Pin<Box<dyn Future<Output = Result<Value, ErrBox>> + Send>>;
 

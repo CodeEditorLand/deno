@@ -267,9 +267,8 @@ mod tests {
 
 	#[test]
 	fn test_resolve_import_error() {
-		use url::ParseError::*;
-
 		use ModuleResolutionError::*;
+		use url::ParseError::*;
 
 		let tests = vec![
 			(
@@ -421,9 +420,8 @@ mod tests {
 
 	#[test]
 	fn test_resolve_url_or_path_error() {
-		use url::ParseError::*;
-
 		use ModuleResolutionError::*;
+		use url::ParseError::*;
 
 		let mut tests = vec![
 			("https://eggplant:b/c", InvalidUrl(InvalidPort)),

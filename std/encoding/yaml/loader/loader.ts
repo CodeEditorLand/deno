@@ -308,9 +308,7 @@ function captureSegment(
 		if (checkJson) {
 			for (
 				let position = 0, length = result.length;
-
 				position < length;
-
 				position++
 			) {
 				const character = result.charCodeAt(position);
@@ -379,9 +377,7 @@ function storeMappingPair(
 
 		for (
 			let index = 0, quantity = keyNode.length;
-
 			index < quantity;
-
 			index++
 		) {
 			if (Array.isArray(keyNode[index])) {
@@ -417,9 +413,7 @@ function storeMappingPair(
 		if (Array.isArray(valueNode)) {
 			for (
 				let index = 0, quantity = valueNode.length;
-
 				index < quantity;
-
 				index++
 			) {
 				mergeMappings(state, result, valueNode[index], overridableKeys);
@@ -1803,9 +1797,7 @@ function composeNode(
 		if (state.tag === "?") {
 			for (
 				let typeIndex = 0, typeQuantity = state.implicitTypes.length;
-
 				typeIndex < typeQuantity;
-
 				typeIndex++
 			) {
 				type = state.implicitTypes[typeIndex];

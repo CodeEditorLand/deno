@@ -7,7 +7,7 @@ use super::dispatch_json::{Deserialize, JsonOp, Value};
 use crate::{
 	fmt_errors::JSError,
 	ops::json_op,
-	source_maps::{get_orig_position, CachedMaps},
+	source_maps::{CachedMaps, get_orig_position},
 	state::ThreadSafeState,
 };
 

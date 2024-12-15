@@ -35,16 +35,16 @@ use crate::{
 	js_errors::{CoreJSError, V8Exception},
 	libdeno,
 	libdeno::{
+		PinnedBuf,
+		Snapshot1,
+		Snapshot2,
 		deno_buf,
 		deno_dyn_import_id,
 		deno_mod,
 		deno_pinned_buf,
-		PinnedBuf,
-		Snapshot1,
-		Snapshot2,
 	},
 	ops::*,
-	shared_queue::{SharedQueue, RECOMMENDED_SIZE},
+	shared_queue::{RECOMMENDED_SIZE, SharedQueue},
 };
 
 /// Stores a script used to initalize a Isolate

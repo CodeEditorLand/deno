@@ -260,9 +260,7 @@ export function globrex(
 				while (glob[++i] !== ":") value += glob[i];
 
 				if (value === "alnum") add("(\\w|\\d)");
-
 				else if (value === "space") add("\\s");
-
 				else if (value === "digit") add("\\d");
 
 				i++; // skip last ]

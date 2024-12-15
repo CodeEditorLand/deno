@@ -56,9 +56,7 @@ function collectSequenceNotCRLF(
 
 	for (
 		let c = s.charAt(position);
-
 		position < s.length && !(c == "\r" || c == "\n");
-
 		c = s.charAt(++position)
 	);
 

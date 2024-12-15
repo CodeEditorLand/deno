@@ -1,7 +1,7 @@
 use std::{collections::HashMap, io::Result};
 
-use serde_json::json;
 pub use serde_json::Value;
+use serde_json::json;
 
 use crate::compilers::CompiledModule;
 

@@ -7,8 +7,8 @@ use std::{
 
 use futures::Future;
 
-pub use crate::libdeno::OpId;
 use crate::PinnedBuf;
+pub use crate::libdeno::OpId;
 
 pub type Buf = Box<[u8]>;
 
@@ -112,7 +112,7 @@ impl OpRegistry {
 
 #[test]
 fn test_op_registry() {
-	use std::sync::{atomic, Arc};
+	use std::sync::{Arc, atomic};
 
 	let op_registry = OpRegistry::new();
 
@@ -155,7 +155,7 @@ fn test_op_registry() {
 
 #[test]
 fn register_op_during_call() {
-	use std::sync::{atomic, Arc};
+	use std::sync::{Arc, atomic};
 
 	let op_registry = Arc::new(OpRegistry::new());
 

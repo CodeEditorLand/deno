@@ -7,11 +7,11 @@ extern crate hyper;
 use std::env;
 
 use hyper::{
-	rt::{self, Future},
-	service::service_fn_ok,
 	Body,
 	Response,
 	Server,
+	rt::{self, Future},
+	service::service_fn_ok,
 };
 
 static PHRASE:&[u8] = b"Hello World!";

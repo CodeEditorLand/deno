@@ -8,9 +8,9 @@ use futures::{
 };
 use reqwest::{
 	self,
-	r#async::Client,
-	header::{HeaderMap, CONTENT_TYPE, LOCATION, USER_AGENT},
 	RedirectPolicy,
+	r#async::Client,
+	header::{CONTENT_TYPE, HeaderMap, LOCATION, USER_AGENT},
 };
 use url::Url;
 
@@ -146,7 +146,6 @@ pub fn fetch_string_once(url:&Url) -> impl Future<Output = Result<FetchOnceResul
 #[cfg(test)]
 mod tests {
 	use super::*;
-
 	use crate::tokio_util;
 
 	#[test]

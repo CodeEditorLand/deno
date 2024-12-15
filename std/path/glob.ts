@@ -129,7 +129,6 @@ export function joinGlobs(
 
 		if (path.length > 0) {
 			if (!joined) joined = path;
-
 			else joined += `${SEP}${path}`;
 		}
 	}

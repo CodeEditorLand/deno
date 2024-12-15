@@ -527,7 +527,6 @@ class Module {
 
 			for (
 				let i = from.length - 1, p = 0, last = from.length;
-
 				i >= 0;
 				--i
 			) {
@@ -573,7 +572,6 @@ class Module {
 
 			for (
 				let i = from.length - 1, p = 0, last = from.length;
-
 				i >= 0;
 				--i
 			) {

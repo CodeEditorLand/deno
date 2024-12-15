@@ -252,8 +252,7 @@ impl GetErrorKind for serde_json::error::Error {
 #[cfg(unix)]
 mod unix {
 	pub use nix::Error;
-
-	use nix::{errno::Errno::*, Error::Sys};
+	use nix::{Error::Sys, errno::Errno::*};
 
 	use super::{ErrorKind, GetErrorKind};
 
@@ -323,7 +322,6 @@ mod tests {
 	use deno::{ErrBox, StackFrame, V8Exception};
 
 	use super::*;
-
 	use crate::{
 		colors::strip_ansi_codes,
 		diagnostics::{Diagnostic, DiagnosticCategory, DiagnosticItem},

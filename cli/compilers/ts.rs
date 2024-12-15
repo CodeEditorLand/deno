@@ -6,11 +6,11 @@ use std::{
 	path::PathBuf,
 	pin::Pin,
 	str,
-	sync::{atomic::Ordering, Mutex},
+	sync::{Mutex, atomic::Ordering},
 };
 
 use deno::{Buf, ErrBox, ModuleSpecifier};
-use futures::{future::FutureExt, Future};
+use futures::{Future, future::FutureExt};
 use regex::Regex;
 use url::Url;
 
@@ -607,11 +607,9 @@ mod tests {
 	use std::path::PathBuf;
 
 	use deno::ModuleSpecifier;
-
 	use tempfile::TempDir;
 
 	use super::*;
-
 	use crate::{fs as deno_fs, tokio_util};
 
 	#[test]

@@ -5,7 +5,7 @@ use std::{collections::HashMap, str};
 
 use deno::{StackFrame, V8Exception};
 use serde_json;
-use source_map_mappings::{parse_mappings, Bias, Mappings};
+use source_map_mappings::{Bias, Mappings, parse_mappings};
 
 pub trait SourceMapGetter {
 	/// Returns the raw source map file.

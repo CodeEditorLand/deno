@@ -5,14 +5,14 @@ use std::os::unix::fs::DirBuilderExt;
 use std::os::unix::fs::PermissionsExt;
 use std::{
 	self,
-	fs::{create_dir, DirBuilder, File, OpenOptions},
+	fs::{DirBuilder, File, OpenOptions, create_dir},
 	io::{ErrorKind, Write},
 	path::{Path, PathBuf},
 };
 
 use deno::ErrBox;
 #[cfg(unix)]
-use nix::unistd::{chown as unix_chown, Gid, Uid};
+use nix::unistd::{Gid, Uid, chown as unix_chown};
 use rand::{self, Rng};
 use url::Url;
 

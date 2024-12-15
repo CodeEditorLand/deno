@@ -289,9 +289,7 @@ const eventTargetHelpers = {
 
 			for (
 				let i = eventImpl.path.length - 1;
-
 				i >= 0 && clearTargetsTupleIndex === -1;
-
 				i--
 			) {
 				if (eventImpl.path[i].target !== null) {

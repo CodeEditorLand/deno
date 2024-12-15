@@ -219,7 +219,6 @@ mod tests {
 	use futures::executor::block_on;
 
 	use super::*;
-
 	use crate::{
 		flags,
 		global_state::ThreadSafeGlobalState,

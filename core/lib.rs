@@ -23,7 +23,7 @@ pub use crate::{
 	flags::v8_set_flags,
 	isolate::*,
 	js_errors::*,
-	libdeno::{deno_mod, OpId, PinnedBuf},
+	libdeno::{OpId, PinnedBuf, deno_mod},
 	module_specifier::*,
 	modules::*,
 	ops::*,

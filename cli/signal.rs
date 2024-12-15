@@ -3,7 +3,7 @@ use deno::ErrBox;
 #[cfg(unix)]
 pub fn kill(pid:i32, signo:i32) -> Result<(), ErrBox> {
 	use nix::{
-		sys::signal::{kill as unix_kill, Signal},
+		sys::signal::{Signal, kill as unix_kill},
 		unistd::Pid,
 	};
 

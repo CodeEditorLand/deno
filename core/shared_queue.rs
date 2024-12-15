@@ -14,7 +14,7 @@
 // |                        RECORDS (*MAX_RECORDS)               ...
 // +---------------------------------------------------------------+
 
-use crate::libdeno::{deno_buf, OpId};
+use crate::libdeno::{OpId, deno_buf};
 
 const MAX_RECORDS:usize = 100;
 /// Total number of records added.
@@ -235,7 +235,6 @@ impl SharedQueue {
 #[cfg(test)]
 mod tests {
 	use super::*;
-
 	use crate::ops::Buf;
 
 	#[test]

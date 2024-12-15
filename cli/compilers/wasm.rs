@@ -2,7 +2,7 @@
 use std::{
 	collections::HashMap,
 	pin::Pin,
-	sync::{atomic::Ordering, Arc, Mutex},
+	sync::{Arc, Mutex, atomic::Ordering},
 };
 
 use deno::Buf;

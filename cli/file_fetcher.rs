@@ -17,7 +17,7 @@ use serde_json;
 use url::{self, Url};
 
 use crate::{
-	deno_error::{too_many_redirects, DenoError, ErrorKind, GetErrorKind},
+	deno_error::{DenoError, ErrorKind, GetErrorKind, too_many_redirects},
 	disk_cache::DiskCache,
 	http_util,
 	http_util::FetchOnceResult,
@@ -690,7 +690,6 @@ mod tests {
 	use tempfile::TempDir;
 
 	use super::*;
-
 	use crate::{fs as deno_fs, tokio_util};
 
 	fn setup_file_fetcher(dir_path:&Path) -> SourceFileFetcher {

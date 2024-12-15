@@ -5,7 +5,7 @@ use std::{
 	marker::PhantomData,
 	ops::{Deref, DerefMut},
 	option::Option,
-	ptr::{null, NonNull},
+	ptr::{NonNull, null},
 	slice,
 };
 

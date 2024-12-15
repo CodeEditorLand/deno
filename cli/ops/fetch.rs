@@ -4,8 +4,8 @@ use std::{self, convert::From};
 use deno::*;
 use futures::future::{FutureExt, TryFutureExt};
 use http::{
-	header::{HeaderName, HeaderValue},
 	Method,
+	header::{HeaderName, HeaderValue},
 };
 
 use super::{

@@ -21,9 +21,7 @@ function compileList(
 	for (const currentType of schema[name]) {
 		for (
 			let previousIndex = 0;
-
 			previousIndex < result.length;
-
 			previousIndex++
 		) {
 			const previousType = result[previousIndex];

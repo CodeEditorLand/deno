@@ -18,19 +18,19 @@ use futures::{
 };
 use tokio::{
 	self,
-	net::{tcp::Incoming, TcpListener, TcpStream},
+	net::{TcpListener, TcpStream, tcp::Incoming},
 };
 use tokio_rustls::{
+	TlsAcceptor,
+	TlsConnector,
 	rustls::{
-		internal::pemfile::{certs, pkcs8_private_keys, rsa_private_keys},
 		Certificate,
 		ClientConfig,
 		NoClientAuth,
 		PrivateKey,
 		ServerConfig,
+		internal::pemfile::{certs, pkcs8_private_keys, rsa_private_keys},
 	},
-	TlsAcceptor,
-	TlsConnector,
 };
 use webpki::{self, DNSNameRef};
 use webpki_roots;
@@ -40,7 +40,7 @@ use super::{
 	io::StreamResource,
 };
 use crate::{
-	deno_error::{bad_resource, DenoError, ErrorKind},
+	deno_error::{DenoError, ErrorKind, bad_resource},
 	ops::json_op,
 	resolve_addr::resolve_addr,
 	state::ThreadSafeState,

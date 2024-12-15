@@ -3,7 +3,7 @@ use std::sync::{Arc, Mutex};
 
 use deno::{Resource, *};
 
-use super::dispatch_json::{blocking_json, Deserialize, JsonOp, Value};
+use super::dispatch_json::{Deserialize, JsonOp, Value, blocking_json};
 use crate::{deno_error::bad_resource, ops::json_op, repl, repl::Repl, state::ThreadSafeState};
 
 pub fn init(i:&mut Isolate, s:&ThreadSafeState) {

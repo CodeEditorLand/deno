@@ -280,9 +280,7 @@ export class Event implements domTypes.Event {
 
 		for (
 			let index = currentTargetIndex + 1;
-
 			index < this._path.length;
-
 			index++
 		) {
 			const { item, rootOfClosedTree, slotInClosedTree } =

@@ -11,7 +11,7 @@ use std::{
 };
 
 pub use deno::v8_set_flags;
-use deno::{js_check, CoreOp, ErrBox, Isolate, ModuleSpecifier, PinnedBuf, StartupData};
+use deno::{CoreOp, ErrBox, Isolate, ModuleSpecifier, PinnedBuf, StartupData, js_check};
 pub use ops::EmitResult;
 use ops::WrittenFile;
 

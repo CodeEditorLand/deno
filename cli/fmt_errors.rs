@@ -6,7 +6,7 @@ use deno::{ErrBox, StackFrame, V8Exception};
 
 use crate::{
 	colors,
-	source_maps::{apply_source_map, SourceMapGetter},
+	source_maps::{SourceMapGetter, apply_source_map},
 };
 
 /// A trait which specifies parts of a diagnostic like item needs to be able to
@@ -217,7 +217,6 @@ impl Error for JSError {}
 #[cfg(test)]
 mod tests {
 	use super::*;
-
 	use crate::colors::strip_ansi_codes;
 
 	fn error1() -> V8Exception {

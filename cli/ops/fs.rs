@@ -8,7 +8,7 @@ use std::{convert::From, fs, path::PathBuf, time::UNIX_EPOCH};
 use deno::*;
 use remove_dir_all::remove_dir_all;
 
-use super::dispatch_json::{blocking_json, Deserialize, JsonOp, Value};
+use super::dispatch_json::{Deserialize, JsonOp, Value, blocking_json};
 use crate::{
 	deno_error::{DenoError, ErrorKind},
 	fs as deno_fs,

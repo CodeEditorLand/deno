@@ -3,7 +3,7 @@ use deno::{Loader, *};
 
 use super::dispatch_json::{Deserialize, JsonOp, Value};
 use crate::{
-	futures::future::{try_join_all, FutureExt, TryFutureExt},
+	futures::future::{FutureExt, TryFutureExt, try_join_all},
 	msg,
 	ops::json_op,
 	state::ThreadSafeState,

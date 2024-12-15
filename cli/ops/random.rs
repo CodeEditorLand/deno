@@ -1,6 +1,6 @@
 // Copyright 2018-2019 the Deno authors. All rights reserved. MIT license.
 use deno::*;
-use rand::{thread_rng, Rng};
+use rand::{Rng, thread_rng};
 
 use super::dispatch_json::{JsonOp, Value};
 use crate::{ops::json_op, state::ThreadSafeState};

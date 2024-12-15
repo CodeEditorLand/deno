@@ -6,10 +6,10 @@ use std::{
 	pin::Pin,
 	str,
 	sync::{
-		atomic::{AtomicUsize, Ordering},
 		Arc,
 		Mutex,
 		MutexGuard,
+		atomic::{AtomicUsize, Ordering},
 	},
 	time::Instant,
 };
@@ -19,7 +19,7 @@ use futures::{
 	channel::mpsc,
 	future::{FutureExt, TryFutureExt},
 };
-use rand::{rngs::StdRng, SeedableRng};
+use rand::{SeedableRng, rngs::StdRng};
 use serde_json::Value;
 
 use crate::{

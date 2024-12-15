@@ -96,32 +96,30 @@ static ENV_VARIABLES_HELP:&str = "ENVIRONMENT VARIABLES:
     HTTP_PROXY     Proxy address for HTTP requests (module downloads, fetch)
     HTTPS_PROXY    Same but for HTTPS";
 
-static DENO_HELP:&str =
-	"A secure JavaScript and TypeScript runtime
+static DENO_HELP:&str = "A secure JavaScript and TypeScript runtime
 
-Docs: https://deno.land/std/manual.md
-Modules: https://deno.land/x/\
-	 
-Bugs: https://github.com/denoland/deno/issues
+Docs: https://deno.land/std/manual.md\
+                         
+Modules: https://deno.land/x/Bugs: https://github.com/denoland/deno/issues\
+                         
 
 To run the REPL supply no arguments:
 
   deno
-\
-	 
-To evaluate code from the command line:
+To evaluate code from the command \
+                         line:
 
   deno eval \"console.log(30933 + 404)\"
 
-To execute \
-	 a script:
+To execute a script:
 
-  deno https://deno.land/std/examples/welcome.ts
+  deno https://deno.land/std/examples/welcome.ts\
+                         
 
-The default subcommand is 'run'. \
-	 The above is equivalent to
+The default subcommand is 'run'. The above is equivalent to
 
-  deno run https://deno.land/std/examples/welcome.ts
+  deno run https://deno.land/std/examples/welcome.ts\
+                         
 
 See 'deno help run' for run specific flags.";
 
@@ -835,13 +833,11 @@ $HOME/.deno/bin \
   deno install file_server https://deno.land/std/http/file_server.ts \
 			 --allow-net --allow-read
 
-  deno install colors https://deno.land/std/examples/colors.ts\
-			 
+  deno install colors https://deno.land/std/examples/colors.tsTo \
+			 change installation directory use -d/--dir flag
 
-To change installation directory use -d/--dir flag
-
-  deno install -d /usr/local/bin \
-			 file_server https://deno.land/std/http/file_server.ts --allow-net --allow-read",
+  deno install -d /usr/local/bin file_server \
+			 https://deno.land/std/http/file_server.ts --allow-net --allow-read",
 		)
 }
 
@@ -857,10 +853,8 @@ If a out_file argument is omitted, \
 			 the output of the bundle will be sent to
 standard out. Examples:
 
-  deno bundle https://deno.land/std/examples/colors.ts\
-			 
-
-  deno bundle https://deno.land/std/examples/colors.ts colors.bundle.js",
+  deno bundle https://deno.land/std/examples/colors.tsdeno \
+			 bundle https://deno.land/std/examples/colors.ts colors.bundle.js",
 		)
 }
 
@@ -941,10 +935,8 @@ fn info_subcommand<'a, 'b>() -> App<'a, 'b> {
 		.long_about(
 			"Information about source file and cache
 
-Example: deno info https://deno.land/std/http/file_server.ts\
-			 
-
-The following information is shown:
+Example: deno info https://deno.land/std/http/file_server.tsThe \
+			 following information is shown:
 
 local: Local path of the file.
 type: JavaScript, TypeScript, or JSON.
@@ -974,21 +966,21 @@ fn fetch_subcommand<'a, 'b>() -> App<'a, 'b> {
 		.long_about(
 			"Fetch and compile remote dependencies recursively.
 
-Downloads all statically imported \
-			 scripts and save them in local
-cache, without running the code. No future import network \
-			 requests
+Downloads all statically imported scripts \
+			 and save them in local
+cache, without running the code. No future import network requests\
+			 
 would be made unless --reload is specified.
 
 Downloads all dependencies
 
-  deno \
-			 fetch https://deno.land/std/http/file_server.ts
+  deno fetch https://deno.land/std/http/file_server.ts\
+			 
 
-Once cached, static imports no longer \
-			 send network requests
+Once cached, static imports no longer send network requests
 
-  deno run -A https://deno.land/std/http/file_server.ts",
+  deno run -A https://deno.land/std/http/file_server.ts\
+			 ",
 		)
 }
 
@@ -1078,28 +1070,25 @@ fn run_subcommand<'a, 'b>() -> App<'a, 'b> {
 		.long_about(
 			"Run a program given a filename or url to the source code.
 
-By default all programs are \
-			 run in sandbox without access to disk, network or
+By default all programs are run \
+			 in sandbox without access to disk, network or
 ability to spawn subprocesses.
 
-  deno \
-			 run https://deno.land/std/examples/welcome.ts
+  deno run \
+			 https://deno.land/std/examples/welcome.ts
 
 With all permissions
 
-  deno run -A https://deno.land/std/http/file_server.ts\
-			 
+  deno run -A https://deno.land/std/http/file_server.tsWith \
+			 only permission to read from disk and listen to network
 
-With only permission to read from disk and listen to network
+  deno run --allow-net --allow-read \
+			 https://deno.land/std/http/file_server.ts
 
-  deno run --allow-net \
-			 --allow-read https://deno.land/std/http/file_server.ts
+With only permission to read whitelist files \
+			 from disk
 
-With only permission to read whitelist \
-			 files from disk
-
-  deno run --allow-read=/etc https://deno.land/std/http/file_server.ts\
-			 ",
+  deno run --allow-read=/etc https://deno.land/std/http/file_server.ts",
 		)
 }
 
@@ -1199,12 +1188,10 @@ fn reload_arg<'a, 'b>() -> Arg<'a, 'b> {
 			"Reload source code cache (recompile TypeScript)
 --reload
   Reload everything
---reload=https://deno.land/std\
-			 
-  Reload only standard modules
---reload=https://deno.land/std/fs/utils.ts,https://deno.land/std/fmt/colors.ts\
-			 
-  Reloads specific modules",
+--reload=https://deno.land/stdReload \
+			 only standard modules
+--reload=https://deno.land/std/fs/utils.ts,https://deno.land/std/fmt/colors.tsReloads \
+			 specific modules",
 		)
 }
 
@@ -1235,10 +1222,9 @@ fn importmap_arg<'a, 'b>() -> Arg<'a, 'b> {
 		.long_help(
 			"Load import map file
 Docs: https://deno.land/std/manual.md#import-maps
-Specification: \
-			 https://wicg.github.io/import-maps/
-Examples: https://github.com/WICG/import-maps#the-import-map\
-			 ",
+Specification: https://wicg.github.io/import-maps/\
+			 
+Examples: https://github.com/WICG/import-maps#the-import-map",
 		)
 		.takes_value(true)
 }

@@ -17,7 +17,7 @@ use super::{
 	io::StreamResource,
 };
 use crate::{
-	deno_error::{bad_resource, DenoError, ErrorKind},
+	deno_error::{DenoError, ErrorKind, bad_resource},
 	fs as deno_fs,
 	ops::json_op,
 	state::ThreadSafeState,

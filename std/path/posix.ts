@@ -26,7 +26,6 @@ export function resolve(...pathSegments: string[]): string {
 		let path: string;
 
 		if (i >= 0) path = pathSegments[i];
-
 		else path = cwd();
 
 		assertPath(path);
@@ -54,10 +53,8 @@ export function resolve(...pathSegments: string[]): string {
 
 	if (resolvedAbsolute) {
 		if (resolvedPath.length > 0) return `/${resolvedPath}`;
-
 		else return "/";
 	} else if (resolvedPath.length > 0) return resolvedPath;
-
 	else return ".";
 }
 
@@ -101,7 +98,6 @@ export function join(...paths: string[]): string {
 
 		if (path.length > 0) {
 			if (!joined) joined = path;
-
 			else joined += `/${path}`;
 		}
 	}
@@ -185,7 +181,6 @@ export function relative(from: string, to: string): string {
 		const toCode = to.charCodeAt(toStart + i);
 
 		if (fromCode !== toCode) break;
-
 		else if (fromCode === CHAR_FORWARD_SLASH) lastCommonSep = i;
 	}
 
@@ -195,7 +190,6 @@ export function relative(from: string, to: string): string {
 	for (i = fromStart + lastCommonSep + 1; i <= fromEnd; ++i) {
 		if (i === fromEnd || from.charCodeAt(i) === CHAR_FORWARD_SLASH) {
 			if (out.length === 0) out += "..";
-
 			else out += "/..";
 		}
 	}
@@ -203,7 +197,6 @@ export function relative(from: string, to: string): string {
 	// Lastly, append the rest of the destination (`to`) path that comes after
 	// the common path parts
 	if (out.length > 0) return out + to.slice(toStart + lastCommonSep);
-
 	else {
 		toStart += lastCommonSep;
 
@@ -310,7 +303,6 @@ export function basename(path: string, ext = ""): string {
 		}
 
 		if (start === end) end = firstNonSlashEnd;
-
 		else if (end === -1) end = path.length;
 
 		return path.slice(start, end);
@@ -379,7 +371,6 @@ export function extname(path: string): string {
 		if (code === CHAR_DOT) {
 			// If this is our first dot, mark it as the start of our extension
 			if (startDot === -1) startDot = i;
-
 			else if (preDotState !== 1) preDotState = 1;
 		} else if (startDot !== -1) {
 			// We saw a non-dot and non-path separator before our dot, so we should
@@ -475,7 +466,6 @@ export function parse(path: string): ParsedPath {
 		if (code === CHAR_DOT) {
 			// If this is our first dot, mark it as the start of our extension
 			if (startDot === -1) startDot = i;
-
 			else if (preDotState !== 1) preDotState = 1;
 		} else if (startDot !== -1) {
 			// We saw a non-dot and non-path separator before our dot, so we should
@@ -516,7 +506,6 @@ export function parse(path: string): ParsedPath {
 	}
 
 	if (startPart > 0) ret.dir = path.slice(0, startPart - 1);
-
 	else if (isAbsolute) ret.dir = "/";
 
 	return ret;

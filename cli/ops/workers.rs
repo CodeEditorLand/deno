@@ -18,7 +18,7 @@ use futures::{
 
 use super::dispatch_json::{Deserialize, JsonOp, Value};
 use crate::{
-	deno_error::{bad_resource, js_check, DenoError, ErrorKind},
+	deno_error::{DenoError, ErrorKind, bad_resource, js_check},
 	ops::json_op,
 	startup_data,
 	state::ThreadSafeState,

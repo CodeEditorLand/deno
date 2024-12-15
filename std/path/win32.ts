@@ -303,7 +303,6 @@ export function normalize(path: string): string {
 	if (device === undefined) {
 		if (isAbsolute) {
 			if (tail.length > 0) return `\\${tail}`;
-
 			else return "\\";
 		} else if (tail.length > 0) {
 			return tail;
@@ -312,7 +311,6 @@ export function normalize(path: string): string {
 		}
 	} else if (isAbsolute) {
 		if (tail.length > 0) return `${device}\\${tail}`;
-
 		else return `${device}\\`;
 	} else if (tail.length > 0) {
 		return device + tail;
@@ -359,7 +357,6 @@ export function join(...paths: string[]): string {
 
 		if (path.length > 0) {
 			if (joined === undefined) joined = firstPart = path;
-
 			else joined += `\\${path}`;
 		}
 	}
@@ -396,7 +393,6 @@ export function join(...paths: string[]): string {
 
 				if (firstLen > 2) {
 					if (isPathSeparator(firstPart.charCodeAt(2))) ++slashCount;
-
 					else {
 						// We matched a UNC path in the first part
 						needsReplace = false;
@@ -513,7 +509,6 @@ export function relative(from: string, to: string): string {
 		const toCode = to.charCodeAt(toStart + i);
 
 		if (fromCode !== toCode) break;
-
 		else if (fromCode === CHAR_BACKWARD_SLASH) lastCommonSep = i;
 	}
 
@@ -531,7 +526,6 @@ export function relative(from: string, to: string): string {
 	for (i = fromStart + lastCommonSep + 1; i <= fromEnd; ++i) {
 		if (i === fromEnd || from.charCodeAt(i) === CHAR_BACKWARD_SLASH) {
 			if (out.length === 0) out += "..";
-
 			else out += "\\..";
 		}
 	}
@@ -540,7 +534,6 @@ export function relative(from: string, to: string): string {
 	// the common path parts
 	if (out.length > 0)
 		return out + toOrig.slice(toStart + lastCommonSep, toEnd);
-
 	else {
 		toStart += lastCommonSep;
 
@@ -684,7 +677,6 @@ export function dirname(path: string): string {
 
 	if (end === -1) {
 		if (rootEnd === -1) return ".";
-
 		else end = rootEnd;
 	}
 
@@ -763,7 +755,6 @@ export function basename(path: string, ext = ""): string {
 		}
 
 		if (start === end) end = firstNonSlashEnd;
-
 		else if (end === -1) end = path.length;
 
 		return path.slice(start, end);
@@ -846,7 +837,6 @@ export function extname(path: string): string {
 		if (code === CHAR_DOT) {
 			// If this is our first dot, mark it as the start of our extension
 			if (startDot === -1) startDot = i;
-
 			else if (preDotState !== 1) preDotState = 1;
 		} else if (startDot !== -1) {
 			// We saw a non-dot and non-path separator before our dot, so we should
@@ -1018,7 +1008,6 @@ export function parse(path: string): ParsedPath {
 		if (code === CHAR_DOT) {
 			// If this is our first dot, mark it as the start of our extension
 			if (startDot === -1) startDot = i;
-
 			else if (preDotState !== 1) preDotState = 1;
 		} else if (startDot !== -1) {
 			// We saw a non-dot and non-path separator before our dot, so we should

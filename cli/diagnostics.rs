@@ -7,7 +7,7 @@ use serde_json::{self, value::Value};
 
 use crate::{
 	colors,
-	fmt_errors::{format_maybe_source_line, format_maybe_source_name, DisplayFormatter},
+	fmt_errors::{DisplayFormatter, format_maybe_source_line, format_maybe_source_name},
 };
 
 #[derive(Debug, PartialEq, Clone)]
@@ -379,7 +379,6 @@ impl From<i64> for DiagnosticCategory {
 #[cfg(test)]
 mod tests {
 	use super::*;
-
 	use crate::colors::strip_ansi_codes;
 
 	fn diagnostic1() -> Diagnostic {

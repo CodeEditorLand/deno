@@ -54,7 +54,7 @@ pub mod worker;
 
 use std::env;
 
-use deno::{v8_set_flags, ErrBox, ModuleSpecifier};
+use deno::{ErrBox, ModuleSpecifier, v8_set_flags};
 use flags::{DenoFlags, DenoSubcommand};
 use log::{Level, Metadata, Record};
 
