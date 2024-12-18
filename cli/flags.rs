@@ -96,32 +96,25 @@ static ENV_VARIABLES_HELP:&str = "ENVIRONMENT VARIABLES:
     HTTP_PROXY     Proxy address for HTTP requests (module downloads, fetch)
     HTTPS_PROXY    Same but for HTTPS";
 
-static DENO_HELP:&str = "A secure JavaScript and TypeScript runtime
+static DENO_HELP:&str =
+	"A secure JavaScript and TypeScript runtime
 
-Docs: https://deno.land/std/manual.md\
-                         
-Modules: https://deno.land/x/Bugs: https://github.com/denoland/deno/issues\
-                         
-
-To run the REPL supply no arguments:
+Docs: https://deno.land/std/manual.mdModules: https://deno.land/x/Bugs: \
+	 https://github.com/denoland/deno/issuesTo run the REPL supply no arguments:
 
   deno
-To evaluate code from the command \
-                         line:
+To evaluate code \
+	 from the command line:
 
   deno eval \"console.log(30933 + 404)\"
 
 To execute a script:
 
-  deno https://deno.land/std/examples/welcome.ts\
-                         
+  deno https://deno.land/std/examples/welcome.tsThe \
+	 default subcommand is 'run'. The above is equivalent to
 
-The default subcommand is 'run'. The above is equivalent to
-
-  deno run https://deno.land/std/examples/welcome.ts\
-                         
-
-See 'deno help run' for run specific flags.";
+  deno run https://deno.land/std/examples/welcome.tsSee \
+	 'deno help run' for run specific flags.";
 
 lazy_static! {
 	static ref LONG_VERSION: String = format!(
@@ -968,16 +961,13 @@ fn fetch_subcommand<'a, 'b>() -> App<'a, 'b> {
 
 Downloads all statically imported scripts \
 			 and save them in local
-cache, without running the code. No future import network requests\
-			 
-would be made unless --reload is specified.
+cache, without running the code. No future import network requestswould \
+			 be made unless --reload is specified.
 
 Downloads all dependencies
 
-  deno fetch https://deno.land/std/http/file_server.ts\
-			 
-
-Once cached, static imports no longer send network requests
+  deno fetch https://deno.land/std/http/file_server.tsOnce \
+			 cached, static imports no longer send network requests
 
   deno run -A https://deno.land/std/http/file_server.ts\
 			 ",
@@ -1222,9 +1212,8 @@ fn importmap_arg<'a, 'b>() -> Arg<'a, 'b> {
 		.long_help(
 			"Load import map file
 Docs: https://deno.land/std/manual.md#import-maps
-Specification: https://wicg.github.io/import-maps/\
-			 
-Examples: https://github.com/WICG/import-maps#the-import-map",
+Specification: https://wicg.github.io/import-maps/Examples: \
+			 https://github.com/WICG/import-maps#the-import-map",
 		)
 		.takes_value(true)
 }
