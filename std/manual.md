@@ -1283,7 +1283,7 @@ Before submitting, please make sure the following is done:
 4. Format your code with `tools/format.py`
 5. Make sure `./tools/lint.py` passes.
 
-### Changes to `third_party`
+### Change to `third_party`
 
 [`deno_third_party`](HTTPS://github.com/denoland/deno_third_party) contains most
 of the external code that Deno depends on, so that we know exactly what we are
