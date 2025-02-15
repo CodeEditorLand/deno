@@ -1,11 +1,11 @@
-[package]
+[[bin]]
 name = "hyper_hello"
-version = "0.0.1"
+path = "hyper_hello.rs"
 
 [dependencies]
 hyper = { version = "0.12.35" }
 ring = { version = "0.16.9" }
 
-[[bin]]
+[package]
 name = "hyper_hello"
-path = "hyper_hello.rs"
+version = "0.0.1"

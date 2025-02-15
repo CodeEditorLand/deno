@@ -1,12 +1,15 @@
-[package]
-name = "deno_typescript"
-version = "0.26.0"
-license-file = "LICENSE"
-description = "To compile TypeScript to a snapshot during build.rs"
-repository = "https://github.com/denoland/deno"
-authors = ["the Deno authors"]
-edition = "2018"
+[dependencies]
+deno = { path = "../core", version = "0.26.0" }
+serde = { version = "1.0.102", features = ["derive"] }
+serde_json = { version = "1.0.41" }
 
+[lib]
+path = "lib.rs"
+
+[package]
+authors = ["the Deno authors"]
+description = "To compile TypeScript to a snapshot during build.rs"
+edition = "2018"
 exclude = [
 	"typescript/tests/*",
 	"typescript/src/*",
@@ -14,11 +17,7 @@ exclude = [
 	"typescript/doc/*",
 	"typescript/lib/*/*.json",
 ]
-
-[lib]
-path = "lib.rs"
-
-[dependencies]
-deno = { path = "../core", version = "0.26.0" }
-serde_json = { version = "1.0.41" }
-serde = { version = "1.0.102", features = ["derive"] }
+license-file = "LICENSE"
+name = "deno_typescript"
+repository = "https://github.com/denoland/deno"
+version = "0.26.0"

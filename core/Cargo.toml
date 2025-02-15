@@ -1,18 +1,3 @@
-# Copyright 2018-2019 the Deno authors. All rights reserved. MIT license.
-
-[package]
-name = "deno"
-version = "0.26.0"
-edition = "2018"
-description = "A secure JavaScript/TypeScript runtime built with V8, Rust, and Tokio"
-authors = ["the Deno authors"]
-license-file = "LICENSE"
-readme = "README.md"
-repository = "https://github.com/denoland/deno"
-
-[lib]
-path = "lib.rs"
-
 [dependencies]
 downcast-rs = "1.1.1"
 futures = { version = "0.3", features = ["thread-pool", "compat"] }
@@ -22,11 +7,23 @@ log = { version = "0.4.8" }
 serde_json = { version = "1.0.41" }
 url = { version = "1.7.2" }
 
+[dev_dependencies]
+num_cpus = { version = "1.11.1" }
+tokio = { version = "0.2", features = ["full"] }
+
 [[example]]
 name = "deno_core_http_bench"
 path = "examples/http_bench.rs"
 
-# tokio is only used for deno_core_http_bench
-[dev_dependencies]
-tokio = { version = "0.2", features = ["full"] }
-num_cpus = { version = "1.11.1" }
+[lib]
+path = "lib.rs"
+
+[package]
+authors = ["the Deno authors"]
+description = "A secure JavaScript/TypeScript runtime built with V8, Rust, and Tokio"
+edition = "2018"
+license-file = "LICENSE"
+name = "deno"
+readme = "README.md"
+repository = "https://github.com/denoland/deno"
+version = "0.26.0"
