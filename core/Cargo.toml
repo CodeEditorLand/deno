@@ -1,11 +1,11 @@
 [dependencies]
-downcast-rs = "1.1.1"
+downcast-rs = "2.0.1"
 futures = { version = "0.3", features = ["thread-pool", "compat"] }
-lazy_static = { version = "1.4.0" }
-libc = { version = "0.2.65" }
-log = { version = "0.4.8" }
-serde_json = { version = "1.0.41" }
-url = { version = "1.7.2" }
+lazy_static = { version = "1.5.0" }
+libc = { version = "0.2.169" }
+log = { version = "0.4.25" }
+serde_json = { version = "1.0.138" }
+url = { version = "2.5.4" }
 
 [dev_dependencies]
 num_cpus = { version = "1.11.1" }

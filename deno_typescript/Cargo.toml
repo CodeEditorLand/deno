@@ -1,7 +1,7 @@
 [dependencies]
 deno = { path = "../core", version = "0.26.0" }
-serde = { version = "1.0.102", features = ["derive"] }
-serde_json = { version = "1.0.41" }
+serde = { version = "1.0.217", features = ["derive"] }
+serde_json = { version = "1.0.138" }
 
 [lib]
 path = "lib.rs"

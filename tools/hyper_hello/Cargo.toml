@@ -3,8 +3,8 @@ name = "hyper_hello"
 path = "hyper_hello.rs"
 
 [dependencies]
-hyper = { version = "0.12.35" }
-ring = { version = "0.16.9" }
+hyper = { version = "1.6.0" }
+ring = { version = "0.17.9" }
 
 [package]
 name = "hyper_hello"
